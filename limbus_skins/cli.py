@@ -2,8 +2,8 @@
 
   limbus-skins                         what is on, and whether the game is ready
   limbus-skins list [all|on|<sinner>]  every skin you can turn on
-  limbus-skins on <skin|id|sinner|tested|all>...    turn skins on (saved)
-  limbus-skins off <skin|id|sinner|all>...          turn skins off
+  limbus-skins on <skin|id|sinner|helpers|repaints|tested|all>...   turn skins on (saved)
+  limbus-skins off <skin|id|sinner|helpers|repaints|all>...         turn skins off
   limbus-skins run -- <launch command>  swap the skins in, start the game with your
                                         command, put the originals back when it exits
   limbus-skins apply / restore          the two halves of `run`, by hand
@@ -74,6 +74,7 @@ def select(words, skins):
         n = _norm(w)
         hit = [k for k, s in skins.items() if
                n in ("all",) or (n == "tested" and s.get("tested")) or _norm(k) == n
+               or (n in ("repaints", "helpers") and s["kind"] == n[:-1])
                or str(s["identity"]) == w or (n in SINNER_IDS and s["identity"] // 100 % 100 == SINNER_IDS[n])]
         if not hit:
             raise SystemExit(f"limbus-skins: no skin, identity or sinner called '{w}' (see `limbus-skins list`)")
@@ -364,7 +365,7 @@ def doctor(skins, st, data):
             print(f"  ok   {mod}")
         except ImportError:
             ok = False
-            print(f"  MISSING {mod} - pip install UnityPy==1.25.4 Pillow lz4")
+            print(f"  MISSING {mod} - pip install UnityPy==1.25.4 'Pillow>=13' 'brotli>=1.2.1' lz4")
     try:
         g, c = paths.find()
         print(f"  ok   game:  {g}\n  ok   cache: {c}")

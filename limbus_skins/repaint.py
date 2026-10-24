@@ -65,6 +65,38 @@ def prefab_objects(env, appearance, forms=False):
     return ids, roots
 
 
+def main_clips(env, root_id):
+    """Ids of the clips in the body's own animator (its appearance's `_anim`, else an
+    Animator on the root) - not those of a helper, summon or prop drawn alongside it.
+    None when there is no such animator."""
+    objs = {o.path_id: o for o in env.objects}
+    root = objs.get(root_id)
+    if root is None:
+        return None
+    anim = None
+    comps = [objs.get(c["component"]["m_PathID"]) for c in root.read_typetree()["m_Component"]]
+    for o in comps:
+        if o is not None and o.type.name == "MonoBehaviour":
+            t = o.read_typetree()
+            if "motionList" in t and t.get("_anim", {}).get("m_PathID"):
+                anim = objs.get(t["_anim"]["m_PathID"])
+    if anim is None:
+        anim = next((o for o in comps if o is not None and o.type.name == "Animator"), None)
+    if anim is None:
+        return None
+    ctrl = objs.get(anim.read_typetree()["m_Controller"]["m_PathID"])
+    out = set()
+    while ctrl is not None:
+        t = ctrl.read_typetree()
+        if ctrl.type.name == "AnimatorOverrideController":
+            out |= {c["m_OverrideClip"]["m_PathID"] for c in t.get("m_Clips", []) if c["m_OverrideClip"]["m_PathID"]}
+            ctrl = objs.get(t["m_Controller"]["m_PathID"])
+        else:
+            out |= {c["m_PathID"] for c in t.get("m_AnimationClips", [])}
+            ctrl = None
+    return out or None
+
+
 def clip_frames(env, ids, wanted=None):
     """{clip name: [sprite reader, ...]} in play order, for clips the body loads."""
     out = {}
@@ -105,10 +137,34 @@ def split_body(sprites):
     return [x for x, k in kinds if k and not fx(k)], [x for x, k in kinds if k and fx(k)]
 
 
-def source_table(env, ids, prefix=None, overrides=None):
+def fx_like(name):
+    n = name.lower()
+    return n.isdigit() or n.startswith(("fx", "eff")) or "_eff" in n or n.endswith("_e")
+
+
+def motion_word(clip_name):
+    """The motion a clip plays, from the last word of its name: "Meursault_LeiHeng_Reload"
+    and "X_Reload_Off" -> "reload"."""
+    words = [w for w in re.split(r"[_\s]+", clip_name.lower()) if w and w not in ("off", "on") and not w.isdigit()]
+    return words[-1] if words else ""
+
+
+def special_table(env, ids, prefix=None):
+    """{motion word: [sprites]} for the source's clips that aren't a standard motion
+    (reloads, parries, duels...), in play order, effect sprites left out."""
+    out = {}
+    for name, (sprites, _) in clip_frames(env, ids, (lambda n: n.startswith(prefix)) if prefix else None).items():
+        body = [x for x in sprites if not fx_like(x.read().m_Name)]
+        if body:
+            out.setdefault(motion_word(name), body)
+    return out
+
+
+def source_table(env, ids, prefix=None, overrides=None, main=None):
     """Source frames by kind: {"idle": [sprite...], "S1": [...], ...}, plus
-    "idle_time": the idle clip's length in seconds."""
-    clips = clip_frames(env, ids, (lambda n: n.startswith(prefix)) if prefix else None)
+    "idle_time": the idle clip's length in seconds. main: the body's own animator
+    clips - a helper or summon drawn alongside it never lends its frames."""
+    clips = clip_frames(env, main or ids, (lambda n: n.startswith(prefix)) if prefix else None)
     table = {}
 
     def put(kind, sprites, length):
@@ -420,8 +476,10 @@ def repaint(target, locate, source=None, clips=None, mapping=None, head=None, mi
         src = {}
     else:
         senv = UnityPy.load(locate(source))
-        sobjs, _ = prefab_objects(senv, source)
-        src = source_table(senv, sobjs, clips, mapping or {})
+        sobjs, sroots = prefab_objects(senv, source)
+        smain = main_clips(senv, sroots[0])
+        src = source_table(senv, sobjs, clips, mapping or {}, main=smain)
+        special = special_table(senv, smain or sobjs, clips)
         if "idle" not in src or "S1" not in src:
             raise RepaintError(f"{source} has no idle or skill frames (found {sorted(src)}) - set clips/map")
 
@@ -441,6 +499,7 @@ def repaint(target, locate, source=None, clips=None, mapping=None, head=None, mi
                     seq.append(s.path_id)
     targets = [o for o in tenv.objects if o.type.name == "Sprite" and o.path_id in tobjs]
     plan = []                                            # (target reader, source reader)
+    borrowed = set()                                     # motions the source has no frames for
     for o in targets:
         k, _ = kind_of(o.read().m_Name)
         if not k:
@@ -455,7 +514,10 @@ def repaint(target, locate, source=None, clips=None, mapping=None, head=None, mi
         if pool is None and k.startswith("S") and not k.endswith("e"):
             n = int(k[1:])                               # a skill the source lacks: reuse one of its first three
             pool = src.get(f"S{(n - 1) % 3 + 1}")
-        pool = pool or src.get("dmg" if k == "dead" else "idle")
+        if pool is None:
+            stand_in = "dmg" if k == "dead" and "dmg" in src else "idle"
+            borrowed.add(f"{k}->{stand_in}")
+            pool = src[stand_in]
         if k.startswith("S") and k in order and o.path_id in order[k]:
             seq = order[k]
             f = seq.index(o.path_id) / max(1, len(seq) - 1)
@@ -464,6 +526,23 @@ def repaint(target, locate, source=None, clips=None, mapping=None, head=None, mi
         plan.append((o, pool[round(f * (len(pool) - 1))]))
     if not plan:
         raise RepaintError(f"{target}: no frame drawings found (a Spine body?)")
+    # frames of the body's own motions that aren't standard (a reload, a parry...):
+    # the source's motion of the same name, else its first skill, by position
+    if source is not None:
+        tmain = set()
+        for r_ in troots:
+            tmain |= main_clips(tenv, r_) or set()
+        done = {o.path_id for o, _ in plan}
+        tsp = {o.path_id: o for o in targets}
+        for name, (sprites, _) in clip_frames(tenv, tmain).items():
+            pool = special.get(motion_word(name)) or src["S1"]
+            n = len(sprites)
+            for i, sp_ in enumerate(sprites):
+                if sp_.path_id in done or sp_.path_id not in tsp or kind_of(sp_.read().m_Name)[0] \
+                        or fx_like(sp_.read().m_Name):
+                    continue
+                plan.append((tsp[sp_.path_id], pool[round(i / max(1, n - 1) * (len(pool) - 1))]))
+                done.add(sp_.path_id)
     # every other sprite on the body's atlas keeps its own picture, repacked with the rest
     done = {o.path_id for o, _ in plan}
     for o in targets:
@@ -630,6 +709,10 @@ def repaint(target, locate, source=None, clips=None, mapping=None, head=None, mi
             except spine.SpineError as e:
                 notes.append(f"idle {sp['name']} left as it is: {e}")
 
+    if borrowed:
+        names_ = {"move": "dash", "miss": "evade", "gud": "guard", "dmg": "hit", "dead": "death", "idle": "idle"}
+        notes.append("source has no " + ", ".join(sorted(f"{names_.get(x.split('->')[0], x)} (uses its {names_.get(x.split('->')[1])})"
+                                                        for x in borrowed)))
     scale_note = "" if scale == 1 else f" (scaled {scale:.2f} to fit)"
     notes.insert(0, f"{len(plan)} frames from {len(rendered)} drawings{scale_note}")
     return tenv.file.save(packer="none"), notes

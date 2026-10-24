@@ -89,7 +89,11 @@ def path_for(data_dir, key):
 
 def save(picture, data_dir, key, do_invert=False):
     from PIL import Image
-    img = cut_out(Image.open(picture))
+    with Image.open(picture) as im:
+        im.load()
+        src = im.convert("RGBA")
+    src.thumbnail((2048, 2048))          # a head needs no more, and the cut-out is pure Python
+    img = cut_out(src)
     if do_invert:
         img = invert(img)
     p = path_for(data_dir, key)

@@ -8,10 +8,11 @@ dynamic = ["version"]
 description = "Dress Limbus Company identities as the characters they mirror (private servers)"
 readme = "README.md"
 license = {text = "MIT"}
-requires-python = ">=3.9"
+requires-python = ">=3.10"
 dependencies = [
     "UnityPy==1.25.4",
-    "Pillow>=10",
+    "Pillow>=13.0.0",      # 12.x and older: 40+ decoder advisories (GHSA, fixed in 13.0.0)
+    "brotli>=1.2.1",       # UnityPy's; 1.2.0 and older have two advisories
     "lz4>=4",
 ]
 

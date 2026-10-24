@@ -22,10 +22,10 @@ contains no game art, and the tool never connects to the internet.
 You need the game installed through Steam (Windows, or Linux with Proton) and launched at least
 once, so its download cache exists, plus Python 3.9 or newer.
 
-Download `limbus_skins-1.0.0-py3-none-any.whl` from the release, then:
+Download `limbus_skins-1.0.1-py3-none-any.whl` from the release, then:
 
 ```
-pip install --user limbus_skins-1.0.0-py3-none-any.whl     # or: pipx install <the .whl>
+pip install --user limbus_skins-1.0.1-py3-none-any.whl     # or: pipx install <the .whl>
 limbus-skins doctor
 ```
 
@@ -46,7 +46,7 @@ Linux it's the same path inside the Proton prefix:
 
 ```
 limbus-skins list                      # every skin, by sinner
-limbus-skins on ahab arayashiki-ryoshu # by name; ids (10808), sinner names, `tested` and `all` work too
+limbus-skins on ahab arayashiki-ryoshu # by name; ids (10808), sinner names, `helpers`, `repaints`, `tested` and `all` work too
 limbus-skins off ishmael
 limbus-skins run --yes -- <the command that starts the game on your private server>
 ```
@@ -132,7 +132,10 @@ If one looks wrong or a fight freezes, turn it off with `limbus-skins off <skin>
   matching drawing of the other character (idle to idle, guard to guard, each skill's frames
   spread across theirs), packed into the body's own atlas pages. Only the objects the
   identity's own body loads are touched (read from the bundle's preload table), so bundles
-  that hold several characters keep the others as they are.
+  that hold several characters keep the others as they are, and only the character's own
+  animator lends frames (not a summon or sidekick drawn alongside it). The identity's other
+  motions (reloads, parries...) take the other character's motion of the same name, else
+  its first skill; `build` says which motions the other character has no drawing for.
 - Most identities stand idle as a **Spine skeleton** and only use the frames to move and
   fight. A repaint hides the skeleton's parts and adds one part that shows the new idle
   frames, placed where the frames stand; bones, skins, constraints and animation names stay,

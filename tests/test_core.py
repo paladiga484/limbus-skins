@@ -134,6 +134,11 @@ class Selection(unittest.TestCase):
           "kira": {"identity": 10814, "kind": "helper", "tested": False, "becomes": "Kira"},
           "rien": {"identity": 10115, "kind": "repaint", "tested": False, "becomes": "Rien"}}
 
+    def test_kind_selectors(self):
+        skins = {"a": {"identity": 10101, "kind": "helper"}, "b": {"identity": 10102, "kind": "repaint"}}
+        self.assertEqual(cli.select(["repaints"], skins), ["b"])
+        self.assertEqual(cli.select(["helpers"], skins), ["a"])
+
     def test_words(self):
         self.assertEqual(cli.select(["ahab"], self.SK), ["ahab"])
         self.assertEqual(cli.select(["10115"], self.SK), ["rien"])

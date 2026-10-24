@@ -42,10 +42,14 @@ def game_running():
 def clone(src, dst):
     """Copy src to dst; a copy-on-write clone where the filesystem has them (btrfs, xfs)."""
     tmp = dst + ".tmp-limbus-skins"
+    try:
+        os.remove(tmp)                   # a leftover (or a planted link): never written through
+    except FileNotFoundError:
+        pass
     if not WINDOWS:
         try:
             import fcntl
-            with open(src, "rb") as s, open(tmp, "wb") as d:
+            with open(src, "rb") as s, open(tmp, "xb") as d:
                 fcntl.ioctl(d.fileno(), 0x40049409, s.fileno())      # FICLONE
             os.replace(tmp, dst)
             return
@@ -54,7 +58,8 @@ def clone(src, dst):
                 os.remove(tmp)
             except OSError:
                 pass
-    shutil.copyfile(src, tmp)
+    with open(src, "rb") as s, open(tmp, "xb") as d:
+        shutil.copyfileobj(s, d, 1 << 20)
     os.replace(tmp, dst)
 
 
