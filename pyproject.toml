@@ -1,0 +1,28 @@
+[build-system]
+requires = ["setuptools>=64"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "limbus-skins"
+dynamic = ["version"]
+description = "Dress Limbus Company identities as the characters they mirror (private servers)"
+readme = "README.md"
+license = {text = "MIT"}
+requires-python = ">=3.9"
+dependencies = [
+    "UnityPy==1.25.4",
+    "Pillow>=10",
+    "lz4>=4",
+]
+
+[project.scripts]
+limbus-skins = "limbus_skins.cli:main"
+
+[tool.setuptools]
+packages = ["limbus_skins"]
+
+[tool.setuptools.dynamic]
+version = {attr = "limbus_skins.__version__"}
+
+[tool.setuptools.package-data]
+limbus_skins = ["data/*.json", "data/heads/*.json"]

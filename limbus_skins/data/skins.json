@@ -1,0 +1,298 @@
+{
+ "_note": "Every skin this tool can build. helpers: the identity takes a story helper unit's body and skills (changes skills: private servers only). repaints: the identity keeps its own body and skills and is redrawn as another character. Nothing here is game art; everything is built from your own installed game.",
+ "helpers": {
+  "arayashiki-ryoshu": {
+   "identity": 10401,
+   "helper": 400015,
+   "becomes": "Arayashiki Ryōshū (stage 9-49)",
+   "tested": true
+  },
+  "certain-sinclair": {
+   "identity": 11001,
+   "helper": 400013,
+   "becomes": "A Certain Sinclair (Canto IX)",
+   "tested": true
+  },
+  "queen-of-hatred": {
+   "identity": 10312,
+   "helper": 400003,
+   "becomes": "Queen of Hatred (Walpurgis Night 6)",
+   "tested": true
+  },
+  "lin-daiyu": {
+   "identity": 10413,
+   "helper": 400002,
+   "becomes": "Lin Daiyu",
+   "tested": false
+  },
+  "jia-xichun": {
+   "identity": 10812,
+   "helper": 400005,
+   "becomes": "Jia Xichun",
+   "tested": false
+  },
+  "aeng-du": {
+   "identity": 10815,
+   "helper": 400038,
+   "becomes": "Aeng-du",
+   "tested": false
+  },
+  "kira": {
+   "identity": 10814,
+   "helper": 400037,
+   "becomes": "Kira",
+   "tested": false
+  },
+  "bamboo-hatted-kim": {
+   "identity": 10508,
+   "helper": 400040,
+   "becomes": "Bamboo-hatted Kim",
+   "tested": false
+  },
+  "alyssa": {
+   "identity": 10211,
+   "helper": 400007,
+   "becomes": "Alyssa",
+   "tested": false
+  },
+  "hohenheim": {
+   "identity": 11214,
+   "helper": 400008,
+   "becomes": "Hohenheim",
+   "tested": false
+  },
+  "pwie": {
+   "identity": 11016,
+   "helper": 400041,
+   "becomes": "Pwie, the Crimson God",
+   "tested": false
+  }
+ },
+ "repaints": {
+  "butterfly-yisang": {
+   "identity": 10110,
+   "becomes": "the Funeral of the Dead Butterflies' head",
+   "self": true,
+   "head": "10110.json",
+   "tested": false
+  },
+  "dongbaek-spicebush": {
+   "identity": 10104,
+   "becomes": "Dongbaek (bloomed)",
+   "source": "8044_Camellia_AwakenAppearance",
+   "clips": "Camellia_Awaken",
+   "map": {
+    "S1": "Camellia_Awaken_1",
+    "S2": "Camellia_Awaken_2",
+    "S3": "Camellia_Awaken_3"
+   },
+   "tested": false
+  },
+  "dongbaek-sunshower": {
+   "identity": 10705,
+   "becomes": "Dongbaek (Sunshower)",
+   "source": "8043_CamelliaAppearance",
+   "map": {
+    "idle": "Camellia_Default",
+    "move": "Camellia_Move",
+    "gud": "Camellia_Guard",
+    "miss": "Camellia_Evade",
+    "dmg": "Camellia_Damaged",
+    "S1": "Camellia_S1S2",
+    "S2": "Camellia_S3S4",
+    "S3": "Camellia_S5"
+   },
+   "tested": false
+  },
+  "ahab": {
+   "identity": 10808,
+   "becomes": "GasHarpoon Ahab",
+   "source": "8106_Ahab_AwakenAppearance",
+   "clips": "Ahab_Awaken_p1",
+   "map": {
+    "S3": "Ahab_Awaken_p2_S1"
+   },
+   "tested": true
+  },
+  "rien": {
+   "identity": 10115,
+   "becomes": "Rien",
+   "source": "1347_Index_fatherAppearance",
+   "tested": false
+  },
+  "pinky-nursefather": {
+   "identity": 10415,
+   "becomes": "the Pinky Nursefather",
+   "source": "1322_Pinky_FatherAppearance",
+   "tested": false
+  },
+  "callisto": {
+   "identity": 10614,
+   "becomes": "Callisto",
+   "source": "1331_RingFinger_FatherAppearance",
+   "tested": false
+  },
+  "valencina": {
+   "identity": 10916,
+   "becomes": "Valencina",
+   "source": "1314_Thumb_FatherAppearance",
+   "tested": false
+  },
+  "lei-heng": {
+   "identity": 10512,
+   "becomes": "Lei Heng",
+   "source": "1145_Thumb_LeiHengAppearance",
+   "tested": false
+  },
+  "cassetti": {
+   "identity": 10513,
+   "becomes": "Cassetti",
+   "source": "8350_CassetteAppearance",
+   "tested": false
+  },
+  "dulcinea": {
+   "identity": 10911,
+   "becomes": "Dulcinea",
+   "source": "8381_Dulcinea_BossAppearance",
+   "tested": false
+  },
+  "barber": {
+   "identity": 11111,
+   "becomes": "the Barber",
+   "source": "8372_Barber_NicoleAppearance",
+   "tested": false
+  },
+  "priest": {
+   "identity": 11210,
+   "becomes": "the Priest",
+   "source": "8378_Priest_BossAppearance",
+   "tested": false
+  },
+  "kromer": {
+   "identity": 10204,
+   "becomes": "Kromer",
+   "source": "8029_CromerAppearance",
+   "tested": false
+  },
+  "lucio": {
+   "identity": 10716,
+   "becomes": "Lucio",
+   "source": "1306_Thumb_DiscipleAppearance",
+   "tested": false
+  },
+  "linamovible": {
+   "identity": 10816,
+   "becomes": "L'Inamovible",
+   "source": "1466_LaRougeHighdomesticAppearance",
+   "tested": false
+  },
+  "rufo": {
+   "identity": 10915,
+   "becomes": "Rufo",
+   "source": "1423_RingFinger_FauvismeDocent_Wolf2pAppearance",
+   "tested": false
+  },
+  "albina": {
+   "identity": 10215,
+   "becomes": "Albina",
+   "source": "1319_RingFinger_DiscipleAppearance",
+   "tested": false
+  },
+  "sora": {
+   "identity": 10314,
+   "becomes": "Sora",
+   "source": "1325_Index_Disciple_NormalAppearance",
+   "tested": false
+  },
+  "jun-ishmael": {
+   "identity": 10811,
+   "becomes": "Jun",
+   "source": "91013_Kurokumo_MiddleBossAppearance",
+   "tested": false
+  },
+  "werner": {
+   "identity": 11012,
+   "becomes": "Werner",
+   "source": "91020_MiddleFinger_MiddleBroAppearance",
+   "tested": false
+  },
+  "camille": {
+   "identity": 10511,
+   "becomes": "Camille",
+   "source": "8371_Cinq_CamilleAppearance",
+   "tested": false
+  },
+  "jia-qiu": {
+   "identity": 10613,
+   "becomes": "Jia Qiu",
+   "source": "1137_JiaqiuAppearance",
+   "tested": false
+  },
+  "starbuck": {
+   "identity": 10107,
+   "becomes": "Starbuck",
+   "source": "8104_StarbuckAppearance",
+   "tested": false
+  },
+  "queequeg": {
+   "identity": 10707,
+   "becomes": "Queequeg",
+   "source": "8103_QueequegAppearance",
+   "tested": false
+  },
+  "nelly": {
+   "identity": 10408,
+   "becomes": "Nelly",
+   "source": "8171_NellyAppearance",
+   "tested": false
+  },
+  "josephine": {
+   "identity": 11108,
+   "becomes": "Josephine",
+   "source": "91014_JosephineAppearance",
+   "tested": false
+  },
+  "guido": {
+   "identity": 10504,
+   "becomes": "Guido",
+   "source": "91005_NCorpAppearance",
+   "tested": false
+  },
+  "niko": {
+   "identity": 10905,
+   "becomes": "Niko",
+   "source": "91008_TroubleshooterAppearance",
+   "tested": false
+  },
+  "aida": {
+   "identity": 11004,
+   "becomes": "Aida",
+   "source": "91004_EyedAppearance",
+   "tested": false
+  },
+  "dead-rabbits-boss": {
+   "identity": 10509,
+   "becomes": "the old Dead Rabbits Boss",
+   "source": "91016_DeadRabbits_BossAppearance",
+   "tested": false
+  },
+  "old-gcorp-head": {
+   "identity": 11103,
+   "becomes": "the Old G Corp. Head Manager",
+   "source": "91001_GCorp_Enhanced_BossAppearance",
+   "tested": false
+  },
+  "jun-gregor": {
+   "identity": 11208,
+   "becomes": "Jun",
+   "source": "91013_Kurokumo_MiddleBossAppearance",
+   "tested": false
+  },
+  "sasha": {
+   "identity": 10210,
+   "becomes": "Sasha",
+   "source": "91018_CyborgFixer_Blood_SwordAppearance",
+   "tested": false
+  }
+ }
+}

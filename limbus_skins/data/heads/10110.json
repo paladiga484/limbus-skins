@@ -1,0 +1,135 @@
+{
+ "_note": "Solemn Lament Yi Sang wears the head of the Funeral of the Dead Butterflies: a white butterfly with black veins (the abnormality's look per the Lobotomy Corporation wiki). The art is the game's own Solemn Lament butterfly, mirrored into a front view. frames: name -> [centre x, centre y, head diameter, rotation] in frame pixels; skill3_1 is a blur and dead has no head, so both stay as they are.",
+ "art": {
+  "texture": "Fx_T_Shape_DyingButterfly_ButterFly1_Color",
+  "mask": "Fx_T_Shape_DyingButterfly_ButterFly1_Mask",
+  "crop": [
+   128,
+   128,
+   256,
+   256
+  ],
+  "tilt": 18,
+  "mirror": true
+ },
+ "width": 1.9,
+ "frames": {
+  "dmg": [
+   125,
+   55,
+   100
+  ],
+  "gud": [
+   90,
+   75,
+   85
+  ],
+  "idle": [
+   135,
+   50,
+   100
+  ],
+  "move": [
+   335,
+   88,
+   100
+  ],
+  "skill1_1": [
+   160,
+   60,
+   112
+  ],
+  "skill1_1_b": [
+   160,
+   57,
+   110
+  ],
+  "skill1_2": [
+   160,
+   60,
+   115
+  ],
+  "skill2_1": [
+   190,
+   58,
+   115
+  ],
+  "skill2_1_b": [
+   193,
+   62,
+   120
+  ],
+  "skill2_2": [
+   195,
+   60,
+   115
+  ],
+  "skill3_2": [
+   118,
+   68,
+   120
+  ],
+  "skill3_3": [
+   117,
+   68,
+   120
+  ],
+  "skill3_4": [
+   175,
+   127,
+   105
+  ],
+  "skill3_5": [
+   173,
+   125,
+   105
+  ],
+  "skill3_6": [
+   163,
+   233,
+   85,
+   180
+  ],
+  "skill3_7": [
+   207,
+   122,
+   110
+  ],
+  "skill3_8": [
+   135,
+   58,
+   115
+  ],
+  "skill3_9": [
+   134,
+   58,
+   115
+  ],
+  "skill3_11": [
+   160,
+   230,
+   90,
+   180
+  ],
+  "skill3_12": [
+   237,
+   60,
+   120
+  ],
+  "skill4_3": [
+   170,
+   90,
+   115
+  ],
+  "skill4_4": [
+   167,
+   90,
+   115
+  ],
+  "skill4_4_b": [
+   168,
+   95,
+   115
+  ]
+ }
+}
