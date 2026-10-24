@@ -96,3 +96,43 @@ def save(picture, data_dir, key, do_invert=False):
     os.makedirs(os.path.dirname(p), exist_ok=True)
     img.save(p)
     return p, img.size
+
+
+def halo(img, radius, color=(201, 182, 255), strength=0.6):
+    """Just the soft glow around img's shape, on a canvas padded by `pad` on each side.
+    Returns (glow image, pad)."""
+    from PIL import Image, ImageFilter
+    radius = max(1.0, radius)
+    pad = int(radius * 2.5) + 2
+    a = Image.new("L", (img.width + 2 * pad, img.height + 2 * pad), 0)
+    a.paste(img.getchannel("A"), (pad, pad))
+    a = a.filter(ImageFilter.GaussianBlur(radius)).point(lambda v: min(255, int(v * strength * 1.8)))
+    out = Image.new("RGBA", a.size, tuple(color) + (0,))
+    out.putalpha(a)
+    return out, pad
+
+
+def glow(img, radius, color=(201, 182, 255), strength=0.6):
+    """img with its glow behind it. Returns (image, pad)."""
+    out, pad = halo(img, radius, color, strength)
+    out.alpha_composite(img, (pad, pad))
+    return out, pad
+
+
+def mote(size=48, color=(214, 200, 255)):
+    """A small soft spark: a glowing dot with a thin four-point star through it."""
+    from PIL import Image, ImageChops, ImageDraw, ImageFilter
+    c, r, t = size / 2, size * 0.16, size * 0.05
+    dot = Image.new("L", (size, size), 0)
+    ImageDraw.Draw(dot).ellipse([c - r, c - r, c + r, c + r], fill=255)
+    dot = dot.filter(ImageFilter.GaussianBlur(size * 0.07))
+    star = Image.new("L", (size, size), 0)
+    d = ImageDraw.Draw(star)
+    d.polygon([(c, 1), (c + t, c), (c, size - 1), (c - t, c)], fill=210)
+    d.polygon([(1, c), (c, c - t), (size - 1, c), (c, c + t)], fill=210)
+    out = Image.new("RGBA", (size, size), tuple(color) + (0,))
+    out.putalpha(ImageChops.lighter(dot, star))
+    core = Image.new("L", (size, size), 0)
+    ImageDraw.Draw(core).ellipse([c - r / 2, c - r / 2, c + r / 2, c + r / 2], fill=255)
+    out.alpha_composite(Image.merge("RGBA", (core, core, core, core.filter(ImageFilter.GaussianBlur(1)))))
+    return out

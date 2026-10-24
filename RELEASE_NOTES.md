@@ -5,8 +5,10 @@ Dress Limbus Company identities as the characters they mirror, on **private serv
 - **45 skins**: 11 helper skins (the identity takes a helper unit's body *and* skills, e.g.
   LCB Ryōshū → Arayashiki Ryōshū from stage 9-49) and 34 repaints (the identity keeps its own
   body and skills but wears another character's drawings, e.g. Pequod Captain Ishmael →
-  GasHarpoon Ahab), plus Solemn Lament Yi Sang with the Funeral of the Dead Butterflies' head.
-- Repaints cover the Spine idle too, so the skin shows standing still, not only in motion.
+  GasHarpoon Ahab), plus Solemn Lament Yi Sang with the Funeral of the Dead Butterflies' head
+  (soft glow; in the idle its wings flutter and motes drift up).
+- Repaints cover the Spine idle too, so the skin shows standing still, not only in motion;
+  borrowed enemy drawings are mirrored to face the sinners' way.
 - Built on your machine from your own installed game; no game art is downloaded or shipped.
   No network use at all.
 - Swaps in about 0.2 s, keeps the game's file checksums, and puts every original back byte for

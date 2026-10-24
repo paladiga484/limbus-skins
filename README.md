@@ -58,13 +58,15 @@ first time `limbus-skins run -- <launcher>` is all you need, including after gam
 To do it by hand: `limbus-skins apply`, start the game, then `limbus-skins restore` after
 closing it (or `limbus-skins watch`, which restores as soon as the game exits).
 
-`limbus-skins preview ahab ahab.png` renders a repaint's frames to a picture before you play.
+`limbus-skins preview ahab ahab.png` renders a repaint's frames to a picture before you play,
+and its standing idle to an animated `ahab-idle.gif`.
 `limbus-skins sheet` draws every skin that is on, standing idle, before and after, into one picture.
 
 Head skins take your own picture too: `limbus-skins art butterfly-yisang butterfly.png --invert`
 cuts the picture out of a dark background (or uses its transparency), `--invert` swaps light and
 dark, and the next `apply` paints it on. `limbus-skins art butterfly-yisang --reset` goes back to
-the in-game art. The picture stays on your computer.
+the in-game art. The picture stays on your computer. The butterfly head also glows softly,
+and in its idle the wings flutter and a few pale motes drift up.
 
 Skins only show in battle. Menus, portraits and identity art stay as they are.
 

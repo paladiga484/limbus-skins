@@ -1,5 +1,5 @@
 {
- "_note": "Solemn Lament Yi Sang wears the head of the Funeral of the Dead Butterflies: a white butterfly with black veins (the abnormality's look per the Lobotomy Corporation wiki). The art is the game's own Solemn Lament butterfly, mirrored into a front view. frames: name -> [centre x, centre y, head diameter, rotation] in frame pixels; skill3_1 is a blur and dead has no head, so both stay as they are. spine: the idle skeleton's head part is swapped too (width x the old head part; dy lifts it by that share of the head's height). own_width: head width for art set with `limbus-skins art`.",
+ "_note": "Solemn Lament Yi Sang wears the head of the Funeral of the Dead Butterflies: a white butterfly with black veins (the abnormality's look per the Lobotomy Corporation wiki). The art is the game's own Solemn Lament butterfly, mirrored into a front view. frames: name -> [centre x, centre y, head diameter, rotation] in frame pixels; skill3_1 is a blur and dead has no head, so both stay as they are. spine: the idle skeleton's head part is swapped too (width x the old head part; dy lifts it by that share of the head's height). own_width: head width for art set with `limbus-skins art`. effects: a pale violet glow (radius x art width; alpha pulses low..high in the idle, the middle on frames), motes drifting up (count, size x head width) and a slight wing flutter (fraction) in the Spine idle.",
  "art": {
   "texture": "Fx_T_Shape_DyingButterfly_ButterFly1_Color",
   "mask": "Fx_T_Shape_DyingButterfly_ButterFly1_Mask",
@@ -137,5 +137,20 @@
   "width": 1.35,
   "dy": 0.05
  },
- "own_width": 1.7
+ "own_width": 1.7,
+ "effects": {
+  "glow": {
+   "color": [
+    201,
+    182,
+    255
+   ],
+   "radius": 0.07,
+   "low": 0.35,
+   "high": 0.75
+  },
+  "motes": 3,
+  "mote": 0.1,
+  "flutter": 0.045
+ }
 }

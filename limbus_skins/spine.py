@@ -454,3 +454,217 @@ def region_attachment(to_skel, x0, y0, x1, y1):
     if abs(rot) > 1e-3 and abs(abs(rot) - 360) > 1e-3:
         att["rotation"] = round(rot, 3)
     return att
+
+
+# --- head effects ---------------------------------------------------------------------
+
+HEAD_BONE, GLOW, MOTE = "lsk_head", "lsk_glow", "lsk_mote"
+
+
+def anim_length(anim):
+    """The latest key time in an animation (0 when it has no keys)."""
+    best = 0.0
+    stack = [anim]
+    while stack:
+        v = stack.pop()
+        if isinstance(v, dict):
+            if isinstance(v.get("time"), (int, float)):
+                best = max(best, float(v["time"]))
+            stack.extend(v.values())
+        elif isinstance(v, list):
+            stack.extend(v)
+    return best
+
+
+def _hex(alpha):
+    return "ffffff%02x" % max(0, min(255, round(alpha * 255)))
+
+
+def head_effects(doc, slot_name, size, rotation, fx, skin_name="default"):
+    """Give the head slot its own bone (so it can flutter), a pulsing glow behind it and
+    a few motes drifting up in front. size = (w, h) of the head art in skeleton units;
+    fx = {"glow": {...}, "glow_size": (w, h), "motes": n, "mote_size": units, "flutter": f}.
+    Changes doc in place."""
+    slots = doc["slots"]
+    i = next(k for k, s in enumerate(slots) if s["name"] == slot_name)
+    slot = slots[i]
+    att_name = slot["attachment"]
+    owner = next(s for s in skins_list(doc) if att_name in s["attachments"].get(slot_name, {})
+                 and s["name"] in (skin_name, "default"))
+    att = owner["attachments"][slot_name][att_name]
+    bx, by = att.get("x", 0.0), att.get("y", 0.0)
+    doc["bones"].append({"name": HEAD_BONE, "parent": slot["bone"], "x": round(bx, 3), "y": round(by, 3)})
+    parent = slot["bone"]
+    # every attachment in the slot moves to the new bone (a pure shift, nothing else changes)
+    for s in skins_list(doc):
+        for a in s["attachments"].get(slot_name, {}).values():
+            if a.get("type", "region") == "region":
+                a["x"] = round(a.get("x", 0.0) - bx, 3)
+                a["y"] = round(a.get("y", 0.0) - by, 3)
+            elif a.get("type") == "mesh" and len(a["vertices"]) == len(a["uvs"]):
+                a["vertices"] = [round(v - (bx if k % 2 == 0 else by), 3) for k, v in enumerate(a["vertices"])]
+    slot["bone"] = HEAD_BONE
+    w, h = size
+    extra = {}
+    if fx.get("glow"):
+        gw, gh = fx["glow_size"]
+        slots.insert(i, {"name": GLOW, "bone": HEAD_BONE, "attachment": GLOW, "color": _hex(fx["glow"]["low"])})
+        extra[GLOW] = {GLOW: {"width": round(gw, 3), "height": round(gh, 3), "rotation": rotation} if rotation
+                       else {"width": round(gw, 3), "height": round(gh, 3)}}
+    n = int(fx.get("motes", 0))
+    spots = [(-0.36, 0.05), (0.38, 0.12), (0.04, 0.42), (-0.2, 0.3), (0.22, -0.1)][:n]
+    after = next(k for k, s in enumerate(slots) if s["name"] == slot_name) + 1
+    for k, (ux, uy) in enumerate(spots, 1):
+        doc["bones"].append({"name": f"{MOTE}{k}", "parent": parent,
+                             "x": round(bx + ux * w, 3), "y": round(by + uy * h, 3)})
+        slots.insert(after, {"name": f"{MOTE}{k}", "bone": f"{MOTE}{k}", "attachment": MOTE, "color": _hex(0)})
+        after += 1
+        m = fx["mote_size"]
+        extra[f"{MOTE}{k}"] = {MOTE: {"width": round(m, 3), "height": round(m, 3)}}
+    default = next((s for s in skins_list(doc) if s["name"] == "default"), None)
+    if default is None:
+        default = {"name": "default", "attachments": {}}
+        doc["skins"].insert(0, default)
+    default["attachments"].update(extra)
+
+    anims = doc.setdefault("animations", {})
+    if not anims:
+        anims["animation"] = {}
+    for a in anims.values():
+        L = anim_length(a) or 2.0
+        # the head slot keeps showing the head: blinks and swaps would bring the old one back
+        for key in a.get("slots", {}).get(slot_name, {}).get("attachment", []):
+            if key.get("name"):
+                key["name"] = att_name
+        bones = a.setdefault("bones", {})
+        f = fx.get("flutter", 0)
+        if f:
+            bones[HEAD_BONE] = {"scale": [{}, {"time": round(L / 4, 4), "x": round(1 - f, 4), "y": round(1 + f / 4, 4)},
+                                          {"time": round(L / 2, 4)},
+                                          {"time": round(3 * L / 4, 4), "x": round(1 - f, 4), "y": round(1 + f / 4, 4)},
+                                          {"time": round(L, 4)}]}
+        sl = a.setdefault("slots", {})
+        if fx.get("glow"):
+            lo, hi = fx["glow"]["low"], fx["glow"]["high"]
+            sl[GLOW] = {"rgba": [{"color": _hex(lo)}, {"time": round(L / 2, 4), "color": _hex(hi)},
+                                 {"time": round(L, 4), "color": _hex(lo)}]}
+        for k in range(1, n + 1):
+            phase = (k - 1) / max(1, n)
+            move, rgba = _mote_keys(L, phase, rise=0.38 * h, drift=0.05 * w * (1 if k % 2 else -1))
+            bones[f"{MOTE}{k}"] = {"translate": move}
+            sl[f"{MOTE}{k}"] = {"rgba": rgba}
+    return doc
+
+
+def _mote_keys(L, phase, rise, drift, steps=8):
+    """Keys for one mote looping over L seconds, started `phase` of the way through its
+    climb: it rises and drifts while it fades in and out, then jumps back unseen."""
+    def at(p):
+        return (round(drift * math.sin(2 * math.pi * p), 3), round(rise * p, 3),
+                _hex(0.85 * math.sin(math.pi * p) ** 1.5))
+    wrap = (1 - phase) * L                       # when the climb restarts
+    times = sorted({round(L * j / steps, 4) for j in range(steps + 1)} | {round(wrap, 4)})
+    move, rgba = [], []
+    for t in times:
+        if t > L:
+            continue
+        p = t / L + phase
+        if p > 1 + 1e-9:
+            p -= 1                                # (p == 1 at the very end stays the top)
+        top = abs(t - wrap) < 1e-3 and 0 < wrap < L
+        if top:                                   # end of this climb, then a stepped jump
+            x, y, c = at(1.0)
+            move.append({"time": t, "x": x, "y": y, "curve": "stepped"})
+            rgba.append({"time": t, "color": c, "curve": "stepped"})
+            t2 = round(t + 0.001, 4)
+            x, y, c = at(0.0)
+            move.append({"time": t2, "x": x, "y": y})
+            rgba.append({"time": t2, "color": c})
+            continue
+        x, y, c = at(p)
+        move.append({"time": t, "x": x, "y": y})
+        rgba.append({"time": t, "color": c})
+    for keys in (move, rgba):
+        if keys and keys[0]["time"] == 0:
+            del keys[0]["time"]
+    return move, rgba
+
+
+# --- animation sampling (previews) ----------------------------------------------------
+
+def _lerp_keys(keys, t, fields, defaults):
+    """Value of a timeline at t (linear between keys, stepped where marked)."""
+    if not keys:
+        return None
+    prev = keys[0]
+    if t <= prev.get("time", 0):
+        return [prev.get(f, d) for f, d in zip(fields, defaults)]
+    for k in keys[1:]:
+        if t < k.get("time", 0):
+            t0, t1 = prev.get("time", 0), k.get("time", 0)
+            if prev.get("curve") == "stepped" or t1 <= t0:
+                return [prev.get(f, d) for f, d in zip(fields, defaults)]
+            u = (t - t0) / (t1 - t0)
+            out = []
+            for f, d in zip(fields, defaults):
+                a, b = prev.get(f, d), k.get(f, d)
+                out.append(a + (b - a) * u if isinstance(a, (int, float)) else a)
+            return out
+        prev = k
+    return [prev.get(f, d) for f, d in zip(fields, defaults)]
+
+
+def _color_at(keys, t):
+    if not keys:
+        return None
+    prev = keys[0]
+    if t <= prev.get("time", 0):
+        return prev["color"]
+    for k in keys[1:]:
+        if t < k.get("time", 0):
+            if prev.get("curve") == "stepped":
+                return prev["color"]
+            t0, t1 = prev.get("time", 0), k["time"]
+            u = (t - t0) / (t1 - t0) if t1 > t0 else 0
+            a, b = int(prev["color"], 16), int(k["color"], 16)
+            ch = [round(((a >> s) & 255) + (((b >> s) & 255) - ((a >> s) & 255)) * u) for s in (24, 16, 8, 0)]
+            return "%02x%02x%02x%02x" % tuple(ch)
+        prev = k
+    return prev["color"]
+
+
+def sample(doc, anim_name, t):
+    """A copy of the skeleton posed at time t of an animation (bones and slot colours and
+    attachments; curves as straight lines - good enough for a preview)."""
+    d = copy.deepcopy(doc)
+    a = d.get("animations", {}).get(anim_name, {})
+    bones = {b["name"]: b for b in d["bones"]}
+    for name, tl in a.get("bones", {}).items():
+        b = bones.get(name)
+        if b is None:
+            continue
+        v = _lerp_keys(tl.get("rotate", []), t, ["value"], [0.0])
+        if v:
+            b["rotation"] = b.get("rotation", 0.0) + v[0]
+        v = _lerp_keys(tl.get("translate", []), t, ["x", "y"], [0.0, 0.0])
+        if v:
+            b["x"], b["y"] = b.get("x", 0.0) + v[0], b.get("y", 0.0) + v[1]
+        v = _lerp_keys(tl.get("scale", []), t, ["x", "y"], [1.0, 1.0])
+        if v:
+            b["scaleX"], b["scaleY"] = b.get("scaleX", 1.0) * v[0], b.get("scaleY", 1.0) * v[1]
+    slots = {s["name"]: s for s in d["slots"]}
+    for name, tl in a.get("slots", {}).items():
+        s = slots.get(name)
+        if s is None:
+            continue
+        c = _color_at(tl.get("rgba", []), t)
+        if c:
+            s["color"] = c
+        keys = tl.get("attachment", [])
+        if keys:
+            cur = keys[0].get("name")
+            for k in keys:
+                if k.get("time", 0) <= t:
+                    cur = k.get("name")
+            s["attachment"] = cur
+    return d

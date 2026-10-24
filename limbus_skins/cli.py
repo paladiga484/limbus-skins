@@ -248,6 +248,12 @@ def main(argv=None):
         out = args[1] if len(args) > 1 else f"{key}.png"
         n = preview(data_file, out)
         print(f"{n} frames -> {out}")
+        from .game import identities
+        from .repaint import idle_gif
+        app = identities(g, c)[0].get(skins[key]["identity"], {}).get("appearance")
+        gif = os.path.splitext(out)[0] + "-idle.gif"
+        if app and idle_gif(data_file, app, gif):
+            print(f"standing idle, animated -> {gif}")
         return 0
     if cmd == "sheet":
         from .game import identities

@@ -241,6 +241,39 @@ class Spine(unittest.TestCase):
         self.assertNotIn("rotation", m)
         self.assertEqual(spine.mul(spine.inv((2, 0, 0, 3, 5, 7)), (2, 0, 0, 3, 5, 7)), (1, 0, 0, 1, 0, 0))
 
+    def test_head_effects(self):
+        doc = {"bones": [{"name": "root"}, {"name": "b", "parent": "root"}],
+               "slots": [{"name": "coat", "bone": "b", "attachment": "coat"}, {"name": "head", "bone": "b", "attachment": "head"}],
+               "skins": [{"name": "default", "attachments": {"head": {"head": {"x": 10, "y": 50, "width": 20, "height": 20},
+                                                                      "blink": {"x": 12, "y": 50, "width": 20, "height": 20}}}}],
+               "animations": {"animation": {"bones": {"b": {"translate": [{}, {"time": 2, "y": 3}]}},
+                                            "slots": {"head": {"attachment": [{"time": 1, "name": "blink"}]}}}}}
+        fx = {"glow": {"low": 0.3, "high": 0.7}, "glow_size": (30, 30), "motes": 2, "mote_size": 3, "flutter": 0.05}
+        spine.head_effects(doc, "head", (20, 20), 0.0, fx)
+        names = [s["name"] for s in doc["slots"]]
+        self.assertEqual(names, ["coat", spine.GLOW, "head", spine.MOTE + "1", spine.MOTE + "2"])   # glow behind, motes in front
+        bone = next(b for b in doc["bones"] if b["name"] == spine.HEAD_BONE)
+        self.assertEqual((bone["parent"], bone["x"], bone["y"]), ("b", 10, 50))
+        atts = doc["skins"][0]["attachments"]["head"]
+        self.assertEqual((atts["head"]["x"], atts["head"]["y"]), (0, 0))   # same place, now on its own bone
+        self.assertEqual((atts["blink"]["x"], atts["blink"]["y"]), (2, 0))
+        a = doc["animations"]["animation"]
+        self.assertEqual(a["slots"]["head"]["attachment"][0]["name"], "head")   # no blinking back to the old head
+        self.assertEqual(a["bones"][spine.HEAD_BONE]["scale"][-1]["time"], 2.0)
+        self.assertEqual(spine._color_at(a["slots"][spine.GLOW]["rgba"], 1.0), spine._hex(0.7))
+
+    def test_motes_loop_seamlessly(self):
+        for phase in (0.0, 1 / 3, 2 / 3):
+            move, rgba = spine._mote_keys(2.0, phase, rise=10, drift=1)
+            self.assertEqual(move[-1]["time"], 2.0)
+            start = spine._lerp_keys(move, 0.0, ["x", "y"], [0, 0])
+            end = spine._lerp_keys(move, 2.0, ["x", "y"], [0, 0])
+            if phase:
+                self.assertEqual([round(v, 2) for v in start], [round(v, 2) for v in end])
+            for t in (0.0, 2.0):                       # whenever it jumps, it is invisible
+                if not phase:
+                    self.assertEqual(spine._color_at(rgba, t)[6:], "00")
+
     def test_render_setup_pose(self):
         from PIL import Image
         pages = spine.parse_atlas("a.png\nsize:20,20\nhead\nbounds:0,0,20,20\n")

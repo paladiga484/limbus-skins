@@ -13,6 +13,7 @@ import os
 import re
 import struct
 
+from . import art as artfx
 from . import spine
 from .game import unitypy
 
@@ -192,7 +193,7 @@ def head_art(env, r):
     return out
 
 
-def paint_head(frame, spec, art, width=1.9):
+def paint_head(frame, spec, art, width=1.9, glow=None):
     """Erase the old head inside a circle (hair, skin and the soft edge - white gloves,
     guns and collars stay) and put the art there. spec = [cx, cy, diameter, rotation]
     in frame pixels, y down."""
@@ -215,6 +216,9 @@ def paint_head(frame, spec, art, width=1.9):
     a = art.resize((max(1, int(art.width * k)), max(1, int(art.height * k))), Image.LANCZOS)
     if rot:
         a = a.rotate(rot, resample=Image.BICUBIC, expand=True)
+    if glow:                                             # a soft halo behind the head
+        a, _ = artfx.glow(a, glow["radius"] * a.width, tuple(glow["color"]),
+                          (glow["low"] + glow["high"]) / 2)
     ax, ay = int(cx - a.width / 2), int(cy - a.height / 2 - 0.05 * dia)
     # grow the frame where the new head pokes out, rather than clipping it
     left, top = max(0, -ax), max(0, -ay)
@@ -319,8 +323,9 @@ def _spine_frames(sp, src, rendered, mirror=False):
     return f"idle {sp['name']}: {len(frames)} frame(s) of the new body"
 
 
-def _spine_head(sp, art, spec):
-    """Swap one part of the idle skeleton (the head) for the head art."""
+def _spine_head(sp, art, spec, effects=None):
+    """Swap one part of the idle skeleton (the head) for the head art; with effects, the
+    head also flutters, glows and gives off a few motes."""
     import math as _m
     from PIL import Image
     UnityPy = unitypy()
@@ -351,25 +356,57 @@ def _spine_head(sp, art, spec):
     att["y"] = round(att.get("y", 0) + dx * _m.sin(r) + dy * _m.cos(r), 3)
     att["width"], att["height"] = round(w, 3), round(h, 3)
     att["path"] = "lsk_head"
+
+    # the pictures to add: (region name, image, size in skeleton units)
+    parts = [("lsk_head", art, (w, h))]
+    fx = dict(effects or {})
+    if fx.get("glow"):
+        g = fx["glow"]
+        halo, pad = artfx.halo(art, g["radius"] * art.width, tuple(g["color"]), 1.0)
+        k = w / art.width
+        fx["glow_size"] = (halo.width * k, halo.height * k)
+        parts.append((spine.GLOW, halo, fx["glow_size"]))
+    if fx.get("motes"):
+        fx["mote_size"] = w * fx.get("mote", 0.07)
+        parts.append((spine.MOTE, artfx.mote(48, tuple((fx.get("glow") or {}).get("color", (214, 200, 255)))),
+                      (fx["mote_size"], fx["mote_size"])))
+    if effects:
+        spine.head_effects(doc, slot["name"], (w, h), att.get("rotation", 0.0), fx,
+                           skin if skin else "default")
+
+    # append them below the page's own pictures, in one strip
     pw, ph = spine.page_size(page)
     img = tex.read().image.convert("RGBA")
     tw, th = img.size
-    aw, ah = min(pw - 2, int(w * dens)), int(h * dens)
+    boxes, x = [], 1
+    for name, im, (uw, uh) in parts:
+        aw, ah = max(2, int(uw * dens)), max(2, int(uh * dens))
+        boxes.append((name, im, x, aw, ah))
+        x += aw + 2
+    if x > pw:                                           # too wide for the page: shrink the strip
+        k = (pw - 2 * len(parts)) / (x - 2 * len(parts))
+        boxes, x = [], 1
+        for name, im, (uw, uh) in parts:
+            aw, ah = max(2, int(uw * dens * k)), max(2, int(uh * dens * k))
+            boxes.append((name, im, x, aw, ah))
+            x += aw + 2
+    tall = max(ah for *_, ah in boxes)
     step = ph // _m.gcd(ph, th)
-    add = -(-(ah + 2) // step) * step
+    add = -(-(tall + 2) // step) * step
     big = Image.new("RGBA", (tw, th + th * add // ph), (0, 0, 0, 0))
     big.paste(img, (0, 0))
-    pix = art.resize((max(1, round(aw * tw / pw)), max(1, round(ah * th / ph))), Image.LANCZOS)
     pma = dict(page["header"]).get("pma", "false") == "true"
-    big.paste(spine.premultiply(pix) if pma else pix, (round(tw / pw), round((ph + 1) * th / ph)))
+    for name, im, bx, aw, ah in boxes:
+        pix = im.resize((max(1, round(aw * tw / pw)), max(1, round(ah * th / ph))), Image.LANCZOS)
+        big.paste(spine.premultiply(pix) if pma else pix, (round(bx * tw / pw), round((ph + 1) * th / ph)))
+        page["regions"].append({"name": name, "fields": [("bounds", f"{bx},{ph + 1},{aw},{ah}")]})
     page["header"] = [(k, f"{pw},{ph + add}" if k == "size" else v) for k, v in page["header"]]
-    page["regions"].append({"name": "lsk_head", "fields": [("bounds", f"1,{ph + 1},{aw},{ah}")]})
     spine.set_text(sp["skeleton"], spine.dumps(doc))
     spine.set_text(sp["atlas"], spine.format_atlas(pages))
     d = tex.read()
     d.set_image(big, target_format=UnityPy.enums.TextureFormat.RGBA32)
     d.save()
-    return f"idle {sp['name']}: head swapped"
+    return f"idle {sp['name']}: head swapped" + (" (glow, flutter, motes)" if effects else "")
 
 
 def repaint(target, locate, source=None, clips=None, mapping=None, head=None, mirror=True):
@@ -457,7 +494,8 @@ def repaint(target, locate, source=None, clips=None, mapping=None, head=None, mi
             spec = recipe["frames"].get(o.read().m_Name)
             if spec and s.path_id == o.path_id and s.path_id in rendered:
                 img, sd = rendered[s.path_id][:2]
-                new, (left, top) = paint_head(img, spec, art, recipe.get("width", 1.9))
+                new, (left, top) = paint_head(img, spec, art, recipe.get("width", 1.9),
+                                              (recipe.get("effects") or {}).get("glow"))
                 # the canvas may have grown left/up; keep the pivot on the same body pixel
                 px = (sd.m_Pivot.x * img.width + left) / new.width
                 py = (sd.m_Pivot.y * img.height + (new.height - img.height - top)) / new.height
@@ -586,7 +624,7 @@ def repaint(target, locate, source=None, clips=None, mapping=None, head=None, mi
                 if source is not None:
                     notes.append(_spine_frames(sp, src, rendered, mirror))
                 elif head and head.get("spine"):
-                    notes.append(_spine_head(sp, art, head["spine"]))
+                    notes.append(_spine_head(sp, art, head["spine"], head.get("effects")))
                 else:
                     notes.append(f"idle {sp['name']} left as it is")
             except spine.SpineError as e:
@@ -648,3 +686,39 @@ def idle_image(bundle_or_path, appearance, height=360):
     img = img.crop(img.getbbox())
     k = height / img.height
     return img.resize((max(1, int(img.width * k)), height), Image.LANCZOS)
+
+
+def idle_gif(bundle_or_path, appearance, out, frames=24, height=360):
+    """An animated picture of the body's Spine idle (its first animation, one loop)."""
+    from PIL import Image
+    env = unitypy().load(bundle_or_path)
+    assets = bundle_assets(env)
+    if appearance not in assets:
+        return 0
+    sps = spine.body_spines(env, assets[appearance][0])
+    if not sps:
+        return 0
+    sp = sps[0]
+    pages = spine.parse_atlas(spine.text_of(sp["atlas"]))
+    texs = {p["name"]: sp["textures"][p["name"].rsplit(".", 1)[0]].read().image.convert("RGBA")
+            for p in pages if p["name"].rsplit(".", 1)[0] in sp["textures"]}
+    doc = json.loads(spine.text_of(sp["skeleton"]))
+    name = next(iter(doc.get("animations") or {"": 0}))
+    L = spine.anim_length(doc.get("animations", {}).get(name, {})) or 2.0
+    shots = []
+    for i in range(frames):
+        img, origin = spine.render(spine.sample(doc, name, L * i / frames), pages, texs, sp["skin"], ppu=0.25)
+        shots.append((img, origin))
+    # one canvas for every frame, lined up on the skeleton's origin
+    left = max(o[0] for _, o in shots)
+    top = max(o[1] for _, o in shots)
+    W = int(max(left - o[0] + im.width for im, o in shots)) + 2
+    H = int(max(top - o[1] + im.height for im, o in shots)) + 2
+    seq = []
+    for im, o in shots:
+        c = Image.new("RGBA", (W, H), (28, 24, 32, 255))
+        c.alpha_composite(im, (int(left - o[0]), int(top - o[1])))
+        k = height / H
+        seq.append(c.resize((max(1, int(W * k)), height), Image.LANCZOS).convert("P", palette=Image.ADAPTIVE))
+    seq[0].save(out, save_all=True, append_images=seq[1:], duration=int(1000 * L / frames), loop=0)
+    return len(seq)
