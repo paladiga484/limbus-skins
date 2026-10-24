@@ -130,11 +130,8 @@ def _need_build(keys, skins, data_dir, cache):
 
 
 def main(argv=None):
-    ap = argparse.ArgumentParser(prog="limbus-skins", add_help=False)
-    ap.add_argument("cmd", nargs="?", default="status")
-    ap.add_argument("args", nargs=argparse.REMAINDER)
-    a = ap.parse_args(argv)
-    cmd, args = a.cmd, a.args
+    argv = list(sys.argv[1:] if argv is None else argv)
+    cmd, args = (argv[0], argv[1:]) if argv else ("status", [])
 
     if cmd in ("-h", "--help", "help"):
         print(__doc__)

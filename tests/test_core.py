@@ -216,6 +216,8 @@ class NoNetwork(unittest.TestCase):
                     self.assertEqual(cli.main(["on", "ahab"]), 0)
                     self.assertEqual(cli.main(["off", "all"]), 0)
                     self.assertEqual(cli.main(["help"]), 0)
+                    self.assertEqual(cli.main(["--help"]), 0)
+                    self.assertEqual(cli.main(["--version"]), 0)
             finally:
                 socket.socket = real
             with open(os.path.join(home, "limbus-skins", "state.json")) as f:
