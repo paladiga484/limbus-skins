@@ -22,10 +22,10 @@ contains no game art, and the tool never connects to the internet.
 You need the game installed through Steam (Windows, or Linux with Proton) and launched at least
 once, so its download cache exists, plus Python 3.9 or newer.
 
-Download `limbus_skins-1.0.1-py3-none-any.whl` from the release, then:
+Download `limbus_skins-1.0.2-py3-none-any.whl` from the release, then:
 
 ```
-pip install --user limbus_skins-1.0.1-py3-none-any.whl     # or: pipx install <the .whl>
+pip install --user limbus_skins-1.0.2-py3-none-any.whl     # or: pipx install <the .whl>
 limbus-skins doctor
 ```
 
