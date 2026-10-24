@@ -192,7 +192,8 @@
     "S1": "LaRougeHighdomestic_S1",
     "S2": "LaRougeHighdomestic_S2",
     "S3": "LaRougeHighdomestic_S3"
-   }
+   },
+   "dash": "lunge"
   },
   "rufo": {
    "identity": 10915,
@@ -288,7 +289,8 @@
    "identity": 11103,
    "becomes": "the Old G Corp. Head Manager",
    "source": "91001_GCorp_Enhanced_BossAppearance",
-   "tested": false
+   "tested": false,
+   "dash": "lunge"
   },
   "jun-gregor": {
    "identity": 11208,

@@ -201,6 +201,28 @@ def source_table(env, ids, prefix=None, overrides=None, main=None):
     return table
 
 
+def lunge(src, frames_per_skill=6):
+    """The source's most dash-like drawing, for an identity's run up to the enemy when the
+    source has none (or only a standing one): of the opening frames of its skills, the
+    one whose outline is widest for its height - a body thrown forward."""
+    best, score = None, 0.0
+    seen = set()
+    for k in ("S1", "S2", "S3"):
+        for sp in src.get(k, [])[:frames_per_skill]:
+            if sp.path_id in seen:
+                continue
+            seen.add(sp.path_id)
+            try:
+                box = sp.read().image.getchannel("A").getbbox()
+            except Exception:
+                continue
+            if box and box[3] > box[1]:
+                ratio = (box[2] - box[0]) / (box[3] - box[1])
+                if ratio > score:
+                    best, score = sp, ratio
+    return best
+
+
 def render(sprite_reader, mirror=False):
     """(image, sprite[, pivot]). mirror: flip left-right, pivot with it - enemies face
     the other way from the sinners."""
@@ -465,7 +487,7 @@ def _spine_head(sp, art, spec, effects=None):
     return f"idle {sp['name']}: head swapped" + (" (glow, flutter, motes)" if effects else "")
 
 
-def repaint(target, locate, source=None, clips=None, mapping=None, head=None, mirror=True):
+def repaint(target, locate, source=None, clips=None, mapping=None, head=None, mirror=True, dash=None):
     """Repaint body `target` (from `source`'s drawings, or its own with a `head` recipe).
     locate(body name) -> path of the cached bundle holding it. Returns (bundle bytes,
     notes). The bytes still need bundle.forge() to carry the stock CRC."""
@@ -482,6 +504,11 @@ def repaint(target, locate, source=None, clips=None, mapping=None, head=None, mi
         special = special_table(senv, smain or sobjs, clips)
         if "idle" not in src or "S1" not in src:
             raise RepaintError(f"{source} has no idle or skill frames (found {sorted(src)}) - set clips/map")
+        if "move" not in src or dash == "lunge":         # no run-up drawing, or a standing one
+            pick = lunge(src)
+            if pick is not None:
+                src["move"] = [pick]
+                notes.append("dash uses a lunge from its skills")
 
     tpath = locate(target)
     tenv = UnityPy.load(tpath)
