@@ -10,7 +10,9 @@ import os
 import shutil
 from importlib import resources
 
-from . import bundle, game, helpers, repaint
+from . import art, bundle, game, helpers, repaint
+
+FORMAT = 2      # bump when built skins change shape: older builds are rebuilt on apply
 
 
 def catalog():
@@ -26,6 +28,18 @@ def catalog():
 def head_recipe(name):
     with resources.files("limbus_skins").joinpath(f"data/heads/{name}").open(encoding="utf-8") as f:
         return json.load(f)
+
+
+def _head(skin, data_dir):
+    """The skin's head recipe, with the player's own art (limbus-skins art) if set."""
+    if not skin.get("head"):
+        return None
+    recipe = head_recipe(skin["head"])
+    mine = art.path_for(data_dir, skin["key"])
+    if os.path.exists(mine):
+        recipe["art"] = {"image_path": mine}
+        recipe["width"] = recipe.get("own_width", recipe.get("width", 1.9))
+    return recipe
 
 
 def _write(out_dir, cache, stock_path, raw):
@@ -71,7 +85,7 @@ def build(keys, game_dir, cache, data_dir, log=print):
             os.makedirs(out)
             rel = _write(out, cache, static_path, raw)
             with open(os.path.join(out, "manifest.json"), "w", encoding="utf-8") as f:
-                json.dump({"kind": "helpers", "skins": [s["key"] for s in want if s["key"] not in bad],
+                json.dump({"format": FORMAT, "kind": "helpers", "skins": [s["key"] for s in want if s["key"] not in bad],
                            "files": [rel]}, f, indent=1)
             for s in want:
                 if s["key"] not in bad:
@@ -101,12 +115,12 @@ def build(keys, game_dir, cache, data_dir, log=print):
                 raw, notes = repaint.repaint(
                     target, locate, source=None if s.get("self") else s["source"],
                     clips=s.get("clips"), mapping=s.get("map"),
-                    head=head_recipe(s["head"]) if s.get("head") else None)
+                    head=_head(s, data_dir))
                 shutil.rmtree(out, ignore_errors=True)
                 os.makedirs(out)
                 rel = _write(out, cache, locate(target), raw)
                 with open(os.path.join(out, "manifest.json"), "w", encoding="utf-8") as f:
-                    json.dump({"kind": "repaint", "skins": [key], "files": [rel], "notes": notes}, f, indent=1)
+                    json.dump({"format": FORMAT, "kind": "repaint", "skins": [key], "files": [rel], "notes": notes}, f, indent=1)
                 results[key] = (True, "; ".join(notes))
             except (repaint.RepaintError, RuntimeError, KeyError, OSError) as e:
                 shutil.rmtree(out, ignore_errors=True)

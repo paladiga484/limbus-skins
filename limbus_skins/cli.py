@@ -9,7 +9,9 @@
   limbus-skins apply / restore          the two halves of `run`, by hand
   limbus-skins watch                    restore as soon as the game exits
   limbus-skins build [<skin>...]        rebuild (apply does this when needed)
-  limbus-skins preview <skin> [file.png]  see a repaint before playing it
+  limbus-skins preview <skin> [file.png]  see a repaint's frames before playing it
+  limbus-skins sheet [file.png]         every skin that is on: its idle before -> after
+  limbus-skins art <skin> <picture> [--invert]   your own head art (art <skin> --reset)
   limbus-skins doctor                   check paths, Python packages and the cache
   limbus-skins config --game DIR --cache DIR   set paths by hand
 
@@ -21,6 +23,7 @@ import argparse
 import json
 import os
 import re
+import shutil
 import subprocess
 import sys
 import unicodedata
@@ -103,6 +106,7 @@ def split_launch(args):
 
 
 def _need_build(keys, skins, data_dir, cache):
+    from .build import FORMAT
     """Enabled skins with no build, or built for an older game version."""
     root = os.path.join(data_dir, "built")
     out = []
@@ -116,9 +120,13 @@ def _need_build(keys, skins, data_dir, cache):
         folder = "helpers" if skins[k]["kind"] == "helper" else k
         try:
             with open(os.path.join(root, folder, "manifest.json"), encoding="utf-8") as f:
-                files = json.load(f)["files"]
+                man = json.load(f)
+            files = man["files"]
         except (OSError, ValueError, KeyError):
             out.append(k)
+            continue
+        if man.get("format") != FORMAT:
+            out.append(k)                                   # built by an older limbus-skins
             continue
         if not all(os.path.isdir(os.path.join(cache, r)) for r in files):
             out.append(k)                                   # game updated: bundle replaced
@@ -187,6 +195,29 @@ def main(argv=None):
         return 0
     if cmd == "doctor":
         return doctor(skins, st, data)
+    if cmd == "art":
+        from . import art
+        if not args:
+            raise SystemExit("usage: limbus-skins art <skin> <picture> [--invert] | art <skin> --reset")
+        key = select(args[:1], skins)[0]
+        if not skins[key].get("head"):
+            raise SystemExit(f"{key} has no head recipe - art is for head skins (e.g. butterfly-yisang)")
+        if "--reset" in args:
+            try:
+                os.remove(art.path_for(data, key))
+            except FileNotFoundError:
+                pass
+            print(f"{key} uses the in-game art again (rebuilt on the next apply)")
+        else:
+            pics = [a for a in args[1:] if not a.startswith("--")]
+            if not pics:
+                mine = art.path_for(data, key)
+                print(f"{key}: " + (f"your art, {mine}" if os.path.exists(mine) else "the in-game art"))
+                return 0
+            p, size = art.save(pics[0], data, key, "--invert" in args)
+            print(f"saved {size[0]}x{size[1]} art to {p}; rebuilt on the next apply")
+        shutil.rmtree(os.path.join(data, "built", key), ignore_errors=True)
+        return 0
 
     g, c = paths.find()
     sess = Session(c, data)
@@ -217,6 +248,55 @@ def main(argv=None):
         out = args[1] if len(args) > 1 else f"{key}.png"
         n = preview(data_file, out)
         print(f"{n} frames -> {out}")
+        return 0
+    if cmd == "sheet":
+        from .game import identities
+        from .repaint import idle_image
+        from PIL import Image, ImageDraw
+        keys = [k for k in st["on"] if k in skins] or list(skins)
+        if not keys:
+            raise SystemExit("no skins")
+        if sess.active():
+            raise SystemExit("restore first (a modded session is live)")
+        stale = _need_build(keys, skins, data, c)
+        if stale:
+            print(f"building {len(stale)} skin(s)...")
+            build(stale, g, c, data)
+        from .game import body_index
+        ids, helper_units = identities(g, c)
+        bodies, have = body_index(g, c, os.path.join(data, "bodies.json"))
+        cells = []
+        for k in sorted(keys, key=lambda k: (skins[k]["identity"], k)):
+            s = skins[k]
+            app = ids.get(s["identity"], {}).get("appearance")
+            before = idle_image(have[bodies[app]], app, 300) if app in bodies else None
+            after = None
+            if s["kind"] == "helper":
+                ha = helper_units.get(s["helper"], {}).get("appearance")
+                after = idle_image(have[bodies[ha]], ha, 300) if ha in bodies else None
+            else:
+                b = built_dirs(data, [k])
+                f = next((os.path.join(r, n) for r, _, ns in os.walk(b[0][1]) for n in ns if n == "__data"), None) if b else None
+                after = idle_image(f, app, 300) if f else None
+            cells.append((k, s, before, after))
+            print(f"  {k}")
+        W, H, cols = 560, 350, 3
+        sheet = Image.new("RGB", (W * cols, H * ((len(cells) + cols - 1) // cols)), (24, 22, 26))
+        dr = ImageDraw.Draw(sheet)
+        for n, (k, s, b, a) in enumerate(cells):
+            x, y = (n % cols) * W, (n // cols) * H
+            dr.rectangle([x + 2, y + 2, x + W - 3, y + H - 3], outline=(70, 60, 80))
+            dr.text((x + 10, y + 8), f"{s['identity']} {k} ({s['kind']}) -> {s['becomes']}", fill=(235, 225, 210))
+            for i, im in enumerate((b, a)):
+                if im is None:
+                    dr.text((x + 20 + i * 270, y + 160), "no picture", fill=(200, 80, 80))
+                    continue
+                im = im.copy()
+                im.thumbnail((260, 300))
+                sheet.paste(im, (x + 10 + i * 270 + (260 - im.width) // 2, y + 30 + 300 - im.height), im)
+        out = args[0] if args else "limbus-skins-idles.png"
+        sheet.save(out)
+        print(f"{len(cells)} skins -> {out} (left: as the game ships it, right: with the skin)")
         return 0
     if cmd in ("apply", "run"):
         yes, launch = split_launch(args)

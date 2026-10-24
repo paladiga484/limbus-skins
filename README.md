@@ -59,6 +59,12 @@ To do it by hand: `limbus-skins apply`, start the game, then `limbus-skins resto
 closing it (or `limbus-skins watch`, which restores as soon as the game exits).
 
 `limbus-skins preview ahab ahab.png` renders a repaint's frames to a picture before you play.
+`limbus-skins sheet` draws every skin that is on, standing idle, before and after, into one picture.
+
+Head skins take your own picture too: `limbus-skins art butterfly-yisang butterfly.png --invert`
+cuts the picture out of a dark background (or uses its transparency), `--invert` swaps light and
+dark, and the next `apply` paints it on. `limbus-skins art butterfly-yisang --reset` goes back to
+the in-game art. The picture stays on your computer.
 
 Skins only show in battle. Menus, portraits and identity art stay as they are.
 
@@ -91,7 +97,7 @@ Skins only show in battle. Menus, portraits and identity art stay as they are.
 | `dongbaek-sunshower` | Heathcliff 10705 | repaint | Dongbaek (Sunshower) | not yet |
 | `queequeg` | Heathcliff 10707 | repaint | Queequeg | not yet |
 | `lucio` | Heathcliff 10716 | repaint | Lucio | not yet |
-| `ahab` | Ishmael 10808 | repaint | GasHarpoon Ahab | yes |
+| `ahab` | Ishmael 10808 | repaint | GasHarpoon Ahab | not yet |
 | `jun-ishmael` | Ishmael 10811 | repaint | Jun | not yet |
 | `jia-xichun` | Ishmael 10812 | helper | Jia Xichun | not yet |
 | `kira` | Ishmael 10814 | helper | Kira | not yet |
@@ -107,7 +113,7 @@ Skins only show in battle. Menus, portraits and identity art stay as they are.
 | `pwie` | Sinclair 11016 | helper | Pwie, the Crimson God | not yet |
 | `old-gcorp-head` | Outis 11103 | repaint | the Old G Corp. Head Manager | not yet |
 | `josephine` | Outis 11108 | repaint | Josephine | not yet |
-| `barber` | Outis 11111 | repaint | the Barber | not yet |
+| `barber` | Outis 11111 | repaint | the Barber (bloodfiend) | not yet |
 | `jun-gregor` | Gregor 11208 | repaint | Jun | not yet |
 | `priest` | Gregor 11210 | repaint | the Priest | not yet |
 | `hohenheim` | Gregor 11214 | helper | Hohenheim | not yet |
@@ -122,7 +128,13 @@ If one looks wrong or a fight freezes, turn it off with `limbus-skins off <skin>
   them back byte for byte. Nothing is changed while the game is running.
 - **Repaints** rewrite only an identity's own body bundle. Each frame is pointed at the
   matching drawing of the other character (idle to idle, guard to guard, each skill's frames
-  spread across theirs), packed into the body's own atlas pages.
+  spread across theirs), packed into the body's own atlas pages. Only the objects the
+  identity's own body loads are touched (read from the bundle's preload table), so bundles
+  that hold several characters keep the others as they are.
+- Most identities stand idle as a **Spine skeleton** and only use the frames to move and
+  fight. A repaint hides the skeleton's parts and adds one part that shows the new idle
+  frames, placed where the frames stand; bones, skins, constraints and animation names stay,
+  so the game finds everything it looks for. A head skin swaps only the skeleton's head part.
 - **Helper skins** rewrite the identity's record in the static-data bundle: the helper's body,
   its skills, and its defence skill.
 - Since version 1.117.1 the game checks each cached file's CRC and re-downloads any that
@@ -135,6 +147,10 @@ If one looks wrong or a fight freezes, turn it off with `limbus-skins off <skin>
 - Only tested by the author on Linux (Proton). Windows support is written but untested.
 - Some identities' bodies are Spine skeletons rather than frame drawings (Middle Big Brother
   Heathcliff, Pinky Apprentice Sinclair), so they can't be repainted.
+- A repainted idle stands still (or flips through the other character's idle frames); the
+  breathing of the original skeleton is gone. Head skins keep it.
+- `sheet` and `preview` draw skeletons without their IK constraints, so some "before" pictures
+  look bent. The game draws them properly.
 - An identity can wear one skin at a time. Skins that share a bundle can't be on together; `apply` says which one it skipped.
 - Swapping an identity onto another character's body without that character's own skills
   crashes battles, and boss units' skills only work in boss fights. That's why helper skins

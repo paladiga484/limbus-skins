@@ -112,7 +112,7 @@
    "map": {
     "S3": "Ahab_Awaken_p2_S1"
    },
-   "tested": true
+   "tested": false
   },
   "rien": {
    "identity": 10115,
@@ -158,8 +158,8 @@
   },
   "barber": {
    "identity": 11111,
-   "becomes": "the Barber",
-   "source": "8372_Barber_NicoleAppearance",
+   "becomes": "the Barber (bloodfiend)",
+   "source": "8375A_Barber_Blood_RoseAppearance",
    "tested": false
   },
   "priest": {
@@ -184,7 +184,15 @@
    "identity": 10816,
    "becomes": "L'Inamovible",
    "source": "1466_LaRougeHighdomesticAppearance",
-   "tested": false
+   "tested": false,
+   "map": {
+    "idle": "LaRougeHighdomestic_Default",
+    "dmg": "LaRougeHighdomestic_Damaged",
+    "move": "LaRougeHighdomestic_Move",
+    "S1": "LaRougeHighdomestic_S1",
+    "S2": "LaRougeHighdomestic_S2",
+    "S3": "LaRougeHighdomestic_S3"
+   }
   },
   "rufo": {
    "identity": 10915,

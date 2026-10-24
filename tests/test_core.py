@@ -10,7 +10,7 @@ import zlib
 from unittest import mock
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-from limbus_skins import bundle, cli, mods, paths, repaint  # noqa: E402
+from limbus_skins import art, bundle, cli, mods, paths, repaint, spine  # noqa: E402
 
 HDR = {"ver": 8, "uver": "5.x.x", "urev": "6000.3.12f1", "flags": 0}
 
@@ -199,6 +199,93 @@ class Repaint(unittest.TestCase):
         self.assertGreater(top, 0)
         self.assertEqual(out.height, 100 + top)
         self.assertEqual(out.getpixel((50 + left, 10 + top))[:3], (255, 255, 255))
+
+
+class Spine(unittest.TestCase):
+    ATLAS = "a.png\nsize:100,50\nfilter:Linear,Linear\npma:true\nhead\nbounds:10,5,20,30\nrotate:90\nbody\nxy: 40, 0\nsize: 10, 10\norig: 12, 12\noffset: 1, 1\nrotate: false\n"
+    DOC = {"skeleton": {"spine": "4.0.64"}, "bones": [{"name": "root"}, {"name": "b", "parent": "root", "y": 10}],
+           "slots": [{"name": "head", "bone": "b", "attachment": "head"}],
+           "skins": [{"name": "on", "attachments": {"head": {"head": {"width": 20, "height": 30}}}}],
+           "ik": [{"name": "k", "bones": ["b"], "target": "root"}],
+           "animations": {"idle": {"bones": {"b": {"rotate": [{"value": 1}]}},
+                                   "deform": {"on": {"head": {"head": [{}]}}}}}}
+
+    def test_atlas_round_trip_both_formats(self):
+        pages = spine.parse_atlas(self.ATLAS)
+        self.assertEqual(spine.page_size(pages[0]), (100, 50))
+        self.assertEqual(spine.region_geom(pages[0]["regions"][0])[:5], (10, 5, 20, 30, 90))
+        self.assertEqual(spine.region_geom(pages[0]["regions"][1]), (40, 0, 10, 10, 0, 1, 1, 12, 12))
+        self.assertEqual(spine.parse_atlas(spine.format_atlas(pages)), pages)
+
+    def test_frame_swap_keeps_names_the_game_looks_up(self):
+        d = spine.frame_swap(self.DOC, [("lsk0", {"width": 5, "height": 5}), ("lsk1", {"width": 5, "height": 5})], 1.0)
+        self.assertEqual([b["name"] for b in d["bones"]], ["root", "b"])
+        self.assertEqual(d["ik"], self.DOC["ik"])
+        self.assertIn("idle", d["animations"])
+        self.assertNotIn("deform", d["animations"]["idle"])        # it names a part that is gone
+        self.assertEqual(d["skins"][0]["name"], "default")           # new parts resolve under any skin
+        self.assertEqual({s["name"] for s in d["skins"]}, {"default", "on"})
+        self.assertNotIn("attachment", d["slots"][0])
+        keys = d["animations"]["idle"]["slots"][spine.SLOT]["attachment"]
+        self.assertEqual([k["name"] for k in keys], ["lsk0", "lsk1", "lsk0"])
+        self.assertEqual(keys[-1]["time"], 1.0)
+        self.assertEqual(self.DOC["slots"][0]["attachment"], "head")  # the original is untouched
+
+    def test_region_attachment_placement(self):
+        # sprite-renderer space -> skeleton units: shift by 1 unit, 1/0.5 units per skeleton unit
+        a = spine.region_attachment((2, 0, 0, 2, 2, 0), -1, 0, 1, 4)
+        self.assertEqual(a, {"x": 2.0, "y": 4.0, "width": 4.0, "height": 8.0})
+        m = spine.region_attachment((-2, 0, 0, 2, 0, 0), -1, 0, 1, 4)   # mirrored body
+        self.assertEqual(m["scaleX"], -1)
+        self.assertNotIn("rotation", m)
+        self.assertEqual(spine.mul(spine.inv((2, 0, 0, 3, 5, 7)), (2, 0, 0, 3, 5, 7)), (1, 0, 0, 1, 0, 0))
+
+    def test_render_setup_pose(self):
+        from PIL import Image
+        pages = spine.parse_atlas("a.png\nsize:20,20\nhead\nbounds:0,0,20,20\n")
+        img, _ = spine.render({"bones": [{"name": "root"}], "slots": [{"name": "s", "bone": "root", "attachment": "head"}],
+                               "skins": [{"name": "default", "attachments": {"s": {"head": {"width": 40, "height": 40}}}}]},
+                              pages, {"a.png": Image.new("RGBA", (20, 20), (255, 0, 0, 255))}, ppu=1)
+        self.assertEqual(img.getpixel((img.width // 2, img.height // 2)), (255, 0, 0, 255))
+
+
+class Art(unittest.TestCase):
+    def test_cut_out_drops_background_and_corner_bits(self):
+        from PIL import Image, ImageDraw
+        im = Image.new("RGBA", (60, 60), (0, 0, 0, 255))
+        d = ImageDraw.Draw(im)
+        d.ellipse([15, 15, 45, 45], fill=(255, 255, 255, 255))
+        d.rectangle([0, 0, 4, 4], fill=(200, 200, 255, 255))         # a rose in the corner
+        out = art.cut_out(im)
+        self.assertLessEqual(abs(out.width - 31), 2)
+        self.assertEqual(out.getpixel((0, 0))[3], 0)
+        self.assertEqual(out.getpixel((out.width // 2, out.height // 2)), (255, 255, 255, 255))
+
+    def test_invert_swaps_light_keeps_hue(self):
+        from PIL import Image
+        im = Image.new("RGBA", (3, 1))
+        im.putdata([(255, 255, 255, 255), (0, 0, 0, 255), (200, 160, 240, 255)])
+        a, b, c = list(art.invert(im).getdata())
+        self.assertEqual(a, (0, 0, 0, 255))
+        self.assertEqual(b, (255, 255, 255, 255))
+        self.assertGreater(c[2], c[1])                                  # still purple, now dark
+        self.assertLess(sum(c[:3]), sum((200, 160, 240)))
+
+
+class Frames(unittest.TestCase):
+    def test_kinds(self):
+        self.assertEqual(repaint.kind_of("Default")[0], "idle")
+        self.assertEqual(repaint.kind_of("skill2_3_e")[0], "S2e")
+        self.assertEqual(repaint.kind_of("move")[0], "move")
+        self.assertIsNone(repaint.kind_of("3")[0])
+
+    def test_split_body_keeps_idle_and_move(self):
+        class S:
+            def __init__(self, n): self.n = n
+            def read(self): return type("R", (), {"m_Name": self.n})()
+        body, fx = repaint.split_body([S("idle"), S("move"), S("skill1_2_e"), S("2")])
+        self.assertEqual([x.n for x in body], ["idle", "move"])
+        self.assertEqual([x.n for x in fx], ["skill1_2_e"])
 
 
 class NoNetwork(unittest.TestCase):

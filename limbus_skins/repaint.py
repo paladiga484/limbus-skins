@@ -8,10 +8,12 @@ guard->guard, skill 2 frame 7 -> the frame at the same point of their skill 2), 
 into the body's own atlas pages. A head recipe can instead paint a new head over the
 identity's own frames.
 """
+import json
 import os
 import re
 import struct
 
+from . import spine
 from .game import unitypy
 
 
@@ -24,35 +26,59 @@ CLIP_KIND = {"Default": "idle", "Move": "move", "Guard": "gud", "Evade": "miss",
              "Damaged": "dmg", "Dead": "dead", "Retire": "dead"}
 
 
-def prefab_objects(env, appearance):
-    """Path ids of every object under the appearance prefab (so a bundle that holds
-    several characters only gives us this one's clips)."""
-    for cp, ptr in env.container.items():
-        if os.path.basename(cp)[:-7] != appearance:
-            continue
-        objs = ptr.assetsfile.objects
-        root = objs.get(ptr.m_PathID)
-        if root is None or root.type.name != "GameObject":
-            continue
-        return objs, root
-    raise RepaintError(f"{appearance}: body not found in its bundle")
-
-
-def clip_frames(env, objs, wanted=None):
-    """{clip name: [sprite reader, ...]} in play order, sprites local to the bundle."""
+def bundle_assets(env):
+    """{prefab name: (root GameObject id, {ids of every object it loads})}, from the
+    AssetBundle's own preload table - so a bundle holding several characters gives each
+    one only its own clips and sprites."""
     out = {}
     for o in env.objects:
-        if o.type.name != "AnimationClip":
+        if o.type.name != "AssetBundle":
+            continue
+        t = o.read_typetree()
+        pre = t["m_PreloadTable"]
+        objs = o.assets_file.objects
+        for name, info in t["m_Container"]:
+            root = objs.get(info["asset"]["m_PathID"])
+            if root is None or root.type.name != "GameObject":
+                continue
+            ids = {p["m_PathID"] for p in pre[info["preloadIndex"]:info["preloadIndex"] + info["preloadSize"]]
+                   if p["m_FileID"] == 0}
+            out[os.path.basename(name).rsplit(".", 1)[0]] = (root.path_id, ids | {root.path_id})
+    return out
+
+
+def prefab_objects(env, appearance, forms=False):
+    """(ids of every object the body loads, [root ids]). With forms, the identity's other
+    bodies in the bundle count too (e.g. "10215_..._CastOffAppearance")."""
+    assets = bundle_assets(env)
+    if appearance not in assets:
+        raise RepaintError(f"{appearance}: body not found in its bundle")
+    root, ids = assets[appearance]
+    roots = [root]
+    if forms:
+        prefix = appearance.split("_", 1)[0] + "_"
+        for name, (r, more) in assets.items():
+            if name.startswith(prefix) and r != root:
+                ids = ids | more
+                roots.append(r)
+    return ids, roots
+
+
+def clip_frames(env, ids, wanted=None):
+    """{clip name: [sprite reader, ...]} in play order, for clips the body loads."""
+    out = {}
+    for o in env.objects:
+        if o.type.name != "AnimationClip" or o.path_id not in ids:
             continue
         t = o.read_typetree()
         name = t["m_Name"]
-        if name.startswith("FX") or (wanted and not wanted(name)):
+        if name.upper().startswith("FX") or (wanted and not wanted(name)):
             continue
         pm = t.get("m_ClipBindingConstant", {}).get("pptrCurveMapping", [])
         sp = [o.assets_file.objects.get(p["m_PathID"]) for p in pm if p.get("m_FileID") == 0]
         sp = [s for s in sp if s is not None and s.type.name == "Sprite"]
         if sp:
-            out.setdefault(name, sp)
+            out.setdefault(name, (sp, t["m_MuscleClip"]["m_StopTime"] - t["m_MuscleClip"]["m_StartTime"]))
     return out
 
 
@@ -65,16 +91,37 @@ def kind_of(sprite_name):
     for k in KINDS:
         if n == k or n.startswith(k):
             return k, 0
+    for word, k in CLIP_KIND.items():                    # some bodies name frames "Default", "Damaged"
+        if n.startswith(word.lower()):
+            return k, 0
     return None, 0
 
 
-def source_table(env, objs, prefix=None, overrides=None):
-    """Source frames by kind: {"idle": [img...], "S1": [img...], ...}."""
-    clips = clip_frames(env, objs, (lambda n: n.startswith(prefix)) if prefix else None)
+def split_body(sprites):
+    """(body frames, effect frames); unnamed effect sprites ("1", "2"...) are dropped."""
+    kinds = [(x, kind_of(x.read().m_Name)[0]) for x in sprites]
+    fx = lambda k: k.startswith("S") and k.endswith("e")  # noqa: E731  ("idle" ends in e too)
+    return [x for x, k in kinds if k and not fx(k)], [x for x, k in kinds if k and fx(k)]
+
+
+def source_table(env, ids, prefix=None, overrides=None):
+    """Source frames by kind: {"idle": [sprite...], "S1": [...], ...}, plus
+    "idle_time": the idle clip's length in seconds."""
+    clips = clip_frames(env, ids, (lambda n: n.startswith(prefix)) if prefix else None)
     table = {}
-    for name, sprites in clips.items():
-        tail = name[len(prefix):] if prefix else name
-        tail = tail.lstrip("_")
+
+    def put(kind, sprites, length):
+        body, fx = split_body(sprites)
+        if not body:
+            return
+        table[kind] = body
+        if kind == "idle":
+            table["idle_time"] = length
+        if kind.startswith("S") and fx:
+            table[kind + "e"] = fx
+
+    for name, (sprites, length) in clips.items():
+        tail = (name[len(prefix):] if prefix else name).lstrip("_")
         kind = None
         for word, k in CLIP_KIND.items():
             if tail.endswith(word):
@@ -83,19 +130,17 @@ def source_table(env, objs, prefix=None, overrides=None):
         if kind is None and m:
             kind = "S" + m.group(1)
         if kind and kind not in table:
-            body = [x for x in sprites if not kind_of(x.read().m_Name)[0] or not kind_of(x.read().m_Name)[0].endswith("e")]
-            fx = [x for x in sprites if x not in body]
-            table[kind] = body or sprites
-            if kind.startswith("S") and fx:
-                table[kind + "e"] = fx
-    every = clip_frames(env, objs) if overrides else {}
+            put(kind, sprites, length)
+    every = clip_frames(env, ids) if overrides else {}
     for k, clip in (overrides or {}).items():
-        sp = every[clip]
-        body = [x for x in sp if not (kind_of(x.read().m_Name)[0] or "").endswith("e")]
-        table[k] = body or sp
-        fx = [x for x in sp if x not in body]
-        if fx:
-            table[k + "e"] = fx
+        if clip not in every:
+            raise RepaintError(f"clip {clip} is not in the source body")
+        table.pop(k, None)
+        put(k, *every[clip])
+    skills = sorted(k for k in table if re.fullmatch(r"S\d", k))
+    for n in (1, 2, 3):                      # a source with fewer skills reuses the ones it has
+        if f"S{n}" not in table and skills:
+            table[f"S{n}"] = table[skills[(n - 1) % len(skills)]]
     return table
 
 
@@ -118,6 +163,9 @@ def head_art(env, r):
     """Build the head picture from textures in the body's own bundle (no art ships with
     these tools): r = {texture, mask?, crop [l,t,r,b], tilt degrees, mirror: bool}."""
     from PIL import Image, ImageDraw
+    if r.get("image_path"):                              # the player's own picture (limbus-skins art)
+        img = Image.open(r["image_path"]).convert("RGBA")
+        return img.crop(img.getbbox())
     tex = {o.read().m_Name: o for o in env.objects if o.type.name == "Texture2D"}
     if r["texture"] not in tex:
         raise RepaintError(f"head art {r['texture']} is not in this body's bundle")
@@ -206,6 +254,119 @@ def pack(sizes, pages):
 
 
 
+def _spine_pages(sp):
+    pages = spine.parse_atlas(spine.text_of(sp["atlas"]))
+    for p in pages:
+        tex = sp["textures"].get(p["name"].rsplit(".", 1)[0])
+        if tex is not None:
+            return pages, p, tex
+    raise spine.SpineError("no texture for its atlas")
+
+
+def _spine_frames(sp, src, rendered):
+    """Swap the idle skeleton's parts for the source's idle frames."""
+    from PIL import Image
+    UnityPy = unitypy()
+    pages, page, tex = _spine_pages(sp)
+    pma = dict(page["header"]).get("pma", "false") == "true"
+    seq = src["idle"]
+    imgs, atts = {}, []
+    for s in seq:
+        if s.path_id not in imgs:
+            img, sd = rendered[s.path_id][:2] if s.path_id in rendered else render(s)
+            imgs[s.path_id] = (img, sd)
+    ids = list(imgs)
+    scale = 1.0
+    while True:
+        sizes = [(max(1, int(imgs[i][0].width * scale)), max(1, int(imgs[i][0].height * scale))) for i in ids]
+        placed = pack(sizes, [(2048, 2048)])
+        if placed:
+            break
+        scale *= 0.9
+    W = max(x + w for (_, x, _), (w, _) in zip(placed, sizes))
+    H = max(y + h for (_, _, y), (_, h) in zip(placed, sizes))
+    canvas = Image.new("RGBA", (W, H), (0, 0, 0, 0))
+    regions, names = [], {}
+    for n, (i, (_, x, y), (w, h)) in enumerate(zip(ids, placed, sizes)):
+        img, sd = imgs[i]
+        canvas.alpha_composite(img.resize((w, h), Image.LANCZOS) if scale != 1 else img, (x, H - y - h))
+        names[i] = f"lsk{n}"
+        regions.append({"name": names[i], "fields": [("bounds", f"{x},{H - y - h},{w},{h}")]})
+    for s in seq:
+        img, sd = imgs[s.path_id]
+        u = float(sd.m_PixelsToUnits)
+        x0, y0 = -sd.m_Pivot.x * img.width / u, -sd.m_Pivot.y * img.height / u
+        atts.append((names[s.path_id], spine.region_attachment(sp["to_skel"], x0, y0, x0 + img.width / u, y0 + img.height / u)))
+    uniq = {}
+    for n, a in atts:
+        uniq.setdefault(n, a)
+    frames = [(n, uniq[n]) for n, _ in atts]
+    doc = json.loads(spine.text_of(sp["skeleton"]))
+    t = src.get("idle_time") or 0
+    new = spine.frame_swap(doc, frames, t if t > 0.05 else 0.1 * len(frames))
+    page["header"] = [(k, f"{W},{H}" if k == "size" else v) for k, v in page["header"]]
+    page["regions"] = regions
+    spine.set_text(sp["skeleton"], spine.dumps(new))
+    spine.set_text(sp["atlas"], spine.format_atlas([page]))
+    d = tex.read()
+    d.set_image(spine.premultiply(canvas) if pma else canvas, target_format=UnityPy.enums.TextureFormat.RGBA32)
+    d.save()
+    return f"idle {sp['name']}: {len(frames)} frame(s) of the new body"
+
+
+def _spine_head(sp, art, spec):
+    """Swap one part of the idle skeleton (the head) for the head art."""
+    import math as _m
+    from PIL import Image
+    UnityPy = unitypy()
+    pages, _, _ = _spine_pages(sp)
+    doc = json.loads(spine.text_of(sp["skeleton"]))
+    slot = next((x for x in doc["slots"] if x["name"] == spec["slot"]), None)
+    if slot is None or not slot.get("attachment"):
+        raise spine.SpineError(f"no slot {spec['slot']}")
+    skin = sp["skin"]
+    att = None
+    for sk in spine.skins_list(doc):
+        if sk["name"] in (skin, "default") and slot["attachment"] in sk["attachments"].get(slot["name"], {}):
+            att = sk["attachments"][slot["name"]][slot["attachment"]]
+            if sk["name"] == skin:
+                break
+    if att is None or att.get("type", "region") != "region":
+        raise spine.SpineError(f"{spec['slot']} is not a plain picture")
+    rname = att.get("path", slot["attachment"])
+    page = next(p for p in pages if any(r["name"] == rname for r in p["regions"]))
+    tex = sp["textures"][page["name"].rsplit(".", 1)[0]]
+    reg = next(r for r in page["regions"] if r["name"] == rname)
+    dens = spine.region_geom(reg)[2] / att["width"]          # atlas px per skeleton unit
+    w = att["width"] * spec.get("width", 1.3)
+    h = w * art.height / art.width
+    r = _m.radians(att.get("rotation", 0.0))
+    dx, dy = spec.get("dx", 0) * att["width"], spec.get("dy", 0) * att["height"]
+    att["x"] = round(att.get("x", 0) + dx * _m.cos(r) - dy * _m.sin(r), 3)
+    att["y"] = round(att.get("y", 0) + dx * _m.sin(r) + dy * _m.cos(r), 3)
+    att["width"], att["height"] = round(w, 3), round(h, 3)
+    att["path"] = "lsk_head"
+    pw, ph = spine.page_size(page)
+    img = tex.read().image.convert("RGBA")
+    tw, th = img.size
+    aw, ah = min(pw - 2, int(w * dens)), int(h * dens)
+    step = ph // _m.gcd(ph, th)
+    add = -(-(ah + 2) // step) * step
+    big = Image.new("RGBA", (tw, th + th * add // ph), (0, 0, 0, 0))
+    big.paste(img, (0, 0))
+    pix = art.resize((max(1, round(aw * tw / pw)), max(1, round(ah * th / ph))), Image.LANCZOS)
+    pma = dict(page["header"]).get("pma", "false") == "true"
+    big.paste(spine.premultiply(pix) if pma else pix, (round(tw / pw), round((ph + 1) * th / ph)))
+    page["header"] = [(k, f"{pw},{ph + add}" if k == "size" else v) for k, v in page["header"]]
+    page["regions"].append({"name": "lsk_head", "fields": [("bounds", f"1,{ph + 1},{aw},{ah}")]})
+    spine.set_text(sp["skeleton"], spine.dumps(doc))
+    spine.set_text(sp["atlas"], spine.format_atlas(pages))
+    d = tex.read()
+    d.set_image(big, target_format=UnityPy.enums.TextureFormat.RGBA32)
+    d.save()
+    return f"idle {sp['name']}: head swapped"
+
+
 def repaint(target, locate, source=None, clips=None, mapping=None, head=None):
     """Repaint body `target` (from `source`'s drawings, or its own with a `head` recipe).
     locate(body name) -> path of the cached bundle holding it. Returns (bundle bytes,
@@ -219,25 +380,24 @@ def repaint(target, locate, source=None, clips=None, mapping=None, head=None):
         senv = UnityPy.load(locate(source))
         sobjs, _ = prefab_objects(senv, source)
         src = source_table(senv, sobjs, clips, mapping or {})
-        missing_kinds = [k for k in ("idle", "S1", "S2", "S3") if k not in src]
-        if missing_kinds:
-            raise RepaintError(f"{source} has no frames for {missing_kinds} (found {sorted(src)}) - set clips/map")
+        if "idle" not in src or "S1" not in src:
+            raise RepaintError(f"{source} has no idle or skill frames (found {sorted(src)}) - set clips/map")
 
     tpath = locate(target)
     tenv = UnityPy.load(tpath)
-    tobjs, _ = prefab_objects(tenv, target)
+    tobjs, troots = prefab_objects(tenv, target, forms=True)
     tclips = clip_frames(tenv, tobjs)
 
     # target sprites -> (kind, position along that kind's animation)
     order = {}
-    for name, sprites in tclips.items():
+    for name, (sprites, _) in tclips.items():
         for i, s in enumerate(sprites):
             k, _ = kind_of(s.read().m_Name)
             if k and k.startswith("S"):
                 seq = order.setdefault(k, [])
                 if s.path_id not in seq:
                     seq.append(s.path_id)
-    targets = [o for o in tenv.objects if o.type.name == "Sprite"]
+    targets = [o for o in tenv.objects if o.type.name == "Sprite" and o.path_id in tobjs]
     plan = []                                            # (target reader, source reader)
     for o in targets:
         k, _ = kind_of(o.read().m_Name)
@@ -316,7 +476,9 @@ def repaint(target, locate, source=None, clips=None, mapping=None, head=None):
     # only pages whose every sprite gets repainted can be wiped (FX and portraits stay put)
     planned = {o.path_id for o, _ in plan}
     users = {}
-    for o in targets:
+    for o in tenv.objects:                               # every sprite in the bundle, not just ours
+        if o.type.name != "Sprite":
+            continue
         t = o.read_typetree()
         refs = {t["m_RD"]["texture"]["m_PathID"]}
         key = (tuple(t["m_RenderDataKey"][0].values()), t["m_RenderDataKey"][1])
@@ -326,6 +488,11 @@ def repaint(target, locate, source=None, clips=None, mapping=None, head=None):
                     refs.add(v["texture"]["m_PathID"])
         for r in refs - {0}:
             users.setdefault(r, set()).add(o.path_id)
+    for o in tenv.objects:                               # a material drawing straight from a page
+        if o.type.name == "Material":
+            for _, v in o.read_typetree()["m_SavedProperties"]["m_TexEnvs"]:
+                if v["m_Texture"]["m_FileID"] == 0 and v["m_Texture"]["m_PathID"]:
+                    users.setdefault(v["m_Texture"]["m_PathID"], set()).add(-1)
     pages = [o for o in tenv.objects if o.type.name == "Texture2D" and o.path_id in users
              and users[o.path_id] <= planned and o.read().m_Name.startswith("sactx-")]
     if not pages:
@@ -403,6 +570,23 @@ def repaint(target, locate, source=None, clips=None, mapping=None, head=None):
         d.save()
 
 
+    # the idle most identities stand in is a Spine skeleton, not the sprites
+    done_skel = set()
+    for root in troots:
+        for sp in spine.body_spines(tenv, root):
+            if sp["skeleton"].path_id in done_skel:
+                continue                                 # forms of one identity can share an idle
+            done_skel.add(sp["skeleton"].path_id)
+            try:
+                if source is not None:
+                    notes.append(_spine_frames(sp, src, rendered))
+                elif head and head.get("spine"):
+                    notes.append(_spine_head(sp, art, head["spine"]))
+                else:
+                    notes.append(f"idle {sp['name']} left as it is")
+            except spine.SpineError as e:
+                notes.append(f"idle {sp['name']} left as it is: {e}")
+
     scale_note = "" if scale == 1 else f" (scaled {scale:.2f} to fit)"
     notes.insert(0, f"{len(plan)} frames from {len(rendered)} drawings{scale_note}")
     return tenv.file.save(packer="none"), notes
@@ -431,3 +615,31 @@ def preview(bundle_bytes_or_path, out_png, kinds=("idle", "S1", "S2", "S3", "gud
         sheet.alpha_composite(im, ((n % 6) * 220, (n // 6) * 220))
     sheet.save(out_png)
     return len(shots)
+
+
+def idle_image(bundle_or_path, appearance, height=360):
+    """What the body looks like standing idle in a fight: its Spine idle when it has
+    one (setup pose), else its idle sprite. None when neither is found."""
+    from PIL import Image
+    env = unitypy().load(bundle_or_path)
+    assets = bundle_assets(env)
+    if appearance not in assets:
+        return None
+    root, ids = assets[appearance]
+    img = None
+    for sp in spine.body_spines(env, root):
+        pages = spine.parse_atlas(spine.text_of(sp["atlas"]))
+        texs = {p["name"]: sp["textures"][p["name"].rsplit(".", 1)[0]].read().image.convert("RGBA")
+                for p in pages if p["name"].rsplit(".", 1)[0] in sp["textures"]}
+        img, _ = spine.render(json.loads(spine.text_of(sp["skeleton"])), pages, texs, sp["skin"], ppu=0.25)
+        break
+    if img is None:
+        for name, (sprites, _) in clip_frames(env, ids).items():
+            if name.endswith("Default") and sprites:
+                img = render(sprites[0])[0]
+                break
+    if img is None or not img.getbbox():
+        return None
+    img = img.crop(img.getbbox())
+    k = height / img.height
+    return img.resize((max(1, int(img.width * k)), height), Image.LANCZOS)
