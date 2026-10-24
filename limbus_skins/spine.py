@@ -14,6 +14,8 @@ import json
 import math
 
 SLOT = "lsk_frame"
+BONE = "lsk_breath"
+BREATH = 2.4       # seconds per breath of a repainted idle
 
 
 class SpineError(Exception):
@@ -154,15 +156,24 @@ def frame_swap(doc, frames, duration):
         s["attachments"] = {}
     for sl in d["slots"]:
         sl.pop("attachment", None)
-    d["slots"].append({"name": SLOT, "bone": d["bones"][0]["name"], "attachment": frames[0][0]})
+    d["bones"].append({"name": BONE, "parent": d["bones"][0]["name"]})
+    d["slots"].append({"name": SLOT, "bone": BONE, "attachment": frames[0][0]})
     default = next((s for s in d["skins"] if s["name"] == "default"), None)
     if default is None:
         default = {"name": "default", "attachments": {}}
         d["skins"].insert(0, default)
     default["attachments"][SLOT] = {name: att for name, att in frames}
+    # loop the frames for at least one breath, so a single still frame still breathes
+    reps = max(1, round(BREATH / duration))
+    length = duration * reps
     step = duration / len(frames)
-    keys = [{"name": frames[0][0]}] + [{"time": round(i * step, 4), "name": n} for i, (n, _) in enumerate(frames) if i]
-    keys.append({"time": round(duration, 4), "name": frames[0][0]})
+    keys = [{"name": frames[0][0]}]
+    for r in range(reps):
+        keys += [{"time": round(r * duration + i * step, 4), "name": n} for i, (n, _) in enumerate(frames) if i or r]
+    keys.append({"time": round(length, 4), "name": frames[0][0]})
+    breath = {"scale": [{},
+                        {"time": round(length / 2, 4), "x": 0.996, "y": 1.018},
+                        {"time": round(length, 4)}]}
     anims = d.setdefault("animations", {}) or {"animation": {}}
     d["animations"] = anims
     if not anims:
@@ -171,6 +182,7 @@ def frame_swap(doc, frames, duration):
         a.pop("deform", None)                                 # names attachments that are gone
         a.pop("attachments", None)
         a.setdefault("slots", {})[SLOT] = {"attachment": keys}
+        a.setdefault("bones", {})[BONE] = breath
     return d
 
 

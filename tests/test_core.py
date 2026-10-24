@@ -219,7 +219,7 @@ class Spine(unittest.TestCase):
 
     def test_frame_swap_keeps_names_the_game_looks_up(self):
         d = spine.frame_swap(self.DOC, [("lsk0", {"width": 5, "height": 5}), ("lsk1", {"width": 5, "height": 5})], 1.0)
-        self.assertEqual([b["name"] for b in d["bones"]], ["root", "b"])
+        self.assertEqual([b["name"] for b in d["bones"]], ["root", "b", spine.BONE])
         self.assertEqual(d["ik"], self.DOC["ik"])
         self.assertIn("idle", d["animations"])
         self.assertNotIn("deform", d["animations"]["idle"])        # it names a part that is gone
@@ -227,8 +227,9 @@ class Spine(unittest.TestCase):
         self.assertEqual({s["name"] for s in d["skins"]}, {"default", "on"})
         self.assertNotIn("attachment", d["slots"][0])
         keys = d["animations"]["idle"]["slots"][spine.SLOT]["attachment"]
-        self.assertEqual([k["name"] for k in keys], ["lsk0", "lsk1", "lsk0"])
-        self.assertEqual(keys[-1]["time"], 1.0)
+        self.assertEqual([k["name"] for k in keys], ["lsk0", "lsk1", "lsk0", "lsk1", "lsk0"])
+        self.assertEqual(keys[-1]["time"], 2.0)                      # looped to one full breath
+        self.assertIn(spine.BONE, d["animations"]["idle"]["bones"])
         self.assertEqual(self.DOC["slots"][0]["attachment"], "head")  # the original is untouched
 
     def test_region_attachment_placement(self):

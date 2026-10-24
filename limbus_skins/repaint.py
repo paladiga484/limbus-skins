@@ -144,9 +144,14 @@ def source_table(env, ids, prefix=None, overrides=None):
     return table
 
 
-def render(sprite_reader):
+def render(sprite_reader, mirror=False):
+    """(image, sprite[, pivot]). mirror: flip left-right, pivot with it - enemies face
+    the other way from the sinners."""
     s = sprite_reader.read()
     img = s.image.convert("RGBA")
+    if mirror:
+        from PIL import Image
+        return img.transpose(Image.FLIP_LEFT_RIGHT), s, (1 - s.m_Pivot.x, s.m_Pivot.y)
     return img, s
 
 
@@ -263,7 +268,7 @@ def _spine_pages(sp):
     raise spine.SpineError("no texture for its atlas")
 
 
-def _spine_frames(sp, src, rendered):
+def _spine_frames(sp, src, rendered, mirror=False):
     """Swap the idle skeleton's parts for the source's idle frames."""
     from PIL import Image
     UnityPy = unitypy()
@@ -273,8 +278,7 @@ def _spine_frames(sp, src, rendered):
     imgs, atts = {}, []
     for s in seq:
         if s.path_id not in imgs:
-            img, sd = rendered[s.path_id][:2] if s.path_id in rendered else render(s)
-            imgs[s.path_id] = (img, sd)
+            imgs[s.path_id] = rendered[s.path_id] if s.path_id in rendered else render(s, mirror)
     ids = list(imgs)
     scale = 1.0
     while True:
@@ -288,14 +292,15 @@ def _spine_frames(sp, src, rendered):
     canvas = Image.new("RGBA", (W, H), (0, 0, 0, 0))
     regions, names = [], {}
     for n, (i, (_, x, y), (w, h)) in enumerate(zip(ids, placed, sizes)):
-        img, sd = imgs[i]
+        img, sd = imgs[i][:2]
         canvas.alpha_composite(img.resize((w, h), Image.LANCZOS) if scale != 1 else img, (x, H - y - h))
         names[i] = f"lsk{n}"
         regions.append({"name": names[i], "fields": [("bounds", f"{x},{H - y - h},{w},{h}")]})
     for s in seq:
-        img, sd = imgs[s.path_id]
+        img, sd = imgs[s.path_id][:2]
+        px, py = imgs[s.path_id][2] if len(imgs[s.path_id]) > 2 else (sd.m_Pivot.x, sd.m_Pivot.y)
         u = float(sd.m_PixelsToUnits)
-        x0, y0 = -sd.m_Pivot.x * img.width / u, -sd.m_Pivot.y * img.height / u
+        x0, y0 = -px * img.width / u, -py * img.height / u
         atts.append((names[s.path_id], spine.region_attachment(sp["to_skel"], x0, y0, x0 + img.width / u, y0 + img.height / u)))
     uniq = {}
     for n, a in atts:
@@ -367,7 +372,7 @@ def _spine_head(sp, art, spec):
     return f"idle {sp['name']}: head swapped"
 
 
-def repaint(target, locate, source=None, clips=None, mapping=None, head=None):
+def repaint(target, locate, source=None, clips=None, mapping=None, head=None, mirror=True):
     """Repaint body `target` (from `source`'s drawings, or its own with a `head` recipe).
     locate(body name) -> path of the cached bundle holding it. Returns (bundle bytes,
     notes). The bytes still need bundle.forge() to carry the stock CRC."""
@@ -437,7 +442,7 @@ def repaint(target, locate, source=None, clips=None, mapping=None, head=None):
     for o, s in plan:
         if s.path_id not in rendered:
             try:
-                rendered[s.path_id] = render(s)
+                rendered[s.path_id] = render(s, mirror) if s.path_id != o.path_id else render(s)
             except Exception:
                 rendered[s.path_id] = None               # art lives in another bundle
         if rendered[s.path_id] is not None:
@@ -579,7 +584,7 @@ def repaint(target, locate, source=None, clips=None, mapping=None, head=None):
             done_skel.add(sp["skeleton"].path_id)
             try:
                 if source is not None:
-                    notes.append(_spine_frames(sp, src, rendered))
+                    notes.append(_spine_frames(sp, src, rendered, mirror))
                 elif head and head.get("spine"):
                     notes.append(_spine_head(sp, art, head["spine"]))
                 else:
