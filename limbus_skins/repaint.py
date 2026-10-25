@@ -577,34 +577,56 @@ def _spine_head(sp, art, spec, effects=None):
     return f"idle {sp['name']}: head swapped" + (" (glow, flutter, motes)" if effects else "")
 
 
-def repaint(target, locate, source=None, clips=None, mapping=None, head=None, mirror=True, dash=None):
+def _load_source(source, locate, clips, mapping, dash, notes):
+    """(drawing table, special-motion table, idle rigs) of the character `source`."""
+    UnityPy = unitypy()
+    senv = UnityPy.load(locate(source))
+    sobjs, sroots = prefab_objects(senv, source)
+    rigs = spine.body_spines(senv, sroots[0])                # the character's own idle rig, if it has one
+    smain = main_clips(senv, sroots[0])
+    src = source_table(senv, sobjs, clips, mapping or {}, main=smain)
+    special = special_table(senv, smain or sobjs, clips)
+    if "idle" not in src or "S1" not in src:
+        raise RepaintError(f"{source} has no idle or skill frames (found {sorted(src)}) - set clips/map")
+    if "move" not in src or dash == "lunge":             # no run-up drawing, or a standing one
+        pick = lunge(src)
+        if pick is not None:
+            src["move"] = [pick]
+            notes.append(f"{source}: dash uses a lunge from its skills")
+    return src, special, rigs
+
+
+def repaint(target, locate, source=None, clips=None, mapping=None, head=None, mirror=True, dash=None, forms=None):
     """Repaint body `target` (from `source`'s drawings, or its own with a `head` recipe).
-    locate(body name) -> path of the cached bundle holding it. Returns (bundle bytes,
-    notes). The bytes still need bundle.forge() to carry the stock CRC."""
+    forms = {another body of the identity: {"source", "clips", "map"}} draws that body
+    (e.g. Wild Hunt mounted) from its own source. locate(body name) -> path of the cached
+    bundle holding it. Returns (bundle bytes, notes). The bytes still need bundle.forge()
+    to carry the stock CRC."""
     notes = []
     UnityPy = unitypy()
     from PIL import Image
     if source is None:
-        src, rigs = {}, []
+        src, special, rigs = {}, {}, []
     else:
-        senv = UnityPy.load(locate(source))
-        sobjs, sroots = prefab_objects(senv, source)
-        rigs = spine.body_spines(senv, sroots[0])            # the character's own idle rig, if it has one
-        smain = main_clips(senv, sroots[0])
-        src = source_table(senv, sobjs, clips, mapping or {}, main=smain)
-        special = special_table(senv, smain or sobjs, clips)
-        if "idle" not in src or "S1" not in src:
-            raise RepaintError(f"{source} has no idle or skill frames (found {sorted(src)}) - set clips/map")
-        if "move" not in src or dash == "lunge":         # no run-up drawing, or a standing one
-            pick = lunge(src)
-            if pick is not None:
-                src["move"] = [pick]
-                notes.append("dash uses a lunge from its skills")
+        src, special, rigs = _load_source(source, locate, clips, mapping, dash, notes)
 
     tpath = locate(target)
     tenv = UnityPy.load(tpath)
     tobjs, troots = prefab_objects(tenv, target, forms=True)
     tclips = clip_frames(tenv, tobjs)
+
+    # sprites only another form of the body draws take that form's source
+    by_sprite, by_root = {}, {}
+    if forms and source is not None:
+        base = prefab_objects(tenv, target)[0]
+        assets = bundle_assets(tenv)
+        for app, f in forms.items():
+            if app not in assets:
+                raise RepaintError(f"{app}: no such body next to {target}")
+            table = _load_source(f["source"], locate, f.get("clips"), f.get("map"), dash, notes)
+            by_root[assets[app][0]] = table
+            for i in assets[app][1] - base:
+                by_sprite[i] = table
 
     # target sprites -> (kind, position along that kind's animation)
     order = {}
@@ -617,6 +639,7 @@ def repaint(target, locate, source=None, clips=None, mapping=None, head=None, mi
                     seq.append(s.path_id)
     targets = [o for o in tenv.objects if o.type.name == "Sprite" and o.path_id in tobjs]
     plan = []                                            # (target reader, source reader)
+    base_src = src
     borrowed = set()                                     # motions the source has no frames for
     for o in targets:
         k, _ = kind_of(o.read().m_Name)
@@ -626,6 +649,7 @@ def repaint(target, locate, source=None, clips=None, mapping=None, head=None, mi
             if o.read_typetree()["m_SpriteAtlas"]["m_FileID"] == 0:
                 plan.append((o, o))
             continue
+        src = by_sprite.get(o.path_id, (base_src,))[0]
         if k.startswith("S") and k.endswith("e") and k not in src:
             continue                                     # keep the identity's own effect art
         pool = src.get(k)
@@ -659,6 +683,11 @@ def repaint(target, locate, source=None, clips=None, mapping=None, head=None, mi
                 if sp_.path_id in done or sp_.path_id not in tsp or kind_of(sp_.read().m_Name)[0] \
                         or fx_like(sp_.read().m_Name):
                     continue
+                if sp_.path_id in by_sprite:
+                    fsrc, fspecial, _ = by_sprite[sp_.path_id]
+                    pool = fspecial.get(motion_word(name)) or fsrc["S1"]
+                else:
+                    pool = special.get(motion_word(name)) or base_src["S1"]
                 plan.append((tsp[sp_.path_id], pool[round(i / max(1, n - 1) * (len(pool) - 1))]))
                 done.add(sp_.path_id)
     # every other sprite on the body's atlas keeps its own picture, repacked with the rest
@@ -813,14 +842,16 @@ def repaint(target, locate, source=None, clips=None, mapping=None, head=None, mi
     # character's own idle rig stands in for it when it has one
     done_skel = set()
     for root in troots:
+        rsrc, _, rrigs = by_root.get(root, (base_src, None, rigs))
         for sp in spine.body_spines(tenv, root):
             if sp["skeleton"].path_id in done_skel:
                 continue                                 # forms of one identity can share an idle
             done_skel.add(sp["skeleton"].path_id)
+            src, rigs_ = rsrc, rrigs
             try:
-                if rigs:
+                if rigs_:
                     try:
-                        notes.append(_spine_borrow(sp, rigs[0], mirror))
+                        notes.append(_spine_borrow(sp, rigs_[0], mirror))
                         continue
                     except (spine.SpineError, KeyError, ValueError, TypeError, IndexError) as e:
                         notes.append(f"idle {sp['name']}: the character's own rig did not fit ({e}), frames instead")

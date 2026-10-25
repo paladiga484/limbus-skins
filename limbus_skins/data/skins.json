@@ -303,6 +303,18 @@
    "becomes": "Sasha",
    "source": "91018_CyborgFixer_Blood_SwordAppearance",
    "tested": false
+  },
+  "vergilius-wildhunt": {
+   "identity": 10710,
+   "becomes": "Vergilius (E.G.O. Vergilius when mounted)",
+   "source": "400012_VergiliusAppearance",
+   "unit": 400012,
+   "forms": {
+    "10710_Heathclif_WHunt_RideAppearance": {
+     "source": "400012_Vergilius_EgoAppearance"
+    }
+   },
+   "tested": false
   }
  },
  "tints": {
