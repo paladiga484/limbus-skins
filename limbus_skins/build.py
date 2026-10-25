@@ -10,17 +10,17 @@ import os
 import shutil
 from importlib import resources
 
-from . import art, bundle, game, helpers, repaint
+from . import art, bundle, game, helpers, repaint, tint
 
-FORMAT = 6      # bump when built skins change shape: older builds are rebuilt on apply
+FORMAT = 7      # bump when built skins change shape: older builds are rebuilt on apply
 
 
 def catalog():
     with resources.files("limbus_skins").joinpath("data/skins.json").open(encoding="utf-8") as f:
         doc = json.load(f)
     skins = {}
-    for kind in ("helpers", "repaints"):
-        for key, e in doc[kind].items():
+    for kind in ("helpers", "repaints", "tints"):
+        for key, e in doc.get(kind, {}).items():
             skins[key] = dict(e, key=key, kind=kind[:-1])
     return skins
 
@@ -93,8 +93,8 @@ def build(keys, game_dir, cache, data_dir, log=print):
                     results[s["key"]] = (ok, "built" if ok else "identity not found in the static data")
             log(f"  helpers: {len(done)} identities restyled")
 
-    # repaints: one folder each
-    want = [skins[k] for k in keys if skins[k]["kind"] == "repaint"]
+    # repaints and tints: one folder each
+    want = [skins[k] for k in keys if skins[k]["kind"] in ("repaint", "tint")]
     if want:
         bodies, have = game.body_index(game_dir, cache, os.path.join(data_dir, "bodies.json"), log=log)
 
@@ -112,15 +112,18 @@ def build(keys, game_dir, cache, data_dir, log=print):
                 results[key] = (False, "identity not in this game version")
                 continue
             try:
-                raw, notes = repaint.repaint(
-                    target, locate, source=None if s.get("self") else s["source"],
-                    clips=s.get("clips"), mapping=s.get("map"),
-                    head=_head(s, data_dir), mirror=s.get("mirror", True), dash=s.get("dash"))
+                if s["kind"] == "tint":
+                    raw, notes = tint.tint(target, locate, s["tint"])
+                else:
+                    raw, notes = repaint.repaint(
+                        target, locate, source=None if s.get("self") else s["source"],
+                        clips=s.get("clips"), mapping=s.get("map"),
+                        head=_head(s, data_dir), mirror=s.get("mirror", True), dash=s.get("dash"))
                 shutil.rmtree(out, ignore_errors=True)
                 os.makedirs(out)
                 rel = _write(out, cache, locate(target), raw)
                 with open(os.path.join(out, "manifest.json"), "w", encoding="utf-8") as f:
-                    json.dump({"format": FORMAT, "kind": "repaint", "skins": [key], "files": [rel], "notes": notes}, f, indent=1)
+                    json.dump({"format": FORMAT, "kind": s["kind"], "skins": [key], "files": [rel], "notes": notes}, f, indent=1)
                 results[key] = (True, "; ".join(notes))
             except (repaint.RepaintError, RuntimeError, KeyError, OSError) as e:
                 shutil.rmtree(out, ignore_errors=True)

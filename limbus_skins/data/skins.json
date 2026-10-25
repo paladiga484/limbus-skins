@@ -1,5 +1,5 @@
 {
- "_note": "Every skin this tool can build. helpers: the identity takes a story helper unit's body and skills (changes skills: private servers only). repaints: the identity keeps its own body and skills and is redrawn as another character. Nothing here is game art; everything is built from your own installed game.",
+ "_note": "Every skin this tool can build. helpers: the identity takes a story helper unit's body and skills (changes skills: private servers only). repaints: the identity keeps its own body and skills and is redrawn as another character. tints: the identity keeps its own body and drawings, recolored. Nothing here is game art; everything is built from your own installed game.",
  "helpers": {
   "arayashiki-ryoshu": {
    "identity": 10401,
@@ -302,6 +302,16 @@
    "identity": 10210,
    "becomes": "Sasha",
    "source": "91018_CyborgFixer_Blood_SwordAppearance",
+   "tested": false
+  }
+ },
+ "tints": {
+  "greencliff": {
+   "identity": 10701,
+   "becomes": "Greencliff (all of him green)",
+   "tint": {
+    "hue": 120
+   },
    "tested": false
   }
  }

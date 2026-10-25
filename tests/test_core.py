@@ -546,5 +546,28 @@ class NoNetwork(unittest.TestCase):
             self.assertEqual(st["on"], [])
 
 
+class Tints(unittest.TestCase):
+    def test_colorize_goes_green_and_keeps_alpha_and_light(self):
+        from PIL import Image
+        from limbus_skins import tint
+        img = Image.new("RGBA", (3, 1))
+        img.putdata([(20, 20, 20, 255), (200, 40, 40, 128), (240, 240, 240, 0)])
+        res = tint.colorize(img, {"hue": 120})
+        out = [res.getpixel((x, 0)) for x in range(3)]
+        self.assertEqual([p[3] for p in out], [255, 128, 0])
+        dark, red = out[0], out[1]
+        self.assertTrue(red[1] > red[0] and red[1] > red[2])        # green dominates
+        lum = lambda p: 0.299 * p[0] + 0.587 * p[1] + 0.114 * p[2]  # noqa: E731
+        self.assertLess(lum(dark), lum(red))                        # light order kept
+
+    def test_premultiplied_pages_stay_premultiplied(self):
+        from PIL import Image
+        from limbus_skins import tint
+        img = Image.new("RGBA", (1, 1), (100, 0, 0, 100))          # premultiplied: rgb <= a
+        p = tint.colorize(img, {"hue": 120}, pma=True).getpixel((0, 0))
+        self.assertEqual(p[3], 100)
+        self.assertTrue(all(c <= 100 for c in p[:3]))
+
+
 if __name__ == "__main__":
     unittest.main()

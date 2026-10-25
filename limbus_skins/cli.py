@@ -74,7 +74,7 @@ def select(words, skins):
         n = _norm(w)
         hit = [k for k, s in skins.items() if
                n in ("all",) or (n == "tested" and s.get("tested")) or _norm(k) == n
-               or (n in ("repaints", "helpers") and s["kind"] == n[:-1])
+               or (n in ("repaints", "helpers", "tints") and s["kind"] == n[:-1])
                or str(s["identity"]) == w or (n in SINNER_IDS and s["identity"] // 100 % 100 == SINNER_IDS[n])]
         if not hit:
             raise SystemExit(f"limbus-skins: no skin, identity or sinner called '{w}' (see `limbus-skins list`)")
@@ -92,7 +92,7 @@ def _table(skins, on, keys):
             last = sid
             print(f"\n{SINNERS.get(sid, '?').upper()}")
         mark = "ON " if k in on else "   "
-        kind = "helper " if s["kind"] == "helper" else "repaint"
+        kind = f"{s['kind']:7}"
         tested = "" if s.get("tested") else "  (not yet seen in a fight)"
         print(f"  {mark} {k:{width}}  {s['identity']}  {kind}  -> {s['becomes']}{tested}")
 
@@ -237,8 +237,8 @@ def main(argv=None):
         if not args:
             raise SystemExit("usage: limbus-skins preview <skin> [file.png]")
         key = select(args[:1], skins)[0]
-        if skins[key]["kind"] != "repaint":
-            raise SystemExit("previews are for repaints (helper skins use the helper's own art)")
+        if skins[key]["kind"] == "helper":
+            raise SystemExit("previews are for repaints and tints (helper skins use the helper's own art)")
         if not built_dirs(data, [key]):
             if sess.active():
                 raise SystemExit("restore first (a modded session is live)")
@@ -247,11 +247,11 @@ def main(argv=None):
         files = built_dirs(data, [key])[0][1]
         data_file = next(os.path.join(r, n) for r, _, ns in os.walk(files) for n in ns if n == "__data")
         out = args[1] if len(args) > 1 else f"{key}.png"
-        n = preview(data_file, out)
-        print(f"{n} frames -> {out}")
         from .game import identities
         from .repaint import idle_gif
         app = identities(g, c)[0].get(skins[key]["identity"], {}).get("appearance")
+        n = preview(data_file, out, appearance=app)
+        print(f"{n} frames -> {out}")
         gif = os.path.splitext(out)[0] + "-idle.gif"
         if app and idle_gif(data_file, app, gif):
             print(f"standing idle, animated -> {gif}")

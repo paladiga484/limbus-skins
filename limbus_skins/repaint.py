@@ -842,14 +842,16 @@ def repaint(target, locate, source=None, clips=None, mapping=None, head=None, mi
     return tenv.file.save(packer="none"), notes
 
 
-def preview(bundle_bytes_or_path, out_png, kinds=("idle", "S1", "S2", "S3", "gud", "dmg"), count=12):
-    """A contact sheet of repainted frames, rendered back from the written bundle."""
+def preview(bundle_bytes_or_path, out_png, kinds=("idle", "S1", "S2", "S3", "gud", "dmg"), count=12, appearance=None):
+    """A contact sheet of repainted frames, rendered back from the written bundle. With
+    appearance, only that body's own frames (a bundle can hold several characters)."""
     UnityPy = unitypy()
     from PIL import Image
     env = UnityPy.load(bundle_bytes_or_path)
+    own = prefab_objects(env, appearance, forms=True)[0] if appearance else None
     shots = []
     for o in env.objects:
-        if o.type.name == "Sprite":
+        if o.type.name == "Sprite" and (own is None or o.path_id in own):
             s = o.read()
             if kind_of(s.m_Name)[0] in kinds:
                 try:
