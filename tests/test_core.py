@@ -617,6 +617,31 @@ class BossSkills(unittest.TestCase):
         self.assertEqual(out[3]["skillData"][0]["coinList"], [{"scale": 1}])
         self.assertEqual(self.skills[3]["skillData"][1]["attributeType"], "VIOLET")
 
+    def test_black_forest_marks_the_identity_and_its_death_ends_everyone(self):
+        out, buffs = self.h.black_forest(self.ident, self.skills)
+        start = out[1]["skillData"][0]["abilityScriptList"][-1]
+        self.assertEqual((start["scriptName"], start["buffData"]["buffKeyword"], start["buffData"]["target"]),
+                         ("GiveBuffOnBattleStart", "BlackForest", "Self"))
+        by_id = {b["id"]: b for b in buffs}
+        on_die = by_id["BlackForest"]["list"]
+        self.assertEqual({a["buffData"]["target"] for a in on_die if a["ability"] == "GiveBuffOnDie"},
+                         {"EveryEnemy", "EveryAlly"})
+        self.assertTrue(all(a["buffData"]["buffKeyword"] == "Apocalypse" for a in on_die))
+        self.assertEqual(by_id["Apocalypse"]["list"], [{"ability": "InstantDeathOnRoundEnd", "value": 1}])
+        self.assertNotIn("abilityScriptList", self.skills[1]["skillData"][0])        # inputs untouched
+
+    def test_skill_edits_stack_on_one_record(self):
+        sins = self.h.recolor_skills(self.ident, self.skills, {"1": "SHAMROCK"})
+        out, _ = self.h.black_forest(self.ident, self.skills, base=sins)
+        self.assertEqual(out[1]["skillData"][0]["attributeType"], "SHAMROCK")
+
+    def test_new_buffs_go_into_the_static_bundle_once(self):
+        doc = {"list": [{"id": "Old"}, {"id": "BlackForest", "stale": True}]}
+        self.assertEqual(self.h.add_records(doc, [{"id": "BlackForest"}, {"id": "Apocalypse"}]),
+                         {"BlackForest", "Apocalypse"})
+        self.assertEqual([b["id"] for b in doc["list"]], ["Old", "BlackForest", "Apocalypse"])
+        self.assertNotIn("stale", doc["list"][1])
+
     def test_pick_unit_prefers_most_attacks_or_the_named_one(self):
         recs = [{"id": 5, "attributeList": [{"skillId": 91}]}, self.unit]
         self.assertEqual(self.h.pick_unit(recs, self.skills)["id"], 81912)
