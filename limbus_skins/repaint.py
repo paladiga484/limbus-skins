@@ -401,6 +401,96 @@ def _spine_frames(sp, src, rendered, mirror=False):
     return f"idle {sp['name']}: {len(frames)} frame(s) of the new body"
 
 
+def _pages_pma(rig, page):
+    """Whether a rig's textures hold premultiplied alpha: its material's word, else its atlas's."""
+    if rig.get("pma") is not None:
+        return rig["pma"]
+    return dict(page["header"]).get("pma", "false").strip() == "true"
+
+
+def _shift_region(region, dy):
+    fields = []
+    for k, v in region["fields"]:
+        if k in ("bounds", "xy"):
+            nums = [int(x) for x in v.split(",")]
+            nums[1] += dy
+            v = ",".join(str(x) for x in nums)
+        fields.append((k, v))
+    return {"name": region["name"], "fields": fields}
+
+
+def _borrow_pages(sp, rig):
+    """The source rig's atlas pages, renamed onto the identity's own textures (pages past
+    the identity's count stacked into its last one). [(page, texture reader, image)]"""
+    from PIL import Image
+    tpages = spine.parse_atlas(spine.text_of(sp["atlas"]))
+    spages = spine.parse_atlas(spine.text_of(rig["atlas"]))
+    ttex = [sp["textures"].get(p["name"].rsplit(".", 1)[0]) for p in tpages]
+    if not tpages or not spages or None in ttex:
+        raise spine.SpineError("no texture for its atlas")
+    imgs = []
+    for p in spages:
+        t = rig["textures"].get(p["name"].rsplit(".", 1)[0])
+        if t is None:
+            raise spine.SpineError(f"no texture for {p['name']}")
+        imgs.append(t.read().image.convert("RGBA"))
+    want, have = _pages_pma(sp, tpages[0]), _pages_pma(rig, spages[0])
+    groups = [[i] for i in range(min(len(spages), len(tpages)))]
+    groups[-1] += list(range(len(groups), len(spages)))
+    out = []
+    for g, grp in enumerate(groups):
+        if len(grp) == 1:
+            img, header, regions = imgs[grp[0]], spages[grp[0]]["header"], spages[grp[0]]["regions"]
+        else:
+            sizes = [spine.page_size(spages[i]) for i in grp]
+            W, H = max(w for w, _ in sizes), sum(h for _, h in sizes) + 2 * (len(grp) - 1)
+            img = Image.new("RGBA", (W, H), (0, 0, 0, 0))
+            regions, y = [], 0
+            for i, (w, h) in zip(grp, sizes):
+                img.paste(imgs[i].resize((w, h), Image.LANCZOS), (0, y))
+                regions += [_shift_region(r, y) for r in spages[i]["regions"]]
+                y += h + 2
+            header = [(k, f"{W},{H}" if k == "size" else v) for k, v in spages[grp[0]]["header"]]
+        if want != have:
+            img = spine.premultiply(img) if want else spine.unpremultiply(img)
+        header = [(k, v) for k, v in header if k != "pma"] + [("pma", "true" if want else "false")]
+        out.append(({"name": tpages[g]["name"], "header": header, "regions": regions}, ttex[g], img))
+    return out
+
+
+def _spine_borrow(sp, rig, mirror=False):
+    """Swap the idle skeleton's parts for the source character's own idle rig - its bones,
+    parts and animation - turned to face the sinners' way and standing where its frames
+    stand. Nothing is written unless the whole rig fits."""
+    UnityPy = unitypy()
+    flip = (-1, 0, 0, 1, 0, 0) if mirror else (1, 0, 0, 1, 0, 0)
+    a, b, c, d, dx, dy = spine.mul(sp["to_skel"], spine.mul(flip, spine.inv(rig["to_skel"])))
+    if max(abs(b), abs(c), abs(abs(a) - 1), abs(d - 1)) > 1e-3:
+        raise spine.SpineError("the two rigs are not drawn at the same scale")
+    src = json.loads(spine.text_of(rig["skeleton"]))
+    anims = src.get("animations") or {}
+    anim = rig["animation"] if rig.get("animation") in anims else next(iter(anims), None)
+    if anim is None:
+        raise spine.SpineError("the rig has no animation")
+    if a < 0:
+        spine.bake_ik(src, anim, rig.get("skin"))
+        spine.mirror_x(src)
+    pace = sp.get("time_scale", 1.0) / rig.get("time_scale", 1.0)
+    if abs(pace - 1) > 1e-3:                             # as fast as in its own fights
+        spine.scale_time(anims[anim], pace)
+    new = spine.transplant(json.loads(spine.text_of(sp["skeleton"])), src, dx, dy, anim,
+                           skin=rig.get("skin"), target_skin=sp.get("skin"), names=[sp.get("animation")])
+    pages = _borrow_pages(sp, rig)
+    spine.check(new, {r["name"] for page, _, _ in pages for r in page["regions"]})
+    spine.set_text(sp["skeleton"], spine.dumps(new))
+    spine.set_text(sp["atlas"], spine.format_atlas([page for page, _, _ in pages]))
+    for _, tex, img in pages:
+        t = tex.read()
+        t.set_image(img, target_format=UnityPy.enums.TextureFormat.RGBA32)
+        t.save()
+    return f"idle {sp['name']}: the character's own idle rig ({len(src['bones'])} bones, animation {anim})"
+
+
 def _spine_head(sp, art, spec, effects=None):
     """Swap one part of the idle skeleton (the head) for the head art; with effects, the
     head also flutters, glows and gives off a few motes."""
@@ -495,10 +585,11 @@ def repaint(target, locate, source=None, clips=None, mapping=None, head=None, mi
     UnityPy = unitypy()
     from PIL import Image
     if source is None:
-        src = {}
+        src, rigs = {}, []
     else:
         senv = UnityPy.load(locate(source))
         sobjs, sroots = prefab_objects(senv, source)
+        rigs = spine.body_spines(senv, sroots[0])            # the character's own idle rig, if it has one
         smain = main_clips(senv, sroots[0])
         src = source_table(senv, sobjs, clips, mapping or {}, main=smain)
         special = special_table(senv, smain or sobjs, clips)
@@ -667,10 +758,10 @@ def repaint(target, locate, source=None, clips=None, mapping=None, head=None, mi
 
     # rewrite the target sprites + atlas entries
     page_ref = {i: {"m_FileID": 0, "m_PathID": pages[i].path_id} for i in range(len(pages))}
-    by_key = {}
+    by_key = {}                                          # a frame can be packed in more than one atlas
     for aid, t in amaps.items():
         for n, (k, v) in enumerate(t["m_RenderDataMap"]):
-            by_key[(tuple(k[0].values()), k[1])] = (aid, n)
+            by_key.setdefault((tuple(k[0].values()), k[1]), []).append((aid, n))
     for o, s in plan:
         if s.path_id not in where:
             continue
@@ -707,8 +798,7 @@ def repaint(target, locate, source=None, clips=None, mapping=None, head=None, mi
         t["m_PhysicsShape"] = []
         o.save_typetree(t)
         key = (tuple(t["m_RenderDataKey"][0].values()), t["m_RenderDataKey"][1])
-        if key in by_key:
-            aid, n = by_key[key]
+        for aid, n in by_key.get(key, []):              # every copy, or the one it reads stays on a wiped page
             v = amaps[aid]["m_RenderDataMap"][n][1]
             v.update({k: val for k, val in rd.items() if k in v})
     for o in atlas_objs:
@@ -719,7 +809,8 @@ def repaint(target, locate, source=None, clips=None, mapping=None, head=None, mi
         d.save()
 
 
-    # the idle most identities stand in is a Spine skeleton, not the sprites
+    # the idle most identities stand in is a Spine skeleton, not the sprites; the
+    # character's own idle rig stands in for it when it has one
     done_skel = set()
     for root in troots:
         for sp in spine.body_spines(tenv, root):
@@ -727,6 +818,12 @@ def repaint(target, locate, source=None, clips=None, mapping=None, head=None, mi
                 continue                                 # forms of one identity can share an idle
             done_skel.add(sp["skeleton"].path_id)
             try:
+                if rigs:
+                    try:
+                        notes.append(_spine_borrow(sp, rigs[0], mirror))
+                        continue
+                    except (spine.SpineError, KeyError, ValueError, TypeError, IndexError) as e:
+                        notes.append(f"idle {sp['name']}: the character's own rig did not fit ({e}), frames instead")
                 if source is not None:
                     notes.append(_spine_frames(sp, src, rendered, mirror))
                 elif head and head.get("spine"):
@@ -784,7 +881,10 @@ def idle_image(bundle_or_path, appearance, height=360):
         pages = spine.parse_atlas(spine.text_of(sp["atlas"]))
         texs = {p["name"]: sp["textures"][p["name"].rsplit(".", 1)[0]].read().image.convert("RGBA")
                 for p in pages if p["name"].rsplit(".", 1)[0] in sp["textures"]}
-        img, _ = spine.render(json.loads(spine.text_of(sp["skeleton"])), pages, texs, sp["skin"], ppu=0.25)
+        doc = json.loads(spine.text_of(sp["skeleton"]))
+        anim = sp.get("animation") if sp.get("animation") in (doc.get("animations") or {}) \
+            else next(iter(doc.get("animations") or {}), None)
+        img, _ = spine.render(doc, pages, texs, sp["skin"], ppu=0.25, anim=anim)   # the idle's first moment
         break
     if img is None:
         for name, (sprites, _) in clip_frames(env, ids).items():
@@ -817,7 +917,7 @@ def idle_gif(bundle_or_path, appearance, out, frames=24, height=360):
     L = spine.anim_length(doc.get("animations", {}).get(name, {})) or 2.0
     shots = []
     for i in range(frames):
-        img, origin = spine.render(spine.sample(doc, name, L * i / frames), pages, texs, sp["skin"], ppu=0.25)
+        img, origin = spine.render(doc, pages, texs, sp["skin"], ppu=0.25, anim=name, t=L * i / frames)
         shots.append((img, origin))
     # one canvas for every frame, lined up on the skeleton's origin
     left = max(o[0] for _, o in shots)

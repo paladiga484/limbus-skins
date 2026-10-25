@@ -1,5 +1,6 @@
 """Core pieces that decide what the game reads: bundles, CRCs, sessions, selection."""
 import json
+import math
 import os
 import socket
 import struct
@@ -286,6 +287,200 @@ class Spine(unittest.TestCase):
                                "skins": [{"name": "default", "attachments": {"s": {"head": {"width": 40, "height": 40}}}}]},
                               pages, {"a.png": Image.new("RGBA", (20, 20), (255, 0, 0, 255))}, ppu=1)
         self.assertEqual(img.getpixel((img.width // 2, img.height // 2)), (255, 0, 0, 255))
+
+
+class Rigs(unittest.TestCase):
+    """Borrowing a character's own idle rig: mirroring it, merging it, checking it."""
+
+    @staticmethod
+    def rig():
+        """A small source rig: rotated and sheared bones, every inherit mode, a region, a
+        plain mesh, a mesh weighted to two bones, a linked mesh in a second skin, one- and
+        two-bone IK and a transform constraint."""
+        return {
+            "skeleton": {"spine": "4.0.64", "x": -10, "width": 30},
+            "bones": [{"name": "root"},
+                      {"name": "hip", "parent": "root", "x": 5, "y": 20, "rotation": 30, "shearX": 4},
+                      {"name": "arm", "parent": "hip", "x": 12, "rotation": -50, "scaleX": 1.2, "length": 9},
+                      {"name": "hand", "parent": "arm", "x": 8, "transform": "noRotationOrReflection"},
+                      {"name": "aim", "parent": "root", "x": 30, "y": 12},
+                      {"name": "leg", "parent": "hip", "x": -3, "y": -6, "rotation": -100, "length": 10},
+                      {"name": "foot", "parent": "leg", "x": 10, "rotation": 40, "length": 8, "transform": "noScale"},
+                      {"name": "heel", "parent": "foot", "x": 3, "transform": "onlyTranslation"},
+                      {"name": "toe", "parent": "foot", "x": 6, "rotation": 15, "transform": "noScaleOrReflection"},
+                      {"name": "step", "parent": "root", "x": 9, "y": -4}],
+            "slots": [{"name": "body", "bone": "hip", "attachment": "body"},
+                      {"name": "cloth", "bone": "hip", "attachment": "cloth"},
+                      {"name": "sleeve", "bone": "arm", "attachment": "sleeve"},
+                      {"name": "glove", "bone": "hand", "attachment": "glove"},
+                      {"name": "boot", "bone": "heel", "attachment": "body"},
+                      {"name": "nail", "bone": "toe", "attachment": "body"}],
+            "ik": [{"name": "reach", "order": 0, "bones": ["arm"], "target": "aim"},
+                   {"name": "walk", "order": 2, "bones": ["leg", "foot"], "target": "step", "bendPositive": False}],
+            "transform": [{"name": "follow", "order": 1, "bones": ["hand"], "target": "hip",
+                           "rotation": 20, "x": 3, "y": 4, "shearY": 5, "mixRotate": 0.5, "mixX": 0.7}],
+            "skins": [
+                {"name": "default", "attachments": {
+                    "body": {"body": {"x": 3, "y": 1, "rotation": 15, "width": 10, "height": 20, "scaleY": 1.5}},
+                    "boot": {"body": {"x": 1, "rotation": -30, "width": 4, "height": 3}},
+                    "nail": {"body": {"y": 1, "width": 2, "height": 2}},
+                    "cloth": {"cloth": {"type": "mesh", "uvs": [0, 0, 1, 0, 1, 1], "triangles": [0, 1, 2],
+                                        "vertices": [0, 0, 6, -2, 4, 7], "hull": 3}},
+                    "sleeve": {"sleeve": {"type": "mesh", "uvs": [0, 0, 1, 0, 1, 1], "triangles": [0, 1, 2], "hull": 3,
+                                          "vertices": [2, 1, 1, 2, 0.5, 2, 2, 0.5, 0.5, 1, 2, 3, 4, 1, 1, 1, 5, 6, 1]}}}},
+                {"name": "basic", "attachments": {
+                    "glove": {"glove": {"type": "linkedmesh", "skin": "basic", "parent": "base", "path": "gloveart"},
+                              "base": {"type": "mesh", "uvs": [0, 0, 1, 0, 1, 1], "triangles": [0, 1, 2],
+                                       "vertices": [0, 0, 2, 0, 2, 2], "hull": 3}}}},
+                {"name": "spare", "attachments": {"body": {"body": {"width": 1, "height": 1}}}}],
+            "animations": {"idle": {
+                "bones": {"hip": {"rotate": [{"value": 10, "curve": [0.3, 10, 0.6, 20]}, {"time": 1, "value": 20}],
+                                  "translate": [{"x": 4, "y": 2, "curve": [0.3, 4, 0.6, 6, 0.3, 2, 0.6, 3]},
+                                                {"time": 1, "x": 6, "y": 3}],
+                                  "shear": [{"x": 2, "y": 3}]}},
+                "slots": {"body": {"attachment": [{"name": "body"}]}},
+                "ik": {"reach": [{"mix": 1}]},
+                "deform": {"basic": {"glove": {"base": [{"offset": 1, "vertices": [5, 6, 7]}]}}},
+                "drawOrder": [{"time": 0.5, "offsets": [{"slot": "body", "offset": 1}]}],
+                "events": [{"name": "step"}]}},
+            "events": {"step": {}}}
+
+    def test_mirror_reflects_every_point(self):
+        # the live rig against its baked, mirrored copy through the idle: every corner of
+        # every part lands on its mirror image (IK, inherit modes and constraints included),
+        # the picture on it unchanged
+        mirrored = spine.mirror_x(spine.bake_ik(self.rig(), "idle"))
+        self.assertEqual(mirrored["ik"], [])
+        for anim, t in (("idle", 0.0), ("idle", 0.4), ("idle", 0.6), ("idle", 1.0)):
+            before = spine.setup_triangles(self.rig(), anim=anim, t=t)
+            after = spine.setup_triangles(mirrored, anim=anim, t=t)
+            self.assertEqual(len(before), len(after))
+            for (n0, pts0, uv0, _, _), (n1, pts1, uv1, _, _) in zip(before, after):
+                self.assertEqual((n0, uv0), (n1, uv1))
+                for (x0, y0), (x1, y1) in zip(pts0, pts1):
+                    self.assertAlmostEqual(x1, -x0, delta=1e-3, msg=f"{n0} at {anim} {t}")
+                    self.assertAlmostEqual(y1, y0, delta=1e-3, msg=f"{n0} at {anim} {t}")
+
+    def test_ik_points_the_bone_at_its_target(self):
+        doc = {"bones": [{"name": "root"}, {"name": "arm", "parent": "root", "length": 5},
+                         {"name": "aim", "parent": "root", "x": 0, "y": 10}],
+               "slots": [], "ik": [{"name": "k", "bones": ["arm"], "target": "aim"}]}
+        a, b, c, d, x, y = spine.pose(doc)[0]["arm"]
+        self.assertAlmostEqual(math.degrees(math.atan2(c, a)), 90, places=6)
+        legs = {"bones": [{"name": "root"}, {"name": "thigh", "parent": "root", "length": 10},
+                          {"name": "shin", "parent": "thigh", "x": 10, "length": 10},
+                          {"name": "goal", "parent": "root", "x": 12, "y": 4}],
+                "slots": [], "ik": [{"name": "k", "bones": ["thigh", "shin"], "target": "goal"}]}
+        w = spine.pose(legs)[0]
+        a, b, c, d, x, y = w["shin"]
+        self.assertAlmostEqual(x + a * 10, 12, places=4)         # the shin's tip reaches the goal
+        self.assertAlmostEqual(y + c * 10, 4, places=4)
+
+    def test_mirror_keys_constraints_and_deforms(self):
+        with self.assertRaises(spine.SpineError):
+            spine.mirror_x(self.rig())                           # live IK would bend the wrong way
+        d = spine.mirror_x(spine.bake_ik(self.rig(), "idle"))
+        hip = d["animations"]["idle"]["bones"]["hip"]
+        self.assertEqual(hip["rotate"][0], {"value": -10, "curve": [0.3, -10, 0.6, -20]})
+        self.assertEqual(hip["translate"][0], {"x": -4, "y": 2, "curve": [0.3, -4, 0.6, -6, 0.3, 2, 0.6, 3]})
+        self.assertEqual(hip["shear"][0], {"x": -2, "y": -3})
+        self.assertEqual({k: d["transform"][0][k] for k in ("rotation", "x", "y", "shearY")},
+                         {"rotation": -20, "x": -3, "y": 4, "shearY": -5})
+        self.assertEqual(d["transform"][0]["order"], 0)         # orders close up once the IK is gone
+        # offset 1: the list starts on a y, so only the 2nd value is an x
+        self.assertEqual(d["animations"]["idle"]["deform"]["basic"]["glove"]["base"][0]["vertices"], [5, -6, 7])
+        self.assertEqual(d["skins"][0]["attachments"]["body"]["body"]["scaleX"], -1.0)
+        self.assertEqual(d["skeleton"]["x"], -20)
+
+    def target(self):
+        return {"skeleton": {"spine": "4.0.64"},
+                "bones": [{"name": "root"}, {"name": "spine", "parent": "root"}],
+                "slots": [{"name": "torso", "bone": "spine", "attachment": "torso"}],
+                "ik": [{"name": "lean", "order": 0, "bones": ["spine"], "target": "root"}],
+                "skins": [{"name": "default", "attachments": {"torso": {"torso": {"width": 5, "height": 5}}}}],
+                "animations": {"animation": {"bones": {"spine": {"rotate": [{"value": 3}]}}}}}
+
+    def regions(self):
+        return {"body", "cloth", "sleeve", "base", "gloveart"}
+
+    def test_transplant_keeps_the_target_names_and_brings_the_rig(self):
+        d = spine.transplant(self.target(), self.rig(), 7, -2, "idle", skin="basic", names=["animation"])
+        p = spine.PREFIX
+        names = [b["name"] for b in d["bones"]]
+        self.assertEqual(names[:2], ["root", "spine"])                # the game still finds its own bones
+        self.assertEqual(names[2:6], [p + "root", p + "hip", p + "arm", p + "hand"])
+        root = d["bones"][2]
+        self.assertEqual((root["parent"], root["x"], root["y"]), ("root", 7, -2))
+        self.assertEqual(d["slots"][0], {"name": "torso", "bone": "spine"})   # hidden, still there
+        self.assertEqual(set(d["animations"]), {"animation"})
+        self.assertNotIn("events", d["animations"]["animation"])
+        self.assertEqual(set(d["animations"]["animation"]["bones"]), {p + "hip"})
+        self.assertEqual([c["order"] for c in d["ik"] + d["transform"]], [0, 1, 3, 2])   # 0..n-1, source order kept
+        default = d["skins"][0]["attachments"]
+        self.assertNotIn("torso", default)
+        # weighted vertices name bones by index: two target bones come first now
+        self.assertEqual(default[p + "sleeve"]["sleeve"]["vertices"],
+                         [2, 3, 1, 2, 0.5, 4, 2, 0.5, 0.5, 1, 4, 3, 4, 1, 1, 3, 5, 6, 1])
+        # the starting skin is folded into the default one, its linked mesh with it
+        glove = default[p + "glove"]["glove"]
+        self.assertEqual(glove["type"], "linkedmesh")
+        self.assertNotIn("skin", glove)
+        self.assertIn("default", d["animations"]["animation"]["deform"])
+        self.assertEqual([s["name"] for s in d["skins"]], ["default"])   # the spare look stays behind
+        self.assertEqual(d["animations"]["animation"]["drawOrder"][0]["offsets"][0]["slot"], p + "body")
+        spine.check(d, self.regions())
+
+    def test_transplant_maps_matching_skins(self):
+        t = self.target()
+        t["skins"] += [{"name": "1", "attachments": {}}, {"name": "2", "attachments": {}}]
+        r = self.rig()
+        r["skins"][1]["name"], r["skins"][2]["name"] = "lv1", "lv2"
+        r["skins"][1]["attachments"]["glove"]["glove"]["skin"] = "lv1"
+        r["animations"]["idle"]["deform"] = {"lv1": r["animations"]["idle"]["deform"]["basic"]}
+        d = spine.transplant(t, r, 0, 0, "idle", skin="lv1", target_skin="1")
+        skins = {s["name"]: s for s in d["skins"]}
+        glove = skins["1"]["attachments"][spine.PREFIX + "glove"]["glove"]
+        self.assertEqual(glove["skin"], "1")                          # its parent mesh moved with it
+        self.assertIn(spine.PREFIX + "body", skins["2"]["attachments"])
+        self.assertNotIn(spine.PREFIX + "glove", skins["default"]["attachments"])
+        self.assertEqual(set(d["animations"]["animation"]["deform"]), {"1"})
+        spine.check(d, self.regions())
+
+    def test_skins_stay_with_the_frames_look(self):
+        # the identity starts "a_off", which would be the source's "off" - but the source
+        # starts (and is drawn in its frames) "on": keep it "on" throughout
+        t = self.target()
+        t["skins"] += [{"name": "a_off", "attachments": {}}, {"name": "a_on", "attachments": {}}]
+        r = self.rig()
+        r["skins"][1]["name"], r["skins"][2]["name"] = "on", "off"
+        r["skins"][1]["attachments"]["glove"]["glove"]["skin"] = "on"
+        r["animations"]["idle"]["deform"] = {"on": r["animations"]["idle"]["deform"]["basic"]}
+        d = spine.transplant(t, r, 0, 0, "idle", skin="on", target_skin="a_off")
+        skins = {s["name"]: s for s in d["skins"]}
+        self.assertIn(spine.PREFIX + "glove", skins["default"]["attachments"])   # "on" folded in
+        self.assertEqual(skins["a_off"]["attachments"], {})
+        spine.check(d, self.regions())
+
+    def test_check_refuses_what_the_game_would(self):
+        good = spine.transplant(self.target(), self.rig(), 0, 0, "idle", skin="basic")
+        spine.check(good, self.regions())
+        with self.assertRaisesRegex(spine.SpineError, "not in the atlas"):
+            spine.check(good, self.regions() - {"gloveart"})
+        for breakage in (lambda d: d["bones"].reverse(),
+                         lambda d: d["ik"][0].update(order=7),
+                         lambda d: d["animations"]["animation"].update(deform={"default": {"lsk_body": {"nope": [{}]}}}),
+                         lambda d: d["skins"][0]["attachments"]["lsk_sleeve"]["sleeve"]["vertices"].__setitem__(1, 40)):
+            d = json.loads(json.dumps(good))
+            breakage(d)
+            with self.assertRaises(spine.SpineError):
+                spine.check(d, self.regions())
+
+    def test_pace_and_skin_names(self):
+        a = spine.scale_time({"bones": {"b": {"rotate": [{"value": 1, "curve": [0.5, 1, 1.0, 2]}, {"time": 2}]}}}, 0.5)
+        self.assertEqual(a["bones"]["b"]["rotate"], [{"value": 1, "curve": [0.25, 1, 0.5, 2]}, {"time": 1.0}])
+        self.assertEqual(spine.skin_match("a_on", ["idle2", "off", "on"]), "on")
+        self.assertEqual(spine.skin_match("2", ["lv1", "lv2", "lv3"]), "lv2")
+        self.assertIsNone(spine.skin_match("blood", ["OFF", "ON"]))
 
 
 class Art(unittest.TestCase):

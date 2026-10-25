@@ -5,7 +5,9 @@ Dress Limbus Company identities as the characters they mirror, on a **private se
 - **Repaints:** the identity keeps its own body, moves, skills and upties, and is redrawn as
   another character. Pequod Captain Ishmael fights as GasHarpoon Ahab, Spicebush Yi Sang as
   the bloomed Dongbaek, Solemn Lament Yi Sang wears the butterfly head of the Funeral of the
-  Dead Butterflies, and so on.
+  Dead Butterflies, and so on. Between moves they stand in that character's own idle
+  animation, turned to face the sinners' way (Kromer, Lucio, Guido and the Old G Corp. Head
+  Manager have none in the game and stand still).
 - **Helper skins:** the identity takes a story helper unit's body *and* its skills: LCB
   Ryōshū as Arayashiki Ryōshū from stage 9-49, LCB Sinclair as A Certain Sinclair, Love and
   Hate Don Quixote as the Walpurgis Night Queen of Hatred.
@@ -22,10 +24,10 @@ contains no game art, and the tool never connects to the internet.
 You need the game installed through Steam (Windows, or Linux with Proton) and launched at least
 once, so its download cache exists, plus Python 3.9 or newer.
 
-Download `limbus_skins-1.0.2-py3-none-any.whl` from the release, then:
+Download `limbus_skins-1.1.0-py3-none-any.whl` from the release, then:
 
 ```
-pip install --user limbus_skins-1.0.2-py3-none-any.whl     # or: pipx install <the .whl>
+pip install --user limbus_skins-1.1.0-py3-none-any.whl     # or: pipx install <the .whl>
 limbus-skins doctor
 ```
 
