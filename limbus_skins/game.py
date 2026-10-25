@@ -116,6 +116,19 @@ def identities(game, cache):
     return ids, helpers
 
 
+def boss_data(cache):
+    """({identity id: record}, {skill id: record}, {appearance: [unit records]}) - the
+    bosses (enemy, abnormality-unit and helper units) that a repaint's source can lend skills."""
+    _, env = find_static(cache)
+    lists = static_lists(env, ("personality", "skill", "enemy", "abnormality-unit", "assistant"))
+    units = {}
+    for kind in ("abnormality-unit", "enemy", "assistant"):
+        for r in lists[kind]:
+            if r.get("appearance"):
+                units.setdefault(r["appearance"], []).append(r)
+    return ({r["id"]: r for r in lists["personality"]}, {r["id"]: r for r in lists["skill"]}, units)
+
+
 # ---------------------------------------------------------------- battle bodies
 
 def scan_bundle(path):

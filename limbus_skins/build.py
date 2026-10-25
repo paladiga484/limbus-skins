@@ -58,18 +58,20 @@ def _write(out_dir, cache, stock_path, raw):
     return rel
 
 
-def build(keys, game_dir, cache, data_dir, log=print):
-    """Build the given skin keys. Returns {key: (ok, message)}."""
+def build(keys, game_dir, cache, data_dir, log=print, boss=()):
+    """Build the given skin keys; repaints in `boss` also take their boss's skills.
+    Returns {key: (ok, message)}."""
     skins = catalog()
     built_root = os.path.join(data_dir, "built")
     os.makedirs(built_root, exist_ok=True)
     ids, helper_units = game.identities(game_dir, cache)
-    results = {}
+    results, boss_notes = {}, {}
 
-    # helpers: one combined static-data bundle
+    # helpers and boss skills: one combined static-data bundle
     want = [skins[k] for k in keys if skins[k]["kind"] == "helper"]
-    if want:
-        swaps, bad = {}, []
+    want_boss = [skins[k] for k in keys if k in boss and skins[k]["kind"] == "repaint" and skins[k].get("source")]
+    if want or want_boss:
+        swaps, skill_swaps, bad, boss_ok = {}, {}, [], []
         for s in want:
             h = helper_units.get(s["helper"])
             if h is None or s["identity"] not in ids:
@@ -77,21 +79,31 @@ def build(keys, game_dir, cache, data_dir, log=print):
                 results[s["key"]] = (False, "not in this game version")
                 continue
             swaps[s["identity"]] = h
+        if want_boss:
+            pers, skills, units = game.boss_data(cache)
+            for s in want_boss:
+                try:
+                    unit = helpers.pick_unit(units[s["source"]], skills, s.get("unit"))
+                    skill_swaps.update(helpers.boss_skills(pers[s["identity"]], unit, skills))
+                    boss_ok.append(s["key"])
+                    boss_notes[s["key"]] = f"boss skills from unit {unit['id']}"
+                except (KeyError, StopIteration, ValueError) as e:
+                    boss_notes[s["key"]] = f"no boss skills ({e or 'no boss record'})"
         out = os.path.join(built_root, "helpers")
         shutil.rmtree(out, ignore_errors=True)
-        if swaps:
+        if swaps or skill_swaps:
             static_path, _ = game.find_static(cache)
-            raw, done = helpers.rewrite_static(static_path, swaps)
+            raw, done, _ = helpers.rewrite_static(static_path, swaps, skill_swaps)
             os.makedirs(out)
             rel = _write(out, cache, static_path, raw)
             with open(os.path.join(out, "manifest.json"), "w", encoding="utf-8") as f:
                 json.dump({"format": FORMAT, "kind": "helpers", "skins": [s["key"] for s in want if s["key"] not in bad],
-                           "files": [rel]}, f, indent=1)
+                           "boss": boss_ok, "files": [rel]}, f, indent=1)
             for s in want:
                 if s["key"] not in bad:
                     ok = s["identity"] in done
                     results[s["key"]] = (ok, "built" if ok else "identity not found in the static data")
-            log(f"  helpers: {len(done)} identities restyled")
+            log(f"  helpers: {len(done)} identities restyled, {len(boss_ok)} with boss skills")
 
     # repaints and tints: one folder each
     want = [skins[k] for k in keys if skins[k]["kind"] in ("repaint", "tint")]
@@ -124,7 +136,7 @@ def build(keys, game_dir, cache, data_dir, log=print):
                 rel = _write(out, cache, locate(target), raw)
                 with open(os.path.join(out, "manifest.json"), "w", encoding="utf-8") as f:
                     json.dump({"format": FORMAT, "kind": s["kind"], "skins": [key], "files": [rel], "notes": notes}, f, indent=1)
-                results[key] = (True, "; ".join(notes))
+                results[key] = (True, "; ".join(notes + ([boss_notes[key]] if key in boss_notes else [])))
             except (repaint.RepaintError, RuntimeError, KeyError, OSError) as e:
                 shutil.rmtree(out, ignore_errors=True)
                 results[key] = (False, str(e))
@@ -132,23 +144,27 @@ def build(keys, game_dir, cache, data_dir, log=print):
     return results
 
 
-def built_dirs(data_dir, keys):
-    """[(label, files dir)] for the built skins among keys (helpers share one folder)."""
+def built_dirs(data_dir, keys, boss=()):
+    """[(label, files dir)] for the built skins among keys (helpers and boss skills share
+    one folder)."""
     root = os.path.join(data_dir, "built")
     out, seen = [], set()
     skins = catalog()
+    try:
+        with open(os.path.join(root, "helpers", "manifest.json"), encoding="utf-8") as f:
+            man = json.load(f)
+    except (OSError, ValueError):
+        man = {}
     for k in keys:
-        folder = "helpers" if skins.get(k, {}).get("kind") == "helper" else k
-        files = os.path.join(root, folder, "files")
-        if folder in seen or not os.path.isdir(files):
-            continue
-        if folder == "helpers":
-            try:
-                with open(os.path.join(root, folder, "manifest.json"), encoding="utf-8") as f:
-                    if k not in json.load(f)["skins"]:
-                        continue        # built without this helper - needs a rebuild
-            except (OSError, ValueError, KeyError):
+        folders = ["helpers"] if skins.get(k, {}).get("kind") == "helper" else [k]
+        if k in boss and k in man.get("boss", []):
+            folders.append("helpers")
+        for folder in folders:
+            files = os.path.join(root, folder, "files")
+            if folder in seen or not os.path.isdir(files):
                 continue
-        seen.add(folder)
-        out.append((folder, files))
+            if folder == "helpers" and k not in man.get("skins", []) + man.get("boss", []):
+                continue                    # built without this skin - needs a rebuild
+            seen.add(folder)
+            out.append((folder, files))
     return out

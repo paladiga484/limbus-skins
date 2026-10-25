@@ -4,6 +4,7 @@
   limbus-skins list [all|on|<sinner>]  every skin you can turn on
   limbus-skins on <skin|id|sinner|helpers|repaints|tested|all>...   turn skins on (saved)
   limbus-skins off <skin|id|sinner|helpers|repaints|all>...         turn skins off
+  limbus-skins boss on|off <skin|all>   a repaint also fights with its boss's skills
   limbus-skins run -- <launch command>  swap the skins in, start the game with your
                                         command, put the originals back when it exits
   limbus-skins apply / restore          the two halves of `run`, by hand
@@ -45,6 +46,7 @@ def _state():
     except (OSError, ValueError):
         st = {}
     st.setdefault("on", [])
+    st.setdefault("boss", [])
     return st, cfg, data
 
 
@@ -82,7 +84,7 @@ def select(words, skins):
     return keys
 
 
-def _table(skins, on, keys):
+def _table(skins, on, keys, boss=()):
     width = max((len(k) for k in keys), default=10)
     last = None
     for k in sorted(keys, key=lambda k: (skins[k]["identity"], k)):
@@ -94,7 +96,8 @@ def _table(skins, on, keys):
         mark = "ON " if k in on else "   "
         kind = f"{s['kind']:7}"
         tested = "" if s.get("tested") else "  (not yet seen in a fight)"
-        print(f"  {mark} {k:{width}}  {s['identity']}  {kind}  -> {s['becomes']}{tested}")
+        fights = "  +boss skills" if k in boss else ""
+        print(f"  {mark} {k:{width}}  {s['identity']}  {kind}  -> {s['becomes']}{fights}{tested}")
 
 
 def split_launch(args):
@@ -106,17 +109,19 @@ def split_launch(args):
     return "--yes" in args, [x for x in args if x != "--yes"]
 
 
-def _need_build(keys, skins, data_dir, cache):
-    from .build import FORMAT
+def _need_build(keys, skins, data_dir, cache, boss=()):
     """Enabled skins with no build, or built for an older game version."""
+    from .build import FORMAT
     root = os.path.join(data_dir, "built")
     out = []
     try:
         with open(os.path.join(root, "helpers", "manifest.json"), encoding="utf-8") as f:
-            helper_built = set(json.load(f)["skins"])
+            man = json.load(f)
+        helper_built, boss_built = set(man["skins"]), set(man.get("boss", []))
     except (OSError, ValueError, KeyError):
-        helper_built = set()
+        helper_built, boss_built = set(), set()
     want_helpers = {k for k in keys if skins[k]["kind"] == "helper"}
+    want_boss = {k for k in keys if k in boss and skins[k]["kind"] == "repaint"}
     for k in keys:
         folder = "helpers" if skins[k]["kind"] == "helper" else k
         try:
@@ -133,8 +138,12 @@ def _need_build(keys, skins, data_dir, cache):
             out.append(k)                                   # game updated: bundle replaced
         elif skins[k]["kind"] == "helper" and helper_built != want_helpers:
             out.append(k)
-    if any(skins[k]["kind"] == "helper" for k in out):     # helpers rebuild as one set
-        out += [k for k in want_helpers if k not in out]
+    # boss skills share the helpers' file: rebuild it when a choice is missing from it, or when
+    # it still carries dropped ones and is going to be swapped in for a helper anyway
+    if want_boss - boss_built or (boss_built - want_boss and want_helpers):
+        out += [k for k in want_boss | want_helpers if k not in out]
+    if any(skins[k]["kind"] == "helper" or k in want_boss for k in out):   # the static bundle rebuilds as one set
+        out += [k for k in want_helpers | want_boss if k not in out]
     return out
 
 
@@ -178,7 +187,7 @@ def main(argv=None):
             keys = [k for k in keys if k in st["on"]]
         elif args and args[0] != "all":
             keys = select(args, skins)
-        _table(skins, set(st["on"]), keys)
+        _table(skins, set(st["on"]), keys, set(st["boss"]))
         print(f"\n{len(st['on'])} on. `limbus-skins on <name>` to add one.")
         return 0
     if cmd in ("on", "off"):
@@ -193,6 +202,21 @@ def main(argv=None):
             st["on"] = [x for x in st["on"] if x not in keys]
         _save_state(st)
         print(f"{len(st['on'])} skin(s) on. They are swapped in the next time you `run` or `apply`.")
+        return 0
+    if cmd == "boss":
+        if len(args) < 2 or args[0] not in ("on", "off"):
+            raise SystemExit("usage: limbus-skins boss on|off <skin|sinner|all>...")
+        keys = [k for k in select(args[1:], skins) if skins[k]["kind"] == "repaint" and skins[k].get("source")]
+        if not keys:
+            raise SystemExit("boss skills are for repaints of a boss (e.g. ahab, kromer)")
+        if args[0] == "on":
+            st["boss"] = sorted(set(st["boss"]) | set(keys))
+            print("boss skills on: " + ", ".join(keys))
+            print("these change skills and have not been seen in a fight yet - try them on a spare account")
+        else:
+            st["boss"] = [k for k in st["boss"] if k not in keys]
+            print("boss skills off: " + ", ".join(keys))
+        _save_state(st)
         return 0
     if cmd == "doctor":
         return doctor(skins, st, data)
@@ -229,7 +253,7 @@ def main(argv=None):
             raise SystemExit("nothing to build - turn some skins on first")
         if sess.active():
             raise SystemExit("a modded session is live - `limbus-skins restore` first (with the game closed)")
-        res = build(keys, g, c, data)
+        res = build(keys, g, c, data, boss=set(st["boss"]))
         bad = [k for k, (ok, _) in res.items() if not ok]
         print(f"built {len(res) - len(bad)} of {len(res)}" + (f"; failed: {', '.join(bad)}" if bad else ""))
         return 1 if bad else 0
@@ -242,7 +266,7 @@ def main(argv=None):
         if not built_dirs(data, [key]):
             if sess.active():
                 raise SystemExit("restore first (a modded session is live)")
-            build([key], g, c, data)
+            build([key], g, c, data, boss=set(st["boss"]))
         from .repaint import preview
         files = built_dirs(data, [key])[0][1]
         data_file = next(os.path.join(r, n) for r, _, ns in os.walk(files) for n in ns if n == "__data")
@@ -265,10 +289,10 @@ def main(argv=None):
             raise SystemExit("no skins")
         if sess.active():
             raise SystemExit("restore first (a modded session is live)")
-        stale = _need_build(keys, skins, data, c)
+        stale = _need_build(keys, skins, data, c, set(st["boss"]))
         if stale:
             print(f"building {len(stale)} skin(s)...")
-            build(stale, g, c, data)
+            build(stale, g, c, data, boss=set(st["boss"]))
         from .game import body_index
         ids, helper_units = identities(g, c)
         bodies, have = body_index(g, c, os.path.join(data, "bodies.json"))
@@ -321,12 +345,12 @@ def main(argv=None):
         if game_running():
             raise SystemExit("Limbus is running - close it first")
         sess.restore()
-        stale = _need_build(st["on"], skins, data, c)
+        stale = _need_build(st["on"], skins, data, c, set(st["boss"]))
         if stale:
             print(f"building {len(stale)} skin(s) for this game version...")
-            build(stale, g, c, data)
+            build(stale, g, c, data, boss=set(st["boss"]))
         try:
-            done = sess.apply(built_dirs(data, st["on"]))
+            done = sess.apply(built_dirs(data, st["on"], set(st["boss"])))
         except ModError as e:
             raise SystemExit(str(e))
         print(f"swapped in: {', '.join(done) if done else 'nothing'}")

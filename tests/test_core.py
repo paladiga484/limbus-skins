@@ -154,6 +154,33 @@ class Selection(unittest.TestCase):
             cli.select(["nobody"], self.SK)
 
 
+class Rebuilds(unittest.TestCase):
+    SK = {"ahab": {"identity": 10808, "kind": "repaint", "source": "x"},
+          "kira": {"identity": 10814, "kind": "helper"}}
+
+    def _built(self, root, boss):
+        from limbus_skins.build import FORMAT
+        cache = os.path.join(root, "cache")
+        os.makedirs(os.path.join(cache, "a", "b"))
+        for folder, extra in (("ahab", {}), ("helpers", {"skins": [], "boss": boss})):
+            os.makedirs(os.path.join(root, "data", "built", folder))
+            with open(os.path.join(root, "data", "built", folder, "manifest.json"), "w") as f:
+                json.dump(dict({"format": FORMAT, "files": ["a/b"]}, **extra), f)
+        return os.path.join(root, "data"), cache
+
+    def test_boss_choice_changes_rebuild_and_nothing_else_does(self):
+        for built, want, stale in (([], set(), []), ([], {"ahab"}, ["ahab"]),
+                                   (["ahab"], {"ahab"}, []), (["ahab"], set(), [])):
+            with tempfile.TemporaryDirectory() as tmp:
+                data, cache = self._built(tmp, built)
+                self.assertEqual(cli._need_build(["ahab"], self.SK, data, cache, want), stale, (built, want))
+
+    def test_dropped_boss_skills_leave_a_helper_file_that_is_swapped_in(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            data, cache = self._built(tmp, ["ahab"])
+            self.assertIn("kira", cli._need_build(["ahab", "kira"], self.SK, data, cache, set()))
+
+
 class LaunchArgs(unittest.TestCase):
     def test_flags_before_the_separator_only(self):
         self.assertEqual(cli.split_launch(["--yes", "--", "play.sh", "--yes"]), (True, ["play.sh", "--yes"]))
@@ -544,6 +571,52 @@ class NoNetwork(unittest.TestCase):
             with open(os.path.join(home, "limbus-skins", "state.json")) as f:
                 st = json.load(f)
             self.assertEqual(st["on"], [])
+
+
+class BossSkills(unittest.TestCase):
+    def setUp(self):
+        from limbus_skins import helpers
+        self.h = helpers
+        mk = lambda i, motion, extra: {"id": i, "skillTier": 1, "skillData": [dict(  # noqa: E731
+            {"gaksungLevel": 1, "skillMotion": motion, "viewType": "BATTLE", "mpUsage": 0,
+             "attributeType": "VIOLET", "defaultValue": 2, "coinList": [{"scale": 1}]}, **extra),
+            {"gaksungLevel": 3, "defaultValue": 3}]}
+        self.skills = {1: mk(1, "S1", {}), 2: mk(2, "S2", {}), 3: mk(3, "S3", {})}
+        for i, tier in ((91, 3), (92, 1), (93, 2), (94, 1)):
+            self.skills[i] = {"id": i, "skillTier": tier, "skillData": [
+                {"skillMotion": "S9", "attributeType": "INDIGO", "defType": "ATTACK", "defaultValue": i,
+                 "coinList": [{"scale": 4}] * 3, "abilityScriptList": [{"scriptName": "EmptyBody"}]}]}
+        self.skills[95] = {"id": 95, "skillTier": 1, "skillData": [{"defType": "GUARD", "skillMotion": "S4"}]}
+        self.ident = {"id": 10808, "attributeList": [{"skillId": 1, "number": 3}, {"skillId": 2, "number": 2},
+                                                      {"skillId": 3, "number": 1}]}
+        self.unit = {"id": 81912, "attributeList": [{"skillId": i, "number": 0} for i in (95, 91, 92, 93, 94)]}
+
+    def test_boss_attacks_by_tier_fill_the_identitys_own_skills(self):
+        out = self.h.boss_skills(self.ident, self.unit, self.skills)
+        self.assertEqual(sorted(out), [1, 2, 3])
+        self.assertEqual([out[i]["skillData"][0]["defaultValue"] for i in (1, 2, 3)], [92, 93, 91])
+        d = out[1]["skillData"]
+        self.assertEqual(len(d), 1)                                  # the boss's numbers at every uptie
+        self.assertEqual(d[0]["skillMotion"], "S1")                  # the identity's own (repainted) motion
+        self.assertEqual(d[0]["gaksungLevel"], 1)
+        self.assertEqual(d[0]["attributeType"], "INDIGO")
+        self.assertEqual(len(d[0]["coinList"]), 3)
+        self.assertEqual(self.skills[1]["skillData"][0]["attributeType"], "VIOLET")   # inputs untouched
+
+    def test_too_few_boss_attacks_keep_the_identitys_last_skills(self):
+        unit = {"id": 1, "attributeList": [{"skillId": 91, "number": 0}, {"skillId": 95, "number": 0}]}
+        self.assertEqual(sorted(self.h.boss_skills(self.ident, unit, self.skills)), [1])
+        with self.assertRaises(ValueError):
+            self.h.boss_skills(self.ident, {"id": 2, "attributeList": [{"skillId": 95}]}, self.skills)
+
+    def test_pick_unit_prefers_most_attacks_or_the_named_one(self):
+        recs = [{"id": 5, "attributeList": [{"skillId": 91}]}, self.unit]
+        self.assertEqual(self.h.pick_unit(recs, self.skills)["id"], 81912)
+        weak = {"id": 6, "attributeList": [{"skillId": i} for i in (91, 92, 93, 94)]}
+        self.skills[99] = {"id": 99, "skillTier": 1, "skillData": [{"defaultValue": 1, "coinList": [{"scale": 1}]}]}
+        weak2 = {"id": 7, "attributeList": [{"skillId": 99}] * 4}
+        self.assertEqual(self.h.pick_unit([weak2, weak], self.skills)["id"], 6)   # same count: strongest
+        self.assertEqual(self.h.pick_unit(recs, self.skills, want=5)["id"], 5)
 
 
 class Tints(unittest.TestCase):
