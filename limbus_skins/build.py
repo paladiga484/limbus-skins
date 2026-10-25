@@ -58,6 +58,13 @@ def _write(out_dir, cache, stock_path, raw):
     return rel
 
 
+def skill_edits(keys, skins, boss=()):
+    """The skins among keys whose skill records go into the static-data bundle: repaints
+    with boss skills on, and skins that recolor a skill's sin (Greencliff's S3)."""
+    return {k for k in keys if skins[k].get("sins")
+            or (k in boss and skins[k]["kind"] == "repaint" and skins[k].get("source"))}
+
+
 def build(keys, game_dir, cache, data_dir, log=print, boss=()):
     """Build the given skin keys; repaints in `boss` also take their boss's skills.
     Returns {key: (ok, message)}."""
@@ -69,7 +76,7 @@ def build(keys, game_dir, cache, data_dir, log=print, boss=()):
 
     # helpers and boss skills: one combined static-data bundle
     want = [skins[k] for k in keys if skins[k]["kind"] == "helper"]
-    want_boss = [skins[k] for k in keys if k in boss and skins[k]["kind"] == "repaint" and skins[k].get("source")]
+    want_boss = [skins[k] for k in sorted(skill_edits(keys, skins, boss))]
     if want or want_boss:
         swaps, skill_swaps, bad, boss_ok = {}, {}, [], []
         for s in want:
@@ -83,12 +90,16 @@ def build(keys, game_dir, cache, data_dir, log=print, boss=()):
             pers, skills, units = game.boss_data(cache)
             for s in want_boss:
                 try:
-                    unit = helpers.pick_unit(units[s["source"]], skills, s.get("unit"))
-                    skill_swaps.update(helpers.boss_skills(pers[s["identity"]], unit, skills))
+                    if s.get("sins"):
+                        skill_swaps.update(helpers.recolor_skills(pers[s["identity"]], skills, s["sins"]))
+                        boss_notes[s["key"]] = "sins: " + ", ".join(f"S{n} {v}" for n, v in sorted(s["sins"].items()))
+                    else:
+                        unit = helpers.pick_unit(units[s["source"]], skills, s.get("unit"))
+                        skill_swaps.update(helpers.boss_skills(pers[s["identity"]], unit, skills))
+                        boss_notes[s["key"]] = f"boss skills from unit {unit['id']}"
                     boss_ok.append(s["key"])
-                    boss_notes[s["key"]] = f"boss skills from unit {unit['id']}"
                 except (KeyError, StopIteration, ValueError) as e:
-                    boss_notes[s["key"]] = f"no boss skills ({e or 'no boss record'})"
+                    boss_notes[s["key"]] = f"skills unchanged ({e or 'no boss record'})"
         out = os.path.join(built_root, "helpers")
         shutil.rmtree(out, ignore_errors=True)
         if swaps or skill_swaps:
@@ -98,12 +109,12 @@ def build(keys, game_dir, cache, data_dir, log=print, boss=()):
             rel = _write(out, cache, static_path, raw)
             with open(os.path.join(out, "manifest.json"), "w", encoding="utf-8") as f:
                 json.dump({"format": FORMAT, "kind": "helpers", "skins": [s["key"] for s in want if s["key"] not in bad],
-                           "boss": boss_ok, "files": [rel]}, f, indent=1)
+                           "skills": boss_ok, "files": [rel]}, f, indent=1)
             for s in want:
                 if s["key"] not in bad:
                     ok = s["identity"] in done
                     results[s["key"]] = (ok, "built" if ok else "identity not found in the static data")
-            log(f"  helpers: {len(done)} identities restyled, {len(boss_ok)} with boss skills")
+            log(f"  helpers: {len(done)} identities restyled, {len(boss_ok)} with new skills")
 
     # repaints and tints: one folder each
     want = [skins[k] for k in keys if skins[k]["kind"] in ("repaint", "tint")]
@@ -150,6 +161,7 @@ def built_dirs(data_dir, keys, boss=()):
     root = os.path.join(data_dir, "built")
     out, seen = [], set()
     skins = catalog()
+    edits = skill_edits([k for k in keys if k in skins], skins, boss)
     try:
         with open(os.path.join(root, "helpers", "manifest.json"), encoding="utf-8") as f:
             man = json.load(f)
@@ -157,13 +169,13 @@ def built_dirs(data_dir, keys, boss=()):
         man = {}
     for k in keys:
         folders = ["helpers"] if skins.get(k, {}).get("kind") == "helper" else [k]
-        if k in boss and k in man.get("boss", []):
+        if k in edits and k in man.get("skills", []):
             folders.append("helpers")
         for folder in folders:
             files = os.path.join(root, folder, "files")
             if folder in seen or not os.path.isdir(files):
                 continue
-            if folder == "helpers" and k not in man.get("skins", []) + man.get("boss", []):
+            if folder == "helpers" and k not in man.get("skins", []) + man.get("skills", []):
                 continue                    # built without this skin - needs a rebuild
             seen.add(folder)
             out.append((folder, files))

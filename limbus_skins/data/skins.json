@@ -312,7 +312,10 @@
    "tint": {
     "hue": 120
    },
-   "tested": false
+   "tested": false,
+   "sins": {
+    "3": "SHAMROCK"
+   }
   }
  }
 }

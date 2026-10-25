@@ -78,6 +78,20 @@ def boss_skills(identity, unit, skills):
     return out
 
 
+def recolor_skills(identity, skills, sins):
+    """{skill id: new record}: the identity's skill n (1-based, as listed) takes sin
+    sins[n] ("SHAMROCK" is green) at every uptie that names one."""
+    mine = [a["skillId"] for a in lit(identity.get("attributeList"))]
+    out = {}
+    for n, sin in sins.items():
+        rec = copy.deepcopy(skills[mine[int(n) - 1]])
+        for d in rec["skillData"]:
+            if "attributeType" in d or d is rec["skillData"][0]:
+                d["attributeType"] = sin
+        out[rec["id"]] = rec
+    return out
+
+
 def rewrite_static(static_path, swaps, skill_swaps=None):
     """Rewrite identity records (and skill records) in the static-data bundle.
     swaps = {identity id: helper record}; skill_swaps = {skill id: new record}.

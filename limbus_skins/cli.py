@@ -117,11 +117,12 @@ def _need_build(keys, skins, data_dir, cache, boss=()):
     try:
         with open(os.path.join(root, "helpers", "manifest.json"), encoding="utf-8") as f:
             man = json.load(f)
-        helper_built, boss_built = set(man["skins"]), set(man.get("boss", []))
+        helper_built, boss_built = set(man["skins"]), set(man.get("skills", []))
     except (OSError, ValueError, KeyError):
         helper_built, boss_built = set(), set()
     want_helpers = {k for k in keys if skins[k]["kind"] == "helper"}
-    want_boss = {k for k in keys if k in boss and skins[k]["kind"] == "repaint"}
+    from .build import skill_edits
+    want_boss = skill_edits(keys, skins, boss)
     for k in keys:
         folder = "helpers" if skins[k]["kind"] == "helper" else k
         try:

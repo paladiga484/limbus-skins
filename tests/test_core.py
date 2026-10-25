@@ -162,7 +162,7 @@ class Rebuilds(unittest.TestCase):
         from limbus_skins.build import FORMAT
         cache = os.path.join(root, "cache")
         os.makedirs(os.path.join(cache, "a", "b"))
-        for folder, extra in (("ahab", {}), ("helpers", {"skins": [], "boss": boss})):
+        for folder, extra in (("ahab", {}), ("helpers", {"skins": [], "skills": boss})):
             os.makedirs(os.path.join(root, "data", "built", folder))
             with open(os.path.join(root, "data", "built", folder, "manifest.json"), "w") as f:
                 json.dump(dict({"format": FORMAT, "files": ["a/b"]}, **extra), f)
@@ -608,6 +608,14 @@ class BossSkills(unittest.TestCase):
         self.assertEqual(sorted(self.h.boss_skills(self.ident, unit, self.skills)), [1])
         with self.assertRaises(ValueError):
             self.h.boss_skills(self.ident, {"id": 2, "attributeList": [{"skillId": 95}]}, self.skills)
+
+    def test_recolor_one_skill_at_every_uptie_that_names_a_sin(self):
+        self.skills[3]["skillData"][1]["attributeType"] = "VIOLET"
+        out = self.h.recolor_skills(self.ident, self.skills, {"3": "SHAMROCK"})
+        self.assertEqual(sorted(out), [3])
+        self.assertEqual([d.get("attributeType") for d in out[3]["skillData"]], ["SHAMROCK", "SHAMROCK"])
+        self.assertEqual(out[3]["skillData"][0]["coinList"], [{"scale": 1}])
+        self.assertEqual(self.skills[3]["skillData"][1]["attributeType"], "VIOLET")
 
     def test_pick_unit_prefers_most_attacks_or_the_named_one(self):
         recs = [{"id": 5, "attributeList": [{"skillId": 91}]}, self.unit]
