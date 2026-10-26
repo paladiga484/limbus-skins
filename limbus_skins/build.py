@@ -141,7 +141,11 @@ def build(keys, game_dir, cache, data_dir, log=print, boss=(), static=True):
             rel = _write(out, cache, static_path, raw)
             with open(os.path.join(out, "manifest.json"), "w", encoding="utf-8") as f:
                 json.dump({"format": FORMAT, "kind": "helpers", "skins": [s["key"] for s in want + want_ids if s["key"] not in bad],
-                           "skills": boss_ok, "files": [rel], "green_skills": sorted(green)}, f, indent=1)
+                           "skills": boss_ok, "files": [rel], "green_skills": sorted(green),
+                           # the server grants these while they're built (Server/OwnIdentities.cs)
+                           "identities": [dict({"id": s["identity"], "base": s["base"]},
+                                               **({"unlock": s["unlock"]} if s.get("unlock") else {}))
+                                          for s in want_ids if s["key"] not in bad]}, f, indent=1)
             for s in want + want_ids:
                 if s["key"] not in bad:
                     ok = s["identity"] in done
