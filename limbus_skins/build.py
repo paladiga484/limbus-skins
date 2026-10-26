@@ -206,7 +206,7 @@ def built_dirs(data_dir, keys, boss=()):
     except (OSError, ValueError):
         man = {}
     for k in keys:
-        folders = ["helpers"] if skins.get(k, {}).get("kind") == "helper" else [k]
+        folders = ["helpers"] if k in skins and shares_static(skins[k]) else [k]
         if k in edits and k in man.get("skills", []):
             folders.append("helpers")
         for folder in folders:

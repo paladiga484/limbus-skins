@@ -757,6 +757,16 @@ class Identities(unittest.TestCase):
         with self.assertRaises(ValueError):
             self.h.check_new_ids({10410}, {10799: 10710})                    # nothing to clone
 
+    def test_an_identity_is_swapped_in_with_the_shared_static_file(self):
+        from limbus_skins.build import built_dirs
+        with tempfile.TemporaryDirectory() as data:
+            files = os.path.join(data, "built", "helpers", "files")
+            os.makedirs(os.path.join(files, "ab", "cd"))
+            open(os.path.join(files, "ab", "cd", "__data"), "wb").close()
+            with open(os.path.join(data, "built", "helpers", "manifest.json"), "w") as f:
+                json.dump({"skins": ["vergilius-id"], "skills": []}, f)
+            self.assertEqual(built_dirs(data, ["vergilius-id"]), [("helpers", files)])
+
     def test_catalog_has_the_identity_kind_and_kali_stays_locked(self):
         from limbus_skins.build import catalog
         skins = catalog()
