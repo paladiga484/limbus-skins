@@ -385,18 +385,29 @@
      "coins": [
       4,
       3
-     ]
+     ],
+     "onHit": {
+      "buffKeyword": "Laceration",
+      "stack": 2,
+      "turn": 2
+     }
     },
     "2": {
-     "name": "Spear",
+     "name": "Upstanding Slash",
      "attributeType": "CRIMSON",
-     "atkType": "PENETRATE",
-     "defaultValue": 3,
+     "atkType": "HIT",
+     "defaultValue": 6,
      "coins": [
-      5,
       4,
-      4
-     ]
+      3
+     ],
+     "onUse": {
+      "buffKeyword": "Breath",
+      "stack": 2,
+      "turn": 2,
+      "target": "Self",
+      "activeRound": 0
+     }
     },
     "3": {
      "name": "Greater Split: Vertical",
@@ -405,7 +416,19 @@
      "defaultValue": 20,
      "coins": [
       19
-     ]
+     ],
+     "onHit": {
+      "buffKeyword": "Laceration",
+      "stack": 5,
+      "turn": 3
+     },
+     "onUse": {
+      "buffKeyword": "Breath",
+      "stack": 2,
+      "turn": 2,
+      "target": "Self",
+      "activeRound": 0
+     }
     },
     "defense": {
      "name": "Counter (Slash 4-8, card 607101)",
@@ -414,7 +437,12 @@
      "defaultValue": 4,
      "coins": [
       4
-     ]
+     ],
+     "onHit": {
+      "buffKeyword": "Laceration",
+      "stack": 1,
+      "turn": 1
+     }
     }
    }
   }
