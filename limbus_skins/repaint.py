@@ -577,6 +577,24 @@ def _spine_head(sp, art, spec, effects=None):
     return f"idle {sp['name']}: head swapped" + (" (glow, flutter, motes)" if effects else "")
 
 
+def standing_height(env, ids, fallback=2.6):
+    """How tall the body stands, in units: the tallest drawn part of its idle frames."""
+    best = 0.0
+    for o in env.objects:
+        if o.type.name != "Sprite" or o.path_id not in ids:
+            continue
+        s = o.read()
+        if kind_of(s.m_Name)[0] != "idle":
+            continue
+        try:
+            box = s.image.getchannel("A").getbbox()
+        except Exception:
+            continue
+        if box:
+            best = max(best, (box[3] - box[1]) / float(s.m_PixelsToUnits))
+    return best or fallback
+
+
 def _load_source(source, locate, clips, mapping, dash, notes):
     """(drawing table, special-motion table, idle rigs) of the character `source`."""
     UnityPy = unitypy()
@@ -606,12 +624,8 @@ def repaint(target, locate, source=None, clips=None, mapping=None, head=None, mi
     notes = []
     UnityPy = unitypy()
     from PIL import Image
-    if lor is not None:                                  # a Library of Ruina character's poses
-        from . import lor as lormod
-        try:
-            src, special, rigs = lormod.source_table(lor), {}, []
-        except lormod.LorError as e:
-            raise RepaintError(str(e))
+    if lor is not None:                                  # a Library of Ruina character: after the target
+        src, special, rigs = {}, {}, []                   # is loaded, to stand as tall as it does
         source = "lor:" + lor["prefab"]
     elif source is None:
         src, special, rigs = {}, {}, []
@@ -622,6 +636,12 @@ def repaint(target, locate, source=None, clips=None, mapping=None, head=None, mi
     tenv = UnityPy.load(tpath)
     tobjs, troots = prefab_objects(tenv, target, forms=True)
     tclips = clip_frames(tenv, tobjs)
+    if lor is not None:
+        from . import lor as lormod
+        try:
+            src = lormod.source_table(lor, height=standing_height(tenv, tobjs))
+        except lormod.LorError as e:
+            raise RepaintError(str(e))
 
     # sprites only another form of the body draws take that form's source
     by_sprite, by_root = {}, {}

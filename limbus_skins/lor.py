@@ -151,20 +151,36 @@ def afterimage(img, pivot, dx, copies=3):
 
 def source_table(spec, height=2.6):
     """repaint()'s source table from a skins.json "lor" entry: {"bundle", "prefab", "map":
-    {kind: [motion, ...]}, "smear": [kind, ...]}. Pixels per unit are set so the standing
-    pose is `height` units tall (a sinner's size)."""
-    got = poses(bundle_path(spec["bundle"]), spec["prefab"])
-    if "Default" not in got:
-        raise LorError(f"{spec['prefab']} has no Default pose")
-    ppu = got["Default"][0].height / height
+    {kind: [motion, ...]}, "smear": [kind, ...], "sources": {name: {"bundle", "prefab"}}}.
+    A motion written "name:Motion" comes from that extra source (e.g. the character's E.G.O.
+    form for one skill). Each source's pixels per unit make its standing pose `height` units
+    tall (times "scale"), so every form stands the same size as the identity it replaces."""
+    height *= float(spec.get("scale", 1.0))
+    sources = {"": (spec["bundle"], spec["prefab"])}
+    sources.update({n: (v["bundle"], v["prefab"]) for n, v in spec.get("sources", {}).items()})
+    loaded = {}
+
+    def pose(ref):
+        name, _, motion = ref.rpartition(":")
+        if name not in sources:
+            raise LorError(f"{ref}: no source called {name!r}")
+        if name not in loaded:
+            bundle, prefab = sources[name]
+            got = poses(bundle_path(bundle), prefab)
+            if "Default" not in got:
+                raise LorError(f"{prefab} has no Default pose")
+            loaded[name] = (got, got["Default"][0].height / height)
+        got, ppu = loaded[name]
+        if motion not in got:
+            raise LorError(f"{sources[name][1]} has no {motion} pose (has {', '.join(sorted(got))})")
+        return got[motion], ppu
+
     smear = set(spec.get("smear", ()))
     table = {}
     for kind, motions in spec["map"].items():
         frames = []
         for m in motions:
-            if m not in got:
-                raise LorError(f"{spec['prefab']} has no {m} pose (has {', '.join(sorted(got))})")
-            img, pv = got[m]
+            (img, pv), ppu = pose(m)
             if kind in smear:                              # the run-up and swing get a smear first
                 s_img, s_pv = afterimage(img, pv, max(8, img.width // 14))
                 frames.append(Frame(f"{m}_smear", s_img, s_pv, ppu))

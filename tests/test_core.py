@@ -696,6 +696,20 @@ class LibraryOfRuina(unittest.TestCase):
         self.assertAlmostEqual(px * out.width, 5.0)                # same body pixel as before
         self.assertEqual(py, 0.25)
 
+    def test_two_forms_each_stand_the_identitys_height(self):
+        from PIL import Image
+        from limbus_skins import lor
+        fake = {"a.pres": {"Default": (Image.new("RGBA", (10, 200)), (0.5, 0.0)), "Slash": (Image.new("RGBA", (30, 100)), (0.5, 0.0))},
+                "b.pres": {"Default": (Image.new("RGBA", (10, 400)), (0.5, 0.0)), "S3": (Image.new("RGBA", (40, 400)), (0.5, 0.0))}}
+        with mock.patch.object(lor, "bundle_path", lambda n: n), mock.patch.object(lor, "poses", lambda b, p: fake[b]):
+            t = lor.source_table({"bundle": "a.pres", "prefab": "A", "sources": {"ego": {"bundle": "b.pres", "prefab": "B"}},
+                                  "map": {"idle": ["Default"], "S1": ["Slash"], "S3": ["ego:S3"]}}, height=5.0)
+        ppu = lambda k: t[k][0].read().m_PixelsToUnits  # noqa: E731
+        self.assertEqual((ppu("idle"), ppu("S1"), ppu("S3")), (40.0, 40.0, 80.0))   # 200 px / 5 u and 400 px / 5 u
+        with self.assertRaises(lor.LorError):
+            with mock.patch.object(lor, "bundle_path", lambda n: n), mock.patch.object(lor, "poses", lambda b, p: fake[b]):
+                lor.source_table({"bundle": "a.pres", "prefab": "A", "map": {"S3": ["nope:S3"]}})
+
     def test_frames_look_like_sprites_to_repaint(self):
         from PIL import Image
         from limbus_skins import lor

@@ -326,10 +326,16 @@
   },
   "gebura": {
    "identity": 10410,
-   "becomes": "Gebura, the Red Mist (Library of Ruina), with her Ruina pages",
+   "becomes": "Gebura, the Red Mist (Library of Ruina): her own form, her E.G.O. for Greater Split",
    "lor": {
-    "bundle": "char/char_604.pres",
-    "prefab": "TheRedMist",
+    "bundle": "char/char_465.pres",
+    "prefab": "Gebura",
+    "sources": {
+     "ego": {
+      "bundle": "char/char_604.pres",
+      "prefab": "TheRedMist"
+     }
+    },
     "map": {
      "idle": [
       "Default"
@@ -351,21 +357,20 @@
      ],
      "S1": [
       "Slash",
-      "S1",
-      "Slash2"
+      "Penetrate",
+      "Slash"
      ],
      "S2": [
-      "Penetrate",
-      "S2",
-      "A2"
+      "Hit",
+      "Hit"
      ],
      "S3": [
-      "A1",
-      "S3",
-      "A3",
-      "S4",
-      "S5",
-      "A5"
+      "ego:A1",
+      "ego:S3",
+      "ego:A3",
+      "ego:S4",
+      "ego:S5",
+      "ego:A5"
      ]
     },
     "smear": [
