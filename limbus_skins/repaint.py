@@ -578,7 +578,8 @@ def _spine_head(sp, art, spec, effects=None):
 
 
 def standing_height(env, ids, fallback=2.6):
-    """How tall the body stands, in units: the tallest drawn part of its idle frames."""
+    """How tall the body stands, in units: from its feet (the sprite's pivot) to the top of its
+    idle frames - so a weapon hanging below the feet doesn't count."""
     best = 0.0
     for o in env.objects:
         if o.type.name != "Sprite" or o.path_id not in ids:
@@ -587,11 +588,13 @@ def standing_height(env, ids, fallback=2.6):
         if kind_of(s.m_Name)[0] != "idle":
             continue
         try:
-            box = s.image.getchannel("A").getbbox()
+            img = s.image
+            box = img.getchannel("A").getbbox()
         except Exception:
             continue
         if box:
-            best = max(best, (box[3] - box[1]) / float(s.m_PixelsToUnits))
+            above = (img.height - box[1]) - s.m_Pivot.y * img.height      # pixels from the feet up
+            best = max(best, above / float(s.m_PixelsToUnits))
     return best or fallback
 
 

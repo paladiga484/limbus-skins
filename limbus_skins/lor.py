@@ -154,7 +154,8 @@ def source_table(spec, height=2.6):
     {kind: [motion, ...]}, "smear": [kind, ...], "sources": {name: {"bundle", "prefab"}}}.
     A motion written "name:Motion" comes from that extra source (e.g. the character's E.G.O.
     form for one skill). Each source's pixels per unit make its standing pose `height` units
-    tall (times "scale"), so every form stands the same size as the identity it replaces."""
+    tall from the feet up (times "scale"), so every form stands as tall as the identity it
+    replaces."""
     height *= float(spec.get("scale", 1.0))
     sources = {"": (spec["bundle"], spec["prefab"])}
     sources.update({n: (v["bundle"], v["prefab"]) for n, v in spec.get("sources", {}).items()})
@@ -169,7 +170,8 @@ def source_table(spec, height=2.6):
             got = poses(bundle_path(bundle), prefab)
             if "Default" not in got:
                 raise LorError(f"{prefab} has no Default pose")
-            loaded[name] = (got, got["Default"][0].height / height)
+            img, (_, py) = got["Default"]                  # its feet to the top of its head,
+            loaded[name] = (got, img.height * (1 - py) / height)   # not a blade hanging below them
         got, ppu = loaded[name]
         if motion not in got:
             raise LorError(f"{sources[name][1]} has no {motion} pose (has {', '.join(sorted(got))})")
