@@ -455,31 +455,52 @@
    "sins": {
     "all": "SHAMROCK"
    },
-   "aura": {
-    "from": "1079_Sancho_BerserkAppearance",
-    "textures": [
-     "Fx_T_Shape_Aura_02",
-     "Fx_T_Shape_Splash_01_2x2"
-    ],
-    "split": {
-     "Fx_T_Shape_Splash_01_2x2": [
-      2,
-      2
+   "aura": [
+    {
+     "from": "1079_Sancho_BerserkAppearance",
+     "textures": [
+      "Fx_T_Shape_Aura_02",
+      "Fx_T_Shape_Splash_01_2x2"
+     ],
+     "split": {
+      "Fx_T_Shape_Splash_01_2x2": [
+       2,
+       2
+      ]
+     },
+     "style": "mist",
+     "count": 4,
+     "size": 0.16,
+     "color": [
+      205,
+      18,
+      28
+     ],
+     "alpha": 1.0,
+     "soft": [
+      "Fx_T_Shape_Aura_02"
      ]
     },
-    "style": "mist",
-    "count": 4,
-    "size": 0.16,
-    "color": [
-     205,
-     18,
-     28
-    ],
-    "alpha": 1.0,
-    "soft": [
-     "Fx_T_Shape_Aura_02"
-    ]
-   }
+    {
+     "from": "10401_Ryoshu_BaseAppearance",
+     "style": "strike",
+     "kinds": [
+      "S1",
+      "S2",
+      "S3"
+     ],
+     "sprites": [
+      "3",
+      "5",
+      "skill2_4_e",
+      "skill2_7_e",
+      "skill3_8_e",
+      "skill3_12_e"
+     ],
+     "size": 0.8,
+     "alpha": 0.9
+    }
+   ]
   },
   "matthias": {
    "identity": 11115,
