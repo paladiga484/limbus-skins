@@ -183,23 +183,23 @@ class Rebuilds(unittest.TestCase):
 
 class Locked(unittest.TestCase):
     SK = {"ahab": {"identity": 10808, "kind": "repaint", "becomes": "Ahab"},
-          "gebura": {"identity": 10410, "kind": "repaint", "becomes": "Gebura", "unlock": "black-forest"}}
+          "kali": {"identity": 10410, "kind": "repaint", "becomes": "Kali", "unlock": "black-forest"}}
 
     def test_a_locked_skin_is_out_of_sight_and_never_active(self):
-        st = {"on": ["ahab", "gebura"], "unlocked": []}
+        st = {"on": ["ahab", "kali", "gebura"], "unlocked": []}           # gebura: an old name, gone
         visible, locked = cli.unlocked(self.SK, st)
-        self.assertEqual((sorted(visible), locked), (["ahab"], {"gebura"}))
+        self.assertEqual((sorted(visible), locked), (["ahab"], {"kali"}))
         self.assertEqual(st["on"], ["ahab"])                           # not swapped in while locked
         self.assertEqual(sorted(cli.select(["all"], visible)), ["ahab"])
         with self.assertRaises(SystemExit) as e:
-            cli.refuse_locked(["Gebura"], locked, self.SK)
+            cli.refuse_locked(["Kali"], locked, self.SK)
         self.assertIn("Black Forest", str(e.exception))
 
     def test_unlocked_it_is_an_ordinary_skin(self):
-        st = {"on": ["gebura"], "unlocked": ["black-forest"]}
+        st = {"on": ["kali"], "unlocked": ["black-forest"]}
         visible, locked = cli.unlocked(self.SK, st)
-        self.assertEqual((sorted(visible), locked, st["on"]), (["ahab", "gebura"], set(), ["gebura"]))
-        cli.refuse_locked(["gebura"], locked, self.SK)                 # no complaint
+        self.assertEqual((sorted(visible), locked, st["on"]), (["ahab", "kali"], set(), ["kali"]))
+        cli.refuse_locked(["kali"], locked, self.SK)                   # no complaint
 
 
 class LaunchArgs(unittest.TestCase):

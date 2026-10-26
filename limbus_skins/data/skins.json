@@ -324,18 +324,12 @@
    "tested": false,
    "mirror": false
   },
-  "gebura": {
+  "kali": {
    "identity": 10410,
-   "becomes": "Gebura, the Red Mist (Library of Ruina): her own form, her E.G.O. for Greater Split",
+   "becomes": "Kali, the Red Mist (Library of Ruina), with her Ruina pages",
    "lor": {
-    "bundle": "char/char_465.pres",
-    "prefab": "Gebura",
-    "sources": {
-     "ego": {
-      "bundle": "char/char_604.pres",
-      "prefab": "TheRedMist"
-     }
-    },
+    "bundle": "char/char_490.pres",
+    "prefab": "Kali",
     "map": {
      "idle": [
       "Default"
@@ -357,20 +351,17 @@
      ],
      "S1": [
       "Slash",
-      "Penetrate",
-      "Slash"
+      "Slash2"
      ],
      "S2": [
       "Hit",
-      "Hit"
+      "Hit2"
      ],
      "S3": [
-      "ego:A1",
-      "ego:S3",
-      "ego:A3",
-      "ego:S4",
-      "ego:S5",
-      "ego:A5"
+      "A1",
+      "S3",
+      "S4",
+      "S5"
      ]
     },
     "smear": [

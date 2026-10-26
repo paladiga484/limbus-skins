@@ -94,7 +94,8 @@ def unlocked(skins, st):
     in memory, so nothing locked is built or applied."""
     have = set(st.get("unlocked", []))
     locked = {k for k, s in skins.items() if s.get("unlock") and s["unlock"] not in have}
-    st["on"] = [k for k in st["on"] if k not in locked]
+    # names this version doesn't know (a skin renamed since, e.g. gebura -> kali) drop out too
+    st["on"] = [k for k in st["on"] if k in skins and k not in locked]
     return {k: v for k, v in skins.items() if k not in locked}, locked
 
 
