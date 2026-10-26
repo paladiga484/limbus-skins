@@ -12,7 +12,7 @@ from importlib import resources
 
 from . import art, bundle, game, helpers, repaint, tint
 
-FORMAT = 7      # bump when built skins change shape: older builds are rebuilt on apply
+FORMAT = 8      # bump when built skins change shape: older builds are rebuilt on apply
 
 
 def catalog():
@@ -60,9 +60,8 @@ def _write(out_dir, cache, stock_path, raw):
 
 def skill_edits(keys, skins, boss=()):
     """The skins among keys whose skill records go into the static-data bundle: repaints
-    with boss skills on, skins that recolor a skill's sin (Greencliff's S3) and skins whose
-    death does something (Greencliff's Black Forest)."""
-    return {k for k in keys if skins[k].get("sins") or skins[k].get("death")
+    with boss skills on, and skins that recolor a skill's sin (Greencliff's S3)."""
+    return {k for k in keys if skins[k].get("sins")
             or (k in boss and skins[k]["kind"] == "repaint" and skins[k].get("source"))}
 
 
@@ -79,7 +78,7 @@ def build(keys, game_dir, cache, data_dir, log=print, boss=()):
     want = [skins[k] for k in keys if skins[k]["kind"] == "helper"]
     want_boss = [skins[k] for k in sorted(skill_edits(keys, skins, boss))]
     if want or want_boss:
-        swaps, skill_swaps, buffs, bad, boss_ok = {}, {}, [], [], []
+        swaps, skill_swaps, bad, boss_ok = {}, {}, [], []
         for s in want:
             h = helper_units.get(s["helper"])
             if h is None or s["identity"] not in ids:
@@ -91,17 +90,9 @@ def build(keys, game_dir, cache, data_dir, log=print, boss=()):
             pers, skills, units = game.boss_data(cache)
             for s in want_boss:
                 try:
-                    if s.get("sins") or s.get("death"):
-                        said = []
-                        if s.get("sins"):
-                            skill_swaps.update(helpers.recolor_skills(pers[s["identity"]], skills, s["sins"], skill_swaps))
-                            said.append("sins: " + ", ".join(f"S{n} {v}" for n, v in sorted(s["sins"].items())))
-                        if s.get("death") == "black-forest":
-                            edits, new = helpers.black_forest(pers[s["identity"]], skills, skill_swaps)
-                            skill_swaps.update(edits)
-                            buffs += new
-                            said.append("carries the Black Forest")
-                        boss_notes[s["key"]] = "; ".join(said)
+                    if s.get("sins"):
+                        skill_swaps.update(helpers.recolor_skills(pers[s["identity"]], skills, s["sins"], skill_swaps))
+                        boss_notes[s["key"]] = "sins: " + ", ".join(f"S{n} {v}" for n, v in sorted(s["sins"].items()))
                     else:
                         unit = helpers.pick_unit(units[s["source"]], skills, s.get("unit"))
                         skill_swaps.update(helpers.boss_skills(pers[s["identity"]], unit, skills))
@@ -113,7 +104,7 @@ def build(keys, game_dir, cache, data_dir, log=print, boss=()):
         shutil.rmtree(out, ignore_errors=True)
         if swaps or skill_swaps:
             static_path, _ = game.find_static(cache)
-            raw, done, _ = helpers.rewrite_static(static_path, swaps, skill_swaps, buffs)
+            raw, done, _ = helpers.rewrite_static(static_path, swaps, skill_swaps)
             os.makedirs(out)
             rel = _write(out, cache, static_path, raw)
             with open(os.path.join(out, "manifest.json"), "w", encoding="utf-8") as f:

@@ -97,64 +97,23 @@ def recolor_skills(identity, skills, sins, base=None):
     return out
 
 
-# The Black Forest: whoever carries it takes everyone with them. Built from the game's own
-# abilities: the mark is given at battle start by the identity's first skill, and on death
-# it gives every unit on both sides a buff that kills at the end of the round.
-BLACK_FOREST = [
-    {"id": "BlackForest", "buffClass": "NonvolatileBuff", "buffType": "Neutral", "canBeDespelled": False,
-     "maxStack": 1, "list": [
-         {"ability": "GiveBuffOnDie", "buffData": {"buffKeyword": "Apocalypse", "target": side, "stack": 1,
-                                                   "turn": 1, "activeRound": 0}}
-         for side in ("EveryEnemy", "EveryAlly")]},
-    {"id": "Apocalypse", "buffClass": "NonvolatileBuff", "buffType": "Negative", "canBeDespelled": False,
-     "maxStack": 1, "list": [{"ability": "InstantDeathOnRoundEnd", "value": 1}]},
-]
-
-
-def black_forest(identity, skills, base=None):
-    """({skill id: new record}, [buff records]): the identity carries the Black Forest."""
-    sid = lit(identity.get("attributeList"))[0]["skillId"]
-    rec = _record(sid, skills, base)
-    shell = rec["skillData"][0]
-    shell["abilityScriptList"] = list(shell.get("abilityScriptList") or []) + [
-        {"scriptName": "GiveBuffOnBattleStart",
-         "buffData": {"buffKeyword": "BlackForest", "target": "Self", "buffOwner": "", "stack": 1,
-                      "turn": 0, "activeRound": 0}}]
-    return {sid: rec}, copy.deepcopy(BLACK_FOREST)
-
-
-def add_records(doc, records):
-    """Put records into a static list, replacing any with the same id. Returns the ids."""
-    new = {r["id"]: r for r in records}
-    keep = [x for x in doc.get("list", []) if x.get("id") not in new]
-    doc["list"] = keep + list(new.values())
-    return set(new)
-
-
-def rewrite_static(static_path, swaps, skill_swaps=None, buffs=()):
+def rewrite_static(static_path, swaps, skill_swaps=None):
     """Rewrite identity records (and skill records) in the static-data bundle.
     swaps = {identity id: helper record}; skill_swaps = {skill id: new record}.
-    buffs = new buff records, added to the first buff list. Returns (bundle bytes,
-    [identity ids changed], [skill ids changed])."""
+    Returns (bundle bytes, [identity ids changed], [skill ids changed])."""
     UnityPy = unitypy()
     env = UnityPy.load(static_path)
     skill_swaps = skill_swaps or {}
     done, done_skills = set(), set()
-    buffs_left = list(buffs)
-    for path, obj in sorted(env.container.items()):
+    for path, obj in env.container.items():
         if obj.type.name != "TextAsset":
             continue
         is_pers = "/static-data/personality/" in path
-        is_buff = buffs_left and "/static-data/buff/" in path
-        if not (is_pers or is_buff or (skill_swaps and "/static-data/skill/" in path)):
+        if not (is_pers or (skill_swaps and "/static-data/skill/" in path)):
             continue
         doc = _text(obj)
         hit = False
-        if is_buff:
-            add_records(doc, buffs_left)
-            buffs_left = []
-            hit = True
-        for i, x in enumerate([] if is_buff else doc.get("list", [])):
+        for i, x in enumerate(doc.get("list", [])):
             if is_pers:
                 h = swaps.get(x.get("id"))
                 if not h:
@@ -176,6 +135,4 @@ def rewrite_static(static_path, swaps, skill_swaps=None, buffs=()):
             ta = obj.read()
             ta.m_Script = json.dumps(doc, ensure_ascii=False, separators=(",", ":"))
             ta.save()
-    if buffs_left:
-        raise ValueError("no buff list in the static data to add the new buffs to")
     return env.file.save(packer="none"), sorted(done), sorted(done_skills)

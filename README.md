@@ -9,8 +9,7 @@ Dress Limbus Company identities as the characters they mirror, on a **private se
   animation, turned to face the sinners' way (Kromer, Lucio, Guido and the Old G Corp. Head
   Manager have none in the game and stand still).
 - **Tints:** the identity keeps its own body and drawings, recolored. LCB Heathcliff as
-  **Greencliff**, green from head to toe; his S3 is Gluttony (the green sin), and when he dies
-  he takes everyone on the field with him.
+  **Greencliff**, green from head to toe; his S3 is Gluttony (the green sin).
 - **Boss skills:** `limbus-skins boss on ahab` and a repainted identity also fights with its
   boss's skills - the boss's power, coins and effects, played with the identity's own (repainted)
   animations. Off by default.
@@ -109,7 +108,7 @@ Skins only show in battle. Menus, portraits and identity art stay as they are.
 | `queequeg` | Heathcliff 10707 | repaint | Queequeg | not yet |
 | `lucio` | Heathcliff 10716 | repaint | Lucio | not yet |
 | `ahab` | Ishmael 10808 | repaint | GasHarpoon Ahab | not yet |
-| `greencliff` | Heathcliff 10701 | tint | Greencliff (all green; S3 Gluttony; his death ends everyone) | not yet |
+| `greencliff` | Heathcliff 10701 | tint | Greencliff (all green; S3 Gluttony) | not yet |
 | `vergilius-wildhunt` | Heathcliff 10710 | repaint | Vergilius (E.G.O. Vergilius when mounted) | not yet |
 | `jun-ishmael` | Ishmael 10811 | repaint | Jun | not yet |
 | `jia-xichun` | Ishmael 10812 | helper | Jia Xichun | not yet |
