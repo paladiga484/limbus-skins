@@ -65,8 +65,9 @@ def skill_edits(keys, skins, boss=()):
             or (k in boss and skins[k]["kind"] == "repaint" and skins[k].get("source"))}
 
 
-def build(keys, game_dir, cache, data_dir, log=print, boss=()):
+def build(keys, game_dir, cache, data_dir, log=print, boss=(), static=True):
     """Build the given skin keys; repaints in `boss` also take their boss's skills.
+    static=False builds only the bodies and leaves the shared static-data file alone.
     Returns {key: (ok, message)}."""
     skins = catalog()
     built_root = os.path.join(data_dir, "built")
@@ -75,8 +76,8 @@ def build(keys, game_dir, cache, data_dir, log=print, boss=()):
     results, boss_notes = {}, {}
 
     # helpers and boss skills: one combined static-data bundle
-    want = [skins[k] for k in keys if skins[k]["kind"] == "helper"]
-    want_boss = [skins[k] for k in sorted(skill_edits(keys, skins, boss))]
+    want = [skins[k] for k in keys if static and skins[k]["kind"] == "helper"]
+    want_boss = [skins[k] for k in sorted(skill_edits(keys, skins, boss))] if static else []
     if want or want_boss:
         swaps, skill_swaps, bad, boss_ok = {}, {}, [], []
         for s in want:
@@ -98,7 +99,7 @@ def build(keys, game_dir, cache, data_dir, log=print, boss=()):
                         skill_swaps.update(helpers.boss_skills(pers[s["identity"]], unit, skills))
                         boss_notes[s["key"]] = f"boss skills from unit {unit['id']}"
                     boss_ok.append(s["key"])
-                except (KeyError, StopIteration, ValueError) as e:
+                except (KeyError, StopIteration, ValueError, IndexError, TypeError, AttributeError) as e:
                     boss_notes[s["key"]] = f"skills unchanged ({e or 'no boss record'})"
         out = os.path.join(built_root, "helpers")
         shutil.rmtree(out, ignore_errors=True)

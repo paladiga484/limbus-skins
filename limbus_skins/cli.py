@@ -124,24 +124,27 @@ def _need_build(keys, skins, data_dir, cache, boss=()):
     from .build import skill_edits
     want_boss = skill_edits(keys, skins, boss)
     for k in keys:
-        folder = "helpers" if skins[k]["kind"] == "helper" else k
-        try:
-            with open(os.path.join(root, folder, "manifest.json"), encoding="utf-8") as f:
-                man = json.load(f)
-            files = man["files"]
-        except (OSError, ValueError, KeyError):
-            out.append(k)
-            continue
-        if man.get("format") != FORMAT:
-            out.append(k)                                   # built by an older limbus-skins
-            continue
-        if not all(os.path.isdir(os.path.join(cache, r)) for r in files):
-            out.append(k)                                   # game updated: bundle replaced
-        elif skins[k]["kind"] == "helper" and helper_built != want_helpers:
-            out.append(k)
-    # boss skills share the helpers' file: rebuild it when a choice is missing from it, or when
-    # it still carries dropped ones and is going to be swapped in for a helper anyway
-    if want_boss - boss_built or (boss_built - want_boss and want_helpers):
+        # a skin with skill edits also needs the shared static-data file to be current
+        folders = ["helpers"] if skins[k]["kind"] == "helper" else [k]
+        if k in want_boss:
+            folders.append("helpers")
+        for folder in folders:
+            try:
+                with open(os.path.join(root, folder, "manifest.json"), encoding="utf-8") as f:
+                    m = json.load(f)
+                files = m["files"]
+            except (OSError, ValueError, KeyError):
+                out.append(k)
+                break
+            if m.get("format") != FORMAT:
+                out.append(k)                               # built by an older limbus-skins
+                break
+            if not all(os.path.isdir(os.path.join(cache, r)) for r in files):
+                out.append(k)                               # game updated: bundle replaced
+                break
+    # helpers and skill edits share one file, swapped in whenever any of them is on: rebuild it
+    # unless it holds exactly what is on now (a dropped helper or boss choice must leave it too)
+    if (want_helpers or want_boss) and (helper_built != want_helpers or boss_built != want_boss):
         out += [k for k in want_boss | want_helpers if k not in out]
     if any(skins[k]["kind"] == "helper" or k in want_boss for k in out):   # the static bundle rebuilds as one set
         out += [k for k in want_helpers | want_boss if k not in out]
@@ -264,12 +267,13 @@ def main(argv=None):
         key = select(args[:1], skins)[0]
         if skins[key]["kind"] == "helper":
             raise SystemExit("previews are for repaints and tints (helper skins use the helper's own art)")
-        if not built_dirs(data, [key]):
+        own = lambda: [d for label, d in built_dirs(data, [key]) if label == key]  # noqa: E731 - not the shared helpers file
+        if not own():
             if sess.active():
                 raise SystemExit("restore first (a modded session is live)")
-            build([key], g, c, data, boss=set(st["boss"]))
+            build([key], g, c, data, static=False)      # the body only: the shared file keeps everyone's edits
         from .repaint import preview
-        files = built_dirs(data, [key])[0][1]
+        files = own()[0]
         data_file = next(os.path.join(r, n) for r, _, ns in os.walk(files) for n in ns if n == "__data")
         out = args[1] if len(args) > 1 else f"{key}.png"
         from .game import identities
