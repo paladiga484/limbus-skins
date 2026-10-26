@@ -3,19 +3,27 @@
 Dress Limbus Company identities as the characters they mirror, on a **private server**.
 
 - **Repaints:** the identity keeps its own body, moves, skills and upties, and is redrawn as
-  another character. Pequod Captain Ishmael fights as GasHarpoon Ahab, Spicebush Yi Sang as
+  another character. Pequod Captain Ishmael fights as Captain Ahab, Spicebush Yi Sang as
   the bloomed Dongbaek, Solemn Lament Yi Sang wears the butterfly head of the Funeral of the
   Dead Butterflies, and so on. Between moves they stand in that character's own idle
   animation, turned to face the sinners' way (Kromer, Lucio, Guido and the Old G Corp. Head
   Manager have none in the game and stand still).
 - **Tints:** the identity keeps its own body and drawings, recolored. LCB Heathcliff as
-  **Greencliff**, green from head to toe; his S3 is Gluttony (the green sin).
+  **Greencliff**, green from head to toe; every skill of his is Gluttony (the green sin).
+- **Library of Ruina:** a repaint can draw from Library of Ruina too, if you own it. Kali,
+  the Red Mist, fights with her Ruina poses (her chibi head brought down to size) and her
+  Ruina pages as skills, wrapped in Sancho's blood mist. She is locked until Greencliff dies
+  in a fight on the private server (the Black Forest).
+- **Auras:** effect sprites taken from a boss's own bundle drift around the body, in every
+  frame and in the idle: the Roach Emperor's flies, Sancho's blood mist.
 - **Boss skills:** `limbus-skins boss on ahab` and a repainted identity also fights with its
   boss's skills - the boss's power, coins and effects, played with the identity's own (repainted)
   animations. Off by default.
 - **Helper skins:** the identity takes a story helper unit's body *and* its skills: LCB
   Ryōshū as Arayashiki Ryōshū from stage 9-49, LCB Sinclair as A Certain Sinclair, Love and
-  Hate Don Quixote as the Walpurgis Night Queen of Hatred.
+  Hate Don Quixote as the Walpurgis Night Queen of Hatred. Skills that only work inside the
+  helper's own story fight (they end or stall it, or kill the user) are left out, and a helper
+  without a defense skill keeps the identity's own.
 
 Everything is built on your machine from the game files you already have. This repository
 contains no game art, and the tool never connects to the internet.
@@ -59,6 +67,13 @@ limbus-skins boss on ahab              # Ahab's own skills too (boss off ahab to
 limbus-skins run --yes -- <the command that starts the game on your private server>
 ```
 
+With the Limbus Private Server packages, the launcher is the package's own:
+
+```
+limbus-skins run --yes -- ./play.sh                               # Linux, from the package folder
+limbus-skins run --yes -- "C:\...\Limbus Private Server.exe"      # Windows
+```
+
 `run` builds whatever is new or out of date, swaps the skins in, starts your launcher, and
 puts the original files back when the game exits. Your choices are remembered, so after the
 first time `limbus-skins run -- <launcher>` is all you need, including after game updates.
@@ -95,6 +110,7 @@ Skins only show in battle. Menus, portraits and identity art stay as they are.
 | `arayashiki-ryoshu` | Ryōshū 10401 | helper | Arayashiki Ryōshū (stage 9-49) | yes |
 | `nelly` | Ryōshū 10408 | repaint | Nelly | not yet |
 | `lin-daiyu` | Ryōshū 10413 | helper | Lin Daiyu | not yet |
+| `kali` | Ryōshū 10410 | repaint | Kali, the Red Mist (Library of Ruina), in Sancho's blood mist; all skills Gluttony. Locked: the Black Forest | not yet |
 | `pinky-nursefather` | Ryōshū 10415 | repaint | the Pinky Nursefather | not yet |
 | `guido` | Meursault 10504 | repaint | Guido | not yet |
 | `bamboo-hatted-kim` | Meursault 10508 | helper | Bamboo-hatted Kim | not yet |
@@ -107,8 +123,9 @@ Skins only show in battle. Menus, portraits and identity art stay as they are.
 | `dongbaek-sunshower` | Heathcliff 10705 | repaint | Dongbaek (Sunshower) | not yet |
 | `queequeg` | Heathcliff 10707 | repaint | Queequeg | not yet |
 | `lucio` | Heathcliff 10716 | repaint | Lucio | not yet |
-| `ahab` | Ishmael 10808 | repaint | GasHarpoon Ahab | not yet |
-| `greencliff` | Heathcliff 10701 | tint | Greencliff (all green; S3 Gluttony) | not yet |
+| `ahab` | Ishmael 10808 | repaint | Captain Ahab | not yet |
+| `greencliff` | Heathcliff 10701 | tint | Greencliff (all green; every skill Gluttony) | not yet |
+| `vergilius` | Heathcliff 10710 | helper | Vergilius, with his own kit and battle script | not yet |
 | `vergilius-wildhunt` | Heathcliff 10710 | repaint | Vergilius (E.G.O. Vergilius when mounted) | not yet |
 | `jun-ishmael` | Ishmael 10811 | repaint | Jun | not yet |
 | `jia-xichun` | Ishmael 10812 | helper | Jia Xichun | not yet |
@@ -124,10 +141,13 @@ Skins only show in battle. Menus, portraits and identity art stay as they are.
 | `werner` | Sinclair 11012 | repaint | Werner | not yet |
 | `pwie` | Sinclair 11016 | helper | Pwie, the Crimson God | not yet |
 | `old-gcorp-head` | Outis 11103 | repaint | the Old G Corp. Head Manager | not yet |
+| `matthias` | Outis 11115 | repaint | the Middle Nursefather, Matthias | not yet |
 | `josephine` | Outis 11108 | repaint | Josephine | not yet |
 | `barber` | Outis 11111 | repaint | the Barber (bloodfiend) | not yet |
+| `roach-emperor` | Gregor 11203 | repaint | the Roach Emperor, with his flies; all skills Gluttony | not yet |
 | `jun-gregor` | Gregor 11208 | repaint | Jun | not yet |
 | `priest` | Gregor 11210 | repaint | the Priest | not yet |
+| `distorted-hohenheim` | Gregor 11212 | repaint | Distorted Hohenheim | not yet |
 | `hohenheim` | Gregor 11214 | helper | Hohenheim | not yet |
 
 "Not yet" means it builds and its frames check out, but nobody has watched it in a fight yet.
