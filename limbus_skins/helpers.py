@@ -97,6 +97,49 @@ def recolor_skills(identity, skills, sins, base=None):
     return out
 
 
+SINS = ("CRIMSON", "SCARLET", "AMBER", "SHAMROCK", "AZURE", "INDIGO", "VIOLET")
+ATK = ("SLASH", "PENETRATE", "HIT")
+
+
+def _buff(spec, script, target):
+    return {"scriptName": script,
+            "buffData": {"buffKeyword": spec["buffKeyword"], "target": spec.get("target", target), "buffOwner": "",
+                         "stack": int(spec.get("stack", 1)), "turn": int(spec.get("turn", 0)),
+                         "activeRound": int(spec.get("activeRound", 1 if script == "GiveBuffOnUse" else 0))}}
+
+
+def move_skills(identity, skills, moves, base=None):
+    """{skill id: new record}: skill n of the identity rewritten from plain data - sin,
+    attack type, base power, coins, and the game's own buff abilities on use and on hit:
+    {"attributeType", "atkType", "defaultValue", "coins": [scale...], "onUse": {...}, "onHit": {...}}.
+    n is "1", "2"... or "defense" (its first defense skill; a guard keeps its defType). Motions
+    and the uptie shell stay the identity's; every uptie plays the same skill."""
+    mine = [a["skillId"] for a in lit(identity.get("attributeList"))]
+    guard = list(lit(identity.get("defenseSkillIDList")))
+    out = {}
+    for n, m in moves.items():
+        if n == "defense" and not guard:
+            raise ValueError("the identity has no defense skill to rewrite")
+        coins = m.get("coins") or []
+        if not 1 <= len(coins) <= 5 or not all(isinstance(c, int) and 0 <= c <= 30 for c in coins):
+            raise ValueError(f"skill {n}: coins must be 1 to 5 scales of 0-30")
+        if m.get("attributeType", "CRIMSON") not in SINS or m.get("atkType", "SLASH") not in ATK:
+            raise ValueError(f"skill {n}: unknown sin or attack type")
+        rec = _record(guard[0] if n == "defense" else mine[int(n) - 1], skills, base)
+        shell = rec["skillData"][0]
+        for k in ("attributeType", "atkType"):
+            if k in m:
+                shell[k] = m[k]
+        shell["defaultValue"] = int(m.get("defaultValue", shell.get("defaultValue", 3)))
+        shell["abilityScriptList"] = [_buff(m["onUse"], "GiveBuffOnUse", "Self")] if m.get("onUse") else []
+        hit = [_buff(m["onHit"], "GiveBuffOnSucceedAttack", "Target")] if m.get("onHit") else []
+        shell["coinList"] = [{"operatorType": "ADD", "scale": c, "abilityScriptList": copy.deepcopy(hit)} for c in coins]
+        shell["gaksungLevel"] = 1
+        rec["skillData"] = [shell]
+        out[rec["id"]] = rec
+    return out
+
+
 def rewrite_static(static_path, swaps, skill_swaps=None):
     """Rewrite identity records (and skill records) in the static-data bundle.
     swaps = {identity id: helper record}; skill_swaps = {skill id: new record}.

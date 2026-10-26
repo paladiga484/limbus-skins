@@ -623,6 +623,36 @@ class BossSkills(unittest.TestCase):
         self.assertEqual(sorted(again), [2])
         self.assertEqual(sins[1]["skillData"][0]["attributeType"], "SHAMROCK")
 
+    def test_moves_rewrite_a_skill_from_plain_data(self):
+        moves = {"2": {"attributeType": "CRIMSON", "atkType": "PENETRATE", "defaultValue": 5, "coins": [3, 3, 3],
+                       "onHit": {"buffKeyword": "Laceration", "stack": 2, "turn": 1},
+                       "onUse": {"buffKeyword": "Agility", "stack": 2, "target": "Self"}}}
+        out = self.h.move_skills(self.ident, self.skills, moves)
+        self.assertEqual(sorted(out), [2])
+        d = out[2]["skillData"]
+        self.assertEqual(len(d), 1)
+        d = d[0]
+        self.assertEqual((d["attributeType"], d["atkType"], d["defaultValue"], d["skillMotion"]), ("CRIMSON", "PENETRATE", 5, "S2"))
+        self.assertEqual([c["scale"] for c in d["coinList"]], [3, 3, 3])
+        hit = d["coinList"][0]["abilityScriptList"][0]
+        self.assertEqual((hit["scriptName"], hit["buffData"]["buffKeyword"], hit["buffData"]["target"],
+                          hit["buffData"]["stack"], hit["buffData"]["turn"]), ("GiveBuffOnSucceedAttack", "Laceration", "Target", 2, 1))
+        use = d["abilityScriptList"][0]
+        self.assertEqual((use["scriptName"], use["buffData"]["buffKeyword"], use["buffData"]["target"],
+                          use["buffData"]["activeRound"]), ("GiveBuffOnUse", "Agility", "Self", 1))
+        self.assertEqual(self.skills[2]["skillData"][0]["attributeType"], "VIOLET")            # inputs untouched
+
+    def test_moves_can_rewrite_the_guard(self):
+        self.ident["defenseSkillIDList"] = [95]
+        out = self.h.move_skills(self.ident, self.skills, {"defense": {"defaultValue": 8, "coins": [4]}})
+        d = out[95]["skillData"][0]
+        self.assertEqual((d["defType"], d["defaultValue"], [c["scale"] for c in d["coinList"]]), ("GUARD", 8, [4]))
+
+    def test_moves_refuse_odd_values(self):
+        for bad in ({"atkType": "KICK"}, {"attributeType": "PLAID"}, {"coins": []}, {"coins": [99] * 9}):
+            with self.assertRaises(ValueError):
+                self.h.move_skills(self.ident, self.skills, {"1": dict({"coins": [4]}, **bad)})
+
     def test_pick_unit_prefers_most_attacks_or_the_named_one(self):
         recs = [{"id": 5, "attributeList": [{"skillId": 91}]}, self.unit]
         self.assertEqual(self.h.pick_unit(recs, self.skills)["id"], 81912)

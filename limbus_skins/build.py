@@ -63,7 +63,7 @@ def _write(out_dir, cache, stock_path, raw):
 def skill_edits(keys, skins, boss=()):
     """The skins among keys whose skill records go into the static-data bundle: repaints
     with boss skills on, and skins that recolor a skill's sin (Greencliff's S3)."""
-    return {k for k in keys if skins[k].get("sins")
+    return {k for k in keys if skins[k].get("sins") or skins[k].get("moves")
             or (k in boss and skins[k]["kind"] == "repaint" and skins[k].get("source"))}
 
 
@@ -93,9 +93,15 @@ def build(keys, game_dir, cache, data_dir, log=print, boss=(), static=True):
             pers, skills, units = game.boss_data(cache)
             for s in want_boss:
                 try:
-                    if s.get("sins"):
-                        skill_swaps.update(helpers.recolor_skills(pers[s["identity"]], skills, s["sins"], skill_swaps))
-                        boss_notes[s["key"]] = "sins: " + ", ".join(f"S{n} {v}" for n, v in sorted(s["sins"].items()))
+                    if s.get("sins") or s.get("moves"):
+                        said = []
+                        if s.get("moves"):
+                            skill_swaps.update(helpers.move_skills(pers[s["identity"]], skills, s["moves"], skill_swaps))
+                            said.append(f"own moves for S{', S'.join(sorted(s['moves']))}")
+                        if s.get("sins"):
+                            skill_swaps.update(helpers.recolor_skills(pers[s["identity"]], skills, s["sins"], skill_swaps))
+                            said.append("sins: " + ", ".join(f"S{n} {v}" for n, v in sorted(s["sins"].items())))
+                        boss_notes[s["key"]] = "; ".join(said)
                     else:
                         unit = helpers.pick_unit(units[s["source"]], skills, s.get("unit"))
                         skill_swaps.update(helpers.boss_skills(pers[s["identity"]], unit, skills))
