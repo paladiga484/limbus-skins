@@ -39,9 +39,16 @@ def _mul(a, b):
             a[1] * b[2] + a[3] * b[3], a[0] * b[4] + a[2] * b[5] + a[4], a[1] * b[4] + a[3] * b[5] + a[5])
 
 
-def poses(bundle, prefix, ppu=100):
+def _about(m, k, ax, ay):
+    """Transform m, then scaled by k about the point (ax, ay)."""
+    return (k * m[0], k * m[1], k * m[2], k * m[3], ax + k * (m[4] - ax), ay + k * (m[5] - ay))
+
+
+def poses(bundle, prefix, ppu=100, head=None):
     """{motion: (RGBA image, (pivot x, pivot y))} for every GameObject named <prefix>_<motion>.
-    The pivot is the character's origin (its feet), as a fraction of the image, bottom-up."""
+    The pivot is the character's origin (its feet), as a fraction of the image, bottom-up.
+    head = {"parts": [child names], "neck": child name, "scale": k} shrinks those parts about
+    the neck's centre: Library of Ruina draws big chibi heads that sit oddly on a sinner."""
     from PIL import Image
     env = unitypy().load(bundle)
     objs = {o.path_id: o for o in env.objects}
@@ -73,18 +80,24 @@ def poses(bundle, prefix, ppu=100):
                 if co.type.name == "SpriteRenderer":
                     sr = co.read_typetree()
                     if sr["m_Sprite"]["m_PathID"] and sr.get("m_Enabled", 1):
-                        parts.append((sr.get("m_SortingOrder", 0), depth, len(parts), sr["m_Sprite"]["m_PathID"],
-                                      m, (sr.get("m_Color") or {}).get("a", 1), sr.get("m_FlipX", 0)))
+                        parts.append([sr.get("m_SortingOrder", 0), depth, len(parts), sr["m_Sprite"]["m_PathID"],
+                                      m, (sr.get("m_Color") or {}).get("a", 1), sr.get("m_FlipX", 0), g["m_Name"]])
             for ch in t["m_Children"]:
                 walk(tt(tt(ch["m_PathID"])["m_GameObject"]["m_PathID"]), m, depth + 1)
 
         walk(go, (1, 0, 0, 1, 0, 0), 0)
         if not parts:
             continue
+        if head:
+            neck = next((p[4] for p in parts if p[7] == head["neck"]), None)
+            if neck is not None:
+                for p in parts:
+                    if p[7] in head["parts"]:
+                        p[4] = _about(p[4], float(head["scale"]), neck[4], neck[5])
         W = H = 2400
         cx, cy = W // 2, int(H * 0.75)                     # the origin, with room above and below
         canvas = Image.new("RGBA", (W, H), (0, 0, 0, 0))
-        for _, _, _, sp, m, alpha, flip in sorted(parts):
+        for _, _, _, sp, m, alpha, flip, _ in sorted(parts, key=lambda p: p[:3]):
             s = objs[sp].read()
             img = s.image.convert("RGBA")
             if flip:
@@ -151,7 +164,8 @@ def afterimage(img, pivot, dx, copies=3):
 
 def source_table(spec, height=2.6):
     """repaint()'s source table from a skins.json "lor" entry: {"bundle", "prefab", "map":
-    {kind: [motion, ...]}, "smear": [kind, ...], "sources": {name: {"bundle", "prefab"}}}.
+    {kind: [motion, ...]}, "smear": [kind, ...], "sources": {name: {"bundle", "prefab"}},
+    "head": {...} (see poses), "idle_time": seconds per idle cycle}.
     A motion written "name:Motion" comes from that extra source (e.g. the character's E.G.O.
     form for one skill). Each source's pixels per unit make its standing pose `height` units
     tall from the feet up (times "scale"), so every form stands as tall as the identity it
@@ -167,7 +181,7 @@ def source_table(spec, height=2.6):
             raise LorError(f"{ref}: no source called {name!r}")
         if name not in loaded:
             bundle, prefab = sources[name]
-            got = poses(bundle_path(bundle), prefab)
+            got = poses(bundle_path(bundle), prefab, head=spec.get("head") if name == "" else None)
             if "Default" not in got:
                 raise LorError(f"{prefab} has no Default pose")
             img, (_, py) = got["Default"]                  # its feet to the top of its head,
@@ -188,5 +202,5 @@ def source_table(spec, height=2.6):
                 frames.append(Frame(f"{m}_smear", s_img, s_pv, ppu))
             frames.append(Frame(m, img, pv, ppu))
         table[kind] = frames
-    table.setdefault("idle_time", 1.6)
+    table["idle_time"] = float(spec.get("idle_time", 1.6))
     return table

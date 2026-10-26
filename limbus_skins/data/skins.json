@@ -328,7 +328,8 @@
     "prefab": "Kali",
     "map": {
      "idle": [
-      "Default"
+      "Default",
+      "Standing"
      ],
      "move": [
       "Move"
@@ -347,17 +348,19 @@
      ],
      "S1": [
       "Slash",
+      "Penetrate",
       "Slash2"
      ],
      "S2": [
       "Hit",
+      "A2",
       "Hit2"
      ],
      "S3": [
       "A1",
-      "S3",
-      "S4",
-      "S5"
+      "A3",
+      "Penetrate",
+      "A5"
      ]
     },
     "smear": [
@@ -365,7 +368,18 @@
      "S1",
      "S2",
      "S3"
-    ]
+    ],
+    "head": {
+     "parts": [
+      "back hair",
+      "head",
+      "front hair",
+      "face"
+     ],
+     "neck": "P voo",
+     "scale": 0.7
+    },
+    "idle_time": 2.4
    },
    "tested": false,
    "moves": {
