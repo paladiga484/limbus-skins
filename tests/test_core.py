@@ -674,6 +674,27 @@ class BossSkills(unittest.TestCase):
             with self.assertRaises(ValueError):
                 self.h.move_skills(self.ident, self.skills, {"1": dict({"coins": [4]}, **bad)})
 
+    def test_helper_kit_drops_story_skills_and_keeps_a_guard(self):
+        story = lambda i, name, motion="S5": {"id": i, "skillTier": 3, "skillData": [  # noqa: E731
+            {"skillMotion": motion, "coinList": [{"scale": 1, "abilityScriptList": [{"scriptName": name}]}]}]}
+        self.skills[96] = story(96, "DoNotEndGameUntilReturnFromLivingSpecimen")
+        self.skills[97] = story(97, "CreateMangWithSkillPowerAdderOnUse_5_1")
+        self.skills[98] = {"id": 98, "skillTier": 1, "skillData": [{"defType": "EVADE", "skillMotion": "Default"}]}
+        self.ident["defenseSkillIDList"] = [95, 98]           # 95 moves as S4, which the helper's body lacks
+        helper = {"id": 400013, "attributeList": [{"skillId": i, "number": 1} for i in (91, 96, 97)]}
+        attrs, guard, dropped = self.h.helper_kit(self.ident, helper, self.skills)
+        self.assertEqual([a["skillId"] for a in attrs], [91])
+        self.assertEqual(guard, [98])
+        self.assertEqual([d[0] for d in dropped], [96, 97])
+        attrs, _, _ = self.h.helper_kit(self.ident, helper, self.skills, script=True)   # its battle script comes along
+        self.assertEqual([a["skillId"] for a in attrs], [91, 97])
+        helper["defenseSkillIDList"] = [95]
+        self.assertEqual(self.h.helper_kit(self.ident, helper, self.skills)[1], [95])  # its own guard wins
+        with self.assertRaises(ValueError):
+            self.h.helper_kit(self.ident, {"id": 1, "attributeList": [{"skillId": 96}]}, self.skills)
+        unit = {"id": 2, "attributeList": [{"skillId": 96}, {"skillId": 92}]}      # bosses skip them too
+        self.assertEqual(self.h.boss_skills(self.ident, unit, self.skills)[1]["skillData"][0]["defaultValue"], 92)
+
     def test_pick_unit_prefers_most_attacks_or_the_named_one(self):
         recs = [{"id": 5, "attributeList": [{"skillId": 91}]}, self.unit]
         self.assertEqual(self.h.pick_unit(recs, self.skills)["id"], 81912)

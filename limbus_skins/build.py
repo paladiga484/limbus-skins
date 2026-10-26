@@ -12,7 +12,7 @@ from importlib import resources
 
 from . import art, bundle, game, helpers, repaint, tint
 
-FORMAT = 8      # bump when built skins change shape: older builds are rebuilt on apply
+FORMAT = 9      # bump when built skins change shape: older builds are rebuilt on apply
 
 
 def catalog():
@@ -81,16 +81,24 @@ def build(keys, game_dir, cache, data_dir, log=print, boss=(), static=True):
     want = [skins[k] for k in keys if static and skins[k]["kind"] == "helper"]
     want_boss = [skins[k] for k in sorted(skill_edits(keys, skins, boss))] if static else []
     if want or want_boss:
-        swaps, skill_swaps, bad, boss_ok = {}, {}, [], []
+        swaps, skill_swaps, bad, boss_ok, kit_notes = {}, {}, [], [], {}
+        pers, skills, units = game.boss_data(cache)
         for s in want:
             h = helper_units.get(s["helper"])
             if h is None or s["identity"] not in ids:
                 bad.append(s["key"])
                 results[s["key"]] = (False, "not in this game version")
                 continue
-            swaps[s["identity"]] = dict(h, _script=bool(s.get("script")))
+            try:
+                attrs, guard, dropped = helpers.helper_kit(pers[s["identity"]], h, skills, bool(s.get("script")))
+            except (KeyError, ValueError) as e:
+                bad.append(s["key"])
+                results[s["key"]] = (False, str(e))
+                continue
+            swaps[s["identity"]] = dict(h, attributeList=attrs, defenseSkillIDList=guard, _script=bool(s.get("script")))
+            if dropped:
+                kit_notes[s["key"]] = "story-only skills left out: " + ", ".join(str(i) for i, _ in dropped)
         if want_boss:
-            pers, skills, units = game.boss_data(cache)
             for s in want_boss:
                 try:
                     if s.get("sins") or s.get("moves"):
@@ -122,7 +130,8 @@ def build(keys, game_dir, cache, data_dir, log=print, boss=(), static=True):
             for s in want:
                 if s["key"] not in bad:
                     ok = s["identity"] in done
-                    results[s["key"]] = (ok, "built" if ok else "identity not found in the static data")
+                    results[s["key"]] = (ok, "; ".join(["built"] + ([kit_notes[s["key"]]] if s["key"] in kit_notes else []))
+                                         if ok else "identity not found in the static data")
             log(f"  helpers: {len(done)} identities restyled, {len(boss_ok)} with new skills")
 
     # repaints and tints: one folder each

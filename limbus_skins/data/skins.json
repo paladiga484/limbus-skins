@@ -442,6 +442,24 @@
     }
    },
    "unlock": "black-forest"
+  },
+  "matthias": {
+   "identity": 11115,
+   "becomes": "the Middle Nursefather Matthias",
+   "source": "1327_MiddleFinger_fatherAppearance",
+   "tested": false
+  },
+  "roach-emperor": {
+   "identity": 11203,
+   "becomes": "the Roach Emperor",
+   "source": "1339_Gregor_EmperorAppearance",
+   "tested": false
+  },
+  "distorted-hohenheim": {
+   "identity": 11212,
+   "becomes": "Distorted Hohenheim",
+   "source": "1082_Distorted_HohenheimAppearance",
+   "tested": false
   }
  },
  "tints": {

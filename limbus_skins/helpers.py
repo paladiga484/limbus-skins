@@ -22,12 +22,39 @@ BOSS_FIELDS = ("attributeType", "atkType", "defType", "skillTargetType", "target
                "canTeamKill", "canDuel", "canChangeTarget")
 
 
+# Skills (helper or boss) that only work inside their own story fight: they end or stall the battle,
+# retreat, or kill the user. Outside it they hang the fight (A Certain Sinclair's S6 waits for
+# a "return from the living specimen" that never comes).
+STORY_SCRIPTS = ("Retreat", "EndPoint", "DieOnEndSkill", "DoNotEndGame", "EndBattleForcely",
+                 "GetImmortalOnlyOnUsingThisSkill")
+# ...and ones that lean on their unit's own battle script, which only a helper with "script" brings
+UNIT_SCRIPTS = ("CreateMang", "UseMpSelfIfCreateMang")
+
+
+def _scripts(rec):
+    out = set()
+    for d in rec.get("skillData", []):
+        for a in d.get("abilityScriptList") or []:
+            out.add(a.get("scriptName") or "")
+        for c in d.get("coinList") or []:
+            for a in c.get("abilityScriptList") or []:
+                out.add(a.get("scriptName") or "")
+    return out
+
+
+def story_only(rec, script=False):
+    """The first ability that ties skill record rec to its own story fight (or, unless
+    script, to its unit's own battle script); None when it works anywhere."""
+    banned = STORY_SCRIPTS + (() if script else UNIT_SCRIPTS)
+    return next((s for s in sorted(_scripts(rec)) if any(b in s for b in banned)), None)
+
+
 def _attacks(unit, skills):
-    """The unit's attack skills, lowest tier first."""
+    """The unit's attack skills that work outside its own fight, lowest tier first."""
     out = []
     for a in lit(unit.get("attributeList")):
         s = skills.get(a["skillId"])
-        if s and s.get("skillData") and s["skillData"][0].get("defType", "ATTACK") == "ATTACK":
+        if s and s.get("skillData") and s["skillData"][0].get("defType", "ATTACK") == "ATTACK" and not story_only(s):
             out.append(s)
     return sorted(out, key=lambda s: s.get("skillTier", 1))
 
@@ -76,6 +103,30 @@ def boss_skills(identity, unit, skills):
         rec["skillData"] = [shell]                  # no uptie steps: the boss's numbers throughout
         out[sid] = rec
     return out
+
+
+def helper_kit(identity, helper, skills, script=False):
+    """(attributeList, defenseSkillIDList, [(skill id, why) dropped]) for an identity taking
+    a helper's kit: the helper's skills minus the story-only ones (and those needing its
+    battle script, unless that comes along). A helper without a defense skill leaves the
+    identity its own, where the helper's body has the motion (Default, or one its kept skills
+    use). Raises ValueError when nothing usable is left."""
+    attrs, dropped = [], []
+    for a in lit(helper.get("attributeList")):
+        rec = skills.get(a["skillId"])
+        why = "not in the skill data" if rec is None else story_only(rec, script)
+        if why:
+            dropped.append((a["skillId"], why))
+        else:
+            attrs.append(a)
+    if not attrs:
+        raise ValueError(f"helper {helper['id']} has no skills that work outside its story fight")
+    guard = [g for g in lit(helper.get("defenseSkillIDList")) if g in skills]
+    if not guard:
+        motions = {"Default"} | {skills[a["skillId"]]["skillData"][0].get("skillMotion") for a in attrs}
+        guard = [g for g in lit(identity.get("defenseSkillIDList"))
+                 if g in skills and skills[g]["skillData"][0].get("skillMotion") in motions]
+    return attrs, guard, dropped
 
 
 def _record(sid, skills, base):
