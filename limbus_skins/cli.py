@@ -135,7 +135,7 @@ def split_launch(args):
 
 def _need_build(keys, skins, data_dir, cache, boss=()):
     """Enabled skins with no build, or built for an older game version."""
-    from .build import FORMAT
+    from .build import FORMAT, shares_static
     root = os.path.join(data_dir, "built")
     out = []
     try:
@@ -144,12 +144,12 @@ def _need_build(keys, skins, data_dir, cache, boss=()):
         helper_built, boss_built = set(man["skins"]), set(man.get("skills", []))
     except (OSError, ValueError, KeyError):
         helper_built, boss_built = set(), set()
-    want_helpers = {k for k in keys if skins[k]["kind"] == "helper"}
+    want_helpers = {k for k in keys if shares_static(skins[k])}
     from .build import skill_edits
     want_boss = skill_edits(keys, skins, boss)
     for k in keys:
         # a skin with skill edits also needs the shared static-data file to be current
-        folders = ["helpers"] if skins[k]["kind"] == "helper" else [k]
+        folders = ["helpers"] if shares_static(skins[k]) else [k]
         if k in want_boss:
             folders.append("helpers")
         for folder in folders:
@@ -170,7 +170,7 @@ def _need_build(keys, skins, data_dir, cache, boss=()):
     # unless it holds exactly what is on now (a dropped helper or boss choice must leave it too)
     if (want_helpers or want_boss) and (helper_built != want_helpers or boss_built != want_boss):
         out += [k for k in want_boss | want_helpers if k not in out]
-    if any(skins[k]["kind"] == "helper" or k in want_boss for k in out):   # the static bundle rebuilds as one set
+    if any(shares_static(skins[k]) or k in want_boss for k in out):   # the static bundle rebuilds as one set
         out += [k for k in want_helpers | want_boss if k not in out]
     return out
 
@@ -194,7 +194,7 @@ def main(argv=None):
         print(f"game:  {g}\ncache: {c}")
         return 0
 
-    from .build import build, built_dirs, catalog
+    from .build import build, built_dirs, catalog, shares_static
     from .mods import ModError, Session, game_running
     st, _, data = _state()
     allskins = catalog()
@@ -294,8 +294,8 @@ def main(argv=None):
             raise SystemExit("usage: limbus-skins preview <skin> [file.png]")
         refuse_locked(args[:1], locked, allskins)
         key = select(args[:1], skins)[0]
-        if skins[key]["kind"] == "helper":
-            raise SystemExit("previews are for repaints and tints (helper skins use the helper's own art)")
+        if shares_static(skins[key]):
+            raise SystemExit("previews are for repaints and tints (helpers and identities wear another skin's art)")
         own = lambda: [d for label, d in built_dirs(data, [key]) if label == key]  # noqa: E731 - not the shared helpers file
         if not own():
             if sess.active():

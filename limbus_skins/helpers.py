@@ -201,19 +201,62 @@ def move_skills(identity, skills, moves, base=None):
     return out
 
 
-def rewrite_static(static_path, swaps, skill_swaps=None):
+# Identities of our own: a new id cloned from an existing identity, in every table the client
+# keys by identity (the record, its skin, passives, voice, card thumbnail, art offsets).
+IDENTITY_KEYS = {"personality": "id", "skin": "skinId", "personality-passive": "personalityID",
+                 "personality-voice": "personalityId", "personality-cg-thumbnail": "personalityId"}
+
+
+def clone_record(kind, rec, base, new):
+    """A copy of `rec` as identity `new`'s, if it is identity `base`'s in table `kind`; else None.
+    The card thumbnail points at the base's art folder, which the new id has none of its own."""
+    key = IDENTITY_KEYS.get(kind)
+    if key is not None:
+        if rec.get(key) != base:
+            return None
+        out = dict(copy.deepcopy(rec), **{key: new})
+        if kind == "personality-cg-thumbnail" and not out.get("folderName"):
+            out["folderName"] = str(base)
+        return out
+    if kind.startswith("illust-pivots-") and str(rec.get("id", "")).startswith(f"{base}_"):
+        return dict(copy.deepcopy(rec), id=f"{new}_{rec['id'][len(str(base)) + 1:]}")
+    return None
+
+
+def add_clones(kind, records, clones):
+    """records plus a clone of each base record for every {new id: base id} in `clones`."""
+    out = list(records)
+    for new, base in sorted(clones.items()):
+        out += [c for c in (clone_record(kind, r, base, new) for r in records) if c is not None]
+    return out
+
+
+def check_new_ids(have, clones):
+    """Refuse a new id the game already uses, or a base it doesn't have (ValueError)."""
+    for new, base in clones.items():
+        if new in have:
+            raise ValueError(f"identity {new} already exists in this game version")
+        if base not in have:
+            raise ValueError(f"identity {base} (to clone {new} from) isn't in this game version")
+
+
+def rewrite_static(static_path, swaps, skill_swaps=None, clones=None):
     """Rewrite identity records (and skill records) in the static-data bundle.
-    swaps = {identity id: helper record}; skill_swaps = {skill id: new record}.
+    swaps = {identity id: helper record}; skill_swaps = {skill id: new record};
+    clones = {new identity id: base id} (cloned after the swaps, so a clone wears them too).
     Returns (bundle bytes, [identity ids changed], [skill ids changed])."""
     UnityPy = unitypy()
     env = UnityPy.load(static_path)
     skill_swaps = skill_swaps or {}
+    clones = clones or {}
     done, done_skills = set(), set()
     for path, obj in env.container.items():
         if obj.type.name != "TextAsset":
             continue
-        is_pers = "/static-data/personality/" in path
-        if not (is_pers or (skill_swaps and "/static-data/skill/" in path)):
+        kind = path.split("/static-data/")[1].split("/")[0] if "/static-data/" in path else ""
+        is_pers = kind == "personality"
+        cloned = bool(clones) and (kind in IDENTITY_KEYS or kind.startswith("illust-pivots-"))
+        if not (is_pers or cloned or (skill_swaps and kind == "skill")):
             continue
         doc = _text(obj)
         hit = False
@@ -239,6 +282,12 @@ def rewrite_static(static_path, swaps, skill_swaps=None):
                 doc["list"][i] = skill_swaps[x["id"]]
                 done_skills.add(x["id"])
             hit = True
+        if cloned:
+            grown = add_clones(kind, doc.get("list", []), clones)
+            if len(grown) != len(doc.get("list", [])):
+                doc["list"] = grown
+                hit = True
+                done.update(n for n in clones if is_pers and any(r.get("id") == n for r in grown))
         if hit:
             ta = obj.read()
             ta.m_Script = json.dumps(doc, ensure_ascii=False, separators=(",", ":"))

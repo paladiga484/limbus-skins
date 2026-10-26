@@ -721,6 +721,50 @@ class BossSkills(unittest.TestCase):
         self.assertEqual(self.h.pick_unit(recs, self.skills, want=5)["id"], 5)
 
 
+class Identities(unittest.TestCase):
+    def setUp(self):
+        from limbus_skins import helpers
+        self.h = helpers
+
+    def test_new_identity_clones_base_with_new_id(self):
+        base = {"id": 10710, "characterId": 7, "appearance": "10710_X", "attributeList": [{"skillId": 1071001}]}
+        rec = self.h.clone_record("personality", base, 10710, 10799)
+        self.assertEqual(rec, dict(base, id=10799))
+        self.assertEqual(base["id"], 10710)                                  # the base stays as it was
+        self.assertIsNone(self.h.clone_record("personality", {"id": 10701}, 10710, 10799))
+
+    def test_clones_follow_every_table_keyed_by_the_identity(self):
+        c = self.h.clone_record
+        self.assertEqual(c("skin", {"skinId": 10710, "rank": 1}, 10710, 10799)["skinId"], 10799)
+        self.assertEqual(c("personality-passive", {"personalityID": 10710}, 10710, 10799)["personalityID"], 10799)
+        self.assertEqual(c("personality-voice", {"personalityId": 10710}, 10710, 10799)["personalityId"], 10799)
+        self.assertEqual(c("illust-pivots-unitinfo", {"id": "10710_normal"}, 10710, 10799)["id"], "10799_normal")
+        self.assertIsNone(c("illust-pivots-unitinfo", {"id": "107100_normal"}, 10710, 10799))
+        thumb = c("personality-cg-thumbnail", {"personalityId": 10710, "folderName": ""}, 10710, 10799)
+        self.assertEqual((thumb["personalityId"], thumb["folderName"]), (10799, "10710"))   # the base's art
+        self.assertIsNone(c("gacha", {"id": 10710}, 10710, 10799))           # not an identity table
+
+    def test_add_clones_appends_copies_of_the_records_as_they_are_now(self):
+        lst = [{"id": 10710, "appearance": "400012_VergiliusAppearance"}, {"id": 10701}]
+        out = self.h.add_clones("personality", lst, {10799: 10710})
+        self.assertEqual([x["id"] for x in out], [10710, 10701, 10799])
+        self.assertEqual(out[2]["appearance"], "400012_VergiliusAppearance")   # after a helper swap: the kit too
+
+    def test_new_identity_refuses_taken_or_missing_ids(self):
+        self.h.check_new_ids({10710, 10410}, {10799: 10710, 10499: 10410})
+        with self.assertRaises(ValueError):
+            self.h.check_new_ids({10710, 10799}, {10799: 10710})             # the game has it already
+        with self.assertRaises(ValueError):
+            self.h.check_new_ids({10410}, {10799: 10710})                    # nothing to clone
+
+    def test_catalog_has_the_identity_kind_and_kali_stays_locked(self):
+        from limbus_skins.build import catalog
+        skins = catalog()
+        self.assertEqual((skins["vergilius-id"]["kind"], skins["vergilius-id"]["identity"], skins["vergilius-id"]["base"]),
+                         ("identity", 10799, 10710))
+        self.assertEqual((skins["kali-id"]["identity"], skins["kali-id"]["unlock"]), (10499, "black-forest"))
+
+
 class LibraryOfRuina(unittest.TestCase):
     def test_afterimage_trails_behind_and_keeps_the_pivot_on_the_body(self):
         from PIL import Image

@@ -12,17 +12,22 @@ from importlib import resources
 
 from . import art, bundle, game, helpers, repaint, tint
 
-FORMAT = 13      # bump when built skins change shape: older builds are rebuilt on apply
+FORMAT = 14      # bump when built skins change shape: older builds are rebuilt on apply
 
 
 def catalog():
     with resources.files("limbus_skins").joinpath("data/skins.json").open(encoding="utf-8") as f:
         doc = json.load(f)
     skins = {}
-    for kind in ("helpers", "repaints", "tints"):
+    for kind, one in (("helpers", "helper"), ("repaints", "repaint"), ("tints", "tint"), ("identities", "identity")):
         for key, e in doc.get(kind, {}).items():
-            skins[key] = dict(e, key=key, kind=kind[:-1])
+            skins[key] = dict(e, key=key, kind=one)
     return skins
+
+
+def shares_static(skin):
+    """Built into the one shared static-data file (helpers, and identities of our own)."""
+    return skin["kind"] in ("helper", "identity")
 
 
 def head_recipe(name):
@@ -79,10 +84,19 @@ def build(keys, game_dir, cache, data_dir, log=print, boss=(), static=True):
 
     # helpers and boss skills: one combined static-data bundle
     want = [skins[k] for k in keys if static and skins[k]["kind"] == "helper"]
+    want_ids = [skins[k] for k in keys if static and skins[k]["kind"] == "identity"]
     want_boss = [skins[k] for k in sorted(skill_edits(keys, skins, boss))] if static else []
-    if want or want_boss:
+    if want or want_boss or want_ids:
         swaps, skill_swaps, bad, boss_ok, kit_notes, green = {}, {}, [], [], {}, set()
         pers, skills, units = game.boss_data(cache)
+        clones = {}
+        for s in want_ids:
+            try:
+                helpers.check_new_ids(set(ids), {s["identity"]: s["base"]})
+                clones[s["identity"]] = s["base"]
+            except ValueError as e:
+                bad.append(s["key"])
+                results[s["key"]] = (False, str(e))
         for s in want:
             h = helper_units.get(s["helper"])
             if h is None or s["identity"] not in ids:
@@ -120,15 +134,15 @@ def build(keys, game_dir, cache, data_dir, log=print, boss=(), static=True):
                     boss_notes[s["key"]] = f"skills unchanged ({e or 'no boss record'})"
         out = os.path.join(built_root, "helpers")
         shutil.rmtree(out, ignore_errors=True)
-        if swaps or skill_swaps:
+        if swaps or skill_swaps or clones:
             static_path, _ = game.find_static(cache)
-            raw, done, _ = helpers.rewrite_static(static_path, swaps, skill_swaps)
+            raw, done, _ = helpers.rewrite_static(static_path, swaps, skill_swaps, clones)
             os.makedirs(out)
             rel = _write(out, cache, static_path, raw)
             with open(os.path.join(out, "manifest.json"), "w", encoding="utf-8") as f:
-                json.dump({"format": FORMAT, "kind": "helpers", "skins": [s["key"] for s in want if s["key"] not in bad],
+                json.dump({"format": FORMAT, "kind": "helpers", "skins": [s["key"] for s in want + want_ids if s["key"] not in bad],
                            "skills": boss_ok, "files": [rel], "green_skills": sorted(green)}, f, indent=1)
-            for s in want:
+            for s in want + want_ids:
                 if s["key"] not in bad:
                     ok = s["identity"] in done
                     results[s["key"]] = (ok, "; ".join(["built"] + ([kit_notes[s["key"]]] if s["key"] in kit_notes else []))

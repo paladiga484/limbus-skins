@@ -551,5 +551,20 @@
     "all": "SHAMROCK"
    }
   }
+ },
+ "identities": {
+  "vergilius-id": {
+   "identity": 10799,
+   "base": 10710,
+   "becomes": "Vergilius as an identity of his own (Heathcliff's slot), wearing what 10710 wears",
+   "tested": false
+  },
+  "kali-id": {
+   "identity": 10499,
+   "base": 10410,
+   "becomes": "Kali as an identity of her own (Ryōshū's slot), wearing what 10410 wears",
+   "unlock": "black-forest",
+   "tested": false
+  }
  }
 }
