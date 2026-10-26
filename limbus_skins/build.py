@@ -12,7 +12,7 @@ from importlib import resources
 
 from . import art, bundle, game, helpers, repaint, tint
 
-FORMAT = 12      # bump when built skins change shape: older builds are rebuilt on apply
+FORMAT = 13      # bump when built skins change shape: older builds are rebuilt on apply
 
 
 def catalog():
@@ -81,7 +81,7 @@ def build(keys, game_dir, cache, data_dir, log=print, boss=(), static=True):
     want = [skins[k] for k in keys if static and skins[k]["kind"] == "helper"]
     want_boss = [skins[k] for k in sorted(skill_edits(keys, skins, boss))] if static else []
     if want or want_boss:
-        swaps, skill_swaps, bad, boss_ok, kit_notes = {}, {}, [], [], {}
+        swaps, skill_swaps, bad, boss_ok, kit_notes, green = {}, {}, [], [], {}, set()
         pers, skills, units = game.boss_data(cache)
         for s in want:
             h = helper_units.get(s["helper"])
@@ -110,7 +110,9 @@ def build(keys, game_dir, cache, data_dir, log=print, boss=(), static=True):
                         skill_swaps.update(helpers.move_skills(ident, skills, s["moves"], skill_swaps))
                         said.append(f"own moves for S{', S'.join(sorted(s['moves']))}")
                     if s.get("sins"):
-                        skill_swaps.update(helpers.recolor_skills(ident, skills, s["sins"], skill_swaps))
+                        recoloured = helpers.recolor_skills(ident, skills, s["sins"], skill_swaps)
+                        skill_swaps.update(recoloured)
+                        green.update(helpers.green_ids(recoloured))
                         said.append("sins: " + ", ".join(f"{n} {v}" for n, v in sorted(s["sins"].items())))
                     boss_notes[s["key"]] = "; ".join(said)
                     boss_ok.append(s["key"])
@@ -125,7 +127,7 @@ def build(keys, game_dir, cache, data_dir, log=print, boss=(), static=True):
             rel = _write(out, cache, static_path, raw)
             with open(os.path.join(out, "manifest.json"), "w", encoding="utf-8") as f:
                 json.dump({"format": FORMAT, "kind": "helpers", "skins": [s["key"] for s in want if s["key"] not in bad],
-                           "skills": boss_ok, "files": [rel]}, f, indent=1)
+                           "skills": boss_ok, "files": [rel], "green_skills": sorted(green)}, f, indent=1)
             for s in want:
                 if s["key"] not in bad:
                     ok = s["identity"] in done

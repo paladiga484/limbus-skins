@@ -647,6 +647,13 @@ class BossSkills(unittest.TestCase):
         out = self.h.recolor_skills(self.ident, self.skills, {"all": "SHAMROCK"}, base=boss)
         self.assertEqual((out[1]["skillData"][0]["defaultValue"], out[1]["skillData"][0]["attributeType"]), (92, "SHAMROCK"))
 
+    def test_green_ids_are_the_skills_recoloured_shamrock(self):
+        self.ident["defenseSkillIDList"] = [95]
+        green = self.h.recolor_skills(self.ident, self.skills, {"all": "SHAMROCK"})
+        blue = self.h.recolor_skills(self.ident, self.skills, {"1": "AZURE"})
+        self.assertEqual(self.h.green_ids(green), [1, 2, 3, 95])
+        self.assertEqual(self.h.green_ids(blue), [])
+
     def test_skill_edits_stack_on_one_record(self):
         sins = self.h.recolor_skills(self.ident, self.skills, {"1": "SHAMROCK"})
         again = self.h.recolor_skills(self.ident, self.skills, {"2": "AZURE"}, base=sins)

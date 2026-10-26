@@ -152,6 +152,12 @@ def recolor_skills(identity, skills, sins, base=None):
     return out
 
 
+def green_ids(recoloured):
+    """The skill ids among recolor_skills' output that are now Gluttony: their coins draw green
+    too (myosotis's GreenCoinsPatch, told through the helpers manifest)."""
+    return sorted(i for i, rec in recoloured.items() if rec["skillData"][0].get("attributeType") == "SHAMROCK")
+
+
 SINS = ("CRIMSON", "SCARLET", "AMBER", "SHAMROCK", "AZURE", "INDIGO", "VIOLET")
 ATK = ("SLASH", "PENETRATE", "HIT")
 
