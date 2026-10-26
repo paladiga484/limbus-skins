@@ -66,6 +66,13 @@
    "helper": 400041,
    "becomes": "Pwie, the Crimson God",
    "tested": false
+  },
+  "vergilius": {
+   "identity": 10710,
+   "helper": 400012,
+   "becomes": "Vergilius (his own body and skills)",
+   "tested": false,
+   "script": true
   }
  },
  "repaints": {
@@ -306,13 +313,67 @@
   },
   "vergilius-wildhunt": {
    "identity": 10710,
-   "becomes": "Vergilius (E.G.O. Vergilius when mounted)",
+   "becomes": "Vergilius, looks only (E.G.O. Vergilius when mounted)",
    "source": "400012_VergiliusAppearance",
    "unit": 400012,
    "forms": {
     "10710_Heathclif_WHunt_RideAppearance": {
      "source": "400012_Vergilius_EgoAppearance"
     }
+   },
+   "tested": false,
+   "mirror": false
+  },
+  "gebura": {
+   "identity": 10410,
+   "becomes": "Gebura, the Red Mist (Library of Ruina)",
+   "lor": {
+    "bundle": "char/char_604.pres",
+    "prefab": "TheRedMist",
+    "map": {
+     "idle": [
+      "Default"
+     ],
+     "move": [
+      "Move"
+     ],
+     "gud": [
+      "Guard"
+     ],
+     "miss": [
+      "Evade"
+     ],
+     "dmg": [
+      "Damaged"
+     ],
+     "dead": [
+      "Damaged"
+     ],
+     "S1": [
+      "Slash",
+      "S1",
+      "Slash2"
+     ],
+     "S2": [
+      "Penetrate",
+      "S2",
+      "A2"
+     ],
+     "S3": [
+      "A1",
+      "S3",
+      "A3",
+      "S4",
+      "S5",
+      "A5"
+     ]
+    },
+    "smear": [
+     "move",
+     "S1",
+     "S2",
+     "S3"
+    ]
    },
    "tested": false
   }

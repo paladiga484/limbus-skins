@@ -121,6 +121,10 @@ def rewrite_static(static_path, swaps, skill_swaps=None):
                 new = {"appearance": h["appearance"],
                        "attributeList": [{"skillId": a["skillId"], "number": 1} for a in lit(h.get("attributeList"))],
                        "defenseSkillIDList": list(lit(h.get("defenseSkillIDList")))}
+                if h.get("_script") and h.get("unitScriptID"):
+                    # the helper's own battle script too: the identity's would drive a body it no
+                    # longer has (Wild Hunt's mount)
+                    new["unitScriptID"] = h["unitScriptID"]
                 for k, v in new.items():
                     # keep the record's own encoding: some fields are stored as Python-literal strings
                     x[k] = str(v) if isinstance(x.get(k), str) and not isinstance(v, str) else v

@@ -633,6 +633,27 @@ class BossSkills(unittest.TestCase):
         self.assertEqual(self.h.pick_unit(recs, self.skills, want=5)["id"], 5)
 
 
+class LibraryOfRuina(unittest.TestCase):
+    def test_afterimage_trails_behind_and_keeps_the_pivot_on_the_body(self):
+        from PIL import Image
+        from limbus_skins import lor
+        img = Image.new("RGBA", (10, 4), (255, 0, 0, 255))
+        out, (px, py) = lor.afterimage(img, (0.5, 0.25), 4, copies=2)
+        self.assertEqual(out.size, (18, 4))
+        self.assertEqual(out.getpixel((2, 1))[3], 255)             # the body stays at the left (its front)
+        self.assertTrue(0 < out.getpixel((15, 1))[3] < 255)        # ghosts fade off to the right (behind)
+        self.assertAlmostEqual(px * out.width, 5.0)                # same body pixel as before
+        self.assertEqual(py, 0.25)
+
+    def test_frames_look_like_sprites_to_repaint(self):
+        from PIL import Image
+        from limbus_skins import lor
+        a, b = lor.Frame("S1", Image.new("RGBA", (4, 4)), (0.5, 0.0), 100), lor.Frame("S2", Image.new("RGBA", (4, 4)), (0.5, 0.0), 100)
+        self.assertNotEqual(a.path_id, b.path_id)
+        img, s, (px, py) = repaint.render(a, mirror=True)
+        self.assertEqual((s.m_PixelsToUnits, px, py), (100, 0.5, 0.0))
+
+
 class Tints(unittest.TestCase):
     def test_colorize_goes_green_and_keeps_alpha_and_light(self):
         from PIL import Image

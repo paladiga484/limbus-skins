@@ -596,7 +596,8 @@ def _load_source(source, locate, clips, mapping, dash, notes):
     return src, special, rigs
 
 
-def repaint(target, locate, source=None, clips=None, mapping=None, head=None, mirror=True, dash=None, forms=None):
+def repaint(target, locate, source=None, clips=None, mapping=None, head=None, mirror=True, dash=None, forms=None,
+            lor=None):
     """Repaint body `target` (from `source`'s drawings, or its own with a `head` recipe).
     forms = {another body of the identity: {"source", "clips", "map"}} draws that body
     (e.g. Wild Hunt mounted) from its own source. locate(body name) -> path of the cached
@@ -605,7 +606,14 @@ def repaint(target, locate, source=None, clips=None, mapping=None, head=None, mi
     notes = []
     UnityPy = unitypy()
     from PIL import Image
-    if source is None:
+    if lor is not None:                                  # a Library of Ruina character's poses
+        from . import lor as lormod
+        try:
+            src, special, rigs = lormod.source_table(lor), {}, []
+        except lormod.LorError as e:
+            raise RepaintError(str(e))
+        source = "lor:" + lor["prefab"]
+    elif source is None:
         src, special, rigs = {}, {}, []
     else:
         src, special, rigs = _load_source(source, locate, clips, mapping, dash, notes)

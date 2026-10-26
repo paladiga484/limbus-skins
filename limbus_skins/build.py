@@ -48,6 +48,8 @@ def _write(out_dir, cache, stock_path, raw):
         stock = f.read()
     forged = bundle.forge(raw, bundle.crc(stock))
     rel = os.path.relpath(os.path.dirname(stock_path), cache)
+    if rel.startswith("..") or os.path.isabs(rel):
+        raise OSError(f"{stock_path} is not inside the game's cache {cache}")
     dst = os.path.join(out_dir, "files", rel)
     os.makedirs(dst, exist_ok=True)
     with open(os.path.join(dst, "__data"), "wb") as f:
@@ -86,7 +88,7 @@ def build(keys, game_dir, cache, data_dir, log=print, boss=(), static=True):
                 bad.append(s["key"])
                 results[s["key"]] = (False, "not in this game version")
                 continue
-            swaps[s["identity"]] = h
+            swaps[s["identity"]] = dict(h, _script=bool(s.get("script")))
         if want_boss:
             pers, skills, units = game.boss_data(cache)
             for s in want_boss:
@@ -140,10 +142,10 @@ def build(keys, game_dir, cache, data_dir, log=print, boss=(), static=True):
                     raw, notes = tint.tint(target, locate, s["tint"])
                 else:
                     raw, notes = repaint.repaint(
-                        target, locate, source=None if s.get("self") else s["source"],
+                        target, locate, source=None if s.get("self") else s.get("source"),
                         clips=s.get("clips"), mapping=s.get("map"),
                         head=_head(s, data_dir), mirror=s.get("mirror", True), dash=s.get("dash"),
-                        forms=s.get("forms"))
+                        forms=s.get("forms"), lor=s.get("lor"))
                 shutil.rmtree(out, ignore_errors=True)
                 os.makedirs(out)
                 rel = _write(out, cache, locate(target), raw)
