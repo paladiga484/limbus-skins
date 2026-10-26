@@ -12,7 +12,7 @@ from importlib import resources
 
 from . import art, bundle, game, helpers, repaint, tint
 
-FORMAT = 9      # bump when built skins change shape: older builds are rebuilt on apply
+FORMAT = 10      # bump when built skins change shape: older builds are rebuilt on apply
 
 
 def catalog():
@@ -101,19 +101,18 @@ def build(keys, game_dir, cache, data_dir, log=print, boss=(), static=True):
         if want_boss:
             for s in want_boss:
                 try:
-                    if s.get("sins") or s.get("moves"):
-                        said = []
-                        if s.get("moves"):
-                            skill_swaps.update(helpers.move_skills(pers[s["identity"]], skills, s["moves"], skill_swaps))
-                            said.append(f"own moves for S{', S'.join(sorted(s['moves']))}")
-                        if s.get("sins"):
-                            skill_swaps.update(helpers.recolor_skills(pers[s["identity"]], skills, s["sins"], skill_swaps))
-                            said.append("sins: " + ", ".join(f"S{n} {v}" for n, v in sorted(s["sins"].items())))
-                        boss_notes[s["key"]] = "; ".join(said)
-                    else:
+                    said, ident = [], pers[s["identity"]]
+                    if s["key"] in boss and s["kind"] == "repaint" and s.get("source"):
                         unit = helpers.pick_unit(units[s["source"]], skills, s.get("unit"))
-                        skill_swaps.update(helpers.boss_skills(pers[s["identity"]], unit, skills))
-                        boss_notes[s["key"]] = f"boss skills from unit {unit['id']}"
+                        skill_swaps.update(helpers.boss_skills(ident, unit, skills))
+                        said.append(f"boss skills from unit {unit['id']}")
+                    if s.get("moves"):                      # each edit stacks on the ones before it
+                        skill_swaps.update(helpers.move_skills(ident, skills, s["moves"], skill_swaps))
+                        said.append(f"own moves for S{', S'.join(sorted(s['moves']))}")
+                    if s.get("sins"):
+                        skill_swaps.update(helpers.recolor_skills(ident, skills, s["sins"], skill_swaps))
+                        said.append("sins: " + ", ".join(f"{n} {v}" for n, v in sorted(s["sins"].items())))
+                    boss_notes[s["key"]] = "; ".join(said)
                     boss_ok.append(s["key"])
                 except (KeyError, StopIteration, ValueError, IndexError, TypeError, AttributeError) as e:
                     boss_notes[s["key"]] = f"skills unchanged ({e or 'no boss record'})"

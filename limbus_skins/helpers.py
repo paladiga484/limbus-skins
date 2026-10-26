@@ -135,16 +135,20 @@ def _record(sid, skills, base):
 
 
 def recolor_skills(identity, skills, sins, base=None):
-    """{skill id: new record}: the identity's skill n (1-based, as listed) takes sin
-    sins[n] ("SHAMROCK" is green) at every uptie that names one."""
+    """{skill id: new record}: the identity's skill n (1-based, as listed; "defense" for its
+    defense skills, "all" for every skill) takes sin sins[n] ("SHAMROCK" is green) at every
+    uptie that names one."""
     mine = [a["skillId"] for a in lit(identity.get("attributeList"))]
+    guard = list(lit(identity.get("defenseSkillIDList")))
     out = {}
     for n, sin in sins.items():
-        rec = _record(mine[int(n) - 1], skills, base)
-        for d in rec["skillData"]:
-            if "attributeType" in d or d is rec["skillData"][0]:
-                d["attributeType"] = sin
-        out[rec["id"]] = rec
+        ids = mine + guard if n == "all" else guard if n == "defense" else [mine[int(n) - 1]]
+        for sid in ids:
+            rec = _record(sid, skills, {**(base or {}), **out})
+            for d in rec["skillData"]:
+                if "attributeType" in d or d is rec["skillData"][0]:
+                    d["attributeType"] = sin
+            out[rec["id"]] = rec
     return out
 
 

@@ -113,12 +113,8 @@
   },
   "ahab": {
    "identity": 10808,
-   "becomes": "GasHarpoon Ahab",
-   "source": "8106_Ahab_AwakenAppearance",
-   "clips": "Ahab_Awaken_p1",
-   "map": {
-    "S3": "Ahab_Awaken_p2_S1"
-   },
+   "becomes": "Captain Ahab",
+   "source": "8105_AhabAppearance",
    "tested": false
   },
   "rien": {
@@ -441,7 +437,10 @@
      }
     }
    },
-   "unlock": "black-forest"
+   "unlock": "black-forest",
+   "sins": {
+    "all": "SHAMROCK"
+   }
   },
   "matthias": {
    "identity": 11115,
@@ -453,7 +452,10 @@
    "identity": 11203,
    "becomes": "the Roach Emperor",
    "source": "1339_Gregor_EmperorAppearance",
-   "tested": false
+   "tested": false,
+   "sins": {
+    "all": "SHAMROCK"
+   }
   },
   "distorted-hohenheim": {
    "identity": 11212,
@@ -471,7 +473,7 @@
    },
    "tested": false,
    "sins": {
-    "3": "SHAMROCK"
+    "all": "SHAMROCK"
    }
   }
  }
