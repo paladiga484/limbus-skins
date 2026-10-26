@@ -454,6 +454,31 @@
    "unlock": "black-forest",
    "sins": {
     "all": "SHAMROCK"
+   },
+   "aura": {
+    "from": "1079_Sancho_BerserkAppearance",
+    "textures": [
+     "Fx_T_Shape_Aura_02",
+     "Fx_T_Shape_Splash_01_2x2"
+    ],
+    "split": {
+     "Fx_T_Shape_Splash_01_2x2": [
+      2,
+      2
+     ]
+    },
+    "style": "mist",
+    "count": 4,
+    "size": 0.16,
+    "color": [
+     205,
+     18,
+     28
+    ],
+    "alpha": 1.0,
+    "soft": [
+     "Fx_T_Shape_Aura_02"
+    ]
    }
   },
   "matthias": {
@@ -469,6 +494,21 @@
    "tested": false,
    "sins": {
     "all": "SHAMROCK"
+   },
+   "aura": {
+    "from": "1339_Gregor_EmperorAppearance",
+    "textures": [
+     "Fx_T_Shape_Flying_Roach_01"
+    ],
+    "split": {
+     "Fx_T_Shape_Flying_Roach_01": [
+      2,
+      1
+     ]
+    },
+    "style": "swarm",
+    "count": 7,
+    "size": 0.13
    }
   },
   "distorted-hohenheim": {

@@ -12,7 +12,7 @@ from importlib import resources
 
 from . import art, bundle, game, helpers, repaint, tint
 
-FORMAT = 10      # bump when built skins change shape: older builds are rebuilt on apply
+FORMAT = 11      # bump when built skins change shape: older builds are rebuilt on apply
 
 
 def catalog():
@@ -159,7 +159,7 @@ def build(keys, game_dir, cache, data_dir, log=print, boss=(), static=True):
                         target, locate, source=None if s.get("self") else s.get("source"),
                         clips=s.get("clips"), mapping=s.get("map"),
                         head=_head(s, data_dir), mirror=s.get("mirror", True), dash=s.get("dash"),
-                        forms=s.get("forms"), lor=s.get("lor"))
+                        forms=s.get("forms"), lor=s.get("lor"), aura=s.get("aura"))
                 shutil.rmtree(out, ignore_errors=True)
                 os.makedirs(out)
                 rel = _write(out, cache, locate(target), raw)

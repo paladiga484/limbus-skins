@@ -9,6 +9,7 @@ into the body's own atlas pages. A head recipe can instead paint a new head over
 identity's own frames.
 """
 import json
+import math
 import os
 import re
 import struct
@@ -491,6 +492,115 @@ def _spine_borrow(sp, rig, mirror=False):
     return f"idle {sp['name']}: the character's own idle rig ({len(src['bones'])} bones, animation {anim})"
 
 
+def _append_regions(sp, pages, page, tex, parts, dens):
+    """Add pictures [(region name, image, (w, h) in skeleton units)] to an idle's atlas, in
+    one strip below the page's own pictures, at `dens` atlas pixels per skeleton unit."""
+    import math as _m
+    from PIL import Image
+    UnityPy = unitypy()
+    pw, ph = spine.page_size(page)
+    img = tex.read().image.convert("RGBA")
+    tw, th = img.size
+    boxes, x = [], 1
+    for name, im, (uw, uh) in parts:
+        aw, ah = max(2, int(uw * dens)), max(2, int(uh * dens))
+        boxes.append((name, im, x, aw, ah))
+        x += aw + 2
+    if x > pw:                                           # too wide for the page: shrink the strip
+        k = (pw - 2 * len(parts)) / (x - 2 * len(parts))
+        boxes, x = [], 1
+        for name, im, (uw, uh) in parts:
+            aw, ah = max(2, int(uw * dens * k)), max(2, int(uh * dens * k))
+            boxes.append((name, im, x, aw, ah))
+            x += aw + 2
+    tall = max(ah for *_, ah in boxes)
+    step = ph // _m.gcd(ph, th)
+    add = -(-(tall + 2) // step) * step
+    big = Image.new("RGBA", (tw, th + th * add // ph), (0, 0, 0, 0))
+    big.paste(img, (0, 0))
+    pma = dict(page["header"]).get("pma", "false") == "true"
+    for name, im, bx, aw, ah in boxes:
+        pix = im.resize((max(1, round(aw * tw / pw)), max(1, round(ah * th / ph))), Image.LANCZOS)
+        big.paste(spine.premultiply(pix) if pma else pix, (round(bx * tw / pw), round((ph + 1) * th / ph)))
+        page["regions"].append({"name": name, "fields": [("bounds", f"{bx},{ph + 1},{aw},{ah}")]})
+    page["header"] = [(k, f"{pw},{ph + add}" if k == "size" else v) for k, v in page["header"]]
+    spine.set_text(sp["atlas"], spine.format_atlas(pages))
+    d = tex.read()
+    d.set_image(big, target_format=UnityPy.enums.TextureFormat.RGBA32)
+    d.save()
+
+
+def _spine_aura(sp, sprites, spec, ref):
+    """Give an idle skeleton the aura as parts of its own: a bone per sprite wandering through
+    the aura's placements over each animation (flies flapping between their frames). ref =
+    the body's standing height in sprite units."""
+    from . import aura as auramod
+    pages, page, tex = _spine_pages(sp)
+    doc = json.loads(spine.text_of(sp["skeleton"]))
+    a, b, c, d, _, _ = sp["to_skel"]
+    lx = math.hypot(a, c)
+    mirrored = a * d - b * c < 0
+    steps = 8
+    keys = [auramod._placements(spec, len(sprites), ref, n) for n in range(steps)]
+    nominal = float(spec.get("size", 0.12)) * ref * lx             # a sprite's longest side, skeleton units
+    regions = [f"{spine.PREFIX}aura{j}" for j in range(len(sprites))]
+    parts = []
+    for name, im in zip(regions, sprites):
+        k = nominal / max(im.width, im.height)
+        parts.append((name, im, (im.width * k, im.height * k)))
+    root = doc["bones"][0]["name"]
+    default = next((x for x in spine.skins_list(doc) if x["name"] == "default"), None)
+    if default is None:
+        default = {"name": "default", "attachments": {}}
+        doc["skins"].insert(0, default)
+    flap = spec.get("style", "swarm") == "swarm" and len(sprites) > 1
+    behind = []
+    for i, (j, _, _, size, deg, flip, alpha, ahead) in enumerate(keys[0]):
+        bone = slot = f"{spine.PREFIX}aura_{i}"
+        doc["bones"].append({"name": bone, "parent": root})
+        new = {"name": slot, "bone": bone, "attachment": regions[j], "color": "ffffff%02x" % round(255 * alpha)}
+        if ahead:
+            doc["slots"].append(new)
+        else:
+            behind.append(new)
+        k = size * lx / nominal
+        atts = {}
+        for jj in ({j} | (set(range(len(sprites))) if flap else set())):
+            w, h = parts[jj][2]
+            att = {"path": regions[jj], "width": round(w * k, 3), "height": round(h * k, 3)}
+            if deg:
+                att["rotation"] = round(-deg if mirrored else deg, 3)
+            if flip != mirrored:
+                att["scaleX"] = -1
+            atts[regions[jj]] = att
+        default["attachments"][slot] = atts
+    doc["slots"][0:0] = behind
+    anims = doc.setdefault("animations", {}) or {"animation": {}}
+    doc["animations"] = anims
+    for an in anims.values():
+        L = spine.anim_length(an) or 2.0
+        bones, slots = an.setdefault("bones", {}), an.setdefault("slots", {})
+        for i in range(len(keys[0])):
+            name = f"{spine.PREFIX}aura_{i}"
+            path = []
+            for n in range(steps + 1):
+                x, y = keys[n % steps][i][1:3]
+                X, Y = spine._apply(sp["to_skel"], x, y)
+                path.append({"time": round(L * n / steps, 4), "x": round(X, 3), "y": round(Y, 3)})
+            path[0].pop("time")
+            bones[name] = {"translate": path}
+            if flap:
+                beat, t, seq = 0.07, 0.0, []
+                while t < L:
+                    seq.append({"time": round(t, 4), "name": regions[(len(seq) + i) % len(sprites)]})
+                    t += beat
+                seq[0].pop("time")
+                slots[name] = {"attachment": seq}
+    _append_regions(sp, pages, page, tex, parts, 128 / max(nominal, 1e-6))
+    spine.set_text(sp["skeleton"], spine.dumps(doc))         # last: it names the regions just added
+    return f"aura in the idle ({len(keys[0])} parts)"
+
+
 def _spine_head(sp, art, spec, effects=None):
     """Swap one part of the idle skeleton (the head) for the head art; with effects, the
     head also flutters, glows and gives off a few motes."""
@@ -542,39 +652,41 @@ def _spine_head(sp, art, spec, effects=None):
         spine.head_effects(doc, slot["name"], (w, h), att.get("rotation", 0.0), fx,
                            skin if skin else "default")
 
-    # append them below the page's own pictures, in one strip
-    pw, ph = spine.page_size(page)
-    img = tex.read().image.convert("RGBA")
-    tw, th = img.size
-    boxes, x = [], 1
-    for name, im, (uw, uh) in parts:
-        aw, ah = max(2, int(uw * dens)), max(2, int(uh * dens))
-        boxes.append((name, im, x, aw, ah))
-        x += aw + 2
-    if x > pw:                                           # too wide for the page: shrink the strip
-        k = (pw - 2 * len(parts)) / (x - 2 * len(parts))
-        boxes, x = [], 1
-        for name, im, (uw, uh) in parts:
-            aw, ah = max(2, int(uw * dens * k)), max(2, int(uh * dens * k))
-            boxes.append((name, im, x, aw, ah))
-            x += aw + 2
-    tall = max(ah for *_, ah in boxes)
-    step = ph // _m.gcd(ph, th)
-    add = -(-(tall + 2) // step) * step
-    big = Image.new("RGBA", (tw, th + th * add // ph), (0, 0, 0, 0))
-    big.paste(img, (0, 0))
-    pma = dict(page["header"]).get("pma", "false") == "true"
-    for name, im, bx, aw, ah in boxes:
-        pix = im.resize((max(1, round(aw * tw / pw)), max(1, round(ah * th / ph))), Image.LANCZOS)
-        big.paste(spine.premultiply(pix) if pma else pix, (round(bx * tw / pw), round((ph + 1) * th / ph)))
-        page["regions"].append({"name": name, "fields": [("bounds", f"{bx},{ph + 1},{aw},{ah}")]})
-    page["header"] = [(k, f"{pw},{ph + add}" if k == "size" else v) for k, v in page["header"]]
     spine.set_text(sp["skeleton"], spine.dumps(doc))
-    spine.set_text(sp["atlas"], spine.format_atlas(pages))
-    d = tex.read()
-    d.set_image(big, target_format=UnityPy.enums.TextureFormat.RGBA32)
-    d.save()
+    _append_regions(sp, pages, page, tex, parts, dens)
     return f"idle {sp['name']}: head swapped" + (" (glow, flutter, motes)" if effects else "")
+
+
+def _bake_aura(spec, locate, src, rendered):
+    """Draw the aura into every rendered frame of the source's body (not its effect sprites).
+    Returns (aura sprites, frames done)."""
+    from . import aura as auramod
+    try:
+        sprites = auramod.textures(spec, locate)
+    except auramod.AuraError as e:
+        raise RepaintError(str(e))
+    order = []
+    for kind, frames in src.items():
+        if isinstance(frames, list) and not (kind.startswith("S") and kind.endswith("e")):
+            order += [f.path_id for f in frames if f.path_id in rendered and f.path_id not in order]
+
+    def pivot(i):
+        return rendered[i][2] if len(rendered[i]) > 2 else (rendered[i][1].m_Pivot.x, rendered[i][1].m_Pivot.y)
+
+    ref = 0.0                                            # how tall the source stands, from its idle
+    for f in src.get("idle", []):
+        if f.path_id in rendered:
+            img, sd = rendered[f.path_id][:2]
+            box = img.getchannel("A").getbbox()
+            if box:
+                ref = max(ref, ((img.height - box[1]) - pivot(f.path_id)[1] * img.height) / float(sd.m_PixelsToUnits))
+    if not ref:
+        raise RepaintError("the aura needs the source's idle to measure it by")
+    for n, i in enumerate(order):
+        img, sd = rendered[i][:2]
+        new, pv = auramod.bake(img, pivot(i), sprites, spec, ref * float(sd.m_PixelsToUnits), n)
+        rendered[i] = (new, sd, pv)
+    return sprites, len(order)
 
 
 def standing_height(env, ids, fallback=2.6):
@@ -618,12 +730,12 @@ def _load_source(source, locate, clips, mapping, dash, notes):
 
 
 def repaint(target, locate, source=None, clips=None, mapping=None, head=None, mirror=True, dash=None, forms=None,
-            lor=None):
+            lor=None, aura=None):
     """Repaint body `target` (from `source`'s drawings, or its own with a `head` recipe).
     forms = {another body of the identity: {"source", "clips", "map"}} draws that body
     (e.g. Wild Hunt mounted) from its own source. locate(body name) -> path of the cached
     bundle holding it. Returns (bundle bytes, notes). The bytes still need bundle.forge()
-    to carry the stock CRC."""
+    to carry the stock CRC. aura: see aura.py."""
     notes = []
     UnityPy = unitypy()
     from PIL import Image
@@ -639,10 +751,11 @@ def repaint(target, locate, source=None, clips=None, mapping=None, head=None, mi
     tenv = UnityPy.load(tpath)
     tobjs, troots = prefab_objects(tenv, target, forms=True)
     tclips = clip_frames(tenv, tobjs)
+    stands = standing_height(tenv, tobjs)                # before its sprites are redrawn
     if lor is not None:
         from . import lor as lormod
         try:
-            src = lormod.source_table(lor, height=standing_height(tenv, tobjs))
+            src = lormod.source_table(lor, height=stands)
         except lormod.LorError as e:
             raise RepaintError(str(e))
 
@@ -759,6 +872,10 @@ def repaint(target, locate, source=None, clips=None, mapping=None, head=None, mi
                 rendered[s.path_id] = (new, sd, (px, py))
                 painted += 1
         notes.append(f"head painted on {painted} frames")
+    sprites = None
+    if aura and source is not None:
+        sprites, n = _bake_aura(aura, locate, base_src, rendered)
+        notes.append(f"aura on {n} frames")
 
     # the body's own atlas pages get the new art
     tex = {}
@@ -883,9 +1000,16 @@ def repaint(target, locate, source=None, clips=None, mapping=None, head=None, mi
                 if rigs_:
                     try:
                         notes.append(_spine_borrow(sp, rigs_[0], mirror))
-                        continue
                     except (spine.SpineError, KeyError, ValueError, TypeError, IndexError) as e:
                         notes.append(f"idle {sp['name']}: the character's own rig did not fit ({e}), frames instead")
+                    else:
+                        if sprites:                      # frames carry the aura; a borrowed rig doesn't
+                            try:
+                                # the idle stands as tall as the identity, not the source's frames
+                                notes.append(_spine_aura(sp, sprites, aura, stands))
+                            except (spine.SpineError, KeyError, ValueError, TypeError, IndexError) as e:
+                                notes.append(f"idle {sp['name']}: no aura ({e})")
+                        continue
                 if source is not None:
                     notes.append(_spine_frames(sp, src, rendered, mirror))
                 elif head and head.get("spine"):

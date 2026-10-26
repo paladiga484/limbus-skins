@@ -750,6 +750,30 @@ class LibraryOfRuina(unittest.TestCase):
         self.assertEqual((s.m_PixelsToUnits, px, py), (100, 0.5, 0.0))
 
 
+class Auras(unittest.TestCase):
+    def test_tint_makes_the_grey_background_clear(self):
+        from PIL import Image
+        from limbus_skins import aura
+        img = Image.new("RGBA", (8, 8), (80, 80, 80, 255))
+        img.putpixel((4, 4), (230, 230, 230, 255))
+        out = aura.tint(img, (150, 0, 0))
+        self.assertEqual(out.getpixel((0, 0))[3], 0)
+        self.assertEqual(out.getpixel((4, 4)), (150, 0, 0, 255))
+
+    def test_bake_keeps_the_feet_on_the_pivot(self):
+        from PIL import Image
+        from limbus_skins import aura
+        body = Image.new("RGBA", (20, 100), (0, 0, 255, 255))
+        fly = Image.new("RGBA", (10, 10), (255, 0, 0, 255))
+        spec = {"style": "swarm", "count": 6, "size": 0.2}
+        out, (px, py) = aura.bake(body, (0.5, 0.0), [fly], spec, 100, seed=3)
+        self.assertGreater(out.width, body.width)                    # flies outside the body grow the canvas
+        fx, fy = round(px * out.width), round((1 - py) * out.height)
+        self.assertEqual(out.getpixel((fx, fy - 1)), (0, 0, 255, 255))   # just above the feet: still the body
+        again, _ = aura.bake(body, (0.5, 0.0), [fly], spec, 100, seed=3)
+        self.assertEqual(out.tobytes(), again.tobytes())             # the same frame bakes the same way
+
+
 class Tints(unittest.TestCase):
     def test_colorize_goes_green_and_keeps_alpha_and_light(self):
         from PIL import Image
