@@ -84,6 +84,29 @@ def select(words, skins):
     return keys
 
 
+UNLOCK_HINT = {"black-forest": "waits in the Black Forest: let Greencliff die in a fight first"}
+
+
+def unlocked(skins, st):
+    """(the skins that can be used, the locked ones). A skin with "unlock" stays out of sight
+    and is never swapped in until state["unlocked"] holds that word (the private server's
+    Black Forest writes it when Greencliff dies). Locked ones are dropped from state["on"]
+    in memory, so nothing locked is built or applied."""
+    have = set(st.get("unlocked", []))
+    locked = {k for k, s in skins.items() if s.get("unlock") and s["unlock"] not in have}
+    st["on"] = [k for k in st["on"] if k not in locked]
+    return {k: v for k, v in skins.items() if k not in locked}, locked
+
+
+def refuse_locked(words, locked, skins):
+    """Asking for a locked skin by name says where it is instead of 'no such skin'."""
+    for w in words:
+        hit = next((k for k in locked if _norm(k) == _norm(w)), None)
+        if hit:
+            why = UNLOCK_HINT.get(skins[hit]["unlock"], "is locked")
+            raise SystemExit(f"limbus-skins: {hit} {why}")
+
+
 def _table(skins, on, keys, boss=()):
     width = max((len(k) for k in keys), default=10)
     last = None
@@ -172,8 +195,9 @@ def main(argv=None):
 
     from .build import build, built_dirs, catalog
     from .mods import ModError, Session, game_running
-    skins = catalog()
     st, _, data = _state()
+    allskins = catalog()
+    skins, locked = unlocked(allskins, st)
 
     if cmd in ("status",):
         print(f"limbus-skins {__version__} - {len(st['on'])} skin(s) on" + (": " + ", ".join(st["on"]) if st["on"] else ""))
@@ -197,6 +221,8 @@ def main(argv=None):
     if cmd in ("on", "off"):
         if not args:
             raise SystemExit(f"usage: limbus-skins {cmd} <skin|id|sinner|tested|all>...")
+        if cmd == "on":
+            refuse_locked(args, locked, allskins)
         keys = select(args, skins)
         if cmd == "on":
             # one skin per identity: the newest choice wins
@@ -252,6 +278,7 @@ def main(argv=None):
     sess = Session(c, data)
 
     if cmd == "build":
+        refuse_locked(args, locked, allskins)
         keys = select(args, skins) if args else st["on"]
         if not keys:
             raise SystemExit("nothing to build - turn some skins on first")
@@ -264,6 +291,7 @@ def main(argv=None):
     if cmd == "preview":
         if not args:
             raise SystemExit("usage: limbus-skins preview <skin> [file.png]")
+        refuse_locked(args[:1], locked, allskins)
         key = select(args[:1], skins)[0]
         if skins[key]["kind"] == "helper":
             raise SystemExit("previews are for repaints and tints (helper skins use the helper's own art)")

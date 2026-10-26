@@ -181,6 +181,27 @@ class Rebuilds(unittest.TestCase):
             self.assertIn("kira", cli._need_build(["ahab", "kira"], self.SK, data, cache, set()))
 
 
+class Locked(unittest.TestCase):
+    SK = {"ahab": {"identity": 10808, "kind": "repaint", "becomes": "Ahab"},
+          "gebura": {"identity": 10410, "kind": "repaint", "becomes": "Gebura", "unlock": "black-forest"}}
+
+    def test_a_locked_skin_is_out_of_sight_and_never_active(self):
+        st = {"on": ["ahab", "gebura"], "unlocked": []}
+        visible, locked = cli.unlocked(self.SK, st)
+        self.assertEqual((sorted(visible), locked), (["ahab"], {"gebura"}))
+        self.assertEqual(st["on"], ["ahab"])                           # not swapped in while locked
+        self.assertEqual(sorted(cli.select(["all"], visible)), ["ahab"])
+        with self.assertRaises(SystemExit) as e:
+            cli.refuse_locked(["Gebura"], locked, self.SK)
+        self.assertIn("Black Forest", str(e.exception))
+
+    def test_unlocked_it_is_an_ordinary_skin(self):
+        st = {"on": ["gebura"], "unlocked": ["black-forest"]}
+        visible, locked = cli.unlocked(self.SK, st)
+        self.assertEqual((sorted(visible), locked, st["on"]), (["ahab", "gebura"], set(), ["gebura"]))
+        cli.refuse_locked(["gebura"], locked, self.SK)                 # no complaint
+
+
 class LaunchArgs(unittest.TestCase):
     def test_flags_before_the_separator_only(self):
         self.assertEqual(cli.split_launch(["--yes", "--", "play.sh", "--yes"]), (True, ["play.sh", "--yes"]))
