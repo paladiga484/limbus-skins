@@ -8,6 +8,12 @@ Dress Limbus Company identities as the characters they mirror, on a **private se
   Dead Butterflies, and so on. Between moves they stand in that character's own idle
   animation, turned to face the sinners' way (Kromer, Lucio, Guido and the Old G Corp. Head
   Manager have none in the game and stand still).
+- **Tints:** the identity keeps its own body and drawings, recolored. LCB Heathcliff as
+  **Greencliff**, green from head to toe; his S3 is Gluttony (the green sin), and when he dies
+  he takes everyone on the field with him.
+- **Boss skills:** `limbus-skins boss on ahab` and a repainted identity also fights with its
+  boss's skills - the boss's power, coins and effects, played with the identity's own (repainted)
+  animations. Off by default.
 - **Helper skins:** the identity takes a story helper unit's body *and* its skills: LCB
   Ryōshū as Arayashiki Ryōshū from stage 9-49, LCB Sinclair as A Certain Sinclair, Love and
   Hate Don Quixote as the Walpurgis Night Queen of Hatred.
@@ -24,10 +30,10 @@ contains no game art, and the tool never connects to the internet.
 You need the game installed through Steam (Windows, or Linux with Proton) and launched at least
 once, so its download cache exists, plus Python 3.9 or newer.
 
-Download `limbus_skins-1.1.0-py3-none-any.whl` from the release, then:
+Download `limbus_skins-1.2.0-py3-none-any.whl` from the release, then:
 
 ```
-pip install --user limbus_skins-1.1.0-py3-none-any.whl     # or: pipx install <the .whl>
+pip install --user limbus_skins-1.2.0-py3-none-any.whl     # or: pipx install <the .whl>
 limbus-skins doctor
 ```
 
@@ -50,6 +56,7 @@ Linux it's the same path inside the Proton prefix:
 limbus-skins list                      # every skin, by sinner
 limbus-skins on ahab arayashiki-ryoshu # by name; ids (10808), sinner names, `helpers`, `repaints`, `tested` and `all` work too
 limbus-skins off ishmael
+limbus-skins boss on ahab              # Ahab's own skills too (boss off ahab to undo)
 limbus-skins run --yes -- <the command that starts the game on your private server>
 ```
 
@@ -102,6 +109,8 @@ Skins only show in battle. Menus, portraits and identity art stay as they are.
 | `queequeg` | Heathcliff 10707 | repaint | Queequeg | not yet |
 | `lucio` | Heathcliff 10716 | repaint | Lucio | not yet |
 | `ahab` | Ishmael 10808 | repaint | GasHarpoon Ahab | not yet |
+| `greencliff` | Heathcliff 10701 | tint | Greencliff (all green; S3 Gluttony; his death ends everyone) | not yet |
+| `vergilius-wildhunt` | Heathcliff 10710 | repaint | Vergilius (E.G.O. Vergilius when mounted) | not yet |
 | `jun-ishmael` | Ishmael 10811 | repaint | Jun | not yet |
 | `jia-xichun` | Ishmael 10812 | helper | Jia Xichun | not yet |
 | `kira` | Ishmael 10814 | helper | Kira | not yet |
