@@ -6,8 +6,10 @@ keeps its own prefab. So the aura is drawn into the pictures instead. Every new 
 the sprites scattered around the body a little differently, so they buzz and seethe as the
 animation plays; an idle that is a borrowed Spine rig gets them as extra moving parts.
 
-skins.json "aura": {"from": body whose bundle holds the textures, "textures": [names],
-"split": {name: [cols, rows]} (flipbook sheets), "style": "swarm" | "mist", "count": n,
+skins.json "aura": {"from": body whose bundle holds the art, "textures": [names] and/or
+"sprites": [names], "split": {name: [cols, rows]} (flipbook sheets),
+"style": "swarm" | "mist" | "strike" (one slash arc ahead of the body), "count": n,
+"kinds": [frame kinds to draw on, default every body frame],
 "size": fraction of the body's height, "color": [r, g, b] (tints a grey texture),
 "soft": [names] (fade to nothing at the edges: a cloud the particle shape used to cut)}.
 Nothing is shipped: the textures are read from the player's own cache.
@@ -23,19 +25,25 @@ class AuraError(Exception):
 
 
 def textures(spec, locate):
-    """The aura's sprites as RGBA images (flipbook cells in order), tinted when asked."""
-    env = unitypy().load(locate(spec["from"]))
+    """The aura's pictures as RGBA images (flipbook cells in order), tinted when asked: Texture2Ds
+    named in "textures", Sprites named in "sprites" (an identity's own effect frames)."""
+    try:
+        env = unitypy().load(locate(spec["from"]))
+    except Exception as e:                               # not in the cache: that character never fielded
+        raise AuraError(f"{spec['from']}: {e}")
+    want = {("Texture2D", n) for n in spec.get("textures", ())} | {("Sprite", n) for n in spec.get("sprites", ())}
     found = {}
     for o in env.objects:
-        if o.type.name == "Texture2D":
+        if o.type.name in ("Texture2D", "Sprite"):
             t = o.read()
-            if t.m_Name in spec["textures"] and t.m_Name not in found:
+            if (o.type.name, t.m_Name) in want and t.m_Name not in found:
                 found[t.m_Name] = t.image.convert("RGBA")
-    missing = [n for n in spec["textures"] if n not in found]
+    names = list(spec.get("textures", ())) + list(spec.get("sprites", ()))
+    missing = [n for n in names if n not in found]
     if missing:
         raise AuraError(f"{spec['from']} has no {', '.join(missing)}")
     out = []
-    for n in spec["textures"]:
+    for n in names:
         img = found[n]
         cols, rows = spec.get("split", {}).get(n, (1, 1))
         w, h = img.width // cols, img.height // rows
@@ -98,6 +106,10 @@ def _placements(spec, n_sprites, ref, seed):
                         rnd.uniform(-0.45, 0.45) * ref, rnd.uniform(0.15, 1.0) * ref,
                         size * rnd.uniform(0.6, 1.2), rnd.uniform(-40, 40), rnd.random() < 0.5,
                         rnd.uniform(0.5, 0.9), rnd.random() < 0.4))
+    elif style == "strike":
+        # one arc a frame, ahead of the body at chest height, turned a little differently each time
+        out.append((seed % n_sprites, 0.35 * ref, 0.55 * ref, size, rnd.uniform(-35, 35), False,
+                    float(spec.get("alpha", 0.9)), True))
     else:
         # flies on loose orbits about the chest, a step further round each frame
         for i in range(count):

@@ -657,18 +657,11 @@ def _spine_head(sp, art, spec, effects=None):
     return f"idle {sp['name']}: head swapped" + (" (glow, flutter, motes)" if effects else "")
 
 
-def _bake_aura(spec, locate, src, rendered):
-    """Draw the aura into every rendered frame of the source's body (not its effect sprites).
-    Returns (aura sprites, frames done)."""
+def _bake_aura(specs, locate, src, rendered, notes):
+    """Draw each aura, in order, into the rendered frames of the source's body (not its effect
+    sprites), or only the frame kinds a spec names. An aura whose art can't be found becomes a
+    note and is skipped. Returns [(spec, its pictures)] for the ones drawn."""
     from . import aura as auramod
-    try:
-        sprites = auramod.textures(spec, locate)
-    except auramod.AuraError as e:
-        raise RepaintError(str(e))
-    order = []
-    for kind, frames in src.items():
-        if isinstance(frames, list) and not (kind.startswith("S") and kind.endswith("e")):
-            order += [f.path_id for f in frames if f.path_id in rendered and f.path_id not in order]
 
     def pivot(i):
         return rendered[i][2] if len(rendered[i]) > 2 else (rendered[i][1].m_Pivot.x, rendered[i][1].m_Pivot.y)
@@ -682,11 +675,27 @@ def _bake_aura(spec, locate, src, rendered):
                 ref = max(ref, ((img.height - box[1]) - pivot(f.path_id)[1] * img.height) / float(sd.m_PixelsToUnits))
     if not ref:
         raise RepaintError("the aura needs the source's idle to measure it by")
-    for n, i in enumerate(order):
-        img, sd = rendered[i][:2]
-        new, pv = auramod.bake(img, pivot(i), sprites, spec, ref * float(sd.m_PixelsToUnits), n)
-        rendered[i] = (new, sd, pv)
-    return sprites, len(order)
+    done = []
+    for spec in specs:
+        try:
+            sprites = auramod.textures(spec, locate)
+        except auramod.AuraError as e:
+            notes.append(f"no aura ({e})")
+            continue
+        kinds = spec.get("kinds")
+        order = []
+        for kind, frames in src.items():
+            if not isinstance(frames, list) or (kind.startswith("S") and kind.endswith("e")):
+                continue
+            if kinds is None or kind in kinds:
+                order += [f.path_id for f in frames if f.path_id in rendered and f.path_id not in order]
+        for n, i in enumerate(order):
+            img, sd = rendered[i][:2]
+            new, pv = auramod.bake(img, pivot(i), sprites, spec, ref * float(sd.m_PixelsToUnits), n)
+            rendered[i] = (new, sd, pv)
+        notes.append(f"aura ({spec.get('style', 'swarm')}) on {len(order)} frames")
+        done.append((spec, sprites))
+    return done
 
 
 def standing_height(env, ids, fallback=2.6):
@@ -872,10 +881,10 @@ def repaint(target, locate, source=None, clips=None, mapping=None, head=None, mi
                 rendered[s.path_id] = (new, sd, (px, py))
                 painted += 1
         notes.append(f"head painted on {painted} frames")
-    sprites = None
+    idle_auras = []                                      # the ones a borrowed idle rig wears too
     if aura and source is not None:
-        sprites, n = _bake_aura(aura, locate, base_src, rendered)
-        notes.append(f"aura on {n} frames")
+        drawn = _bake_aura(aura if isinstance(aura, list) else [aura], locate, base_src, rendered, notes)
+        idle_auras = [(spec, sp) for spec, sp in drawn if "idle" in spec.get("kinds", ("idle",))]
 
     # the body's own atlas pages get the new art
     tex = {}
@@ -1003,10 +1012,10 @@ def repaint(target, locate, source=None, clips=None, mapping=None, head=None, mi
                     except (spine.SpineError, KeyError, ValueError, TypeError, IndexError) as e:
                         notes.append(f"idle {sp['name']}: the character's own rig did not fit ({e}), frames instead")
                     else:
-                        if sprites:                      # frames carry the aura; a borrowed rig doesn't
+                        for spec, pictures in idle_auras:  # frames carry the aura; a borrowed rig doesn't
                             try:
                                 # the idle stands as tall as the identity, not the source's frames
-                                notes.append(_spine_aura(sp, sprites, aura, stands))
+                                notes.append(_spine_aura(sp, pictures, spec, stands))
                             except (spine.SpineError, KeyError, ValueError, TypeError, IndexError) as e:
                                 notes.append(f"idle {sp['name']}: no aura ({e})")
                         continue

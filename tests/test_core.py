@@ -751,6 +751,70 @@ class LibraryOfRuina(unittest.TestCase):
 
 
 class Auras(unittest.TestCase):
+    def _frames(self):
+        """An idle frame and a skill frame of a 100px-tall body standing on its pivot."""
+        from PIL import Image
+        from limbus_skins import lor
+        src, rendered = {}, {}
+        for kind in ("idle", "S1"):
+            f = lor.Frame(kind, Image.new("RGBA", (20, 100), (0, 0, 255, 255)), (0.5, 0.0), 100)
+            src[kind] = [f]
+            rendered[f.path_id] = (f.read().image, f.read(), (0.5, 0.0))
+        return src, rendered
+
+    def _bake(self, specs, sprites, src, rendered):
+        from limbus_skins import repaint
+        notes = []
+        with mock.patch("limbus_skins.aura.textures", side_effect=lambda spec, locate: sprites[spec["style"]]):
+            done = repaint._bake_aura(specs, None, src, rendered, notes)
+        return done, notes
+
+    STRIKE = {"style": "strike", "kinds": ["S1", "S2", "S3"], "size": 0.3}
+    MIST = {"style": "mist", "count": 2, "size": 0.2}
+
+    def test_strike_only_on_skill_frames(self):
+        from PIL import Image
+        src, rendered = self._frames()
+        idle_before = rendered[src["idle"][0].path_id][0].tobytes()
+        arc = Image.new("RGBA", (30, 10), (255, 0, 0, 255))
+        done, _ = self._bake([self.STRIKE], {"strike": [arc]}, src, rendered)
+        self.assertEqual(rendered[src["idle"][0].path_id][0].tobytes(), idle_before)
+        self.assertNotEqual(rendered[src["S1"][0].path_id][0].size, (20, 100))
+        self.assertEqual([d[0]["style"] for d in done], ["strike"])
+
+    def test_strike_in_front_on_the_facing_side(self):
+        from PIL import Image
+        src, rendered = self._frames()
+        arc = Image.new("RGBA", (30, 10), (255, 0, 0, 255))
+        self._bake([self.STRIKE], {"strike": [arc]}, src, rendered)
+        img, _, (px, py) = rendered[src["S1"][0].path_id]
+        fx = px * img.width
+        reds = [x for x in range(img.width) for y in range(img.height) if img.getpixel((x, y))[:3] == (255, 0, 0)]
+        self.assertTrue(reds and min(reds) > fx - 10 and sum(reds) / len(reds) > fx)   # ahead of her, to the right
+
+    def test_auras_compose_mist_then_strike(self):
+        from PIL import Image
+        from limbus_skins import aura
+        src, rendered = self._frames()
+        sprites = {"mist": [Image.new("RGBA", (40, 40), (90, 0, 0, 200))], "strike": [Image.new("RGBA", (30, 10), (255, 0, 0, 255))]}
+        i = src["S1"][0].path_id
+        img, sd, pv = rendered[i]
+        a, pa = aura.bake(img, pv, sprites["mist"], self.MIST, 100, 1)          # S1 is the second frame: seed 1
+        want, _ = aura.bake(a, pa, sprites["strike"], self.STRIKE, 100, 0)       # first frame the strike draws on
+        self._bake([self.MIST, self.STRIKE], sprites, src, rendered)
+        self.assertEqual(rendered[i][0].tobytes(), want.tobytes())
+
+    def test_missing_donor_is_a_note(self):
+        from limbus_skins import aura, repaint
+        src, rendered = self._frames()
+        before = {k: v[0].tobytes() for k, v in rendered.items()}
+        notes = []
+        with mock.patch("limbus_skins.aura.textures", side_effect=aura.AuraError("1079_Sancho has no Fx_X")):
+            done = repaint._bake_aura([self.STRIKE], None, src, rendered, notes)
+        self.assertEqual(done, [])
+        self.assertTrue(any("no aura" in n and "Fx_X" in n for n in notes))
+        self.assertEqual({k: v[0].tobytes() for k, v in rendered.items()}, before)
+
     def test_tint_makes_the_grey_background_clear(self):
         from PIL import Image
         from limbus_skins import aura
