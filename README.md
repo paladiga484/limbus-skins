@@ -120,7 +120,7 @@ Skins only show in battle. Menus, portraits and identity art stay as they are.
 | `arayashiki-ryoshu` | Ryōshū 10401 | helper | Arayashiki Ryōshū (stage 9-49) | yes |
 | `nelly` | Ryōshū 10408 | repaint | Nelly | not yet |
 | `lin-daiyu` | Ryōshū 10413 | helper | Lin Daiyu | not yet |
-| `kali` | Ryōshū 10410 | repaint | Kali, the Red Mist (Library of Ruina), in Sancho's blood mist; her own pages, all Wrath, hitting for hundreds. Locked: the Black Forest | not yet |
+| `kali` | Ryōshū 10410 | repaint | Kali, the Red Mist (Library of Ruina), in Sancho's blood mist; her own pages, all Wrath with green coins, hitting for hundreds. Locked: the Black Forest | not yet |
 | `pinky-nursefather` | Ryōshū 10415 | repaint | the Pinky Nursefather | not yet |
 | `guido` | Meursault 10504 | repaint | Guido | not yet |
 | `bamboo-hatted-kim` | Meursault 10508 | helper | Bamboo-hatted Kim | not yet |

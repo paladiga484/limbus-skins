@@ -1,3 +1,23 @@
+# limbus-skins 1.3.2
+
+Fixes
+- **Boss skills no longer overrun their animation.** A boss coin carried the boss's own hit
+  number, so the Roach Emperor's S2 put three coins on a one-hit motion and the game logged an
+  error each time (the stalls some boss skins had). Boss coins now play the identity's own hits,
+  and extra coins replay its last hit.
+
+Skins
+- **Kali** (`kali`) is OP: 250 HP, Speed 6-10, Haste, Protection and Damage Up on her pages,
+  hits of 150-340 - and green coins, though her skills stay Wrath.
+- **Greencliff** (`greencliff`) too: 200 HP, Speed 6-10, hits of 100-240 (The Greenest Hunt
+  180-240 a hit), green coins as before.
+- New for skins: `"green_coins": true` makes every coin of the identity green, whatever its sin.
+
+Install: download the `.whl`, then `pip install --user limbus_skins-1.3.2-py3-none-any.whl`.
+Check the download with `sha256sum -c SHA256SUMS`.
+
+Private servers only, and none of it has been seen in a fight yet: try it on a spare account.
+
 # limbus-skins 1.3.1
 
 - **Greencliff the stickman** (`greencliff`): below his head he is a stick figure now - arms,

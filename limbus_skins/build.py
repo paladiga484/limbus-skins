@@ -12,7 +12,7 @@ from importlib import resources
 
 from . import art, bundle, game, helpers, lortext, repaint, tint
 
-FORMAT = 17      # bump when built skins change shape: older builds are rebuilt on apply
+FORMAT = 18      # bump when built skins change shape: older builds are rebuilt on apply
 
 
 def catalog():
