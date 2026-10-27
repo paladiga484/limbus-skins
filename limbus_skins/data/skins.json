@@ -322,7 +322,7 @@
   },
   "kali": {
    "identity": 10410,
-   "becomes": "Kali, the Red Mist (Library of Ruina): Wrath; her own pages - names, dice and Bleed as in LoR",
+   "becomes": "Kali, the Red Mist (Library of Ruina): Wrath; her own pages, hitting for hundreds",
    "lor": {
     "bundle": "char/char_490.pres",
     "prefab": "Kali",
@@ -386,10 +386,10 @@
     "1": {
      "attributeType": "CRIMSON",
      "atkType": "SLASH",
-     "defaultValue": 5,
+     "defaultValue": 200,
      "coins": [
-      2,
-      2
+      25,
+      25
      ],
      "onHit": {
       "buffKeyword": "Laceration",
@@ -400,31 +400,31 @@
     "2": {
      "attributeType": "CRIMSON",
      "atkType": "HIT",
-     "defaultValue": 6,
+     "defaultValue": 150,
      "coins": [
-      2,
-      1,
-      1
+      20,
+      20,
+      20
      ]
     },
     "3": {
      "attributeType": "CRIMSON",
      "atkType": "SLASH",
-     "defaultValue": 20,
+     "defaultValue": 200,
      "coins": [
-      7,
-      6,
-      6
+      30,
+      30,
+      30
      ]
     },
     "4": {
      "attributeType": "CRIMSON",
      "atkType": "SLASH",
-     "defaultValue": 28,
+     "defaultValue": 250,
      "coins": [
-      5,
-      5,
-      4
+      30,
+      30,
+      30
      ],
      "onHit": {
       "buffKeyword": "Laceration",
@@ -438,10 +438,10 @@
     "defense": {
      "attributeType": "CRIMSON",
      "atkType": "SLASH",
-     "defaultValue": 4,
+     "defaultValue": 150,
      "coins": [
-      2,
-      2
+      25,
+      25
      ]
     }
    },
@@ -563,7 +563,7 @@
  "tints": {
   "greencliff": {
    "identity": 10701,
-   "becomes": "Greencliff (all of him green), the best ID ever: Gluttony, buffs on every skill - and a green Wild Hunt below half HP",
+   "becomes": "Greencliff (all green), the best ID ever, a stickman below his head; S3 \"The Greenest Hunt\" turns him into a green Wild Hunt (half HP does too)",
    "tint": {
     "hue": 120
    },
@@ -573,7 +573,8 @@
    },
    "shift": {
     "to": 10710,
-    "hp": 50
+    "hp": 50,
+    "skill": "3"
    },
    "stats": {
     "hp": 130,
@@ -713,6 +714,16 @@
     "support": [
      1060321
     ]
+   },
+   "stick": {
+    "head": 0.33,
+    "width": 0.03
+   },
+   "texts": {
+    "3": {
+     "name": "The Greenest Hunt",
+     "note": "[WhenUse] Become the Greenest Hunt: Wild Hunt Heathcliff, green"
+    }
    }
   }
  },

@@ -1,3 +1,20 @@
+# limbus-skins 1.3.1
+
+- **Greencliff the stickman** (`greencliff`): below his head he is a stick figure now - arms,
+  legs and bat drawn as lines in every pose, the head as it was. His S3 is **The Greenest
+  Hunt**: using it turns him into a green Wild Hunt Heathcliff (half HP still does too; needs
+  the Limbus Private Server's client patch, build 3).
+- **Kali hits for hundreds** (`kali`): every hit of hers lands for 150-340 - Level Slash
+  400-475, Upstanding Slash 450-570, Greater Split: Vertical 600-780 - before resistances
+  and crits. Her flavor text still quotes Library of Ruina's dice.
+- New for skins: "stick" (a stick figure below the head, for tints), a "skill" in "shift" (a
+  body change on using a skill), and a text "note" ahead of a skill's own lines.
+
+Install: download the `.whl`, then `pip install --user limbus_skins-1.3.1-py3-none-any.whl`.
+Check the download with `sha256sum -c SHA256SUMS`.
+
+Private servers only, and none of it has been seen in a fight yet: try it on a spare account.
+
 # limbus-skins 1.3.0
 
 Skins
