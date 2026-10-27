@@ -9,13 +9,17 @@ Dress Limbus Company identities as the characters they mirror, on a **private se
   animation, turned to face the sinners' way (Kromer, Lucio, Guido and the Old G Corp. Head
   Manager have none in the game and stand still).
 - **Tints:** the identity keeps its own body and drawings, recolored. LCB Heathcliff as
-  **Greencliff**, green from head to toe; every skill of his is Gluttony (the green sin).
+  **Greencliff**, green from head to toe and the best ID ever: 130 HP, Speed 5-9, a pile of buffs
+  on every Gluttony skill, and below half HP he turns into a green Wild Hunt.
 - **Library of Ruina:** a repaint can draw from Library of Ruina too, if you own it. Kali,
-  the Red Mist, fights with her Ruina poses (her chibi head brought down to size) and her
-  Ruina pages as skills, wrapped in Sancho's blood mist. She is locked until Greencliff dies
-  in a fight on the private server (the Black Forest).
+  the Red Mist, fights with her Ruina poses (her chibi head brought down to size) and her own
+  pages - Level Slash, Upstanding Slash, Greater Split: Vertical, Retaliate - with their names,
+  dice and Bleed, read from your Library of Ruina, wrapped in Sancho's blood mist. She is locked
+  until Greencliff dies in a fight on the private server (the Black Forest).
 - **Auras:** effect sprites taken from a boss's own bundle drift around the body, in every
-  frame and in the idle: the Roach Emperor's flies, Sancho's blood mist.
+  frame and in the idle: the Roach Emperor's swarm of roaches, Sancho's blood mist.
+- **Skill text:** a skin that rewrites skills also rewrites their names and descriptions, so a
+  skill's text says what it does now (with the Limbus Private Server's client patch).
 - **Boss skills:** `limbus-skins boss on ahab` and a repainted identity also fights with its
   boss's skills - the boss's power, coins and effects, played with the identity's own (repainted)
   animations. Off by default.
@@ -78,6 +82,11 @@ limbus-skins run --yes -- "C:\...\Limbus Private Server.exe"      # Windows
 puts the original files back when the game exits. Your choices are remembered, so after the
 first time `limbus-skins run -- <launcher>` is all you need, including after game updates.
 
+With a package's launcher, `run` also sets the package's client patch for the session: the
+skills' own names and descriptions, green coins on Gluttony skills, and Greencliff's turn into
+the Wild Hunt. It clears them when the game exits. `limbus-skins client [--off] <folder>` does
+the same by hand for any folder holding the patch's `myosotis.ini`.
+
 To do it by hand: `limbus-skins apply`, start the game, then `limbus-skins restore` after
 closing it (or `limbus-skins watch`, which restores as soon as the game exits).
 
@@ -110,7 +119,7 @@ Skins only show in battle. Menus, portraits and identity art stay as they are.
 | `arayashiki-ryoshu` | Ryōshū 10401 | helper | Arayashiki Ryōshū (stage 9-49) | yes |
 | `nelly` | Ryōshū 10408 | repaint | Nelly | not yet |
 | `lin-daiyu` | Ryōshū 10413 | helper | Lin Daiyu | not yet |
-| `kali` | Ryōshū 10410 | repaint | Kali, the Red Mist (Library of Ruina), in Sancho's blood mist; all skills Gluttony. Locked: the Black Forest | not yet |
+| `kali` | Ryōshū 10410 | repaint | Kali, the Red Mist (Library of Ruina), in Sancho's blood mist; her own pages, all Wrath. Locked: the Black Forest | not yet |
 | `pinky-nursefather` | Ryōshū 10415 | repaint | the Pinky Nursefather | not yet |
 | `guido` | Meursault 10504 | repaint | Guido | not yet |
 | `bamboo-hatted-kim` | Meursault 10508 | helper | Bamboo-hatted Kim | not yet |
@@ -124,7 +133,7 @@ Skins only show in battle. Menus, portraits and identity art stay as they are.
 | `queequeg` | Heathcliff 10707 | repaint | Queequeg | not yet |
 | `lucio` | Heathcliff 10716 | repaint | Lucio | not yet |
 | `ahab` | Ishmael 10808 | repaint | Captain Ahab | not yet |
-| `greencliff` | Heathcliff 10701 | tint | Greencliff (all green; every skill Gluttony) | not yet |
+| `greencliff` | Heathcliff 10701 | tint | Greencliff (all green), the best ID ever; a green Wild Hunt below half HP | not yet |
 | `vergilius` | Heathcliff 10710 | helper | Vergilius, with his own kit and battle script | not yet |
 | `vergilius-wildhunt` | Heathcliff 10710 | repaint | Vergilius (E.G.O. Vergilius when mounted) | not yet |
 | `jun-ishmael` | Ishmael 10811 | repaint | Jun | not yet |
@@ -144,7 +153,7 @@ Skins only show in battle. Menus, portraits and identity art stay as they are.
 | `matthias` | Outis 11115 | repaint | the Middle Nursefather, Matthias | not yet |
 | `josephine` | Outis 11108 | repaint | Josephine | not yet |
 | `barber` | Outis 11111 | repaint | the Barber (bloodfiend) | not yet |
-| `roach-emperor` | Gregor 11203 | repaint | the Roach Emperor, with his flies; all skills Gluttony | not yet |
+| `roach-emperor` | Gregor 11203 | repaint | the Roach Emperor, in a swarm of his roaches; all skills Gluttony | not yet |
 | `jun-gregor` | Gregor 11208 | repaint | Jun | not yet |
 | `priest` | Gregor 11210 | repaint | the Priest | not yet |
 | `distorted-hohenheim` | Gregor 11212 | repaint | Distorted Hohenheim | not yet |

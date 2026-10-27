@@ -1,3 +1,35 @@
+# limbus-skins 1.3.0
+
+Skins
+- **Greencliff, the best ID ever** (`greencliff`): 130 HP, Speed 5-9, every skill Gluttony and
+  Blunt with buffs on use - Haste, Poise (for every ally on S3), Protection, Damage Up - and
+  Rupture and Tremor on hit; Acute Studies, Buy Time and Flame Rooster's Death Defiance as
+  passives, Gambit as support. Below half HP he turns into Wild Hunt Heathcliff's body, tinted
+  green with him (needs the Limbus Private Server's client patch). While he is on, Wild Hunt
+  Heathcliff is green too. He and `vergilius-wildhunt` both change Wild Hunt's body: with both
+  on, the one turned on first wins and the other is skipped.
+- **Kali** (`kali`) fights with her own Library of Ruina pages: Level Slash (Slash 5-9, 3 Bleed
+  next turn on each hit), Upstanding Slash (Blunt 6-10), Greater Split: Vertical (Slash 20-39)
+  and Retaliate (counter, Slash 4-8), all Wrath. Their names, and their Ruina cost, dice and
+  abilities as flavor text, are read from your own Library of Ruina when she is built.
+- **The Roach Emperor** (`roach-emperor`) stands in a swarm of 22 roaches; 10 follow him into
+  every move.
+
+New in the tool
+- **Skill text:** a rewritten skill gets its own name and description - what it does now, in
+  the game's own wording - shown through the Limbus Private Server's client patch.
+- **`run` sets a package's client patch** for the session (skill text, green coins, Greencliff's
+  Wild Hunt) and clears it when the game exits; `limbus-skins client [--off] <folder>` by hand.
+- Skins can now have several effects on a skill, effects on chosen coins, stats (HP and Speed),
+  and a body to turn into at low HP. Rewritten skills keep their animation's timing.
+
+Install: download the `.whl`, then `pip install --user limbus_skins-1.3.0-py3-none-any.whl`.
+Check the download with `sha256sum -c SHA256SUMS`.
+
+Private servers only. These change how fights play, and none of it has been seen in a fight
+yet: try it on a spare account, and if something looks wrong or a fight freezes,
+`limbus-skins off <skin>` and open an issue.
+
 # limbus-skins 1.2.0
 
 New skins
