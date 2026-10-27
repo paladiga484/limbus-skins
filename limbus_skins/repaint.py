@@ -535,6 +535,7 @@ def _spine_aura(sp, sprites, spec, ref):
     the aura's placements over each animation (flies flapping between their frames). ref =
     the body's standing height in sprite units."""
     from . import aura as auramod
+    spec = auramod.idle_spec(spec)
     pages, page, tex = _spine_pages(sp)
     doc = json.loads(spine.text_of(sp["skeleton"]))
     a, b, c, d, _, _ = sp["to_skel"]

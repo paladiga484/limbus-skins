@@ -545,8 +545,12 @@
      ]
     },
     "style": "swarm",
-    "count": 7,
-    "size": 0.13
+    "count": 10,
+    "size": 0.15,
+    "idle": {
+     "count": 22,
+     "size": 0.21
+    }
    }
   },
   "distorted-hohenheim": {

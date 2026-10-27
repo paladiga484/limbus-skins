@@ -962,6 +962,15 @@ class Auras(unittest.TestCase):
         self._bake([self.MIST, self.STRIKE], sprites, src, rendered)
         self.assertEqual(rendered[i][0].tobytes(), want.tobytes())
 
+    def test_an_idle_rig_can_carry_a_thicker_swarm(self):
+        from limbus_skins import aura
+        spec = {"style": "swarm", "count": 8, "size": 0.14, "idle": {"count": 18, "size": 0.2}}
+        idle = aura.idle_spec(spec)
+        self.assertEqual((idle["count"], idle["size"], idle["style"]), (18, 0.2, "swarm"))
+        self.assertEqual(len(aura._placements(idle, 2, 100.0, 0)), 18)
+        self.assertEqual(len(aura._placements(spec, 2, 100.0, 0)), 8)          # the drawn frames keep theirs
+        self.assertEqual(aura.idle_spec({"count": 3}), {"count": 3})
+
     def test_missing_donor_is_a_note(self):
         from limbus_skins import aura, repaint
         src, rendered = self._frames()

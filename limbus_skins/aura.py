@@ -11,7 +11,9 @@ skins.json "aura": {"from": body whose bundle holds the art, "textures": [names]
 "style": "swarm" | "mist" | "strike" (one slash arc ahead of the body), "count": n,
 "kinds": [frame kinds to draw on, default every body frame],
 "size": fraction of the body's height, "color": [r, g, b] (tints a grey texture),
-"soft": [names] (fade to nothing at the edges: a cloud the particle shape used to cut)}.
+"soft": [names] (fade to nothing at the edges: a cloud the particle shape used to cut),
+"idle": {"count", "size", ...} (what a borrowed Spine idle gets instead: its parts cost no
+atlas room, where every drawn frame's canvas grows with the aura)}.
 Nothing is shipped: the textures are read from the player's own cache.
 """
 import math
@@ -86,6 +88,11 @@ def soften(img):
     out = img.copy()
     out.putalpha(ImageChops.multiply(img.getchannel("A"), mask))
     return out
+
+
+def idle_spec(spec):
+    """The aura as a borrowed Spine idle wears it: the spec with its "idle" overrides."""
+    return dict(spec, **(spec.get("idle") or {}))
 
 
 def _placements(spec, n_sprites, ref, seed):
