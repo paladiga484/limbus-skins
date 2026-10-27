@@ -322,7 +322,7 @@
   },
   "kali": {
    "identity": 10410,
-   "becomes": "Kali, the Red Mist (Library of Ruina): Wrath; her own pages, hitting for hundreds",
+   "becomes": "Kali, the Red Mist (Library of Ruina): Wrath with green coins; her own pages, hitting for hundreds; 250 HP, Speed 6-10",
    "lor": {
     "bundle": "char/char_490.pres",
     "prefab": "Kali",
@@ -395,7 +395,14 @@
       "buffKeyword": "Laceration",
       "stack": 3,
       "activeRound": 1
-     }
+     },
+     "onUse": [
+      {
+       "buffKeyword": "Agility",
+       "activeRound": 1,
+       "stack": 2
+      }
+     ]
     },
     "2": {
      "attributeType": "CRIMSON",
@@ -405,6 +412,13 @@
       20,
       20,
       20
+     ],
+     "onUse": [
+      {
+       "buffKeyword": "Protection",
+       "activeRound": 0,
+       "stack": 3
+      }
      ]
     },
     "3": {
@@ -415,6 +429,18 @@
       30,
       30,
       30
+     ],
+     "onUse": [
+      {
+       "buffKeyword": "Agility",
+       "activeRound": 1,
+       "stack": 3
+      },
+      {
+       "buffKeyword": "AttackDmgUp",
+       "activeRound": 1,
+       "stack": 3
+      }
      ]
     },
     "4": {
@@ -442,6 +468,13 @@
      "coins": [
       25,
       25
+     ],
+     "onUse": [
+      {
+       "buffKeyword": "Protection",
+       "activeRound": 0,
+       "stack": 3
+      }
      ]
     }
    },
@@ -517,6 +550,14 @@
     "defense": {
      "lor_passive": 250222
     }
+   },
+   "green_coins": true,
+   "stats": {
+    "hp": 250,
+    "speed": [
+     6,
+     10
+    ]
    }
   },
   "matthias": {
@@ -577,19 +618,19 @@
     "skill": "3"
    },
    "stats": {
-    "hp": 130,
+    "hp": 200,
     "speed": [
-     5,
-     9
+     6,
+     10
     ]
    },
    "moves": {
     "1": {
      "attributeType": "SHAMROCK",
      "atkType": "HIT",
-     "defaultValue": 8,
+     "defaultValue": 100,
      "coins": [
-      10
+      30
      ],
      "onUse": [
       {
@@ -615,10 +656,10 @@
     "2": {
      "attributeType": "SHAMROCK",
      "atkType": "HIT",
-     "defaultValue": 10,
+     "defaultValue": 120,
      "coins": [
-      7,
-      7
+      30,
+      30
      ],
      "onUse": [
       {
@@ -649,10 +690,10 @@
     "3": {
      "attributeType": "SHAMROCK",
      "atkType": "HIT",
-     "defaultValue": 14,
+     "defaultValue": 180,
      "coins": [
-      10,
-      10
+      30,
+      30
      ],
      "onUse": [
       {
@@ -685,9 +726,9 @@
     "defense": {
      "attributeType": "SHAMROCK",
      "atkType": "HIT",
-     "defaultValue": 12,
+     "defaultValue": 100,
      "coins": [
-      10
+      30
      ],
      "onUse": [
       {

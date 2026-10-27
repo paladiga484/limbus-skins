@@ -69,7 +69,7 @@ def skill_edits(keys, skins, boss=()):
     """The skins among keys whose records go into the static-data bundle: repaints with boss
     skills on, and skins that recolor a skill's sin, rewrite its moves or text, swap its passives
     or change its stats."""
-    return {k for k in keys if any(skins[k].get(f) for f in ("sins", "moves", "passives", "texts", "stats"))
+    return {k for k in keys if any(skins[k].get(f) for f in ("sins", "moves", "passives", "texts", "stats", "green_coins"))
             or (k in boss and skins[k]["kind"] == "repaint" and skins[k].get("source"))}
 
 
@@ -138,6 +138,9 @@ def build(keys, game_dir, cache, data_dir, log=print, boss=(), static=True):
                         skill_swaps.update(recoloured)
                         green.update(helpers.green_ids(recoloured))
                         said.append("sins: " + ", ".join(f"{n} {v}" for n, v in sorted(s["sins"].items())))
+                    if s.get("green_coins"):                # green coins, keeping the skills' own sins
+                        green.update(helpers.all_skill_ids(ident))
+                        said.append("green coins")
                     if s.get("texts") or s.get("moves"):    # shown by myosotis's SkillTextPatch
                         mine = s.get("texts") or {}
                         if lortext.uses_lor(mine):

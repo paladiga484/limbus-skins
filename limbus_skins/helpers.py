@@ -75,6 +75,27 @@ def pick_unit(records, skills, want=None):
     return max(records, key=lambda r: _power(r, skills))
 
 
+def _coin_cues(rec, n):
+    """For n coins of a skill played with rec's animation: each coin's place in it (actionIndex,
+    cutsceneStart), as rec's own coins have them at their last uptie. A coin past rec's own goes
+    on its last hit: an action number past the motion's hits is an error in the game."""
+    cues, own = [{} for _ in range(n)], 0
+    for d in rec["skillData"]:
+        cl = d.get("coinList") or []
+        own = max(own, len(cl))
+        for k, c in enumerate(cl[:n]):
+            cues[k].update({key: c[key] for key in COIN_CUES if key in c})
+    for k in range(own, n):
+        last = cues[own - 1].get("actionIndex", cues[own - 1].get("actionindex", own)) if own else 1
+        cues[k] = {"actionIndex": last}
+    return cues
+
+
+def _recue(coins, cues):
+    """The coins, each with its own cue keys swapped for the given cues."""
+    return [dict({k: v for k, v in c.items() if k not in COIN_CUES}, **cue) for c, cue in zip(coins, cues)]
+
+
 def boss_skills(identity, unit, skills):
     """{skill id: new record} for the identity's own attack skills, carrying the boss's.
     When the boss has fewer attacks, the identity's last skills stay its own. Raises
@@ -94,11 +115,14 @@ def boss_skills(identity, unit, skills):
         rec = copy.deepcopy(skills[sid])
         shell = rec["skillData"][0]
         b = boss["skillData"][0]
+        cues = _coin_cues(rec, len(b.get("coinList") or []))     # before the boss's coins replace them
         for k in BOSS_FIELDS:
             if k in b:
                 shell[k] = copy.deepcopy(b[k])
             else:
                 shell.pop(k, None)
+        if shell.get("coinList"):                   # the boss's coins, played in the identity's animation
+            shell["coinList"] = _recue(shell["coinList"], cues)
         shell["gaksungLevel"] = 1
         rec["skillData"] = [shell]                  # no uptie steps: the boss's numbers throughout
         out[sid] = rec
@@ -150,6 +174,12 @@ def recolor_skills(identity, skills, sins, base=None):
                     d["attributeType"] = sin
             out[rec["id"]] = rec
     return out
+
+
+def all_skill_ids(identity):
+    """Every skill id of the identity, attacks then defense ("green_coins": its coins draw green
+    whatever its sin)."""
+    return [a["skillId"] for a in lit(identity.get("attributeList"))] + list(lit(identity.get("defenseSkillIDList")))
 
 
 def green_ids(recoloured):
@@ -223,10 +253,7 @@ def move_skills(identity, skills, moves, base=None):
                 shell[k] = m[k]
         shell["defaultValue"] = int(m.get("defaultValue", shell.get("defaultValue", 3)))
         shell["abilityScriptList"] = [_buff(u, "GiveBuffOnUse", "Self") for u in uses]
-        cues = [{} for _ in coins]                  # which hit of the animation each coin plays, per uptie
-        for d in rec["skillData"]:
-            for k, c in enumerate((d.get("coinList") or [])[:len(coins)]):
-                cues[k].update({key: c[key] for key in COIN_CUES if key in c})
+        cues = _coin_cues(rec, len(coins))          # which hit of the animation each coin plays
         shell["coinList"] = [dict(cues[k - 1], operatorType="ADD", scale=c,
                                   abilityScriptList=[_buff(h, "GiveBuffOnSucceedAttack", "Target")
                                                      for h in hits if k in _on(h, len(coins))])

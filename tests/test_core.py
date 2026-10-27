@@ -624,6 +624,18 @@ class BossSkills(unittest.TestCase):
         self.assertEqual(len(d[0]["coinList"]), 3)
         self.assertEqual(self.skills[1]["skillData"][0]["attributeType"], "VIOLET")   # inputs untouched
 
+    def test_boss_coins_play_within_the_identitys_animation(self):
+        # the game: "the action number went past the motion count of the current hit data" -
+        # a boss coin's actionIndex is about the boss's animation, not the identity's
+        self.skills[1]["skillData"][0]["coinList"] = [{"scale": 1}, {"scale": 1}]            # S1: two hits
+        self.skills[92]["skillData"][0]["coinList"] = [{"scale": 4, "actionIndex": i, "cutsceneStart": True}
+                                                      for i in (1, 2, 3, 4)]
+        out = self.h.boss_skills(self.ident, self.unit, self.skills)
+        coins = out[1]["skillData"][0]["coinList"]
+        self.assertEqual([c.get("actionIndex") for c in coins], [None, None, 2, 2])        # past its hits: the last one
+        self.assertFalse(any("cutsceneStart" in c for c in coins))
+        self.assertEqual([c["scale"] for c in coins], [4, 4, 4, 4])
+
     def test_too_few_boss_attacks_keep_the_identitys_last_skills(self):
         unit = {"id": 1, "attributeList": [{"skillId": 91, "number": 0}, {"skillId": 95, "number": 0}]}
         self.assertEqual(sorted(self.h.boss_skills(self.ident, unit, self.skills)), [1])
@@ -653,6 +665,11 @@ class BossSkills(unittest.TestCase):
         blue = self.h.recolor_skills(self.ident, self.skills, {"1": "AZURE"})
         self.assertEqual(self.h.green_ids(green), [1, 2, 3, 95])
         self.assertEqual(self.h.green_ids(blue), [])
+
+    def test_every_skill_of_an_identity_for_green_coins_whatever_its_sin(self):
+        self.ident["defenseSkillIDList"] = [95]
+        self.assertEqual(self.h.all_skill_ids(self.ident), [1, 2, 3, 95])
+        self.assertEqual(self.h.all_skill_ids({"attributeList": "[{'skillId': 7}]"}), [7])
 
     def test_skill_edits_stack_on_one_record(self):
         sins = self.h.recolor_skills(self.ident, self.skills, {"1": "SHAMROCK"})
