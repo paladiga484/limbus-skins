@@ -160,6 +160,7 @@ def green_ids(recoloured):
 
 SINS = ("CRIMSON", "SCARLET", "AMBER", "SHAMROCK", "AZURE", "INDIGO", "VIOLET")
 ATK = ("SLASH", "PENETRATE", "HIT")
+COIN_CUES = ("actionIndex", "actionindex", "cutsceneStart")    # a coin's place in its animation
 
 
 def _buff(spec, script, target):
@@ -173,6 +174,7 @@ def move_skills(identity, skills, moves, base=None):
     """{skill id: new record}: skill n of the identity rewritten from plain data - sin,
     attack type, base power, coins, and the game's own buff abilities on use and on hit:
     {"attributeType", "atkType", "defaultValue", "coins": [scale...], "onUse": {...}, "onHit": {...}}.
+    "onHit" goes on every coin, or only on those listed in its "coins" (1-based).
     n is "1", "2"... or "defense" (its first defense skill; a guard keeps its defType). Motions
     and the uptie shell stay the identity's; every uptie plays the same skill. The coin count
     stays the identity's own: each coin is a hit in its animation, and a different count stalls
@@ -199,10 +201,39 @@ def move_skills(identity, skills, moves, base=None):
         shell["defaultValue"] = int(m.get("defaultValue", shell.get("defaultValue", 3)))
         shell["abilityScriptList"] = [_buff(m["onUse"], "GiveBuffOnUse", "Self")] if m.get("onUse") else []
         hit = [_buff(m["onHit"], "GiveBuffOnSucceedAttack", "Target")] if m.get("onHit") else []
-        shell["coinList"] = [{"operatorType": "ADD", "scale": c, "abilityScriptList": copy.deepcopy(hit)} for c in coins]
+        on = (m.get("onHit") or {}).get("coins") or range(1, len(coins) + 1)
+        if not all(isinstance(k, int) and 1 <= k <= len(coins) for k in on):
+            raise ValueError(f"skill {n}: onHit coins must be among 1-{len(coins)}")
+        cues = [{} for _ in coins]                  # which hit of the animation each coin plays, per uptie
+        for d in rec["skillData"]:
+            for k, c in enumerate((d.get("coinList") or [])[:len(coins)]):
+                cues[k].update({key: c[key] for key in COIN_CUES if key in c})
+        shell["coinList"] = [dict(cues[k - 1], operatorType="ADD", scale=c,
+                                  abilityScriptList=copy.deepcopy(hit) if k in on else []) for k, c in enumerate(coins, 1)]
         shell["gaksungLevel"] = 1
         rec["skillData"] = [shell]
         out[rec["id"]] = rec
+    return out
+
+
+def skill_texts(identity, skills, texts):
+    """{skill id: {"name", "desc", "flavor", "coins": [line per coin]}}: what myosotis's
+    SkillTextPatch shows for skill n ("1", "2"... or "defense", as in move_skills) instead of the
+    game's own text. desc, flavor and every coin line the skill has are always there ("" blanks the
+    old line, which would describe the old skill); a name not given keeps the old one."""
+    mine = [a["skillId"] for a in lit(identity.get("attributeList"))]
+    guard = list(lit(identity.get("defenseSkillIDList")))
+    out = {}
+    for n, t in texts.items():
+        if n == "defense" and not guard:
+            raise ValueError("the identity has no defense skill to name")
+        sid = guard[0] if n == "defense" else mine[int(n) - 1]
+        have = len(skills[sid]["skillData"][0].get("coinList") or [])
+        lines = list(t.get("coins") or [])
+        if len(lines) > have:
+            raise ValueError(f"skill {n}: {len(lines)} coin lines, but it has {have} coins")
+        out[sid] = {**({"name": t["name"]} if t.get("name") else {}),
+                    "desc": t.get("desc", ""), "flavor": t.get("flavor", ""), "coins": lines + [""] * (have - len(lines))}
     return out
 
 

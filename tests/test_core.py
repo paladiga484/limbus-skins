@@ -693,6 +693,37 @@ class BossSkills(unittest.TestCase):
         self.assertIn("coin", str(e.exception))
         self.assertEqual(len(self.h.move_skills(self.ident, self.skills, {"3": {"coins": [9]}})[3]["skillData"][0]["coinList"]), 1)
 
+    def test_moved_coins_keep_the_hosts_animation_cues(self):
+        self.skills[2]["skillData"][0]["coinList"] = [{"scale": 1, "actionIndex": 1, "color": "x", "grade": 2},
+                                                      {"scale": 1, "actionIndex": 2}, {"scale": 1}]
+        self.skills[2]["skillData"][1]["coinList"] = [{"scale": 2, "actionIndex": 1}, {"scale": 2, "actionIndex": 2},
+                                                      {"scale": 2, "actionIndex": 3, "cutsceneStart": True}]
+        out = self.h.move_skills(self.ident, self.skills, {"2": {"coins": [5, 5, 4]}})
+        coins = out[2]["skillData"][0]["coinList"]
+        self.assertEqual([c.get("actionIndex") for c in coins], [1, 2, 3])     # the last uptie's, where it has more
+        self.assertTrue(coins[2]["cutsceneStart"])
+        self.assertNotIn("color", coins[0])                                    # not the host's coin mechanics
+        self.assertNotIn("grade", coins[0])
+        self.assertEqual([c["scale"] for c in coins], [5, 5, 4])
+
+    def test_an_effect_can_go_on_chosen_coins_only(self):
+        self.skills[2]["skillData"][0]["coinList"] = [{"scale": 1}] * 3
+        out = self.h.move_skills(self.ident, self.skills, {"2": {"coins": [5, 5, 4],
+                                 "onHit": {"buffKeyword": "Laceration", "stack": 5, "turn": 2, "coins": [1]}}})
+        hits = [len(c["abilityScriptList"]) for c in out[2]["skillData"][0]["coinList"]]
+        self.assertEqual(hits, [1, 0, 0])                     # one die, one Bleed - not three
+        self.assertNotIn("coins", out[2]["skillData"][0]["coinList"][0]["abilityScriptList"][0]["buffData"])
+
+    def test_texts_are_keyed_by_skill_id_with_every_old_line_blanked(self):
+        self.ident["defenseSkillIDList"] = [95]
+        self.skills[95]["skillData"][0]["coinList"] = [{"scale": 1}] * 2
+        texts = {"1": {"name": "Level Slash", "coins": ["[OnSucceedAttack] Inflict 3 [Laceration]"]},
+                 "defense": {"name": "Counter", "flavor": "Slash 4-8"}}
+        out = self.h.skill_texts(self.ident, self.skills, texts)
+        self.assertEqual(out[1], {"name": "Level Slash", "desc": "", "flavor": "",
+                                  "coins": ["[OnSucceedAttack] Inflict 3 [Laceration]"]})
+        self.assertEqual(out[95], {"name": "Counter", "desc": "", "flavor": "Slash 4-8", "coins": ["", ""]})
+
     def test_passives_replace_every_uptie_level(self):
         rec = {"personalityID": 10410,
                "battlePassiveList": [{"level": 1, "passiveIDList": [1041002]}, {"level": 2, "passiveIDList": [1041002, 1041001]}],
