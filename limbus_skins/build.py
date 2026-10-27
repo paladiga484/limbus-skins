@@ -12,7 +12,7 @@ from importlib import resources
 
 from . import art, bundle, game, helpers, repaint, tint
 
-FORMAT = 14      # bump when built skins change shape: older builds are rebuilt on apply
+FORMAT = 15      # bump when built skins change shape: older builds are rebuilt on apply
 
 
 def catalog():
@@ -66,9 +66,9 @@ def _write(out_dir, cache, stock_path, raw):
 
 
 def skill_edits(keys, skins, boss=()):
-    """The skins among keys whose skill records go into the static-data bundle: repaints
-    with boss skills on, and skins that recolor a skill's sin (Greencliff's S3)."""
-    return {k for k in keys if skins[k].get("sins") or skins[k].get("moves")
+    """The skins among keys whose records go into the static-data bundle: repaints with boss
+    skills on, and skins that recolor a skill's sin, rewrite its moves or swap its passives."""
+    return {k for k in keys if skins[k].get("sins") or skins[k].get("moves") or skins[k].get("passives")
             or (k in boss and skins[k]["kind"] == "repaint" and skins[k].get("source"))}
 
 
@@ -87,7 +87,7 @@ def build(keys, game_dir, cache, data_dir, log=print, boss=(), static=True):
     want_ids = [skins[k] for k in keys if static and skins[k]["kind"] == "identity"]
     want_boss = [skins[k] for k in sorted(skill_edits(keys, skins, boss))] if static else []
     if want or want_boss or want_ids:
-        swaps, skill_swaps, bad, boss_ok, kit_notes, green = {}, {}, [], [], {}, set()
+        swaps, skill_swaps, bad, boss_ok, kit_notes, green, passives = {}, {}, [], [], {}, set(), {}
         pers, skills, units = game.boss_data(cache)
         clones = {}
         for s in want_ids:
@@ -123,6 +123,10 @@ def build(keys, game_dir, cache, data_dir, log=print, boss=(), static=True):
                     if s.get("moves"):                      # each edit stacks on the ones before it
                         skill_swaps.update(helpers.move_skills(ident, skills, s["moves"], skill_swaps))
                         said.append(f"own moves for S{', S'.join(sorted(s['moves']))}")
+                    if s.get("passives"):
+                        passives[s["identity"]] = s["passives"]
+                        said.append("passives: " + ", ".join(str(i) for i in s["passives"].get("battle", [])
+                                                           + s["passives"].get("support", [])))
                     if s.get("sins"):
                         recoloured = helpers.recolor_skills(ident, skills, s["sins"], skill_swaps)
                         skill_swaps.update(recoloured)
@@ -134,9 +138,9 @@ def build(keys, game_dir, cache, data_dir, log=print, boss=(), static=True):
                     boss_notes[s["key"]] = f"skills unchanged ({e or 'no boss record'})"
         out = os.path.join(built_root, "helpers")
         shutil.rmtree(out, ignore_errors=True)
-        if swaps or skill_swaps or clones:
+        if swaps or skill_swaps or clones or passives:
             static_path, _ = game.find_static(cache)
-            raw, done, _ = helpers.rewrite_static(static_path, swaps, skill_swaps, clones)
+            raw, done, _ = helpers.rewrite_static(static_path, swaps, skill_swaps, clones, passives)
             os.makedirs(out)
             rel = _write(out, cache, static_path, raw)
             with open(os.path.join(out, "manifest.json"), "w", encoding="utf-8") as f:

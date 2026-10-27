@@ -322,7 +322,7 @@
   },
   "kali": {
    "identity": 10410,
-   "becomes": "Kali, the Red Mist (Library of Ruina), with her Ruina pages",
+   "becomes": "Kali, the Red Mist (Library of Ruina): Wrath, Bleed, Poise, Blunt",
    "lor": {
     "bundle": "char/char_490.pres",
     "prefab": "Kali",
@@ -386,30 +386,43 @@
     "1": {
      "name": "Level Slash",
      "attributeType": "CRIMSON",
-     "atkType": "SLASH",
-     "defaultValue": 5,
+     "atkType": "HIT",
+     "defaultValue": 4,
      "coins": [
       4,
-      3
+      4
      ],
      "onHit": {
       "buffKeyword": "Laceration",
       "stack": 2,
-      "turn": 2
+      "turn": 1
+     },
+     "onUse": {
+      "buffKeyword": "Breath",
+      "stack": 2,
+      "turn": 1,
+      "target": "Self",
+      "activeRound": 0
      }
     },
     "2": {
      "name": "Upstanding Slash",
      "attributeType": "CRIMSON",
      "atkType": "HIT",
-     "defaultValue": 6,
+     "defaultValue": 4,
      "coins": [
       4,
-      3
+      4,
+      4
      ],
+     "onHit": {
+      "buffKeyword": "Laceration",
+      "stack": 1,
+      "turn": 1
+     },
      "onUse": {
       "buffKeyword": "Breath",
-      "stack": 2,
+      "stack": 3,
       "turn": 2,
       "target": "Self",
       "activeRound": 0
@@ -418,43 +431,66 @@
     "3": {
      "name": "Greater Split: Vertical",
      "attributeType": "CRIMSON",
-     "atkType": "SLASH",
-     "defaultValue": 20,
+     "atkType": "HIT",
+     "defaultValue": 10,
      "coins": [
-      19
+      6,
+      6,
+      6
      ],
      "onHit": {
       "buffKeyword": "Laceration",
-      "stack": 5,
+      "stack": 3,
       "turn": 3
      },
      "onUse": {
       "buffKeyword": "Breath",
+      "stack": 4,
+      "turn": 2,
+      "target": "Self",
+      "activeRound": 0
+     }
+    },
+    "4": {
+     "name": "Greater Split: Horizontal",
+     "attributeType": "CRIMSON",
+     "atkType": "HIT",
+     "defaultValue": 7,
+     "coins": [
+      5,
+      5,
+      5
+     ],
+     "onHit": {
+      "buffKeyword": "Laceration",
       "stack": 2,
+      "turn": 2
+     },
+     "onUse": {
+      "buffKeyword": "Breath",
+      "stack": 3,
       "turn": 2,
       "target": "Self",
       "activeRound": 0
      }
     },
     "defense": {
-     "name": "Counter (Slash 4-8, card 607101)",
+     "name": "Onrush (counter)",
      "attributeType": "CRIMSON",
-     "atkType": "SLASH",
+     "atkType": "HIT",
      "defaultValue": 4,
      "coins": [
+      4,
       4
      ],
      "onHit": {
       "buffKeyword": "Laceration",
-      "stack": 1,
+      "stack": 2,
       "turn": 1
      }
     }
    },
    "unlock": "black-forest",
-   "sins": {
-    "all": "SHAMROCK"
-   },
    "aura": [
     {
      "from": "1079_Sancho_BerserkAppearance",
@@ -500,7 +536,16 @@
      "size": 0.8,
      "alpha": 0.9
     }
-   ]
+   ],
+   "passives": {
+    "battle": [
+     1090101,
+     1090601
+    ],
+    "support": [
+     1090621
+    ]
+   }
   },
   "matthias": {
    "identity": 11115,

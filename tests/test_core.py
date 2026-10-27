@@ -661,6 +661,7 @@ class BossSkills(unittest.TestCase):
         self.assertEqual(sins[1]["skillData"][0]["attributeType"], "SHAMROCK")
 
     def test_moves_rewrite_a_skill_from_plain_data(self):
+        self.skills[2]["skillData"][0]["coinList"] = [{"scale": 1}] * 3      # a three-coin skill
         moves = {"2": {"attributeType": "CRIMSON", "atkType": "PENETRATE", "defaultValue": 5, "coins": [3, 3, 3],
                        "onHit": {"buffKeyword": "Laceration", "stack": 2, "turn": 1},
                        "onUse": {"buffKeyword": "Agility", "stack": 2, "target": "Self"}}}
@@ -684,6 +685,23 @@ class BossSkills(unittest.TestCase):
         out = self.h.move_skills(self.ident, self.skills, {"defense": {"defaultValue": 8, "coins": [4]}})
         d = out[95]["skillData"][0]
         self.assertEqual((d["defType"], d["defaultValue"], [c["scale"] for c in d["coinList"]]), ("GUARD", 8, [4]))
+
+    def test_moves_keep_the_identitys_coin_count(self):
+        # each coin of a skill is a hit in the identity's own animation: a different count stalls it
+        with self.assertRaises(ValueError) as e:
+            self.h.move_skills(self.ident, self.skills, {"3": {"coins": [5, 5]}})     # skill 3 has one coin
+        self.assertIn("coin", str(e.exception))
+        self.assertEqual(len(self.h.move_skills(self.ident, self.skills, {"3": {"coins": [9]}})[3]["skillData"][0]["coinList"]), 1)
+
+    def test_passives_replace_every_uptie_level(self):
+        rec = {"personalityID": 10410,
+               "battlePassiveList": [{"level": 1, "passiveIDList": [1041002]}, {"level": 2, "passiveIDList": [1041002, 1041001]}],
+               "supporterPassiveList": [{"level": 1, "passiveIDList": [1041021]}]}
+        out = self.h.swap_passives(rec, [1090101, 1090601], [1090621])
+        self.assertEqual(out["battlePassiveList"], [{"level": 1, "passiveIDList": [1090101, 1090601]},
+                                                    {"level": 2, "passiveIDList": [1090101, 1090601]}])
+        self.assertEqual(out["supporterPassiveList"], [{"level": 1, "passiveIDList": [1090621]}])
+        self.assertEqual(rec["battlePassiveList"][0]["passiveIDList"], [1041002])      # the input stays as it was
 
     def test_moves_refuse_odd_values(self):
         for bad in ({"atkType": "KICK"}, {"attributeType": "PLAID"}, {"coins": []}, {"coins": [99] * 9}):

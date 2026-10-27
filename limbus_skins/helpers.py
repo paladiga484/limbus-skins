@@ -174,7 +174,9 @@ def move_skills(identity, skills, moves, base=None):
     attack type, base power, coins, and the game's own buff abilities on use and on hit:
     {"attributeType", "atkType", "defaultValue", "coins": [scale...], "onUse": {...}, "onHit": {...}}.
     n is "1", "2"... or "defense" (its first defense skill; a guard keeps its defType). Motions
-    and the uptie shell stay the identity's; every uptie plays the same skill."""
+    and the uptie shell stay the identity's; every uptie plays the same skill. The coin count
+    stays the identity's own: each coin is a hit in its animation, and a different count stalls
+    it (ValueError)."""
     mine = [a["skillId"] for a in lit(identity.get("attributeList"))]
     guard = list(lit(identity.get("defenseSkillIDList")))
     out = {}
@@ -188,6 +190,9 @@ def move_skills(identity, skills, moves, base=None):
             raise ValueError(f"skill {n}: unknown sin or attack type")
         rec = _record(guard[0] if n == "defense" else mine[int(n) - 1], skills, base)
         shell = rec["skillData"][0]
+        own = len(shell.get("coinList") or [])
+        if own and len(coins) != own:
+            raise ValueError(f"skill {n}: {len(coins)} coins, but its animation has {own} - keep {own}")
         for k in ("attributeType", "atkType"):
             if k in m:
                 shell[k] = m[k]
@@ -240,15 +245,26 @@ def check_new_ids(have, clones):
             raise ValueError(f"identity {base} (to clone {new} from) isn't in this game version")
 
 
-def rewrite_static(static_path, swaps, skill_swaps=None, clones=None):
+def swap_passives(rec, battle, support):
+    """A copy of a personality-passive record with these passive ids at every uptie level
+    (passives are coded per id in the client: borrowed ones bring their own effect)."""
+    out = copy.deepcopy(rec)
+    for key, ids in (("battlePassiveList", battle), ("supporterPassiveList", support)):
+        out[key] = [dict(lv, passiveIDList=list(ids)) for lv in rec.get(key, [])]
+    return out
+
+
+def rewrite_static(static_path, swaps, skill_swaps=None, clones=None, passive_swaps=None):
     """Rewrite identity records (and skill records) in the static-data bundle.
     swaps = {identity id: helper record}; skill_swaps = {skill id: new record};
-    clones = {new identity id: base id} (cloned after the swaps, so a clone wears them too).
+    clones = {new identity id: base id} (cloned after the swaps, so a clone wears them too);
+    passive_swaps = {identity id: {"battle": [passive ids], "support": [passive ids]}}.
     Returns (bundle bytes, [identity ids changed], [skill ids changed])."""
     UnityPy = unitypy()
     env = UnityPy.load(static_path)
     skill_swaps = skill_swaps or {}
     clones = clones or {}
+    passive_swaps = passive_swaps or {}
     done, done_skills = set(), set()
     for path, obj in env.container.items():
         if obj.type.name != "TextAsset":
@@ -256,7 +272,8 @@ def rewrite_static(static_path, swaps, skill_swaps=None, clones=None):
         kind = path.split("/static-data/")[1].split("/")[0] if "/static-data/" in path else ""
         is_pers = kind == "personality"
         cloned = bool(clones) and (kind in IDENTITY_KEYS or kind.startswith("illust-pivots-"))
-        if not (is_pers or cloned or (skill_swaps and kind == "skill")):
+        if not (is_pers or cloned or (skill_swaps and kind == "skill")
+                or (passive_swaps and kind == "personality-passive")):
             continue
         doc = _text(obj)
         hit = False
@@ -276,11 +293,18 @@ def rewrite_static(static_path, swaps, skill_swaps=None, clones=None):
                     # keep the record's own encoding: some fields are stored as Python-literal strings
                     x[k] = str(v) if isinstance(x.get(k), str) and not isinstance(v, str) else v
                 done.add(x["id"])
-            else:
+            elif kind == "skill":
                 if x.get("id") not in skill_swaps:
                     continue
                 doc["list"][i] = skill_swaps[x["id"]]
                 done_skills.add(x["id"])
+            elif kind == "personality-passive":
+                sw = passive_swaps.get(x.get("personalityID"))
+                if not sw:
+                    continue
+                doc["list"][i] = swap_passives(x, sw.get("battle", []), sw.get("support", []))
+            else:
+                continue                            # a table here only for its clones
             hit = True
         if cloned:
             grown = add_clones(kind, doc.get("list", []), clones)
