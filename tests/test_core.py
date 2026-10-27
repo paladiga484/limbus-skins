@@ -1031,7 +1031,7 @@ class Tints(unittest.TestCase):
         from limbus_skins.build import shift_rule
         ids = {10701: {"appearance": "10701_Heathclif_BaseAppearance"}, 10710: {"appearance": "10710_Heathclif_WHuntAppearance"}}
         skin = {"identity": 10701, "shift": {"to": 10710, "hp": 50}}
-        self.assertEqual(shift_rule(skin, ids), {"from": "10701_Heathclif_BaseAppearance",
+        self.assertEqual(shift_rule(skin, ids), {"from": "10701_",          # every body of his (a Canto VI one too)
                                                  "to": "10710_Heathclif_WHuntAppearance", "hp": 50})
         self.assertIsNone(shift_rule({"identity": 10701}, ids))
         for bad in ({"to": 99999, "hp": 50}, {"to": 10710, "hp": 0}, {"to": 10710, "hp": "50"}):

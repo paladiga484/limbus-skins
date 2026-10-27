@@ -216,20 +216,20 @@ def build(keys, game_dir, cache, data_dir, log=print, boss=(), static=True):
 
 def shift_rule(skin, ids):
     """A skin's "shift" ({"to": identity id, "hp": percent}) as the client patch takes it:
-    {"from": its body, "to": that identity's body, "hp": percent} - the unit turns into the other
-    body the first time its HP falls below that percent of its max (myosotis's HpShiftPatch).
-    None without one; ValueError for one that can't work."""
+    {"from": "<identity>_" (any body of the skin's identity - LCB Heathcliff has a Canto VI one
+    too), "to": that identity's body, "hp": percent} - the unit turns into the other body the first
+    time its HP falls below that percent of its max (myosotis's HpShiftPatch). None without one;
+    ValueError for one that can't work."""
     sh = skin.get("shift")
     if not sh:
         return None
     to = ids.get(sh.get("to"), {}).get("appearance")
-    frm = ids.get(skin["identity"], {}).get("appearance")
     hp = sh.get("hp")
-    if not to or not frm:
+    if not to or skin["identity"] not in ids:
         raise ValueError(f"shift: identity {sh.get('to')} isn't in this game version")
     if not isinstance(hp, int) or not 1 <= hp <= 99:
         raise ValueError("shift: hp must be a percent, 1-99")
-    return {"from": frm, "to": to, "hp": hp}
+    return {"from": f"{skin['identity']}_", "to": to, "hp": hp}
 
 
 def built_dirs(data_dir, keys, boss=()):
