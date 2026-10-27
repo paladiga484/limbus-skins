@@ -168,6 +168,16 @@ class Rebuilds(unittest.TestCase):
                 json.dump(dict({"format": FORMAT, "files": ["a/b"]}, **extra), f)
         return os.path.join(root, "data"), cache
 
+    def test_a_tints_other_body_is_its_own_folder_after_the_skin(self):
+        # Greencliff's green Wild Hunt lives apart: if vergilius-wildhunt holds Wild Hunt's file,
+        # only that part is skipped, not Greencliff himself (a friend's "on all" lost him whole)
+        from limbus_skins import build
+        with tempfile.TemporaryDirectory() as tmp:
+            for folder in ("greencliff", "greencliff.forms", "vergilius-wildhunt"):
+                os.makedirs(os.path.join(tmp, "built", folder, "files"))
+            labels = [label for label, _ in build.built_dirs(tmp, ["vergilius-wildhunt", "greencliff"])]
+            self.assertEqual(labels, ["vergilius-wildhunt", "greencliff", "greencliff.forms"])
+
     def test_boss_choice_changes_rebuild_and_nothing_else_does(self):
         for built, want, stale in (([], set(), []), ([], {"ahab"}, ["ahab"]),
                                    (["ahab"], {"ahab"}, []), (["ahab"], set(), [])):

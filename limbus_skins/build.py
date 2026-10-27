@@ -12,7 +12,8 @@ from importlib import resources
 
 from . import art, bundle, game, helpers, lortext, repaint, tint
 
-FORMAT = 18      # bump when built skins change shape: older builds are rebuilt on apply
+FORMS = ".forms"  # built/<skin>.forms: another body a skin turns into, swapped in apart from it
+FORMAT = 19      # bump when built skins change shape: older builds are rebuilt on apply
 
 
 def catalog():
@@ -218,11 +219,16 @@ def build(keys, game_dir, cache, data_dir, log=print, boss=(), static=True):
                 shutil.rmtree(out, ignore_errors=True)
                 os.makedirs(out)
                 rels = [_write(out, cache, locate(target), raw)]
-                if shift and s["kind"] == "tint":    # the body it turns into, the same colour
-                    if locate(shift["to"]) == locate(target):
-                        raise repaint.RepaintError(f"{shift['to']} shares {target}'s bundle")
+                extra = out + FORMS
+                shutil.rmtree(extra, ignore_errors=True)
+                if shift and s["kind"] == "tint":    # the body it turns into, the same colour - in a
+                    if locate(shift["to"]) == locate(target):   # folder of its own, so a clash over it
+                        raise repaint.RepaintError(f"{shift['to']} shares {target}'s bundle")  # skips only it
                     more, more_notes = tint.tint(shift["to"], locate, s["tint"])
-                    rels.append(_write(out, cache, locate(shift["to"]), more))
+                    os.makedirs(extra)
+                    rel = _write(extra, cache, locate(shift["to"]), more)
+                    with open(os.path.join(extra, "manifest.json"), "w", encoding="utf-8") as f:
+                        json.dump({"format": FORMAT, "kind": s["kind"], "skins": [key], "files": [rel]}, f, indent=1)
                     notes = notes + [f"{shift['to']}: " + "; ".join(more_notes)]
                 with open(os.path.join(out, "manifest.json"), "w", encoding="utf-8") as f:
                     json.dump(dict({"format": FORMAT, "kind": s["kind"], "skins": [key], "files": rels, "notes": notes},
@@ -277,7 +283,7 @@ def built_dirs(data_dir, keys, boss=()):
     except (OSError, ValueError):
         man = {}
     for k in keys:
-        folders = ["helpers"] if k in skins and shares_static(skins[k]) else [k]
+        folders = ["helpers"] if k in skins and shares_static(skins[k]) else [k, k + FORMS]
         if k in edits and k in man.get("skills", []):
             folders.append("helpers")
         for folder in folders:

@@ -1,3 +1,15 @@
+# limbus-skins 1.3.3
+
+Fix
+- **Greencliff vanished with `vergilius-wildhunt` on** (as with `limbus-skins on all`): both change
+  Wild Hunt Heathcliff's body, and the clash skipped Greencliff whole - no green, no stickman.
+  His green Wild Hunt is now a part of its own (`built/greencliff.forms`): a clash skips only
+  that, and Greencliff stays green and a stickman.
+
+Install: download the `.whl`, then `pipx install ./limbus_skins-1.3.3-py3-none-any.whl` (Linux)
+or `py -m pip install --user limbus_skins-1.3.3-py3-none-any.whl` (Windows).
+Check the download with `sha256sum -c SHA256SUMS`.
+
 # limbus-skins 1.3.2
 
 Fixes
