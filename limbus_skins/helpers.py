@@ -163,18 +163,34 @@ ATK = ("SLASH", "PENETRATE", "HIT")
 COIN_CUES = ("actionIndex", "actionindex", "cutsceneStart")    # a coin's place in its animation
 
 
+def _effects(v):
+    """A move's onUse/onHit: one effect, or a list of them."""
+    return [v] if isinstance(v, dict) else list(v or [])
+
+
+def _round(spec, on_use):
+    """0 = this turn, 1 = next turn; on use, next turn unless the effect says otherwise."""
+    return int(spec.get("activeRound", 1 if on_use else 0))
+
+
 def _buff(spec, script, target):
     return {"scriptName": script,
             "buffData": {"buffKeyword": spec["buffKeyword"], "target": spec.get("target", target), "buffOwner": "",
                          "stack": int(spec.get("stack", 1)), "turn": int(spec.get("turn", 0)),
-                         "activeRound": int(spec.get("activeRound", 1 if script == "GiveBuffOnUse" else 0))}}
+                         "activeRound": _round(spec, script == "GiveBuffOnUse")}}
+
+
+def _on(effect, n):
+    """The coins (1-based) an onHit effect goes on: its own "coins", else all n."""
+    return effect.get("coins") or range(1, n + 1)
 
 
 def move_skills(identity, skills, moves, base=None):
     """{skill id: new record}: skill n of the identity rewritten from plain data - sin,
     attack type, base power, coins, and the game's own buff abilities on use and on hit:
-    {"attributeType", "atkType", "defaultValue", "coins": [scale...], "onUse": {...}, "onHit": {...}}.
-    "onHit" goes on every coin, or only on those listed in its "coins" (1-based).
+    {"attributeType", "atkType", "defaultValue", "coins": [scale...], "onUse": ..., "onHit": ...},
+    each of onUse/onHit one effect {"buffKeyword", "stack", "turn", "activeRound", "target"} or a
+    list of them. An onHit effect goes on every coin, or only on those in its "coins" (1-based).
     n is "1", "2"... or "defense" (its first defense skill; a guard keeps its defType). Motions
     and the uptie shell stay the identity's; every uptie plays the same skill. The coin count
     stays the identity's own: each coin is a hit in its animation, and a different count stalls
@@ -190,6 +206,11 @@ def move_skills(identity, skills, moves, base=None):
             raise ValueError(f"skill {n}: coins must be 1 to 5 scales of 0-30")
         if m.get("attributeType", "CRIMSON") not in SINS or m.get("atkType", "SLASH") not in ATK:
             raise ValueError(f"skill {n}: unknown sin or attack type")
+        uses, hits = _effects(m.get("onUse")), _effects(m.get("onHit"))
+        if not all(isinstance(e, dict) and e.get("buffKeyword") for e in uses + hits):
+            raise ValueError(f"skill {n}: every effect needs a buffKeyword")
+        if not all(isinstance(k, int) and 1 <= k <= len(coins) for h in hits for k in _on(h, len(coins))):
+            raise ValueError(f"skill {n}: onHit coins must be among 1-{len(coins)}")
         rec = _record(guard[0] if n == "defense" else mine[int(n) - 1], skills, base)
         shell = rec["skillData"][0]
         own = len(shell.get("coinList") or [])
@@ -199,42 +220,83 @@ def move_skills(identity, skills, moves, base=None):
             if k in m:
                 shell[k] = m[k]
         shell["defaultValue"] = int(m.get("defaultValue", shell.get("defaultValue", 3)))
-        shell["abilityScriptList"] = [_buff(m["onUse"], "GiveBuffOnUse", "Self")] if m.get("onUse") else []
-        hit = [_buff(m["onHit"], "GiveBuffOnSucceedAttack", "Target")] if m.get("onHit") else []
-        on = (m.get("onHit") or {}).get("coins") or range(1, len(coins) + 1)
-        if not all(isinstance(k, int) and 1 <= k <= len(coins) for k in on):
-            raise ValueError(f"skill {n}: onHit coins must be among 1-{len(coins)}")
+        shell["abilityScriptList"] = [_buff(u, "GiveBuffOnUse", "Self") for u in uses]
         cues = [{} for _ in coins]                  # which hit of the animation each coin plays, per uptie
         for d in rec["skillData"]:
             for k, c in enumerate((d.get("coinList") or [])[:len(coins)]):
                 cues[k].update({key: c[key] for key in COIN_CUES if key in c})
         shell["coinList"] = [dict(cues[k - 1], operatorType="ADD", scale=c,
-                                  abilityScriptList=copy.deepcopy(hit) if k in on else []) for k, c in enumerate(coins, 1)]
+                                  abilityScriptList=[_buff(h, "GiveBuffOnSucceedAttack", "Target")
+                                                     for h in hits if k in _on(h, len(coins))])
+                             for k, c in enumerate(coins, 1)]
         shell["gaksungLevel"] = 1
         rec["skillData"] = [shell]
         out[rec["id"]] = rec
     return out
 
 
-def skill_texts(identity, skills, texts):
+def _line(when, effect, own):
+    """One effect in the game's own words: "[WhenUse] Gain 2 [Agility] next turn"."""
+    kw, stack, turn = effect["buffKeyword"], int(effect.get("stack", 1)), int(effect.get("turn", 0))
+    amount = (f"{stack} [{kw}] and +{turn} [{kw}] Count" if stack and turn else
+              f"+{turn} [{kw}] Count" if turn else f"{stack} [{kw}]")
+    later = " next turn" if _round(effect, when == "WhenUse") == 1 else ""
+    target = effect.get("target", own)
+    verb = "Gain" if target == "Self" else "Apply" if target == "EveryAlly" else "Inflict"
+    return f"[{when}] {verb} {amount}{' to all allies' if target == 'EveryAlly' else ''}{later}"
+
+
+def describe_move(m):
+    """(desc, [line per coin]): a move_skills move's effects in the game's own words, as its
+    text shows them - on use in the skill's description, on hit on each coin."""
+    n = len(m.get("coins") or [])
+    hits = _effects(m.get("onHit"))
+    return ("\n".join(_line("WhenUse", u, "Self") for u in _effects(m.get("onUse"))),
+            ["\n".join(_line("OnSucceedAttack", h, "Target") for h in hits if k in _on(h, n)) for k in range(1, n + 1)])
+
+
+def skill_texts(identity, skills, texts, moves=None):
     """{skill id: {"name", "desc", "flavor", "coins": [line per coin]}}: what myosotis's
     SkillTextPatch shows for skill n ("1", "2"... or "defense", as in move_skills) instead of the
-    game's own text. desc, flavor and every coin line the skill has are always there ("" blanks the
-    old line, which would describe the old skill); a name not given keeps the old one."""
+    game's own text. A moved skill's desc and coin lines describe its move (describe_move) unless
+    the skin's text gives them. desc, flavor and every coin line the skill has are always there
+    ("" blanks the old line, which would describe the old skill); a name not given keeps the old one."""
     mine = [a["skillId"] for a in lit(identity.get("attributeList"))]
     guard = list(lit(identity.get("defenseSkillIDList")))
+    moves = moves or {}
     out = {}
-    for n, t in texts.items():
+    for n in list(moves) + [n for n in texts if n not in moves]:
+        t = texts.get(n) or {}
         if n == "defense" and not guard:
             raise ValueError("the identity has no defense skill to name")
         sid = guard[0] if n == "defense" else mine[int(n) - 1]
         have = len(skills[sid]["skillData"][0].get("coinList") or [])
-        lines = list(t.get("coins") or [])
+        desc, lines = describe_move(moves[n]) if n in moves else ("", [])
+        lines = list(t["coins"]) if "coins" in t else lines
         if len(lines) > have:
             raise ValueError(f"skill {n}: {len(lines)} coin lines, but it has {have} coins")
         out[sid] = {**({"name": t["name"]} if t.get("name") else {}),
-                    "desc": t.get("desc", ""), "flavor": t.get("flavor", ""), "coins": lines + [""] * (have - len(lines))}
+                    "desc": t.get("desc", desc), "flavor": t.get("flavor", ""), "coins": lines + [""] * (have - len(lines))}
     return out
+
+
+def edit_stats(rec, stats):
+    """Set an identity record's HP ("hp": its base HP, the growth per level kept) and Speed
+    ("speed": [min, max] at every uptie), in place and in the record's own encoding."""
+    def put(key, change):
+        old = rec.get(key)
+        new = change(lit(old) if isinstance(old, str) else old)
+        rec[key] = str(new) if isinstance(old, str) else new
+    if "hp" in stats:
+        if not 1 <= int(stats["hp"]) <= 9999:
+            raise ValueError("hp must be 1-9999")
+        put("hp", lambda hp: dict(hp or {}, defaultStat=int(stats["hp"])))
+    if "speed" in stats:
+        lo, hi = (int(v) for v in stats["speed"])
+        if not 1 <= lo <= hi <= 99:
+            raise ValueError("speed must be [min, max] with 1 <= min <= max <= 99")
+        put("minSpeedList", lambda old: [lo] * max(1, len(old or [])))
+        put("maxSpeedList", lambda old: [hi] * max(1, len(old or [])))
 
 
 # Identities of our own: a new id cloned from an existing identity, in every table the client
@@ -285,17 +347,19 @@ def swap_passives(rec, battle, support):
     return out
 
 
-def rewrite_static(static_path, swaps, skill_swaps=None, clones=None, passive_swaps=None):
+def rewrite_static(static_path, swaps, skill_swaps=None, clones=None, passive_swaps=None, stat_edits=None):
     """Rewrite identity records (and skill records) in the static-data bundle.
     swaps = {identity id: helper record}; skill_swaps = {skill id: new record};
     clones = {new identity id: base id} (cloned after the swaps, so a clone wears them too);
-    passive_swaps = {identity id: {"battle": [passive ids], "support": [passive ids]}}.
+    passive_swaps = {identity id: {"battle": [passive ids], "support": [passive ids]}};
+    stat_edits = {identity id: {"hp": base HP, "speed": [min, max]}} (edit_stats).
     Returns (bundle bytes, [identity ids changed], [skill ids changed])."""
     UnityPy = unitypy()
     env = UnityPy.load(static_path)
     skill_swaps = skill_swaps or {}
     clones = clones or {}
     passive_swaps = passive_swaps or {}
+    stat_edits = stat_edits or {}
     done, done_skills = set(), set()
     for path, obj in env.container.items():
         if obj.type.name != "TextAsset":
@@ -311,6 +375,10 @@ def rewrite_static(static_path, swaps, skill_swaps=None, clones=None, passive_sw
         for i, x in enumerate(doc.get("list", [])):
             if is_pers:
                 h = swaps.get(x.get("id"))
+                if x.get("id") in stat_edits:
+                    edit_stats(x, stat_edits[x["id"]])
+                    done.add(x["id"])
+                    hit = True
                 if not h:
                     continue
                 new = {"appearance": h["appearance"],

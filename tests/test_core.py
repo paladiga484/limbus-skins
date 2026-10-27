@@ -693,6 +693,54 @@ class BossSkills(unittest.TestCase):
         self.assertIn("coin", str(e.exception))
         self.assertEqual(len(self.h.move_skills(self.ident, self.skills, {"3": {"coins": [9]}})[3]["skillData"][0]["coinList"]), 1)
 
+    def test_many_effects_on_use_and_on_hit(self):
+        self.skills[2]["skillData"][0]["coinList"] = [{"scale": 1}] * 2
+        moves = {"2": {"coins": [7, 7], "onUse": [{"buffKeyword": "Agility", "stack": 2, "activeRound": 1},
+                                                  {"buffKeyword": "Breath", "stack": 0, "turn": 2, "activeRound": 0}],
+                       "onHit": [{"buffKeyword": "Burst", "stack": 2}, {"buffKeyword": "Vibration", "stack": 1, "coins": [2]}]}}
+        d = self.h.move_skills(self.ident, self.skills, moves)[2]["skillData"][0]
+        self.assertEqual([tuple(a["buffData"][k] for k in ("buffKeyword", "stack", "turn", "activeRound"))
+                          for a in d["abilityScriptList"]], [("Agility", 2, 0, 1), ("Breath", 0, 2, 0)])
+        self.assertEqual([[a["buffData"]["buffKeyword"] for a in c["abilityScriptList"]] for c in d["coinList"]],
+                         [["Burst"], ["Burst", "Vibration"]])
+
+    def test_text_for_a_move_in_the_games_own_words(self):
+        m = {"coins": [7, 7], "onUse": [{"buffKeyword": "Agility", "stack": 2, "activeRound": 1},
+                                        {"buffKeyword": "Breath", "stack": 0, "turn": 2, "activeRound": 0},
+                                        {"buffKeyword": "Breath", "stack": 3, "turn": 1, "target": "EveryAlly", "activeRound": 0}],
+             "onHit": [{"buffKeyword": "Burst", "stack": 2}, {"buffKeyword": "Burst", "stack": 0, "turn": 1, "coins": [2]},
+                       {"buffKeyword": "Laceration", "stack": 3, "activeRound": 1, "coins": [2]}]}
+        desc, coins = self.h.describe_move(m)
+        self.assertEqual(desc.splitlines(), ["[WhenUse] Gain 2 [Agility] next turn", "[WhenUse] Gain +2 [Breath] Count",
+                                             "[WhenUse] Apply 3 [Breath] and +1 [Breath] Count to all allies"])
+        self.assertEqual(coins, ["[OnSucceedAttack] Inflict 2 [Burst]",
+                                 "[OnSucceedAttack] Inflict 2 [Burst]\n[OnSucceedAttack] Inflict +1 [Burst] Count\n"
+                                 "[OnSucceedAttack] Inflict 3 [Laceration] next turn"])
+        self.assertEqual(self.h.describe_move({"coins": [1], "onUse": {"buffKeyword": "Protection", "stack": 2}})[0],
+                         "[WhenUse] Gain 2 [Protection] next turn")      # on use, "next turn" unless said otherwise
+
+    def test_moved_skills_get_their_text_unless_the_skin_gives_it(self):
+        self.skills[2]["skillData"][0]["coinList"] = [{"scale": 1}] * 2
+        moves = {"2": {"coins": [7, 7], "onHit": {"buffKeyword": "Laceration", "stack": 3, "activeRound": 1}}}
+        out = self.h.skill_texts(self.ident, self.skills, {"2": {"name": "Level Slash"}}, moves)
+        self.assertEqual(out[2], {"name": "Level Slash", "desc": "", "flavor": "",
+                                  "coins": ["[OnSucceedAttack] Inflict 3 [Laceration] next turn"] * 2})
+        out = self.h.skill_texts(self.ident, self.skills, {}, moves)            # moves alone: their text, the old name
+        self.assertNotIn("name", out[2])
+        self.assertEqual(len(out[2]["coins"]), 2)
+        out = self.h.skill_texts(self.ident, self.skills, {"2": {"coins": ["mine"]}}, moves)
+        self.assertEqual(out[2]["coins"], ["mine", ""])
+
+    def test_stats_set_hp_and_speed_at_every_uptie_in_the_records_own_encoding(self):
+        rec = {"id": 10701, "hp": {"defaultStat": 78, "incrementByLevel": 2.69},
+               "minSpeedList": "[1, 1, 2, 2]", "maxSpeedList": [4, 5, 5, 5]}
+        self.h.edit_stats(rec, {"hp": 130, "speed": [5, 9]})
+        self.assertEqual(rec["hp"], {"defaultStat": 130, "incrementByLevel": 2.69})
+        self.assertEqual(rec["minSpeedList"], "[5, 5, 5, 5]")
+        self.assertEqual(rec["maxSpeedList"], [9, 9, 9, 9])
+        with self.assertRaises(ValueError):
+            self.h.edit_stats(rec, {"speed": [9, 5]})
+
     def test_moved_coins_keep_the_hosts_animation_cues(self):
         self.skills[2]["skillData"][0]["coinList"] = [{"scale": 1, "actionIndex": 1, "color": "x", "grade": 2},
                                                       {"scale": 1, "actionIndex": 2}, {"scale": 1}]
@@ -969,6 +1017,17 @@ class Tints(unittest.TestCase):
         p = tint.colorize(img, {"hue": 120}, pma=True).getpixel((0, 0))
         self.assertEqual(p[3], 100)
         self.assertTrue(all(c <= 100 for c in p[:3]))
+
+    def test_a_shift_names_both_bodies_for_the_client_patch(self):
+        from limbus_skins.build import shift_rule
+        ids = {10701: {"appearance": "10701_Heathclif_BaseAppearance"}, 10710: {"appearance": "10710_Heathclif_WHuntAppearance"}}
+        skin = {"identity": 10701, "shift": {"to": 10710, "hp": 50}}
+        self.assertEqual(shift_rule(skin, ids), {"from": "10701_Heathclif_BaseAppearance",
+                                                 "to": "10710_Heathclif_WHuntAppearance", "hp": 50})
+        self.assertIsNone(shift_rule({"identity": 10701}, ids))
+        for bad in ({"to": 99999, "hp": 50}, {"to": 10710, "hp": 0}, {"to": 10710, "hp": "50"}):
+            with self.assertRaises(ValueError):
+                shift_rule({"identity": 10701, "shift": bad}, ids)
 
 
 if __name__ == "__main__":

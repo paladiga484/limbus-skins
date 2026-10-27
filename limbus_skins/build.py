@@ -67,8 +67,9 @@ def _write(out_dir, cache, stock_path, raw):
 
 def skill_edits(keys, skins, boss=()):
     """The skins among keys whose records go into the static-data bundle: repaints with boss
-    skills on, and skins that recolor a skill's sin, rewrite its moves or text, or swap its passives."""
-    return {k for k in keys if skins[k].get("sins") or skins[k].get("moves") or skins[k].get("passives") or skins[k].get("texts")
+    skills on, and skins that recolor a skill's sin, rewrite its moves or text, swap its passives
+    or change its stats."""
+    return {k for k in keys if any(skins[k].get(f) for f in ("sins", "moves", "passives", "texts", "stats"))
             or (k in boss and skins[k]["kind"] == "repaint" and skins[k].get("source"))}
 
 
@@ -87,7 +88,7 @@ def build(keys, game_dir, cache, data_dir, log=print, boss=(), static=True):
     want_ids = [skins[k] for k in keys if static and skins[k]["kind"] == "identity"]
     want_boss = [skins[k] for k in sorted(skill_edits(keys, skins, boss))] if static else []
     if want or want_boss or want_ids:
-        swaps, skill_swaps, bad, boss_ok, kit_notes, green, passives, texts = {}, {}, [], [], {}, set(), {}, {}
+        swaps, skill_swaps, bad, boss_ok, kit_notes, green, passives, texts, stats = {}, {}, [], [], {}, set(), {}, {}, {}
         pers, skills, units = game.boss_data(cache)
         clones = {}
         for s in want_ids:
@@ -132,18 +133,22 @@ def build(keys, game_dir, cache, data_dir, log=print, boss=(), static=True):
                         skill_swaps.update(recoloured)
                         green.update(helpers.green_ids(recoloured))
                         said.append("sins: " + ", ".join(f"{n} {v}" for n, v in sorted(s["sins"].items())))
-                    if s.get("texts"):                      # shown by myosotis's SkillTextPatch
-                        texts.update(helpers.skill_texts(ident, skills, s["texts"]))
-                        said.append(f"own text for S{', S'.join(sorted(s['texts']))}")
+                    if s.get("texts") or s.get("moves"):    # shown by myosotis's SkillTextPatch
+                        texts.update(helpers.skill_texts(ident, skills, s.get("texts") or {}, s.get("moves")))
+                        said.append("own skill text")
+                    if s.get("stats"):
+                        helpers.edit_stats(dict(ident), s["stats"])         # refused here, not mid-rewrite
+                        stats[s["identity"]] = s["stats"]
+                        said.append("stats: " + ", ".join(f"{k} {v}" for k, v in sorted(s["stats"].items())))
                     boss_notes[s["key"]] = "; ".join(said)
                     boss_ok.append(s["key"])
                 except (KeyError, StopIteration, ValueError, IndexError, TypeError, AttributeError) as e:
                     boss_notes[s["key"]] = f"skills unchanged ({e or 'no boss record'})"
         out = os.path.join(built_root, "helpers")
         shutil.rmtree(out, ignore_errors=True)
-        if swaps or skill_swaps or clones or passives or texts:
+        if swaps or skill_swaps or clones or passives or texts or stats:
             static_path, _ = game.find_static(cache)
-            raw, done, _ = helpers.rewrite_static(static_path, swaps, skill_swaps, clones, passives)
+            raw, done, _ = helpers.rewrite_static(static_path, swaps, skill_swaps, clones, passives, stats)
             os.makedirs(out)
             rel = _write(out, cache, static_path, raw)
             with open(os.path.join(out, "manifest.json"), "w", encoding="utf-8") as f:
@@ -180,6 +185,7 @@ def build(keys, game_dir, cache, data_dir, log=print, boss=(), static=True):
                 results[key] = (False, "identity not in this game version")
                 continue
             try:
+                shift = shift_rule(s, ids)
                 if s["kind"] == "tint":
                     raw, notes = tint.tint(target, locate, s["tint"])
                 else:
@@ -190,15 +196,40 @@ def build(keys, game_dir, cache, data_dir, log=print, boss=(), static=True):
                         forms=s.get("forms"), lor=s.get("lor"), aura=s.get("aura"))
                 shutil.rmtree(out, ignore_errors=True)
                 os.makedirs(out)
-                rel = _write(out, cache, locate(target), raw)
+                rels = [_write(out, cache, locate(target), raw)]
+                if shift and s["kind"] == "tint":    # the body it turns into, the same colour
+                    if locate(shift["to"]) == locate(target):
+                        raise repaint.RepaintError(f"{shift['to']} shares {target}'s bundle")
+                    more, more_notes = tint.tint(shift["to"], locate, s["tint"])
+                    rels.append(_write(out, cache, locate(shift["to"]), more))
+                    notes = notes + [f"{shift['to']}: " + "; ".join(more_notes)]
                 with open(os.path.join(out, "manifest.json"), "w", encoding="utf-8") as f:
-                    json.dump({"format": FORMAT, "kind": s["kind"], "skins": [key], "files": [rel], "notes": notes}, f, indent=1)
+                    json.dump(dict({"format": FORMAT, "kind": s["kind"], "skins": [key], "files": rels, "notes": notes},
+                                   **({"shift": shift} if shift else {})), f, indent=1)
                 results[key] = (True, "; ".join(notes + ([boss_notes[key]] if key in boss_notes else [])))
-            except (repaint.RepaintError, RuntimeError, KeyError, OSError) as e:
+            except (repaint.RepaintError, RuntimeError, KeyError, OSError, ValueError) as e:
                 shutil.rmtree(out, ignore_errors=True)
                 results[key] = (False, str(e))
             log(f"  {'ok  ' if results[key][0] else 'FAIL'} {key}: {results[key][1]}")
     return results
+
+
+def shift_rule(skin, ids):
+    """A skin's "shift" ({"to": identity id, "hp": percent}) as the client patch takes it:
+    {"from": its body, "to": that identity's body, "hp": percent} - the unit turns into the other
+    body the first time its HP falls below that percent of its max (myosotis's HpShiftPatch).
+    None without one; ValueError for one that can't work."""
+    sh = skin.get("shift")
+    if not sh:
+        return None
+    to = ids.get(sh.get("to"), {}).get("appearance")
+    frm = ids.get(skin["identity"], {}).get("appearance")
+    hp = sh.get("hp")
+    if not to or not frm:
+        raise ValueError(f"shift: identity {sh.get('to')} isn't in this game version")
+    if not isinstance(hp, int) or not 1 <= hp <= 99:
+        raise ValueError("shift: hp must be a percent, 1-99")
+    return {"from": frm, "to": to, "hp": hp}
 
 
 def built_dirs(data_dir, keys, boss=()):
