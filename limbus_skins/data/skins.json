@@ -503,11 +503,7 @@
    },
    "texts": {
     "1": {
-     "name": "Level Slash",
-     "coins": [
-      "[OnSucceedAttack] Inflict 3 [Laceration] next turn",
-      "[OnSucceedAttack] Inflict 3 [Laceration] next turn"
-     ]
+     "name": "Level Slash"
     },
     "2": {
      "name": "Upstanding Slash"
@@ -516,10 +512,7 @@
      "name": "Greater Split: Vertical"
     },
     "4": {
-     "name": "Greater Split: Horizontal",
-     "coins": [
-      "[OnSucceedAttack] Inflict 5 [Laceration] next turn"
-     ]
+     "name": "Greater Split: Horizontal"
     },
     "defense": {
      "name": "Retaliate"
@@ -566,13 +559,156 @@
  "tints": {
   "greencliff": {
    "identity": 10701,
-   "becomes": "Greencliff (all of him green)",
+   "becomes": "Greencliff (all of him green), the best ID ever: Gluttony, buffs on every skill - and a green Wild Hunt below half HP",
    "tint": {
     "hue": 120
    },
    "tested": false,
    "sins": {
     "all": "SHAMROCK"
+   },
+   "shift": {
+    "to": 10710,
+    "hp": 50
+   },
+   "stats": {
+    "hp": 130,
+    "speed": [
+     5,
+     9
+    ]
+   },
+   "moves": {
+    "1": {
+     "attributeType": "SHAMROCK",
+     "atkType": "HIT",
+     "defaultValue": 8,
+     "coins": [
+      10
+     ],
+     "onUse": [
+      {
+       "buffKeyword": "Agility",
+       "activeRound": 1,
+       "stack": 2
+      },
+      {
+       "buffKeyword": "Breath",
+       "activeRound": 0,
+       "stack": 3
+      }
+     ],
+     "onHit": [
+      {
+       "buffKeyword": "Burst",
+       "activeRound": 0,
+       "stack": 2,
+       "turn": 1
+      }
+     ]
+    },
+    "2": {
+     "attributeType": "SHAMROCK",
+     "atkType": "HIT",
+     "defaultValue": 10,
+     "coins": [
+      7,
+      7
+     ],
+     "onUse": [
+      {
+       "buffKeyword": "Protection",
+       "activeRound": 0,
+       "stack": 2
+      },
+      {
+       "buffKeyword": "Breath",
+       "activeRound": 0,
+       "stack": 0,
+       "turn": 2
+      }
+     ],
+     "onHit": [
+      {
+       "buffKeyword": "Vibration",
+       "activeRound": 0,
+       "stack": 2
+      },
+      {
+       "buffKeyword": "Burst",
+       "activeRound": 0,
+       "stack": 2
+      }
+     ]
+    },
+    "3": {
+     "attributeType": "SHAMROCK",
+     "atkType": "HIT",
+     "defaultValue": 14,
+     "coins": [
+      10,
+      10
+     ],
+     "onUse": [
+      {
+       "buffKeyword": "Agility",
+       "activeRound": 1,
+       "stack": 3
+      },
+      {
+       "buffKeyword": "AttackDmgUp",
+       "activeRound": 1,
+       "stack": 2
+      },
+      {
+       "buffKeyword": "Breath",
+       "activeRound": 0,
+       "stack": 3,
+       "turn": 2,
+       "target": "EveryAlly"
+      }
+     ],
+     "onHit": [
+      {
+       "buffKeyword": "Burst",
+       "activeRound": 0,
+       "stack": 3,
+       "turn": 2
+      }
+     ]
+    },
+    "defense": {
+     "attributeType": "SHAMROCK",
+     "atkType": "HIT",
+     "defaultValue": 12,
+     "coins": [
+      10
+     ],
+     "onUse": [
+      {
+       "buffKeyword": "Protection",
+       "activeRound": 0,
+       "stack": 3
+      }
+     ],
+     "onHit": [
+      {
+       "buffKeyword": "Burst",
+       "activeRound": 0,
+       "stack": 2
+      }
+     ]
+    }
+   },
+   "passives": {
+    "battle": [
+     1010201,
+     1050901,
+     1071403
+    ],
+    "support": [
+     1060321
+    ]
    }
   }
  },
