@@ -265,6 +265,15 @@ class Repaint(unittest.TestCase):
         self.assertEqual(out.getpixel((50 + left, 10 + top))[:3], (255, 255, 255))
 
 
+class LayeredBodies(unittest.TestCase):
+    def test_a_body_drawn_in_layers_is_recognised(self):
+        # The Middle Nursefather Outis (11115) draws each move as parts (s1_f3_l2_p4, ..._b): a
+        # repaint redrew only its whole frames and the parts stayed, his own art round Matthias
+        from limbus_skins import repaint
+        self.assertTrue(repaint.layered(["skill1_1", "s1_f1_l1_p1", "s1_f1_l1_b", "idle_f1_l1_p2"]))
+        self.assertFalse(repaint.layered(["skill1_1", "idle", "dmg", "skill3_10_e", "1"]))
+
+
 class Spine(unittest.TestCase):
     ATLAS = "a.png\nsize:100,50\nfilter:Linear,Linear\npma:true\nhead\nbounds:10,5,20,30\nrotate:90\nbody\nxy: 40, 0\nsize: 10, 10\norig: 12, 12\noffset: 1, 1\nrotate: false\n"
     DOC = {"skeleton": {"spine": "4.0.64"}, "bones": [{"name": "root"}, {"name": "b", "parent": "root", "y": 10}],

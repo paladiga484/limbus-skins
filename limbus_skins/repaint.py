@@ -131,6 +131,12 @@ def kind_of(sprite_name):
     return None, 0
 
 
+def layered(names):
+    """Does a body draw its moves in layers - each frame a stack of parts (s1_f3_l2_p4,
+    idle_f1_l1_b) - rather than one picture a frame? A repaint can't redraw those."""
+    return any(re.search(r"_f\d+_l\d+_(p\d|b|f)", n) for n in names)
+
+
 def split_body(sprites):
     """(body frames, effect frames); unnamed effect sprites ("1", "2"...) are dropped."""
     kinds = [(x, kind_of(x.read().m_Name)[0]) for x in sprites]
@@ -761,6 +767,9 @@ def repaint(target, locate, source=None, clips=None, mapping=None, head=None, mi
     tenv = UnityPy.load(tpath)
     tobjs, troots = prefab_objects(tenv, target, forms=True)
     tclips = clip_frames(tenv, tobjs)
+    if layered(o.read().m_Name for o in tenv.objects if o.type.name == "Sprite" and o.path_id in tobjs):
+        raise RepaintError(f"{target} draws its moves in layers of parts; a repaint would leave them "
+                           "round the new drawings - pick another identity")
     stands = standing_height(tenv, tobjs)                # before its sprites are redrawn
     if lor is not None:
         from . import lor as lormod

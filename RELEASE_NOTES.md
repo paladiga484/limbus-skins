@@ -5,8 +5,12 @@ Fix
   Wild Hunt Heathcliff's body, and the clash skipped Greencliff whole - no green, no stickman.
   His green Wild Hunt is now a part of its own (`built/greencliff.forms`): a clash skips only
   that, and Greencliff stays green and a stickman.
+- **Matthias was a mess in fights** (`matthias`): his identity, Outis as the Middle Nursefather
+  (11115), draws every move as a stack of parts, and the repaint only redrew whole frames - so
+  Outis's own parts flew round Matthias. He now wears the Ring Pointillist Student (11109),
+  whose moves are whole pictures, and repaints refuse layered bodies from now on.
 
-Install: download the `.whl`, then `pipx install ./limbus_skins-1.3.3-py3-none-any.whl` (Linux)
+Update: download the `.whl`, then `pipx install --force ./limbus_skins-1.3.3-py3-none-any.whl` (Linux)
 or `py -m pip install --user limbus_skins-1.3.3-py3-none-any.whl` (Windows).
 Check the download with `sha256sum -c SHA256SUMS`.
 

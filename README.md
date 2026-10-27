@@ -151,7 +151,7 @@ Skins only show in battle. Menus, portraits and identity art stay as they are.
 | `werner` | Sinclair 11012 | repaint | Werner | not yet |
 | `pwie` | Sinclair 11016 | helper | Pwie, the Crimson God | not yet |
 | `old-gcorp-head` | Outis 11103 | repaint | the Old G Corp. Head Manager | not yet |
-| `matthias` | Outis 11115 | repaint | the Middle Nursefather, Matthias | not yet |
+| `matthias` | Outis 11109 | repaint | the Middle Nursefather, Matthias | not yet |
 | `josephine` | Outis 11108 | repaint | Josephine | not yet |
 | `barber` | Outis 11111 | repaint | the Barber (bloodfiend) | not yet |
 | `roach-emperor` | Gregor 11203 | repaint | the Roach Emperor, in a swarm of his roaches; all skills Gluttony | not yet |
