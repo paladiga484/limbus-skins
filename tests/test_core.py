@@ -731,6 +731,19 @@ class BossSkills(unittest.TestCase):
         out = self.h.skill_texts(self.ident, self.skills, {"2": {"coins": ["mine"]}}, moves)
         self.assertEqual(out[2]["coins"], ["mine", ""])
 
+    def test_a_note_goes_before_the_moves_own_lines(self):
+        self.skills[2]["skillData"][0]["coinList"] = [{"scale": 1}] * 2
+        moves = {"2": {"coins": [7, 7], "onUse": {"buffKeyword": "Agility", "stack": 2}}}
+        out = self.h.skill_texts(self.ident, self.skills, {"2": {"name": "The Greenest Hunt", "note": "[WhenUse] Become green"}}, moves)
+        self.assertEqual(out[2]["desc"], "[WhenUse] Become green\n[WhenUse] Gain 2 [Agility] next turn")
+
+    def test_huge_base_power_is_fine_but_not_absurd(self):
+        self.skills[2]["skillData"][0]["coinList"] = [{"scale": 1}] * 2
+        out = self.h.move_skills(self.ident, self.skills, {"2": {"defaultValue": 250, "coins": [30, 30]}})
+        self.assertEqual(out[2]["skillData"][0]["defaultValue"], 250)
+        with self.assertRaises(ValueError):
+            self.h.move_skills(self.ident, self.skills, {"2": {"defaultValue": 5000, "coins": [30, 30]}})
+
     def test_stats_set_hp_and_speed_at_every_uptie_in_the_records_own_encoding(self):
         rec = {"id": 10701, "hp": {"defaultStat": 78, "incrementByLevel": 2.69},
                "minSpeedList": "[1, 1, 2, 2]", "maxSpeedList": [4, 5, 5, 5]}
@@ -919,7 +932,7 @@ class ClientPatch(unittest.TestCase):
         self.tmp = tempfile.TemporaryDirectory()
         self.data = os.path.join(self.tmp.name, "data")
         for key, man in (("helpers", {"green_skills": [9], "skill_texts": self.TEXTS}),
-                         ("greencliff", {"shift": {"from": "10701_", "to": "10710_Heathclif_WHuntAppearance", "hp": 50}}),
+                         ("greencliff", {"shift": {"from": "10701_", "to": "10710_Heathclif_WHuntAppearance", "hp": 50, "skill": 1070103}}),
                          ("other", {"shift": {"from": "A_Appearance", "to": "B_Appearance", "hp": 30}}),
                          ("broken", {"shift": {"from": "x y", "to": "B", "hp": 300}})):
             os.makedirs(os.path.join(self.data, "built", key))
@@ -966,7 +979,7 @@ class ClientPatch(unittest.TestCase):
         client.configure(self.client, self.data)
         ini = self.read("client", "myosotis.ini")
         self.assertIn("green_coin_skills=9\n", ini)
-        self.assertIn("hp_shift=10701_>10710_Heathclif_WHuntAppearance@50\n", ini)
+        self.assertIn("hp_shift=10701_>10710_Heathclif_WHuntAppearance@50,10701_>10710_Heathclif_WHuntAppearance#1070103\n", ini)
         self.assertIn("1041001\tname\tLevel Slash\n", self.read("client", "skilltext.txt"))
         client.configure(self.client, self.data, on=False)
         ini = self.read("client", "myosotis.ini")
@@ -999,6 +1012,56 @@ class ClientPatch(unittest.TestCase):
         os.makedirs(empty)
         self.assertFalse(client.configure(empty, self.data))
         self.assertEqual(os.listdir(empty), [])
+
+
+class Stickman(unittest.TestCase):
+    def _figure(self):
+        """A 60x100 figure: a 30x30 head on a 40-wide body block with two 10-wide legs."""
+        from PIL import Image, ImageDraw
+        img = Image.new("RGBA", (80, 120), (0, 0, 0, 0))
+        d = ImageDraw.Draw(img)
+        d.rectangle([25, 10, 54, 39], fill=(200, 160, 120, 255))      # head
+        d.rectangle([20, 40, 59, 79], fill=(40, 60, 200, 255))        # torso
+        d.rectangle([22, 80, 31, 109], fill=(40, 40, 40, 255))        # legs
+        d.rectangle([48, 80, 57, 109], fill=(40, 40, 40, 255))
+        return img
+
+    def test_the_head_stays_and_the_body_becomes_thin_lines(self):
+        from limbus_skins import stick
+        img = self._figure()
+        out = stick.stickify(img, head_px=30, width_px=4)
+        self.assertEqual(out.size, img.size)
+        self.assertEqual(out.getpixel((40, 25)), img.getpixel((40, 25)))   # the head, untouched
+        a = out.getchannel("A")
+        torso_row = [x for x in range(80) if a.getpixel((x, 60)) > 0]
+        self.assertTrue(torso_row and len(torso_row) <= 10)                  # a 40-wide torso is a stick now
+        self.assertEqual(a.getpixel((21, 60)), 0)                            # its old edge is gone
+        self.assertTrue(any(a.getpixel((x, 100)) for x in range(18, 36)))    # the left leg is still there...
+        self.assertTrue(any(a.getpixel((x, 100)) for x in range(44, 62)))    # ...and the right
+        self.assertTrue(len([x for x in range(80) if a.getpixel((x, 100))]) <= 16)
+
+    def test_a_bat_held_over_the_head_isnt_taken_for_it(self):
+        from PIL import ImageDraw
+        from limbus_skins import stick
+        img = self._figure()
+        ImageDraw.Draw(img).line([(40, 0), (75, 0), (75, 14)], fill=(0, 0, 0, 255), width=3)   # thin, above the head
+        out = stick.stickify(img, head_px=30, width_px=4, skip_px=8)
+        self.assertEqual(out.getpixel((40, 25)), img.getpixel((40, 25)))   # the head is still drawn
+        self.assertEqual(out.getpixel((40, 35)), img.getpixel((40, 35)))   # down to its own chin
+
+    def test_an_empty_picture_comes_back_as_it_was(self):
+        from PIL import Image
+        from limbus_skins import stick
+        img = Image.new("RGBA", (10, 10), (0, 0, 0, 0))
+        self.assertEqual(stick.stickify(img, 5, 2).tobytes(), img.tobytes())
+
+    def test_thinning_keeps_a_line_one_pixel_wide(self):
+        from limbus_skins import stick
+        grid = [[1 if 2 <= x <= 6 and 1 <= y <= 18 else 0 for x in range(9)] for y in range(20)]
+        thin = stick.thin(grid)
+        rows = [sum(r) for r in thin]
+        self.assertTrue(all(c <= 2 for c in rows))
+        self.assertGreater(sum(rows), 8)                                     # still a long line
 
 
 class LorText(unittest.TestCase):
@@ -1173,6 +1236,15 @@ class Tints(unittest.TestCase):
         self.assertEqual(shift_rule(skin, ids), {"from": "10701_",          # every body of his (a Canto VI one too)
                                                  "to": "10710_Heathclif_WHuntAppearance", "hp": 50})
         self.assertIsNone(shift_rule({"identity": 10701}, ids))
+        rec = {"attributeList": [{"skillId": 1070101}, {"skillId": 1070102}, {"skillId": 1070103}]}
+        both = shift_rule({"identity": 10701, "shift": {"to": 10710, "hp": 50, "skill": "3"}}, ids, rec)
+        self.assertEqual((both["hp"], both["skill"]), (50, 1070103))
+        only = shift_rule({"identity": 10701, "shift": {"to": 10710, "skill": "1"}}, ids, rec)
+        self.assertEqual((only.get("hp"), only["skill"]), (None, 1070101))
+        with self.assertRaises(ValueError):
+            shift_rule({"identity": 10701, "shift": {"to": 10710, "skill": "9"}}, ids, rec)
+        with self.assertRaises(ValueError):
+            shift_rule({"identity": 10701, "shift": {"to": 10710}}, ids, rec)       # neither hp nor skill
         for bad in ({"to": 99999, "hp": 50}, {"to": 10710, "hp": 0}, {"to": 10710, "hp": "50"}):
             with self.assertRaises(ValueError):
                 shift_rule({"identity": 10701, "shift": bad}, ids)

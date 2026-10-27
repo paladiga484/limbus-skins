@@ -206,6 +206,8 @@ def move_skills(identity, skills, moves, base=None):
             raise ValueError(f"skill {n}: coins must be 1 to 5 scales of 0-30")
         if m.get("attributeType", "CRIMSON") not in SINS or m.get("atkType", "SLASH") not in ATK:
             raise ValueError(f"skill {n}: unknown sin or attack type")
+        if not 0 <= int(m.get("defaultValue", 0)) <= 999:
+            raise ValueError(f"skill {n}: base power must be 0-999")
         uses, hits = _effects(m.get("onUse")), _effects(m.get("onHit"))
         if not all(isinstance(e, dict) and e.get("buffKeyword") for e in uses + hits):
             raise ValueError(f"skill {n}: every effect needs a buffKeyword")
@@ -259,7 +261,7 @@ def skill_texts(identity, skills, texts, moves=None):
     """{skill id: {"name", "desc", "flavor", "coins": [line per coin]}}: what myosotis's
     SkillTextPatch shows for skill n ("1", "2"... or "defense", as in move_skills) instead of the
     game's own text. A moved skill's desc and coin lines describe its move (describe_move) unless
-    the skin's text gives them. desc, flavor and every coin line the skill has are always there
+    the skin's text gives them; a text's "note" goes before the move's own lines. desc, flavor and every coin line the skill has are always there
     ("" blanks the old line, which would describe the old skill); a name not given keeps the old one."""
     mine = [a["skillId"] for a in lit(identity.get("attributeList"))]
     guard = list(lit(identity.get("defenseSkillIDList")))
@@ -272,6 +274,8 @@ def skill_texts(identity, skills, texts, moves=None):
         sid = guard[0] if n == "defense" else mine[int(n) - 1]
         have = len(skills[sid]["skillData"][0].get("coinList") or [])
         desc, lines = describe_move(moves[n]) if n in moves else ("", [])
+        if t.get("note"):                           # a line of the skin's own before the move's
+            desc = "\n".join(x for x in (t["note"], desc) if x)
         lines = list(t["coins"]) if "coins" in t else lines
         if len(lines) > have:
             raise ValueError(f"skill {n}: {len(lines)} coin lines, but it has {have} coins")

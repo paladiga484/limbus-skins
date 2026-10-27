@@ -3,6 +3,7 @@ client patch, reads them from its own folder (the one with myosotis.ini, beside 
 
   myosotis.ini   green_coin_skills = <skill ids>   skills recoloured to Gluttony draw green coins
                  hp_shift = <from>><to>@<percent>   a body the unit turns into at low HP
+                            <from>><to>#<skill id>  ...or on using that skill
   skilltext.txt  names and descriptions of our own for the skills a skin rewrote
 
 They come from the manifests of what was built (built/<folder>/manifest.json), and only from the
@@ -56,7 +57,7 @@ def skill_texts(data_dir):
 
 
 def hp_shifts(data_dir, folders):
-    """["<from>><to>@<percent>"] from the "shift" of each built folder given."""
+    """["<from>><to>@<percent>", "<from>><to>#<skill id>"] from the "shift" of each built folder given."""
     out = []
     for folder in sorted(folders):
         if folder == "helpers" or os.sep in folder or "/" in folder or folder.startswith("."):
@@ -64,10 +65,13 @@ def hp_shifts(data_dir, folders):
         sh = _manifest(data_dir, folder).get("shift")
         if not isinstance(sh, dict):
             continue
-        frm, to, hp = sh.get("from"), sh.get("to"), sh.get("hp")
-        if (isinstance(frm, str) and isinstance(to, str) and APPEARANCE.fullmatch(frm) and APPEARANCE.fullmatch(to)
-                and isinstance(hp, int) and 1 <= hp <= 99):
+        frm, to, hp, skill = sh.get("from"), sh.get("to"), sh.get("hp"), sh.get("skill")
+        if not (isinstance(frm, str) and isinstance(to, str) and APPEARANCE.fullmatch(frm) and APPEARANCE.fullmatch(to)):
+            continue
+        if isinstance(hp, int) and 1 <= hp <= 99:
             out.append(f"{frm}>{to}@{hp}")
+        if isinstance(skill, int) and 1 <= skill <= 999999999:
+            out.append(f"{frm}>{to}#{skill}")              # on using that skill
     return out
 
 

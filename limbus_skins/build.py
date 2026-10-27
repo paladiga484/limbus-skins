@@ -12,7 +12,7 @@ from importlib import resources
 
 from . import art, bundle, game, helpers, lortext, repaint, tint
 
-FORMAT = 16      # bump when built skins change shape: older builds are rebuilt on apply
+FORMAT = 17      # bump when built skins change shape: older builds are rebuilt on apply
 
 
 def catalog():
@@ -183,6 +183,7 @@ def build(keys, game_dir, cache, data_dir, log=print, boss=(), static=True):
 
     # repaints and tints: one folder each
     want = [skins[k] for k in keys if skins[k]["kind"] in ("repaint", "tint")]
+    pers_all = None                                 # identity records, for a shift on a skill
     if want:
         bodies, have = game.body_index(game_dir, cache, os.path.join(data_dir, "bodies.json"), log=log)
 
@@ -200,9 +201,11 @@ def build(keys, game_dir, cache, data_dir, log=print, boss=(), static=True):
                 results[key] = (False, "identity not in this game version")
                 continue
             try:
-                shift = shift_rule(s, ids)
+                if (s.get("shift") or {}).get("skill") and pers_all is None:
+                    pers_all = game.boss_data(cache)[0]
+                shift = shift_rule(s, ids, (pers_all or {}).get(s["identity"]))
                 if s["kind"] == "tint":
-                    raw, notes = tint.tint(target, locate, s["tint"])
+                    raw, notes = tint.tint(target, locate, s["tint"], stick=s.get("stick"))
                 else:
                     raw, notes = repaint.repaint(
                         target, locate, source=None if s.get("self") else s.get("source"),
@@ -229,22 +232,33 @@ def build(keys, game_dir, cache, data_dir, log=print, boss=(), static=True):
     return results
 
 
-def shift_rule(skin, ids):
-    """A skin's "shift" ({"to": identity id, "hp": percent}) as the client patch takes it:
-    {"from": "<identity>_" (any body of the skin's identity - LCB Heathcliff has a Canto VI one
-    too), "to": that identity's body, "hp": percent} - the unit turns into the other body the first
-    time its HP falls below that percent of its max (myosotis's HpShiftPatch). None without one;
-    ValueError for one that can't work."""
+def shift_rule(skin, ids, identity_rec=None):
+    """A skin's "shift" ({"to": identity id, "hp": percent and/or "skill": its slot "1", "2"...})
+    as the client patch takes it: {"from": "<identity>_" (any body of the skin's identity - LCB
+    Heathcliff has a Canto VI one too), "to": that identity's body, "hp": percent, "skill": skill id}
+    - the unit turns into the other body the first time its HP falls below that percent of its max,
+    or when it starts that skill (myosotis's HpShiftPatch). identity_rec: the skin identity's
+    record, to find the skill's id. None without a shift; ValueError for one that can't work."""
     sh = skin.get("shift")
     if not sh:
         return None
     to = ids.get(sh.get("to"), {}).get("appearance")
-    hp = sh.get("hp")
     if not to or skin["identity"] not in ids:
         raise ValueError(f"shift: identity {sh.get('to')} isn't in this game version")
-    if not isinstance(hp, int) or not 1 <= hp <= 99:
-        raise ValueError("shift: hp must be a percent, 1-99")
-    return {"from": f"{skin['identity']}_", "to": to, "hp": hp}
+    out = {"from": f"{skin['identity']}_", "to": to}
+    if "hp" in sh:
+        if not isinstance(sh["hp"], int) or not 1 <= sh["hp"] <= 99:
+            raise ValueError("shift: hp must be a percent, 1-99")
+        out["hp"] = sh["hp"]
+    if "skill" in sh:
+        mine = [a["skillId"] for a in helpers.lit((identity_rec or {}).get("attributeList"))]
+        n = str(sh["skill"])
+        if not n.isdigit() or not 1 <= int(n) <= len(mine):
+            raise ValueError(f"shift: the identity has no skill {n}")
+        out["skill"] = mine[int(n) - 1]
+    if "hp" not in out and "skill" not in out:
+        raise ValueError("shift: needs an hp percent or a skill")
+    return out
 
 
 def built_dirs(data_dir, keys, boss=()):
