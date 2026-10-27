@@ -322,7 +322,7 @@
   },
   "kali": {
    "identity": 10410,
-   "becomes": "Kali, the Red Mist (Library of Ruina): Wrath, Bleed, Poise, Blunt",
+   "becomes": "Kali, the Red Mist (Library of Ruina): Wrath; her own pages - names, dice and Bleed as in LoR",
    "lor": {
     "bundle": "char/char_490.pres",
     "prefab": "Kali",
@@ -384,110 +384,65 @@
    "tested": false,
    "moves": {
     "1": {
-     "name": "Level Slash",
      "attributeType": "CRIMSON",
-     "atkType": "HIT",
-     "defaultValue": 4,
+     "atkType": "SLASH",
+     "defaultValue": 5,
      "coins": [
-      4,
-      4
+      2,
+      2
      ],
      "onHit": {
       "buffKeyword": "Laceration",
-      "stack": 2,
-      "turn": 1
-     },
-     "onUse": {
-      "buffKeyword": "Breath",
-      "stack": 2,
-      "turn": 1,
-      "target": "Self",
-      "activeRound": 0
+      "stack": 3,
+      "activeRound": 1
      }
     },
     "2": {
-     "name": "Upstanding Slash",
      "attributeType": "CRIMSON",
      "atkType": "HIT",
-     "defaultValue": 4,
+     "defaultValue": 6,
      "coins": [
-      4,
-      4,
+      2,
+      1,
+      1
+     ]
+    },
+    "3": {
+     "attributeType": "CRIMSON",
+     "atkType": "SLASH",
+     "defaultValue": 20,
+     "coins": [
+      7,
+      6,
+      6
+     ]
+    },
+    "4": {
+     "attributeType": "CRIMSON",
+     "atkType": "SLASH",
+     "defaultValue": 28,
+     "coins": [
+      5,
+      5,
       4
      ],
      "onHit": {
       "buffKeyword": "Laceration",
-      "stack": 1,
-      "turn": 1
-     },
-     "onUse": {
-      "buffKeyword": "Breath",
-      "stack": 3,
-      "turn": 2,
-      "target": "Self",
-      "activeRound": 0
-     }
-    },
-    "3": {
-     "name": "Greater Split: Vertical",
-     "attributeType": "CRIMSON",
-     "atkType": "HIT",
-     "defaultValue": 10,
-     "coins": [
-      6,
-      6,
-      6
-     ],
-     "onHit": {
-      "buffKeyword": "Laceration",
-      "stack": 3,
-      "turn": 3
-     },
-     "onUse": {
-      "buffKeyword": "Breath",
-      "stack": 4,
-      "turn": 2,
-      "target": "Self",
-      "activeRound": 0
-     }
-    },
-    "4": {
-     "name": "Greater Split: Horizontal",
-     "attributeType": "CRIMSON",
-     "atkType": "HIT",
-     "defaultValue": 7,
-     "coins": [
-      5,
-      5,
-      5
-     ],
-     "onHit": {
-      "buffKeyword": "Laceration",
-      "stack": 2,
-      "turn": 2
-     },
-     "onUse": {
-      "buffKeyword": "Breath",
-      "stack": 3,
-      "turn": 2,
-      "target": "Self",
-      "activeRound": 0
+      "stack": 5,
+      "activeRound": 1,
+      "coins": [
+       1
+      ]
      }
     },
     "defense": {
-     "name": "Onrush (counter)",
      "attributeType": "CRIMSON",
-     "atkType": "HIT",
+     "atkType": "SLASH",
      "defaultValue": 4,
      "coins": [
-      4,
-      4
-     ],
-     "onHit": {
-      "buffKeyword": "Laceration",
-      "stack": 2,
-      "turn": 1
-     }
+      2,
+      2
+     ]
     }
    },
    "unlock": "black-forest",
@@ -539,12 +494,36 @@
    ],
    "passives": {
     "battle": [
-     1090101,
-     1090601
+     1030301,
+     1090101
     ],
     "support": [
-     1090621
+     1030321
     ]
+   },
+   "texts": {
+    "1": {
+     "name": "Level Slash",
+     "coins": [
+      "[OnSucceedAttack] Inflict 3 [Laceration] next turn",
+      "[OnSucceedAttack] Inflict 3 [Laceration] next turn"
+     ]
+    },
+    "2": {
+     "name": "Upstanding Slash"
+    },
+    "3": {
+     "name": "Greater Split: Vertical"
+    },
+    "4": {
+     "name": "Greater Split: Horizontal",
+     "coins": [
+      "[OnSucceedAttack] Inflict 5 [Laceration] next turn"
+     ]
+    },
+    "defense": {
+     "name": "Retaliate"
+    }
    }
   },
   "matthias": {
