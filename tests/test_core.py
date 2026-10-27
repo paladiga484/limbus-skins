@@ -908,6 +908,145 @@ class LibraryOfRuina(unittest.TestCase):
         self.assertEqual((s.m_PixelsToUnits, px, py), (100, 0.5, 0.0))
 
 
+class ClientPatch(unittest.TestCase):
+    """limbus_skins.client: the client patch's settings for what was swapped in."""
+    INI = "[myosotis]\ntoken=my-save\nserver=http://127.0.0.1:3000/\nlog_level=1\n"
+    TEXTS = {"1041001": {"name": "Level Slash", "desc": "", "flavor": "line one\nline two",
+                         "coins": ["[OnSucceedAttack] Inflict 3 [Laceration]", ""]},
+             "1041005": {"desc": "a\ttab and a back\\slash", "flavor": "", "coins": []}}
+
+    def setUp(self):
+        self.tmp = tempfile.TemporaryDirectory()
+        self.data = os.path.join(self.tmp.name, "data")
+        for key, man in (("helpers", {"green_skills": [9], "skill_texts": self.TEXTS}),
+                         ("greencliff", {"shift": {"from": "10701_", "to": "10710_Heathclif_WHuntAppearance", "hp": 50}}),
+                         ("other", {"shift": {"from": "A_Appearance", "to": "B_Appearance", "hp": 30}}),
+                         ("broken", {"shift": {"from": "x y", "to": "B", "hp": 300}})):
+            os.makedirs(os.path.join(self.data, "built", key))
+            with open(os.path.join(self.data, "built", key, "manifest.json"), "w") as f:
+                json.dump(man, f)
+        self.pkg = os.path.join(self.tmp.name, "LimbusPrivateServer")
+        for d in ("client", "join"):
+            os.makedirs(os.path.join(self.pkg, d))
+            with open(os.path.join(self.pkg, d, "myosotis.ini"), "w", newline="") as f:
+                f.write(self.INI if d == "client" else self.INI.replace("\n", "\r\n"))
+        self.client = os.path.join(self.pkg, "client")
+
+    def tearDown(self):
+        self.tmp.cleanup()
+
+    def applied(self, *mods):
+        with open(os.path.join(self.data, "active.json"), "w") as f:
+            json.dump({"files": [], "mods": list(mods)}, f)
+
+    def read(self, *parts):
+        with open(os.path.join(self.pkg, *parts), encoding="utf-8", newline="") as f:
+            return f.read()
+
+    def test_skilltext_has_a_line_per_field_in_the_patchs_format(self):
+        from limbus_skins import client
+        self.assertEqual(client.skilltext_file(self.TEXTS).splitlines(), [
+            "1041001\tname\tLevel Slash", "1041001\tdesc\t", "1041001\tflavor\tline one\\nline two",
+            "1041001\tcoin1\t[OnSucceedAttack] Inflict 3 [Laceration]", "1041001\tcoin2\t",
+            "1041005\tdesc\ta\\ttab and a back\\\\slash", "1041005\tflavor\t"])
+        self.assertEqual(client.skilltext_file({}), "")
+
+    def test_a_key_is_replaced_in_place_or_added_to_the_section(self):
+        from limbus_skins import client
+        once = client.set_key(self.INI, "green_coin_skills", "1")
+        twice = client.set_key(once, "green_coin_skills", "2,3")
+        self.assertEqual(twice.count("green_coin_skills="), 1)
+        self.assertIn("green_coin_skills=2,3\n", twice)
+        self.assertTrue(twice.startswith("[myosotis]\ntoken=my-save\n"))
+        self.assertIn("hp_shift=x\r\n", client.set_key(self.INI.replace("\n", "\r\n"), "hp_shift", "x"))
+
+    def test_configure_sets_what_was_applied_and_off_clears_it(self):
+        from limbus_skins import client
+        self.applied("helpers", "greencliff", "broken")
+        client.configure(self.client, self.data)
+        ini = self.read("client", "myosotis.ini")
+        self.assertIn("green_coin_skills=9\n", ini)
+        self.assertIn("hp_shift=10701_>10710_Heathclif_WHuntAppearance@50\n", ini)
+        self.assertIn("1041001\tname\tLevel Slash\n", self.read("client", "skilltext.txt"))
+        client.configure(self.client, self.data, on=False)
+        ini = self.read("client", "myosotis.ini")
+        self.assertIn("green_coin_skills=\n", ini)
+        self.assertIn("hp_shift=\n", ini)
+        self.assertEqual(self.read("client", "skilltext.txt"), "")
+
+    def test_a_helpers_build_counts_only_when_it_was_swapped_in(self):
+        from limbus_skins import client
+        self.applied("greencliff")                     # helpers skipped (the game updated since it was built)
+        client.configure(self.client, self.data)
+        self.assertIn("green_coin_skills=\n", self.read("client", "myosotis.ini"))
+        self.assertEqual(self.read("client", "skilltext.txt"), "")
+        os.remove(os.path.join(self.data, "active.json"))       # no session at all
+        client.configure(self.client, self.data)
+        self.assertIn("hp_shift=\n", self.read("client", "myosotis.ini"))
+
+    def test_the_client_folders_of_a_package_are_found_beside_its_launcher(self):
+        from limbus_skins import client
+        play = os.path.join(self.pkg, "play.sh")
+        open(play, "w").close()
+        self.assertEqual(client.folders_beside(play), [os.path.join(self.pkg, "client"), os.path.join(self.pkg, "join")])
+        self.assertEqual(client.folders_beside(os.path.join(self.pkg, "not-a-file")), [])   # a command on PATH, say
+        os.remove(os.path.join(self.pkg, "join", "myosotis.ini"))
+        self.assertEqual(client.folders_beside(play), [os.path.join(self.pkg, "client")])
+
+    def test_configure_leaves_a_folder_without_the_patch_alone(self):
+        from limbus_skins import client
+        empty = os.path.join(self.tmp.name, "empty")
+        os.makedirs(empty)
+        self.assertFalse(client.configure(empty, self.data))
+        self.assertEqual(os.listdir(empty), [])
+
+
+class LorText(unittest.TestCase):
+    TABLES = [
+        ("CardInfo_test", b"""<?xml version="1.0" encoding="utf-8"?><DiceCardXmlRoot>
+          <Card ID="1"><Name>x</Name><Rarity>Rare</Rarity><Spec Range="Near" Cost="2" /><Script>pageScript</Script>
+            <BehaviourList><Behaviour Min="5" Dice="9" Type="Atk" Detail="Slash" Script="dieScript" />
+              <Behaviour Min="5" Dice="8" Type="Atk" Detail="Hit" Script="dieScript" /></BehaviourList></Card>
+          <Card ID="2"><Rarity>Unique</Rarity><Spec Range="FarArea" Cost="6" /><Script></Script>
+            <BehaviourList><Behaviour Min="28" Dice="42" Type="Atk" Detail="Penetrate" Script="other" /></BehaviourList></Card>
+          <Card ID="3"><Rarity>Rare</Rarity><Spec Range="Near" Cost="1" />
+            <BehaviourList><Behaviour Min="4" Dice="8" Type="Standby" Detail="Slash" /></BehaviourList></Card>
+          </DiceCardXmlRoot>"""),
+        ("EN_BattleCards", b"""<r><cardDescList><BattleCardDesc ID="1"><LocalizedName>Page One</LocalizedName><Ability /></BattleCardDesc>
+          <BattleCardDesc ID="2"><LocalizedName>Page Two</LocalizedName></BattleCardDesc></cardDescList></r>"""),
+        ("EN_BattleCardAbilities", b"""<r><BattleCardAbility ID="pageScript"><Desc>page ability</Desc></BattleCardAbility>
+          <BattleCardAbility ID="dieScript"><Desc>die ability</Desc></BattleCardAbility>
+          <BattleCardAbility ID="other"><Desc>other die ability</Desc></BattleCardAbility></r>"""),
+        ("EN_PassiveDesc", b"""<r><PassiveDesc ID="9"><Name>Retort</Name><Desc>passive text</Desc></PassiveDesc></r>"""),
+        ("EN_PassiveDesc", b"<r><broken"),
+    ]
+
+    def test_a_page_in_ruinas_own_words(self):
+        from limbus_skins import lortext
+        book = lortext.Book(self.TABLES)
+        self.assertEqual(book.page(1), {"name": "Page One", "flavor": "Combat Page · Rare · Cost 2 · Slash 5-9, Blunt 5-8\n"
+                                        "page ability\ndie ability"})
+        self.assertEqual(book.page("2")["flavor"], "Combat Page · Unique · Cost 6 · Mass (Summation) · Pierce 28-42\n"
+                                                   "other die ability")
+        with self.assertRaises(lortext.LorTextError):
+            book.page(3)                                    # a page with no English name
+        self.assertEqual(book.passive(9), {"name": "Retort", "flavor": "Passive · passive text"})
+
+    def test_texts_take_ruinas_words_and_keep_their_own(self):
+        from limbus_skins import lortext
+        book = lortext.Book(self.TABLES)
+        out = lortext.resolve({"1": {"lor_card": 1}, "2": {"lor_card": 2, "name": "Mine"},
+                               "defense": {"lor_passive": 9}, "3": {"name": "Plain"}}, book)
+        self.assertEqual(out["1"]["name"], "Page One")
+        self.assertEqual(out["2"]["name"], "Mine")
+        self.assertTrue(out["2"]["flavor"].startswith("Combat Page · Unique"))
+        self.assertEqual(out["defense"]["name"], "Retort")
+        self.assertEqual(out["3"], {"name": "Plain"})
+        self.assertNotIn("lor_card", out["1"])
+        self.assertTrue(lortext.uses_lor({"1": {"lor_card": 1}}))
+        self.assertFalse(lortext.uses_lor({"1": {"name": "x"}}))
+
+
 class Auras(unittest.TestCase):
     def _frames(self):
         """An idle frame and a skill frame of a 100px-tall body standing on its pivot."""

@@ -10,7 +10,7 @@ import os
 import shutil
 from importlib import resources
 
-from . import art, bundle, game, helpers, repaint, tint
+from . import art, bundle, game, helpers, lortext, repaint, tint
 
 FORMAT = 16      # bump when built skins change shape: older builds are rebuilt on apply
 
@@ -90,7 +90,12 @@ def build(keys, game_dir, cache, data_dir, log=print, boss=(), static=True):
     if want or want_boss or want_ids:
         swaps, skill_swaps, bad, boss_ok, kit_notes, green, passives, texts, stats = {}, {}, [], [], {}, set(), {}, {}, {}
         pers, skills, units = game.boss_data(cache)
-        clones = {}
+        clones, ruina = {}, None
+        if any(lortext.uses_lor(s.get("texts")) for s in want_boss):
+            try:                                    # Ruina's own words, from the player's install
+                ruina = lortext.Book(lortext.read_tables())
+            except (lortext.LorTextError, OSError) as e:
+                log(f"  Library of Ruina's text: {e}")
         for s in want_ids:
             try:
                 helpers.check_new_ids(set(ids), {s["identity"]: s["base"]})
@@ -134,7 +139,17 @@ def build(keys, game_dir, cache, data_dir, log=print, boss=(), static=True):
                         green.update(helpers.green_ids(recoloured))
                         said.append("sins: " + ", ".join(f"{n} {v}" for n, v in sorted(s["sins"].items())))
                     if s.get("texts") or s.get("moves"):    # shown by myosotis's SkillTextPatch
-                        texts.update(helpers.skill_texts(ident, skills, s.get("texts") or {}, s.get("moves")))
+                        mine = s.get("texts") or {}
+                        if lortext.uses_lor(mine):
+                            try:
+                                mine = lortext.resolve(mine, ruina) if ruina else None
+                            except lortext.LorTextError as e:
+                                said.append(str(e))
+                                mine = None
+                            if mine is None:                # the skill text without Ruina's words
+                                mine = {n: {k: v for k, v in t.items() if not k.startswith("lor_")}
+                                        for n, t in (s.get("texts") or {}).items()}
+                        texts.update(helpers.skill_texts(ident, skills, mine, s.get("moves")))
                         said.append("own skill text")
                     if s.get("stats"):
                         helpers.edit_stats(dict(ident), s["stats"])         # refused here, not mid-rewrite

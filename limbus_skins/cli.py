@@ -7,12 +7,17 @@
   limbus-skins boss on|off <skin|all>   a repaint also fights with its boss's skills
   limbus-skins run -- <launch command>  swap the skins in, start the game with your
                                         command, put the originals back when it exits
+                                        (a private-server package's play.sh or app: its
+                                        client patch also gets green coins, skill text
+                                        and body changes for the session)
   limbus-skins apply / restore          the two halves of `run`, by hand
   limbus-skins watch                    restore as soon as the game exits
   limbus-skins build [<skin>...]        rebuild (apply does this when needed)
   limbus-skins preview <skin> [file.png]  see a repaint's frames before playing it
   limbus-skins sheet [file.png]         every skin that is on: its idle before -> after
   limbus-skins art <skin> <picture> [--invert]   your own head art (art <skin> --reset)
+  limbus-skins client [--off] <folder>...  set (or clear) those client patch settings
+                                        in a folder holding myosotis.ini, by hand
   limbus-skins doctor                   check paths, Python packages and the cache
   limbus-skins config --game DIR --cache DIR   set paths by hand
 
@@ -200,6 +205,16 @@ def main(argv=None):
     allskins = catalog()
     skins, locked = unlocked(allskins, st)
 
+    if cmd == "client":
+        from . import client
+        off = "--off" in args
+        folders = [a for a in args if a != "--off"]
+        if not folders:
+            raise SystemExit("usage: limbus-skins client [--off] <client patch folder>...")
+        for f in folders:
+            if not client.configure(f, data, on=not off):
+                raise SystemExit(f"{f}: no myosotis.ini there - not a client patch folder")
+        return 0
     if cmd in ("status",):
         print(f"limbus-skins {__version__} - {len(st['on'])} skin(s) on" + (": " + ", ".join(st["on"]) if st["on"] else ""))
         try:
@@ -391,15 +406,25 @@ def main(argv=None):
         if cmd == "apply":
             print("start the game now; `limbus-skins restore` (or `watch`) puts the originals back")
             return 0
-        if not args:
-            print("no launch command given - waiting for you to start the game...")
-        else:
-            try:
-                subprocess.Popen(args)
-            except OSError as e:
-                sess.restore()
-                raise SystemExit(f"could not start {args[0]}: {e}")
-        sess.watch()
+        from . import client
+        clients = client.folders_beside(args[0]) if args else []
+        try:
+            for d in clients:                   # the package's client patch: green coins, skill text, bodies
+                client.configure(d, data)
+            if clients:
+                print(f"client patch set for this session: {', '.join(os.path.basename(d) for d in clients)}")
+            if not args:
+                print("no launch command given - waiting for you to start the game...")
+            else:
+                try:
+                    subprocess.Popen(args)
+                except OSError as e:
+                    sess.restore()
+                    raise SystemExit(f"could not start {args[0]}: {e}")
+            sess.watch()
+        finally:
+            for d in clients:
+                client.configure(d, data, on=False)
         return 0
     if cmd == "restore":
         try:

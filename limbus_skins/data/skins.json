@@ -503,19 +503,19 @@
    },
    "texts": {
     "1": {
-     "name": "Level Slash"
+     "lor_card": 607005
     },
     "2": {
-     "name": "Upstanding Slash"
+     "lor_card": 607003
     },
     "3": {
-     "name": "Greater Split: Vertical"
+     "lor_card": 607002
     },
     "4": {
-     "name": "Greater Split: Horizontal"
+     "lor_card": 607001
     },
     "defense": {
-     "name": "Retaliate"
+     "lor_passive": 250222
     }
    }
   },
