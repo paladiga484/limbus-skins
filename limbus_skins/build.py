@@ -6,6 +6,7 @@ manifest. Helper skins all edit the one static-data bundle, so they build togeth
 into a single "helpers" folder.
 """
 import json
+import re
 import os
 import shutil
 from importlib import resources
@@ -14,7 +15,7 @@ from . import art, audit, bundle, cards, game, helpers, lortext, repaint, tint
 
 FORMS = ".forms"  # built/<skin>.forms: another body a skin turns into, swapped in apart from it
 CARD = ".card"    # built/<skin>.card: the identity's card pictures, when they aren't in its body's file
-FORMAT = 23      # bump when built skins change shape: older builds are rebuilt on apply
+FORMAT = 24      # bump when built skins change shape: older builds are rebuilt on apply
 
 
 def catalog():
@@ -26,6 +27,12 @@ def catalog():
         for key, e in doc.get(kind, {}).items():
             skins[key] = dict(e, key=key, kind=one)
     return with_allies(skins)
+
+
+def short_name(text):
+    """A skin's name as the game shows an identity's: its words up to a bracket, colon or dash."""
+    name = re.split(r"[:;(]| - ", text)[0].strip()
+    return name[:1].upper() + name[1:]
 
 
 def with_allies(skins):
@@ -50,6 +57,7 @@ def with_allies(skins):
         if unlock:
             a["unlock"] = unlock
         a["title"] = f"{s.get('title') or s.get('becomes') or key} - ally"    # how the forest's gifts name it
+        a["name"] = s.get("name") or short_name(s.get("becomes") or s.get("title") or key)
         out[k] = a
     return out
 
@@ -302,7 +310,8 @@ def build(keys, game_dir, cache, data_dir, log=print, boss=(), static=True):
                            "skills": boss_ok, "files": [rel], "green_skills": sorted(green),
                            "skill_texts": {str(i): t for i, t in sorted(texts.items())},
                            # the server grants these while they're built (Server/OwnIdentities.cs)
-                           "identities": [dict({"id": s["identity"], "base": s["base"]},
+                           "identities": [dict({"id": s["identity"], "base": s["base"], "folder": s.get("folder") or s["base"],
+                                                "name": s.get("name") or short_name(s.get("becomes") or s["key"])},
                                                **({"unlock": s["unlock"]} if s.get("unlock") else {}))
                                           for s in want_ids if s["key"] not in bad]}, f, indent=1)
             for s in want + want_ids:

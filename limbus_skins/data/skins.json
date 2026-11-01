@@ -110,7 +110,8 @@
     "S2": "Camellia_Awaken_2",
     "S3": "Camellia_Awaken_3"
    },
-   "tested": false
+   "tested": false,
+   "name": "Dongbaek (Bloomed)"
   },
   "dongbaek-sunshower": {
    "identity": 10705,
@@ -127,7 +128,8 @@
     "S2": "Camellia_S3S4",
     "S3": "Camellia_S5"
    },
-   "tested": false
+   "tested": false,
+   "name": "Dongbaek (Sunshower)"
   },
   "ahab": {
    "identity": 10808,
@@ -823,7 +825,8 @@
    "tested": false,
    "unlock": "black-forest",
    "title": "Vergilius, an identity of his own - Heathcliff",
-   "card": "vergilius"
+   "card": "vergilius",
+   "name": "Vergilius"
   },
   "kali-id": {
    "identity": 10499,
@@ -831,7 +834,8 @@
    "becomes": "Kali as an identity of her own (Ryōshū's slot), wearing what 10410 wears",
    "unlock": "black-forest",
    "tested": false,
-   "title": "Kali, an identity of her own - Ryōshū"
+   "title": "Kali, an identity of her own - Ryōshū",
+   "name": "Kali, the Red Mist"
   },
   "dulcinea-id": {
    "identity": 10999,
@@ -843,7 +847,8 @@
    "tested": false,
    "card": "dulcinea",
    "unlock": "black-forest",
-   "title": "Dulcinea, the boss herself - an identity of her own - Rodion"
+   "title": "Dulcinea, the boss herself - an identity of her own - Rodion",
+   "name": "Dulcinea"
   },
   "distorted-kim-id": {
    "identity": 10599,
@@ -855,7 +860,8 @@
    "tested": false,
    "card": "distorted-kim",
    "unlock": "black-forest",
-   "title": "Distorted Kim Satgat, the boss himself - an identity of his own - Meursault"
+   "title": "Distorted Kim Satgat, the boss himself - an identity of his own - Meursault",
+   "name": "Distorted Kim Satgat"
   },
   "vergilius-boss-id": {
    "identity": 10795,
@@ -866,7 +872,8 @@
    "folder": 10710,
    "unlock": "black-forest",
    "title": "Vergilius, the Red Gaze - the boss himself, an identity of his own - Heathcliff",
-   "tested": false
+   "tested": false,
+   "name": "Vergilius, the Red Gaze"
   }
  },
  "kits": {

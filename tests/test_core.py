@@ -1090,6 +1090,10 @@ class Allies(unittest.TestCase):
         r = out["rien-id"]
         self.assertEqual((r["unit"], r["unlock"]), (1347, "black-forest"))
         self.assertEqual((r["title"], q["title"]), ("Rien - ally", "qoh - ally"))   # the forest's gift list names each
+        # its name in the game: the skin's "name", else its "becomes" up to a bracket or a colon
+        self.assertEqual((a["name"], r["name"], q["name"]), ("Ahab", "Rien", "Qoh"))
+        self.assertEqual(with_allies({"b": {"key": "b", "kind": "repaint", "identity": 11111, "ally": 11198,
+                                            "becomes": "the Barber (bloodfiend)"}})["b-id"]["name"], "The Barber")
         self.assertEqual(out["ahab"], skins["ahab"])                         # the skin itself stays as it was
         with self.assertRaises(ValueError):                                  # a derived key may not hide another skin
             with_allies({"x": {"key": "x", "kind": "repaint", "identity": 10101, "ally": 10199},
@@ -1121,7 +1125,7 @@ class Allies(unittest.TestCase):
         self.assertIn("Gone_App", res["b-id"][1])
         self.assertEqual(g.written["clones"], {10198: 10101})               # only the ally that built
         self.assertEqual(g.written["swaps"][10198]["appearance"], "A_App")
-        self.assertEqual(man["identities"], [{"id": 10198, "base": 10101}])
+        self.assertEqual(man["identities"], [{"id": 10198, "base": 10101, "folder": 10101, "name": "A"}])
 
     def test_helper_ally(self):
         from limbus_skins import build
@@ -1142,7 +1146,8 @@ class Allies(unittest.TestCase):
         swap = g.written["swaps"][10398]
         self.assertEqual((swap["appearance"], swap["attributeList"], swap["defenseSkillIDList"]),
                          ("400003_QueenOfHatred", [{"skillId": 1, "number": 3}], [2]))
-        self.assertEqual(man["identities"], [{"id": 10398, "base": 10312, "unlock": "black-forest"}])
+        self.assertEqual(man["identities"], [{"id": 10398, "base": 10312, "folder": 10312, "name": "Qoh",
+                                              "unlock": "black-forest"}])
         self.assertEqual(man["skins"], ["qoh-id"])
         self.assertEqual(base, {"id": 10312, "appearance": "10312_X", "attributeList": [{"skillId": 9}]})
 
@@ -1276,7 +1281,10 @@ class ClientPatch(unittest.TestCase):
     def setUp(self):
         self.tmp = tempfile.TemporaryDirectory()
         self.data = os.path.join(self.tmp.name, "data")
-        for key, man in (("helpers", {"green_skills": [9], "skill_texts": self.TEXTS}),
+        for key, man in (("helpers", {"green_skills": [9], "skill_texts": self.TEXTS, "identities": [
+                              {"id": 10999, "base": 10917, "folder": 10911, "name": "Dulcinea"},
+                              {"id": 10895, "base": 10808, "folder": 10808, "name": "Captain\tAhab"},
+                              {"id": "x", "folder": 1}, {"id": 10799, "base": 10710}]}),
                          ("greencliff", {"shift": {"from": "10701_", "to": "10710_Heathclif_WHuntAppearance", "hp": 50, "skill": 1070103}}),
                          ("other", {"shift": {"from": "A_Appearance", "to": "B_Appearance", "hp": 30}}),
                          ("broken", {"shift": {"from": "x y", "to": "B", "hp": 300}})):
@@ -1326,11 +1334,13 @@ class ClientPatch(unittest.TestCase):
         self.assertIn("green_coin_skills=9\n", ini)
         self.assertIn("hp_shift=10701_>10710_Heathclif_WHuntAppearance@50,10701_>10710_Heathclif_WHuntAppearance#1070103\n", ini)
         self.assertIn("1041001\tname\tLevel Slash\n", self.read("client", "skilltext.txt"))
+        self.assertEqual(self.read("client", "allies.txt"), "10799\t10710\t\n10895\t10808\tCaptain\\tAhab\n10999\t10911\tDulcinea\n")
         client.configure(self.client, self.data, on=False)
         ini = self.read("client", "myosotis.ini")
         self.assertIn("green_coin_skills=\n", ini)
         self.assertIn("hp_shift=\n", ini)
         self.assertEqual(self.read("client", "skilltext.txt"), "")
+        self.assertEqual(self.read("client", "allies.txt"), "")          # no ally borrows a card once it's over
 
     def test_a_helpers_build_counts_only_when_it_was_swapped_in(self):
         from limbus_skins import client

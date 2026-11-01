@@ -5,6 +5,7 @@ client patch, reads them from its own folder (the one with myosotis.ini, beside 
                  hp_shift = <from>><to>@<percent>   a body the unit turns into at low HP
                             <from>><to>#<skill id>  ...or on using that skill
   skilltext.txt  names and descriptions of our own for the skills a skin rewrote
+  allies.txt     each identity of our own: the identity whose card it shows, and its name
 
 A boss skin (a boss's own body on a sinner) needs the patch itself to be new enough: wears_bosses.
 
@@ -56,6 +57,25 @@ def skill_texts(data_dir):
     if not isinstance(texts, dict):
         return {}
     return {k: v for k, v in texts.items() if k.isdigit() and len(k) <= 9 and isinstance(v, dict)}
+
+
+def allies(data_dir):
+    """[(id, folder, name)] for the identities of our own the helpers build adds: the identity
+    whose card each shows (its base's when none is named), and its name in the game."""
+    out = []
+    for e in _manifest(data_dir, "helpers").get("identities") or []:
+        try:
+            i, folder = int(e["id"]), int(e.get("folder") or e["base"])
+        except (KeyError, TypeError, ValueError):
+            continue
+        out.append((i, folder, str(e.get("name") or "")))
+    return sorted(out)
+
+
+def allies_file(entries):
+    """allies.txt: <id> TAB <folder id> TAB <name> per identity of our own - the client patch
+    shows each with its folder's card pictures and that name (AllyFacePatch)."""
+    return "".join(f"{i}\t{folder}\t{_escape(name)}\n" for i, folder, name in entries)
 
 
 def hp_shifts(data_dir, folders):
@@ -138,6 +158,7 @@ def configure(folder, data_dir, on=True):
     text = set_key(text, GREEN, ",".join(str(i) for i in (green_skills(data_dir) if "helpers" in done else [])))
     _replace(ini, set_key(text, SHIFT, ",".join(hp_shifts(data_dir, done))))
     _replace(os.path.join(folder, "skilltext.txt"), skilltext_file(skill_texts(data_dir) if "helpers" in done else {}))
+    _replace(os.path.join(folder, "allies.txt"), allies_file(allies(data_dir) if "helpers" in done else []))
     return True
 
 
