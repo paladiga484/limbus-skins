@@ -1225,6 +1225,33 @@ class Stickman(unittest.TestCase):
         self.assertEqual(out.getpixel((40, 25)), img.getpixel((40, 25)))   # the head is still drawn
         self.assertEqual(out.getpixel((40, 35)), img.getpixel((40, 35)))   # down to its own chin
 
+    def test_a_wobbly_limb_is_drawn_straight(self):
+        from limbus_skins import stick
+        wobble = [(x, 10 + (x % 2)) for x in range(30)]                      # a line that jitters by a pixel
+        self.assertEqual(stick.straighten(wobble), [(0, 10), (29, 11)])
+        bent = [(x, 0) for x in range(10)] + [(9, y) for y in range(1, 10)]   # an elbow stays an elbow
+        self.assertEqual(stick.straighten(bent), [(0, 0), (9, 0), (9, 9)])
+
+    def test_spurs_and_lone_streaks_are_dropped(self):
+        from limbus_skins import stick
+        g = [[0] * 40 for _ in range(12)]
+        for x in range(2, 38):
+            g[5][x] = 1                                                      # a long limb
+        g[4][20] = g[3][20] = 1                                              # a 2-pixel spur off it
+        g[10][2] = g[10][3] = g[10][4] = 1                                   # a short streak on its own
+        cells = {p for path in stick.limbs(g, 6) for p in path}
+        self.assertTrue({(x, 5) for x in range(2, 38)} <= cells)
+        self.assertFalse({(20, 3), (2, 10), (3, 10), (4, 10)} & cells)
+
+    def test_an_arm_that_touches_the_head_becomes_a_stick(self):
+        from PIL import ImageDraw
+        from limbus_skins import stick
+        img = self._figure()
+        ImageDraw.Draw(img).rectangle([55, 20, 78, 22], fill=(250, 0, 250, 255))   # thin, off the head's side
+        out = stick.stickify(img, head_px=30, width_px=2)
+        self.assertEqual(out.getpixel((40, 25)), img.getpixel((40, 25)))   # the head is kept
+        self.assertNotEqual(out.getpixel((74, 21))[:3], (250, 0, 250))      # the arm isn't, as drawn
+
     def test_an_empty_picture_comes_back_as_it_was(self):
         from PIL import Image
         from limbus_skins import stick
