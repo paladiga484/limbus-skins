@@ -893,6 +893,18 @@ class BossSkills(unittest.TestCase):
         self.assertEqual(attrs, [{"skillId": 92, "number": 3}, {"skillId": 93, "number": 2},
                                  {"skillId": 91, "number": 1}])               # 94: tier 1 is dealt already
 
+    def test_dice_coins(self):
+        dc = self.h.dice_coins
+        self.assertEqual(dc([(5, 9, "Atk", "Slash"), (5, 9, "Atk", "Slash")]), (5, [2, 2], "SLASH"))       # Durandal
+        self.assertEqual(dc([(20, 39, "Atk", "Slash")]), (20, [19], "SLASH"))                             # Furioso
+        self.assertEqual(dc([(3, 7, "Atk", "Penetrate")] * 3), (3, [1, 1, 2], "PENETRATE"))               # Ranga
+        self.assertEqual(dc([(4, 8, "Atk", "Penetrate"), (5, 8, "Atk", "Penetrate"), (7, 12, "Atk", "Hit")]),
+                         (4, [2, 3, 3], "PENETRATE"))                                                     # Atelier Logic
+        self.assertEqual(dc([(20, 39, "Atk", "Slash")], 9), (20, [2] * 8 + [3], "SLASH"))  # nine coins, as written
+        self.assertEqual(dc([(5, 9, "Def", "Guard")]), (5, [4], None))                     # a block keeps its type
+        with self.assertRaises(ValueError):
+            dc([])
+
     def test_a_boss_form_takes_the_bosss_whole_moveset(self):
         # the boss's own body plays its own moves: every attack it has, one per move, dealt as an
         # identity's deck is (tier 1 three times, tier 2 twice, tier 3 once), and its own guard
@@ -1018,7 +1030,8 @@ class Identities(unittest.TestCase):
 class FakeGame:
     """build() against a stand-in game: identity records, skills, boss units and the bodies that
     carry them - no cache, no UnityPy. Enter it, then call build.build(keys, ...)."""
-    SKILLS = {1: {"id": 1, "skillTier": 1, "skillData": [{"skillMotion": "S1", "defType": "ATTACK"}]},
+    SKILLS = {1: {"id": 1, "skillTier": 1, "skillData": [{"skillMotion": "S1", "defType": "ATTACK",
+                                                          "coinList": [{"scale": 1}, {"scale": 1}]}]},
               2: {"id": 2, "skillTier": 1, "skillData": [{"skillMotion": "Guard", "defType": "GUARD"}]}}
 
     def __init__(self, skins, pers, units=None, helpers=None, bodies=None):
@@ -1028,7 +1041,7 @@ class FakeGame:
         bodies = bodies or {}
 
         def rewrite(path, swaps, skill_swaps=None, clones=None, *a):
-            self.written = {"swaps": swaps, "clones": dict(clones or {})}
+            self.written = {"swaps": swaps, "clones": dict(clones or {}), "skills": dict(skill_swaps or {})}
             return b"raw", sorted(set(swaps) | set(clones or {})), []
         self.patches = [
             mock.patch.object(build, "catalog", return_value=build.with_allies(skins)),
@@ -1474,6 +1487,54 @@ class LorText(unittest.TestCase):
         self.assertTrue(out["2"]["flavor"].startswith("Combat Page · Unique"))
         self.assertEqual(out["defense"]["name"], "Retort")
         self.assertEqual(out["3"], {"name": "Plain"})
+
+    def test_a_pages_dice(self):
+        from limbus_skins import lortext
+        book = lortext.Book(self.TABLES)
+        self.assertEqual(book.dice(1), [(5, 9, "Atk", "Slash"), (5, 8, "Atk", "Hit")])
+        self.assertEqual(book.dice(3, "Atk"), [])                      # a counter die isn't an attack
+        with self.assertRaises(lortext.LorTextError):
+            book.dice(77)
+
+    def test_a_kit_is_built_with_ruinas_dice(self):
+        from limbus_skins import build, lortext
+        skins = {"k": {"key": "k", "kind": "kit", "identity": 10101, "moves": {"1": {"lor_dice": 1, "coins": [0, 0]}}}}
+        pers = {10101: {"id": 10101, "attributeList": [{"skillId": 1, "number": 3}], "defenseSkillIDList": [2]}}
+        with tempfile.TemporaryDirectory() as data, FakeGame(skins, pers) as g, \
+                mock.patch.object(lortext, "read_tables", return_value=self.TABLES):
+            res = build.build(["k"], "game", "cache", data, log=lambda *a: None)
+        self.assertTrue(res["k"][0], res)
+        shell = g.written["skills"][1]["skillData"][0]
+        self.assertEqual((shell["defaultValue"], [c["scale"] for c in shell["coinList"]], shell["atkType"]), (5, [2, 2], "SLASH"))
+        with tempfile.TemporaryDirectory() as data, FakeGame(skins, pers), \
+                mock.patch.object(lortext, "read_tables", side_effect=lortext.LorTextError("not installed")):
+            res = build.build(["k"], "game", "cache", data, log=lambda *a: None)
+        self.assertEqual(res["k"][0], False)                         # no Ruina: the kit isn't guessed
+        self.assertIn("Library of Ruina", res["k"][1])
+
+    def test_moves_take_ruinas_dice(self):
+        # each hit as hard as Ruina's die: all tails its lowest, all heads its highest; the coin
+        # count stays the one written (the animation's), its sin and effects stay the skin's own
+        from limbus_skins import lortext
+        tables = self.TABLES + [("CardInfo_def", b"""<r><Card ID="4"><Spec Cost="1" /><BehaviourList>
+            <Behaviour Min="5" Dice="9" Type="Def" Detail="Guard" /><Behaviour Min="4" Dice="8" Type="Atk" Detail="Hit" />
+            </BehaviourList></Card></r>""")]
+        book = lortext.Book(tables)
+        moves = {"1": {"lor_dice": 1, "coins": [20, 20], "attributeType": "CRIMSON", "onHit": {"buffKeyword": "X"}},
+                 "4": {"lor_dice": 2, "coins": [15] * 9},
+                 "defense": {"lor_dice": 4, "coins": [10]},
+                 "2": {"atkType": "HIT", "defaultValue": 7, "coins": [3]}}
+        out = lortext.resolve_moves(moves, book)
+        self.assertEqual(out["1"], {"defaultValue": 5, "coins": [2, 2], "atkType": "SLASH", "attributeType": "CRIMSON",
+                                    "onHit": {"buffKeyword": "X"}})
+        self.assertEqual((out["4"]["defaultValue"], out["4"]["coins"], out["4"]["atkType"]),
+                         (28, [1, 1, 1, 1, 2, 2, 2, 2, 2], "PENETRATE"))
+        self.assertEqual((out["defense"]["defaultValue"], out["defense"]["coins"]), (5, [4]))   # its block die
+        self.assertNotIn("atkType", out["defense"])
+        self.assertEqual(out["2"], moves["2"])                        # written out: as it is
+        self.assertTrue(lortext.uses_dice(moves))
+        with self.assertRaises(lortext.LorTextError):
+            lortext.resolve_moves(moves, None)                       # no Ruina installed: no guessing
         self.assertNotIn("lor_card", out["1"])
         self.assertTrue(lortext.uses_lor({"1": {"lor_card": 1}}))
         self.assertFalse(lortext.uses_lor({"1": {"name": "x"}}))

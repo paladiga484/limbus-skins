@@ -91,6 +91,13 @@ class Book:
                 lines.append(say)
         return {"name": name, "flavor": "\n".join(x for x in lines if x)}
 
+    def dice(self, card_id, kind=None):
+        """[(min, max, type, detail)...] of a page's dice ("Atk", "Def", "Standby"; kind: only those)."""
+        card = self.cards.get(str(card_id))
+        if card is None:
+            raise LorTextError(f"Library of Ruina has no page {card_id}")
+        return [(int(lo), int(hi), t, d) for t, d, lo, hi, _ in card["dice"] if kind is None or t == kind]
+
     def passive(self, passive_id):
         """{"name", "flavor"} for a passive: its name, and "Passive · " its description."""
         name, desc = self.passives.get(str(passive_id), ("", ""))
@@ -109,6 +116,35 @@ def resolve(texts, book):
                book.passive(t.pop("lor_passive")) if "lor_passive" in t else {})
         out[n] = {**ref, **t}
     return out
+
+
+def resolve_moves(moves, book):
+    """A skin's moves with every "lor_dice": <page> turned into that page's dice
+    (helpers.dice_coins): its attack dice for a skill, its block or evade die for "defense". The
+    coin count stays the one written (the animation's); an attack type written out wins. Without
+    Ruina (book None) a move that needs its dice raises LorTextError rather than guess."""
+    from .helpers import dice_coins
+    out = {}
+    for n, m in moves.items():
+        if "lor_dice" not in m:
+            out[n] = m
+            continue
+        if book is None:
+            raise LorTextError("Library of Ruina isn't installed: its pages' dice can't be read")
+        m = dict(m)
+        kind = "Def" if n == "defense" else "Atk"
+        dice = book.dice(m.pop("lor_dice"), kind)
+        if not dice:
+            raise LorTextError(f"move {n}: that page has no {kind} die")
+        m["defaultValue"], m["coins"], atk = dice_coins(dice, len(m.get("coins") or []) or None)
+        if atk:
+            m.setdefault("atkType", atk)
+        out[n] = m
+    return out
+
+
+def uses_dice(moves):
+    return any("lor_dice" in m for m in (moves or {}).values())
 
 
 def uses_lor(texts):

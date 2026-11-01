@@ -378,7 +378,7 @@
   },
   "kali": {
    "identity": 10410,
-   "becomes": "Kali, the Red Mist (Library of Ruina): Wrath with green coins; her own pages, hitting for hundreds; 250 HP, Speed 6-10",
+   "becomes": "Kali, the Red Mist (Library of Ruina): Wrath with green coins; her own pages at their own dice; 250 HP, Speed 6-10",
    "lor": {
     "bundle": "char/char_490.pres",
     "prefab": "Kali",
@@ -440,12 +440,11 @@
    "tested": false,
    "moves": {
     "1": {
+     "lor_dice": 607005,
      "attributeType": "CRIMSON",
-     "atkType": "SLASH",
-     "defaultValue": 200,
      "coins": [
-      25,
-      25
+      0,
+      0
      ],
      "onHit": {
       "buffKeyword": "Laceration",
@@ -461,13 +460,12 @@
      ]
     },
     "2": {
+     "lor_dice": 607003,
      "attributeType": "CRIMSON",
-     "atkType": "HIT",
-     "defaultValue": 150,
      "coins": [
-      20,
-      20,
-      20
+      0,
+      0,
+      0
      ],
      "onUse": [
       {
@@ -478,13 +476,12 @@
      ]
     },
     "3": {
+     "lor_dice": 607002,
      "attributeType": "CRIMSON",
-     "atkType": "SLASH",
-     "defaultValue": 200,
      "coins": [
-      30,
-      30,
-      30
+      0,
+      0,
+      0
      ],
      "onUse": [
       {
@@ -500,13 +497,12 @@
      ]
     },
     "4": {
+     "lor_dice": 607001,
      "attributeType": "CRIMSON",
-     "atkType": "SLASH",
-     "defaultValue": 250,
      "coins": [
-      30,
-      30,
-      30
+      0,
+      0,
+      0
      ],
      "onHit": {
       "buffKeyword": "Laceration",
@@ -520,10 +516,10 @@
     "defense": {
      "attributeType": "CRIMSON",
      "atkType": "SLASH",
-     "defaultValue": 150,
+     "defaultValue": 5,
      "coins": [
-      25,
-      25
+      2,
+      2
      ],
      "onUse": [
       {
@@ -876,16 +872,15 @@
  "kits": {
   "roland": {
    "identity": 10115,
-   "becomes": "Roland, the Black Silence (Library of Ruina): his pages on Index Father Yi Sang, Furioso on all nine coins; 250 HP, Speed 6-10 - his body is the roland-yisang mod's",
+   "becomes": "Roland, the Black Silence (Library of Ruina): his pages on Index Father Yi Sang, at their own dice (Durandal, Ranga, Crystal Atelier, Furioso on all nine coins, Old Boys); 250 HP, Speed 6-10 - his body is the roland-yisang mod's",
    "unlock": "black-forest",
    "tested": false,
    "moves": {
     "1": {
-     "atkType": "SLASH",
-     "defaultValue": 150,
+     "lor_dice": 702009,
      "coins": [
-      20,
-      20
+      0,
+      0
      ],
      "onUse": [
       {
@@ -896,12 +891,11 @@
      ]
     },
     "2": {
-     "atkType": "PENETRATE",
-     "defaultValue": 160,
+     "lor_dice": 702006,
      "coins": [
-      20,
-      20,
-      20
+      0,
+      0,
+      0
      ],
      "onHit": {
       "buffKeyword": "Laceration",
@@ -910,13 +904,12 @@
      }
     },
     "3": {
-     "atkType": "SLASH",
-     "defaultValue": 200,
+     "lor_dice": 702007,
      "coins": [
-      25,
-      25,
-      25,
-      25
+      0,
+      0,
+      0,
+      0
      ],
      "onUse": [
       {
@@ -927,18 +920,17 @@
      ]
     },
     "4": {
-     "atkType": "SLASH",
-     "defaultValue": 250,
+     "lor_dice": 702010,
      "coins": [
-      15,
-      15,
-      15,
-      15,
-      15,
-      15,
-      15,
-      15,
-      15
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
      ],
      "onUse": [
       {
@@ -957,9 +949,9 @@
      }
     },
     "defense": {
-     "defaultValue": 150,
+     "lor_dice": 702004,
      "coins": [
-      25
+      0
      ],
      "onUse": [
       {

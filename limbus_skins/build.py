@@ -154,7 +154,7 @@ def build(keys, game_dir, cache, data_dir, log=print, boss=(), static=True):
         if dressed or any(boss_form(s["key"], s, boss) for s in want_boss):  # the motions the body worn has
             bodies_, have_ = game.body_index(game_dir, cache, os.path.join(data_dir, "bodies.json"), log=log)
             located = lambda b: have_.get(bodies_.get(b, ""))  # noqa: E731
-        if any(lortext.uses_lor(s.get("texts")) for s in want_boss):
+        if any(lortext.uses_lor(s.get("texts")) or lortext.uses_dice(s.get("moves")) for s in want_boss):
             try:                                    # Ruina's own words, from the player's install
                 ruina = lortext.Book(lortext.read_tables())
             except (lortext.LorTextError, OSError) as e:
@@ -229,7 +229,8 @@ def build(keys, game_dir, cache, data_dir, log=print, boss=(), static=True):
                     said.append(f"the boss's own body {unit['appearance']} and moveset (unit {unit['id']}: "
                                 + ", ".join(f"{a['skillId']}x{a['number']}" for a in attrs) + f"; defense {guard[0]})")
                 if s.get("moves"):                          # each edit stacks on the ones before it
-                    mine_skills.update(helpers.move_skills(ident, skills, s["moves"], base()))
+                    moves = lortext.resolve_moves(s["moves"], ruina)    # Ruina's dice, read from its install
+                    mine_skills.update(helpers.move_skills(ident, skills, moves, base()))
                     said.append(f"own moves for S{', S'.join(sorted(s['moves']))}")
                 if s.get("passives"):
                     mine_passives = s["passives"]
@@ -268,7 +269,7 @@ def build(keys, game_dir, cache, data_dir, log=print, boss=(), static=True):
                 if findings:
                     raise ValueError("audit: " + "; ".join(findings))
             except (KeyError, StopIteration, ValueError, IndexError, TypeError, AttributeError,
-                    repaint.RepaintError, OSError) as e:
+                    repaint.RepaintError, lortext.LorTextError, OSError) as e:
                 if boss_form(s["key"], s, boss):                      # a boss form that can't be built isn't swapped in
                     bad.append(s["key"])
                     results[s["key"]] = (False, f"no boss form: {e or 'no boss record'}")
@@ -310,8 +311,6 @@ def build(keys, game_dir, cache, data_dir, log=print, boss=(), static=True):
                     results[s["key"]] = (ok, "; ".join(["built"] + ([kit_notes[s["key"]]] if s["key"] in kit_notes else []))
                                          if ok else "identity not found in the static data")
             for s in want_boss:
-                if s["kind"] == "kit":                  # nothing but the static file: its edits are its result
-                    results[s["key"]] = (s["key"] in boss_ok, boss_notes[s["key"]])
                 if boss_form(s["key"], s, boss) and s["key"] not in bad:
                     ok = s["identity"] in done
                     results[s["key"]] = (ok, boss_notes[s["key"]] if ok else "identity not found in the static data")
@@ -319,6 +318,9 @@ def build(keys, game_dir, cache, data_dir, log=print, boss=(), static=True):
                         for folder in (s["key"], s["key"] + FORMS):
                             shutil.rmtree(os.path.join(built_root, folder), ignore_errors=True)
             log(f"  helpers: {len(done)} identities restyled, {len(boss_ok)} with new skills")
+        for s in want_boss:
+            if s["kind"] == "kit":                      # nothing but the static file: its edits are its result
+                results[s["key"]] = (s["key"] in boss_ok, boss_notes[s["key"]])
 
     # repaints and tints: one folder each
     want = [skins[k] for k in keys if skins[k]["kind"] in ("repaint", "tint") and not boss_form(k, skins[k], boss)]
