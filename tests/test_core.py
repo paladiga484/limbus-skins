@@ -1191,8 +1191,27 @@ class Covers(unittest.TestCase):
         pfp = covers.pictures(tall, {"": stock[""]}, face=(180, 260))["_profile"]
         r, g, b = pfp.getpixel((128, 118))
         self.assertTrue(r > 200 and g < 60 and b < 60, (r, g, b))
-        self.assertEqual(covers.file_name(10999, "_info"), "10999_normal_info.jpg")
-        self.assertEqual(covers.file_name(10999, ""), "10999_normal.jpg")
+        self.assertEqual(covers.file_name(10999, "_info"), "10999_normal_info.dxt")
+        self.assertEqual(covers.file_name(10999, ""), "10999_normal.dxt")
+
+    def test_a_cover_is_saved_as_the_games_own_dxt1(self):
+        # this Limbus build has no image decoder (ImageConversion.LoadImage is stripped): the
+        # client patch hands Texture2D.LoadRawTextureData DXT1 blocks, rows bottom-up as Unity's
+        import struct
+        from PIL import Image
+        from limbus_skins import covers
+        img = Image.new("RGB", (537, 827), (0, 0, 255))
+        img.paste((255, 0, 0), (0, 0, 537, 10))                     # red along the top
+        raw = covers.dxt1_file(img)
+        magic, w, h, sw, sh = struct.unpack("<4sHHHH", raw[:12])
+        self.assertEqual((magic, w, h, sw, sh), (b"LSD1", 540, 828, 537, 827))   # padded to 4
+        self.assertEqual(len(raw), 16 + (540 // 4) * (828 // 4) * 8)
+        import texture2ddecoder
+        px = texture2ddecoder.decode_bc1(raw[16:], 540, 828)         # BGRA
+        row = lambda y: px[(y * 540) * 4:(y * 540) * 4 + 4]          # noqa: E731 - bottom-up rows
+        self.assertTrue(row(826)[2] > 200 and row(826)[0] < 60, row(826))   # the picture's top: red
+        self.assertTrue(row(0)[0] > 200 and row(0)[2] < 60, row(0))         # its bottom: blue (BGRA)
+        self.assertTrue(max(row(827)[:3]) < 30, row(827))                  # above it: padding
 
 
 class CoverBuild(unittest.TestCase):
@@ -1215,12 +1234,10 @@ class CoverBuild(unittest.TestCase):
             with open(os.path.join(out, "manifest.json")) as f:
                 man = json.load(f)
             pics = sorted(os.listdir(os.path.join(out, "pics")))
-            sizes = {f: Image.open(os.path.join(out, "pics", f)).size for f in pics}
             self.assertFalse(os.path.exists(os.path.join(data, "built", "b-id" + build.COVER)))
         self.assertEqual((man["identity"], man["from"]), (10198, "A_EGO"))
-        self.assertEqual(pics, ["10198_normal.jpg", "10198_normal_info.jpg", "10198_normal_profile.jpg",
-                                "10198_normal_profile_support_personality.jpg"])
-        self.assertEqual(sizes["10198_normal.jpg"], (96, 54))
+        self.assertEqual(pics, ["10198_normal.dxt", "10198_normal_info.dxt", "10198_normal_profile.dxt",
+                                "10198_normal_profile_support_personality.dxt"])
         sp.assert_any_call("game", "cache", 10101)                  # sized by its folder's own card
         self.assertTrue(res["a-id"][0] and "cover: A_EGO" in res["a-id"][1], res)
         self.assertTrue(res["b-id"][0] and "no cover" in res["b-id"][1], res)   # still built: its folder's card
@@ -1423,12 +1440,12 @@ class ClientPatch(unittest.TestCase):
         pics = os.path.join(self.data, "built", "ahab-id.cover", "pics")
         os.makedirs(pics)
         with open(os.path.join(self.data, "built", "ahab-id.cover", "manifest.json"), "w") as f:
-            json.dump({"kind": "cover", "identity": 10895, "files": ["10895_normal.jpg"]}, f)
-        with open(os.path.join(pics, "10895_normal.jpg"), "wb") as f:
+            json.dump({"kind": "cover", "identity": 10895, "files": ["10895_normal.dxt"]}, f)
+        with open(os.path.join(pics, "10895_normal.dxt"), "wb") as f:
             f.write(b"jpg")
         self.applied("helpers")
         client.configure(self.client, self.data)
-        self.assertEqual(self.read("client", "covers", "10895_normal.jpg"), "jpg")
+        self.assertEqual(self.read("client", "covers", "10895_normal.dxt"), "jpg")
         self.applied("greencliff")                                       # helpers not swapped in: no allies
         client.configure(self.client, self.data)
         self.assertEqual(os.listdir(os.path.join(self.client, "covers")), [])

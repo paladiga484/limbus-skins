@@ -9,7 +9,7 @@ its face tiles; the body is its largest sprite. "cover_face": [x, y] in the body
 the top of the figure isn't its head (a spear, a parasol, wings), "cover_zoom" below 1 to show
 more of it.
 
-The pictures go to built/<ally>.cover/pics/<id>_normal<suffix>.jpg (one per card role: the full
+The pictures go to built/<ally>.cover/pics/<id>_normal<suffix>.dxt (one per card role: the full
 card, info, profile and support portrait; the uptie card shows the same). limbus-skins puts them
 beside the client patch for the session (client.py), and myosotis's AllyFacePatch shows them
 for that identity's id alone - the identity whose card it otherwise borrows keeps its own.
@@ -25,7 +25,23 @@ class CoverError(Exception):
 
 
 def file_name(ident, suffix):
-    return f"{ident}_normal{suffix}.jpg"
+    return f"{ident}_normal{suffix}.dxt"
+
+
+def dxt1_file(img):
+    """A picture as the client patch loads it - this Limbus build has no image decoder
+    (ImageConversion.LoadImage is stripped), so Texture2D.LoadRawTextureData gets the game's own
+    DXT1 blocks: "LSD1", texture width and height (padded to 4), the picture's own width and
+    height (uint16 each), 4 bytes spare, then the blocks, rows bottom-up as Unity keeps them."""
+    import struct
+    import etcpak
+    from PIL import Image
+    sw, sh = img.size
+    w, h = (sw + 3) // 4 * 4, (sh + 3) // 4 * 4
+    canvas = Image.new("RGBA", (w, h), (0, 0, 0, 255))
+    canvas.paste(img.convert("RGBA"), (0, h - sh))            # the picture at the texture's top left
+    flipped = canvas.transpose(Image.FLIP_TOP_BOTTOM)
+    return struct.pack("<4sHHHH4x", b"LSD1", w, h, sw, sh) + etcpak.compress_bc1(flipped.tobytes(), w, h)
 
 
 def body(texture, rects):

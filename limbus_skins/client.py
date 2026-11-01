@@ -6,7 +6,7 @@ client patch, reads them from its own folder (the one with myosotis.ini, beside 
                             <from>><to>#<skill id>  ...or on using that skill
   skilltext.txt  names and descriptions of our own for the skills a skin rewrote
   allies.txt     each identity of our own: the identity whose card it shows, and its name
-  covers/        an ally's own card pictures (covers.py), <id>_normal<suffix>.jpg
+  covers/        an ally's own card pictures (covers.py), <id>_normal<suffix>.dxt
 
 A boss skin (a boss's own body on a sinner) needs the patch itself to be new enough: wears_bosses.
 
@@ -23,7 +23,7 @@ import re
 GREEN = "green_coin_skills"
 SHIFT = "hp_shift"
 APPEARANCE = re.compile(r"[A-Za-z0-9_]{1,80}")
-COVER = re.compile(r"\d{1,9}_normal[a-z_]{0,40}\.jpg")
+COVER = re.compile(r"\d{1,9}_normal[a-z_]{0,40}\.dxt")
 
 
 def _json(path):

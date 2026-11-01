@@ -460,7 +460,8 @@ def build(keys, game_dir, cache, data_dir, log=print, boss=(), static=True):
                 for suffix, im in covers.pictures(found[s["cover"]], stock, s.get("cover_face"),
                                                   float(s.get("cover_zoom", 1.0))).items():
                     files.append(covers.file_name(s["identity"], suffix))
-                    im.save(os.path.join(out, "pics", files[-1]), quality=90)
+                    with open(os.path.join(out, "pics", files[-1]), "wb") as f:
+                        f.write(covers.dxt1_file(im))
                 with open(os.path.join(out, "manifest.json"), "w", encoding="utf-8") as f:
                     json.dump({"format": FORMAT, "kind": "cover", "skins": [k], "identity": s["identity"],
                                "from": s["cover"], "files": files}, f, indent=1)
