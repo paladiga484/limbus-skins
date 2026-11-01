@@ -1,3 +1,19 @@
+# limbus-skins 1.5.0
+
+44 allies, each with its villain's own face
+- **Every repaint and helper skin of a boss or villain is now also an identity of its own**
+  (`<skin>-id`, 44 in all - the Queen of Hatred, Kali, the Red Mist, Vergilius, Rien, Dongbaek,
+  Starbuck, Captain Ahab, L'Inamovible, ...): equipped like any other, with the boss's own body
+  and whole moveset, its records untouched. The sinner's own identity keeps its look.
+- **Covers**: each ally's card - full art, info, the profile picture lists show, and the support
+  portrait - is drawn from its villain's story portrait in your own Limbus install, framed on the
+  face. Needs the private server's client patch from app-1.118.0 or later to show in game.
+- **True damage**: a boss with one animation for several moves still deals every tier (Rien), and
+  moves written as Library of Ruina pages (Roland's, Kali's) deal those pages' own dice, read from
+  your install.
+- **Only the strongest are locked** behind the Black Forest; the rest are open from the start.
+- **Greencliff is thinner**: his sticks are drawn at a third of the width.
+
 # limbus-skins 1.4.0
 
 Boss skins: the real boss, not a repaint
