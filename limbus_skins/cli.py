@@ -2,8 +2,8 @@
 
   limbus-skins                         what is on, and whether the game is ready
   limbus-skins list [all|on|<sinner>]  every skin you can turn on
-  limbus-skins on <skin|id|sinner|helpers|repaints|bosses|tested|all>...   turn skins on (saved)
-  limbus-skins off <skin|id|sinner|helpers|repaints|bosses|all>...         turn skins off
+  limbus-skins on <skin|id|sinner|helpers|repaints|bosses|kits|identities|tested|all>...   turn skins on (saved)
+  limbus-skins off <skin|id|sinner|helpers|repaints|bosses|kits|identities|all>...         turn skins off
   limbus-skins boss on|off <skin|all>   a repaint of a boss becomes it: the boss's own body
                                         and skills (boss skins always are)
   limbus-skins run -- <launch command>  swap the skins in, start the game with your
@@ -17,6 +17,8 @@
   limbus-skins preview <skin> [file.png]  see a repaint's frames before playing it
   limbus-skins sheet [file.png]         every skin that is on: its idle before -> after
   limbus-skins art <skin> <picture> [--invert]   your own head art (art <skin> --reset)
+  limbus-skins card <art> <id> <file>   draw an identity's card pictures into a bundle file
+                                        (a body mod's): the card art in <data>/art/cards/<art>
   limbus-skins client [--off] <folder>...  set (or clear) those client patch settings
                                         in a folder holding myosotis.ini, by hand
   limbus-skins doctor                   check paths, Python packages and the cache
@@ -76,7 +78,8 @@ SINNER_IDS = {_norm(n): k for k, n in SINNERS.items()}
 SINNER_IDS.update({"don": 3, "heath": 7})
 
 
-GROUPS = {"repaints": "repaint", "helpers": "helper", "tints": "tint", "bosses": "boss"}
+GROUPS = {"repaints": "repaint", "helpers": "helper", "tints": "tint", "bosses": "boss", "identities": "identity",
+          "kits": "kit"}
 
 
 def select(words, skins):
@@ -106,6 +109,31 @@ def unlocked(skins, st):
     # names this version doesn't know (a skin renamed since, e.g. gebura -> kali) drop out too
     st["on"] = [k for k in st["on"] if k in skins and k not in locked]
     return {k: v for k, v in skins.items() if k not in locked}, locked
+
+
+def write_locks(data, skins):
+    """locks.json in the data folder: {unlock word: [title of each skin waiting for it]} - the
+    private server's Black Forest lists them as its gifts (Server/BlackForest.cs). Written only
+    when it changes."""
+    locks = {}
+    for k in sorted(skins, key=lambda k: (skins[k]["identity"], k)):
+        if skins[k].get("unlock"):
+            locks.setdefault(skins[k]["unlock"], []).append(skins[k].get("title") or k)
+    path = os.path.join(data, "locks.json")
+    text = json.dumps(locks, indent=1, ensure_ascii=False) + "\n"
+    try:
+        with open(path, encoding="utf-8") as f:
+            if f.read() == text:
+                return
+    except OSError:
+        pass
+    try:
+        os.makedirs(data, exist_ok=True)
+        with open(path + ".tmp", "w", encoding="utf-8") as f:
+            f.write(text)
+        os.replace(path + ".tmp", path)
+    except OSError:
+        pass                                        # only the mod menu's gift list goes without it
 
 
 def refuse_locked(words, locked, skins):
@@ -207,6 +235,7 @@ def main(argv=None):
     from .mods import ModError, Session, game_running
     st, _, data = _state()
     allskins = catalog()
+    write_locks(data, allskins)
     skins, locked = unlocked(allskins, st)
 
     if cmd == "client":
@@ -296,6 +325,27 @@ def main(argv=None):
             p, size = art.save(pics[0], data, key, "--invert" in args)
             print(f"saved {size[0]}x{size[1]} art to {p}; rebuilt on the next apply")
         shutil.rmtree(os.path.join(data, "built", key), ignore_errors=True)
+        return 0
+    if cmd == "card":
+        # for a body mod's own built file (mods.sh): its identity's card pictures from card art
+        from . import cards
+        from .game import unitypy
+        if len(args) != 3 or not args[1].isdigit():
+            raise SystemExit("usage: limbus-skins card <card art name> <identity id> <bundle file (rewritten)>")
+        name, ident, path = args[0], int(args[1]), args[2]
+        if not re.fullmatch(r"[a-z0-9][a-z0-9-]*", name):
+            raise SystemExit(f"limbus-skins: '{name}' isn't a card art name")
+        try:
+            art_ = cards.load_art(cards.art_dir(data, name))
+            env = unitypy().load(path)
+            n = cards.apply(env, ident, art_)
+            raw = env.file.save(packer="none")
+        except cards.CardError as e:
+            raise SystemExit(f"limbus-skins: {e}")
+        with open(path + ".tmp", "wb") as f:
+            f.write(raw)
+        os.replace(path + ".tmp", path)
+        print(f"{path}: {n} card pictures of {ident} from {name}")
         return 0
 
     g, c = paths.find()

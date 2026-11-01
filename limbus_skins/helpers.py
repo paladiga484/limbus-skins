@@ -237,8 +237,8 @@ def move_skills(identity, skills, moves, base=None):
         if n == "defense" and not guard:
             raise ValueError("the identity has no defense skill to rewrite")
         coins = m.get("coins") or []
-        if not 1 <= len(coins) <= 5 or not all(isinstance(c, int) and 0 <= c <= 30 for c in coins):
-            raise ValueError(f"skill {n}: coins must be 1 to 5 scales of 0-30")
+        if not 1 <= len(coins) <= 10 or not all(isinstance(c, int) and 0 <= c <= 30 for c in coins):
+            raise ValueError(f"skill {n}: coins must be 1 to 10 scales of 0-30")
         if m.get("attributeType", "CRIMSON") not in SINS or m.get("atkType", "SLASH") not in ATK:
             raise ValueError(f"skill {n}: unknown sin or attack type")
         if not 0 <= int(m.get("defaultValue", 0)) <= 999:
@@ -341,27 +341,32 @@ IDENTITY_KEYS = {"personality": "id", "skin": "skinId", "personality-passive": "
                  "personality-voice": "personalityId", "personality-cg-thumbnail": "personalityId"}
 
 
-def clone_record(kind, rec, base, new):
+def clone_record(kind, rec, base, new, folder=None):
     """A copy of `rec` as identity `new`'s, if it is identity `base`'s in table `kind`; else None.
-    The card thumbnail points at the base's art folder, which the new id has none of its own."""
+    The card thumbnail points at an art folder the new id has none of its own of: `folder` (an
+    identity whose card it shows), else the base's."""
     key = IDENTITY_KEYS.get(kind)
     if key is not None:
         if rec.get(key) != base:
             return None
         out = dict(copy.deepcopy(rec), **{key: new})
-        if kind == "personality-cg-thumbnail" and not out.get("folderName"):
-            out["folderName"] = str(base)
+        if kind == "personality-cg-thumbnail" and (folder or not out.get("folderName")):
+            out["folderName"] = str(folder or base)
         return out
     if kind.startswith("illust-pivots-") and str(rec.get("id", "")).startswith(f"{base}_"):
         return dict(copy.deepcopy(rec), id=f"{new}_{rec['id'][len(str(base)) + 1:]}")
     return None
 
 
-def add_clones(kind, records, clones):
-    """records plus a clone of each base record for every {new id: base id} in `clones`."""
+def add_clones(kind, records, clones, folders=None):
+    """records plus a clone of each base record for every {new id: base id} in `clones`
+    (folders: {new id: the identity whose card art it shows}, see clone_record)."""
     out = list(records)
     for new, base in sorted(clones.items()):
-        out += [c for c in (clone_record(kind, r, base, new) for r in records) if c is not None]
+        folder = (folders or {}).get(new)
+        if kind == "personality-cg-thumbnail" and folder:
+            base = folder                           # the card it shows: that identity's record, whole
+        out += [c for c in (clone_record(kind, r, base, new, folder) for r in records) if c is not None]
     return out
 
 
@@ -383,12 +388,15 @@ def swap_passives(rec, battle, support):
     return out
 
 
-def rewrite_static(static_path, swaps, skill_swaps=None, clones=None, passive_swaps=None, stat_edits=None):
+def rewrite_static(static_path, swaps, skill_swaps=None, clones=None, passive_swaps=None, stat_edits=None,
+                   folders=None):
     """Rewrite identity records (and skill records) in the static-data bundle.
     swaps = {identity id: helper record}; skill_swaps = {skill id: new record};
-    clones = {new identity id: base id} (cloned after the swaps, so a clone wears them too);
+    clones = {new identity id: base id}: cloned after the swaps, so a clone wears the base's, and
+    then a clone's own swaps, passives and stats go on it (a boss form of its own);
     passive_swaps = {identity id: {"battle": [passive ids], "support": [passive ids]}};
-    stat_edits = {identity id: {"hp": base HP, "speed": [min, max]}} (edit_stats).
+    stat_edits = {identity id: {"hp": base HP, "speed": [min, max]}} (edit_stats);
+    folders = {new identity id: identity whose card art it shows} (clone_record).
     Returns (bundle bytes, [identity ids changed], [skill ids changed])."""
     UnityPy = unitypy()
     env = UnityPy.load(static_path)
@@ -397,6 +405,46 @@ def rewrite_static(static_path, swaps, skill_swaps=None, clones=None, passive_sw
     passive_swaps = passive_swaps or {}
     stat_edits = stat_edits or {}
     done, done_skills = set(), set()
+
+    def edit(kind, doc, i, x):
+        """Apply this record's edits in place; True when anything changed."""
+        if kind == "personality":
+            h = swaps.get(x.get("id"))
+            hit = False
+            if x.get("id") in stat_edits:
+                edit_stats(x, stat_edits[x["id"]])
+                done.add(x["id"])
+                hit = True
+            if not h:
+                return hit
+            # a helper's skills come once each; a boss form's as dealt in its moveset (_numbers)
+            new = {"appearance": h["appearance"],
+                   "attributeList": [{"skillId": a["skillId"], "number": a.get("number", 1) if h.get("_numbers") else 1}
+                                     for a in lit(h.get("attributeList"))],
+                   "defenseSkillIDList": list(lit(h.get("defenseSkillIDList")))}
+            if h.get("_script") and h.get("unitScriptID"):
+                # the helper's own battle script too: the identity's would drive a body it no
+                # longer has (Wild Hunt's mount)
+                new["unitScriptID"] = h["unitScriptID"]
+            for k, v in new.items():
+                # keep the record's own encoding: some fields are stored as Python-literal strings
+                x[k] = str(v) if isinstance(x.get(k), str) and not isinstance(v, str) else v
+            done.add(x["id"])
+            return True
+        if kind == "skill":
+            if x.get("id") not in skill_swaps:
+                return False
+            doc["list"][i] = skill_swaps[x["id"]]
+            done_skills.add(x["id"])
+            return True
+        if kind == "personality-passive":
+            sw = passive_swaps.get(x.get("personalityID"))
+            if not sw:
+                return False
+            doc["list"][i] = swap_passives(x, sw.get("battle", []), sw.get("support", []))
+            return True
+        return False                                # a table here only for its clones
+
     for path, obj in env.container.items():
         if obj.type.name != "TextAsset":
             continue
@@ -409,46 +457,16 @@ def rewrite_static(static_path, swaps, skill_swaps=None, clones=None, passive_sw
         doc = _text(obj)
         hit = False
         for i, x in enumerate(doc.get("list", [])):
-            if is_pers:
-                h = swaps.get(x.get("id"))
-                if x.get("id") in stat_edits:
-                    edit_stats(x, stat_edits[x["id"]])
-                    done.add(x["id"])
-                    hit = True
-                if not h:
-                    continue
-                # a helper's skills come once each; a boss form's as dealt in its moveset (_numbers)
-                new = {"appearance": h["appearance"],
-                       "attributeList": [{"skillId": a["skillId"], "number": a.get("number", 1) if h.get("_numbers") else 1}
-                                         for a in lit(h.get("attributeList"))],
-                       "defenseSkillIDList": list(lit(h.get("defenseSkillIDList")))}
-                if h.get("_script") and h.get("unitScriptID"):
-                    # the helper's own battle script too: the identity's would drive a body it no
-                    # longer has (Wild Hunt's mount)
-                    new["unitScriptID"] = h["unitScriptID"]
-                for k, v in new.items():
-                    # keep the record's own encoding: some fields are stored as Python-literal strings
-                    x[k] = str(v) if isinstance(x.get(k), str) and not isinstance(v, str) else v
-                done.add(x["id"])
-            elif kind == "skill":
-                if x.get("id") not in skill_swaps:
-                    continue
-                doc["list"][i] = skill_swaps[x["id"]]
-                done_skills.add(x["id"])
-            elif kind == "personality-passive":
-                sw = passive_swaps.get(x.get("personalityID"))
-                if not sw:
-                    continue
-                doc["list"][i] = swap_passives(x, sw.get("battle", []), sw.get("support", []))
-            else:
-                continue                            # a table here only for its clones
-            hit = True
+            hit = edit(kind, doc, i, x) or hit
         if cloned:
-            grown = add_clones(kind, doc.get("list", []), clones)
-            if len(grown) != len(doc.get("list", [])):
+            old = len(doc.get("list", []))
+            grown = add_clones(kind, doc.get("list", []), clones, folders)
+            if len(grown) != old:
                 doc["list"] = grown
                 hit = True
                 done.update(n for n in clones if is_pers and any(r.get("id") == n for r in grown))
+                for i in range(old, len(grown)):    # a clone's own edits, on top of the base's
+                    edit(kind, doc, i, grown[i])
         if hit:
             ta = obj.read()
             ta.m_Script = json.dumps(doc, ensure_ascii=False, separators=(",", ":"))

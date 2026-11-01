@@ -223,6 +223,25 @@ class Locked(unittest.TestCase):
         self.assertEqual((sorted(visible), locked, st["on"]), (["ahab", "kali"], set(), ["kali"]))
         cli.refuse_locked(["kali"], locked, self.SK)                   # no complaint
 
+    def test_the_locked_skins_are_written_down_for_the_black_forest(self):
+        sk = dict(self.SK, roland={"identity": 10115, "kind": "kit", "becomes": "Roland", "unlock": "black-forest",
+                                   "title": "Roland's pages"})
+        with tempfile.TemporaryDirectory() as data:
+            cli.write_locks(data, sk)
+            path = os.path.join(data, "locks.json")
+            with open(path, encoding="utf-8") as f:
+                self.assertEqual(json.load(f), {"black-forest": ["Roland's pages", "kali"]})   # by identity; key without a title
+            before = os.stat(path).st_mtime_ns
+            cli.write_locks(data, sk)
+            self.assertEqual(os.stat(path).st_mtime_ns, before)        # unchanged: not rewritten
+
+    def test_every_forest_skin_has_a_title(self):
+        from limbus_skins.build import catalog
+        forest = {k: s for k, s in catalog().items() if s.get("unlock")}
+        self.assertTrue({"kali", "kali-id", "vergilius-id", "vergilius-wildhunt", "queen-of-hatred", "butterfly-yisang",
+                         "roland"} <= set(forest))
+        self.assertTrue(all(s["unlock"] == "black-forest" and s.get("title") for s in forest.values()))
+
 
 class LaunchArgs(unittest.TestCase):
     def test_flags_before_the_separator_only(self):
@@ -929,6 +948,22 @@ class Identities(unittest.TestCase):
         self.assertEqual([x["id"] for x in out], [10710, 10701, 10799])
         self.assertEqual(out[2]["appearance"], "400012_VergiliusAppearance")   # after a helper swap: the kit too
 
+    def test_a_clone_shows_the_card_of_its_folder_identity(self):
+        thumbs = [{"personalityId": 10911, "folderName": "", "isNormalReady": True}, {"personalityId": 10508, "folderName": ""}]
+        out = self.h.add_clones("personality-cg-thumbnail", thumbs, {10999: 10917, 10599: 10508}, {10999: 10911})
+        got = {r["personalityId"]: r["folderName"] for r in out}
+        self.assertEqual(got, {10911: "", 10508: "", 10999: "10911", 10599: "10508"})   # 10917 has none: 10911's
+        self.assertTrue(next(r for r in out if r["personalityId"] == 10999)["isNormalReady"])
+
+    def test_an_ally_is_a_boss_form_on_a_new_id(self):
+        from limbus_skins.build import boss_form, catalog
+        skins = catalog()
+        for key, new, base, unit in (("dulcinea-id", 10999, 10917, 8381), ("distorted-kim-id", 10599, 10508, 8153)):
+            s = skins[key]
+            self.assertTrue(boss_form(key, s), key)
+            self.assertEqual((s["kind"], s["identity"], s["base"], s["unit"]), ("identity", new, base, unit))
+        self.assertFalse(boss_form("vergilius-id", skins["vergilius-id"]))      # wears its base's body
+
     def test_new_identity_refuses_taken_or_missing_ids(self):
         self.h.check_new_ids({10710, 10410}, {10799: 10710, 10499: 10410})
         with self.assertRaises(ValueError):
@@ -952,6 +987,68 @@ class Identities(unittest.TestCase):
         self.assertEqual((skins["vergilius-id"]["kind"], skins["vergilius-id"]["identity"], skins["vergilius-id"]["base"]),
                          ("identity", 10799, 10710))
         self.assertEqual((skins["kali-id"]["identity"], skins["kali-id"]["unlock"]), (10499, "black-forest"))
+
+
+class Cards(unittest.TestCase):
+    """ID card pictures drawn from card art (limbus_skins/cards.py)."""
+
+    @staticmethod
+    def figure(w=200, h=600, head=(100, 60, 40)):
+        """A cut-out: a red head (circle) on a grey body, on transparency."""
+        from PIL import Image, ImageDraw
+        im = Image.new("RGBA", (w, h), (0, 0, 0, 0))
+        d = ImageDraw.Draw(im)
+        d.rectangle([60, 100, 140, h - 10], fill=(90, 90, 90, 255))
+        x, y, r = head
+        d.ellipse([x - r, y - r, x + r, y + r], fill=(255, 0, 0, 255))
+        return im
+
+    def test_a_cut_out_is_told_from_a_whole_picture(self):
+        from PIL import Image
+        from limbus_skins import cards
+        self.assertTrue(cards.is_cutout(self.figure()))
+        self.assertFalse(cards.is_cutout(Image.new("RGBA", (50, 50), (10, 20, 30, 255))))
+
+    def test_every_picture_keeps_its_size_and_frames_the_face(self):
+        from PIL import Image
+        from limbus_skins import cards
+        art, stock = self.figure(), Image.new("RGB", (64, 64), (0, 0, 200))
+        for role, size in (("wide", (192, 108)), ("info", (54, 83)), ("profile", (64, 64)), ("support", (20, 98))):
+            img = cards.render(role, size, art, stock, face=(100, 60))
+            self.assertEqual(img.size, size, role)
+            self.assertEqual(img.getpixel((0, 0))[3], 255, role)            # a backdrop under the cut-out
+        prof = cards.render("profile", (64, 64), art, stock, face=(100, 60))
+        r, g, b, _ = prof.getpixel((32, 27))                                # the face, near the middle
+        self.assertTrue(r > 200 and g < 60 and b < 60, prof.getpixel((32, 27)))
+
+    def test_a_whole_picture_is_cut_inside_itself_around_the_face(self):
+        from PIL import Image
+        from limbus_skins import cards
+        art = Image.new("RGBA", (400, 400), (0, 255, 0, 255))
+        x, y, w, h = cards._inside((-500, -500, 1600, 900), art, (300, 100))
+        self.assertTrue(0 <= x and 0 <= y and x + w <= 400.01 and y + h <= 400.01)
+        self.assertAlmostEqual(w / h, 1600 / 900, places=3)                  # the shape stays the picture's
+
+    def test_whose_card_a_skin_draws(self):
+        from limbus_skins.build import card_identity, catalog
+        sk = catalog()
+        self.assertEqual(card_identity(sk["dulcinea-id"]), 10911)            # its folder
+        self.assertEqual(card_identity(sk["vergilius-id"]), 10710)           # its base
+        self.assertEqual(card_identity(sk["matthias"]), 11109)               # its own identity
+        self.assertEqual({k for k, s in sk.items() if s.get("card")},
+                         {"kali", "matthias", "roach-emperor", "distorted-hohenheim", "dulcinea-id",
+                          "distorted-kim-id", "vergilius-wildhunt", "vergilius-id"})
+
+    def test_two_skins_drawing_the_same_card_swap_it_in_once(self):
+        from limbus_skins.build import built_dirs
+        with tempfile.TemporaryDirectory() as data:
+            for key in ("vergilius-wildhunt", "vergilius-id"):
+                d = os.path.join(data, "built", key + ".card")
+                os.makedirs(os.path.join(d, "files", "ab", "cd"))
+                with open(os.path.join(d, "manifest.json"), "w") as f:
+                    json.dump({"skins": [key], "files": ["ab/cd"]}, f)
+            got = [label for label, _ in built_dirs(data, ["vergilius-wildhunt", "vergilius-id"])]
+            self.assertEqual(got, ["vergilius-wildhunt.card"])
 
 
 class LibraryOfRuina(unittest.TestCase):
