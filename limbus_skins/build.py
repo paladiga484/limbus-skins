@@ -13,7 +13,7 @@ from importlib import resources
 from . import art, bundle, game, helpers, lortext, repaint, tint
 
 FORMS = ".forms"  # built/<skin>.forms: another body a skin turns into, swapped in apart from it
-FORMAT = 20      # bump when built skins change shape: older builds are rebuilt on apply
+FORMAT = 21      # bump when built skins change shape: older builds are rebuilt on apply
 
 
 def catalog():
@@ -33,7 +33,7 @@ def shares_static(skin):
 
 
 def boss_form(key, skin, boss=()):
-    """Does the skin wear its boss's own body and skills (helpers.boss_kit)? Boss skins always do;
+    """Does the skin wear its boss's own body and skills (helpers.boss_moveset)? Boss skins always do;
     a repaint of a boss does with boss on - and then its repainted body isn't built or swapped in."""
     return skin["kind"] == "boss" or (skin["kind"] == "repaint" and key in boss and bool(skin.get("source")))
 
@@ -99,12 +99,11 @@ def build(keys, game_dir, cache, data_dir, log=print, boss=(), static=True):
     if want or want_boss or want_ids:
         swaps, skill_swaps, bad, boss_ok, kit_notes, green, passives, texts, stats = {}, {}, [], [], {}, set(), {}, {}, {}
         pers, skills, units = game.boss_data(cache)
-        clones, ruina, boss_words = {}, None, {}
+        clones, ruina = {}, None
         located = lambda b: None  # noqa: E731 - set below when a boss form is wanted
-        if any(boss_form(s["key"], s, boss) for s in want_boss):  # a boss form: the body's motions, the boss's words
+        if any(boss_form(s["key"], s, boss) for s in want_boss):  # a boss form: the motions its body has
             bodies_, have_ = game.body_index(game_dir, cache, os.path.join(data_dir, "bodies.json"), log=log)
             located = lambda b: have_.get(bodies_.get(b, ""))  # noqa: E731
-            boss_words = game.names(game_dir, "EN_Skills")
         if any(lortext.uses_lor(s.get("texts")) for s in want_boss):
             try:                                    # Ruina's own words, from the player's install
                 ruina = lortext.Book(lortext.read_tables())
@@ -140,18 +139,18 @@ def build(keys, game_dir, cache, data_dir, log=print, boss=(), static=True):
             try:
                 ident = pers[s["identity"]]
                 base = lambda: {**skill_swaps, **mine_skills}  # noqa: E731 - edits stack on earlier ones
-                if boss_form(s["key"], s, boss):                      # the boss's own body, and its skills whole
+                if boss_form(s["key"], s, boss):                      # the boss's own body and whole moveset
                     unit = helpers.pick_unit(units[s["source"]], skills, s.get("unit"))
                     where = located(unit["appearance"])
                     if not where:
                         raise ValueError(f"{unit['appearance']} is not in the game's cache")
                     motions = repaint.body_motions(game.unitypy().load(where), unit["appearance"])
-                    kit, pairs = helpers.boss_kit(ident, unit, skills, motions)
-                    mine_skills.update(kit)
-                    mine_texts.update(helpers.boss_texts(pairs, kit, boss_words))
-                    mine_swap = {"appearance": unit["appearance"], "_body_only": True}
-                    said.append(f"the boss's own body {unit['appearance']} and skills (unit {unit['id']}: "
-                                + ", ".join(f"{sid}<-{bid}" for sid, bid in pairs) + ")")
+                    attrs, guard = helpers.boss_moveset(ident, unit, skills, motions)
+                    mine_swap = {"appearance": unit["appearance"], "attributeList": attrs,
+                                 "defenseSkillIDList": guard, "_numbers": True}
+                    ident = dict(ident, attributeList=attrs, defenseSkillIDList=guard)   # what's below acts on them
+                    said.append(f"the boss's own body {unit['appearance']} and moveset (unit {unit['id']}: "
+                                + ", ".join(f"{a['skillId']}x{a['number']}" for a in attrs) + f"; defense {guard[0]})")
                 if s.get("moves"):                          # each edit stacks on the ones before it
                     mine_skills.update(helpers.move_skills(ident, skills, s["moves"], base()))
                     said.append(f"own moves for S{', S'.join(sorted(s['moves']))}")

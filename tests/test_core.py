@@ -656,10 +656,12 @@ class BossSkills(unittest.TestCase):
         out = self.h.recolor_skills(self.ident, self.skills, {"all": "SHAMROCK"})
         self.assertEqual(sorted(out), [1, 2, 3, 95])
         self.assertTrue(all(r["skillData"][0]["attributeType"] == "SHAMROCK" for r in out.values()))
-        boss, _ = self.h.boss_kit(self.ident, self.unit, self.skills, {"S4", "S9"})   # green on a boss form
-        out = self.h.recolor_skills(self.ident, self.skills, {"all": "SHAMROCK"}, base=boss)
-        self.assertEqual((out[1]["skillData"][0]["defaultValue"], out[1]["skillData"][0]["attributeType"]), (92, "SHAMROCK"))
-        self.assertEqual(out[1]["skillData"][0]["skillMotion"], "S9")           # still the boss's own motion
+        attrs, guard = self.h.boss_moveset(self.ident, self.unit, self.skills, {"S4", "S9"})   # green on a boss form
+        out = self.h.recolor_skills(dict(self.ident, attributeList=attrs, defenseSkillIDList=guard),
+                                    self.skills, {"all": "SHAMROCK"})
+        self.assertEqual(sorted(out), [91, 95])                               # its own moves, recoloured
+        self.assertEqual((out[91]["skillData"][0]["attributeType"], out[91]["skillData"][0]["skillMotion"]),
+                         ("SHAMROCK", "S9"))
 
     def test_green_ids_are_the_skills_recoloured_shamrock(self):
         self.ident["defenseSkillIDList"] = [95]
@@ -838,78 +840,51 @@ class BossSkills(unittest.TestCase):
         with self.assertRaises(ValueError):
             self.h.helper_kit(self.ident, {"id": 1, "attributeList": [{"skillId": 96}]}, self.skills)
         unit = {"id": 2, "attributeList": [{"skillId": 96}, {"skillId": 92}]}      # boss forms skip them too
-        self.assertEqual(self.h.boss_kit(self.ident, unit, self.skills, {"Default", "S4", "S5", "S9"})[1][0], (1, 92))
+        self.assertEqual(self.h.boss_moveset(self.ident, unit, self.skills, {"Default", "S4", "S5", "S9"})[0],
+                         [{"skillId": 92, "number": 3}])
 
-    def test_a_boss_form_takes_the_bosss_own_skills_whole_under_the_identitys_ids(self):
-        # the real boss's body plays its own motions, so its skills come whole - motion included
+    def _moves(self):
+        """The boss's attacks, each with a move of its own (setUp gives them all S9)."""
+        for i, m in ((91, "S7"), (92, "S8"), (93, "S9"), (94, "S9")):
+            self.skills[i]["skillData"][0]["skillMotion"] = m
+
+    def test_a_boss_form_takes_the_bosss_whole_moveset(self):
+        # the boss's own body plays its own moves: every attack it has, one per move, dealt as an
+        # identity's deck is (tier 1 three times, tier 2 twice, tier 3 once), and its own guard
+        self._moves()
         self.ident["defenseSkillIDList"] = [4]
-        self.skills[4] = {"id": 4, "skillTier": 1, "requireIDList": [],
-                          "skillData": [{"gaksungLevel": 1, "defType": "GUARD", "skillMotion": "Default"}]}
-        self.skills[96] = {"id": 96, "skillTier": 1, "skillData": [{"defType": "COUNTER", "skillMotion": "S5"}]}
-        self.unit["attributeList"].append({"skillId": 96, "number": 0})
-        motions = {"Default", "Dead", "Evade", "Guard", "S4", "S5", "S9"}
-        kit, pairs = self.h.boss_kit(self.ident, self.unit, self.skills, motions)
-        self.assertEqual(pairs, [(1, 92), (2, 93), (3, 91), (4, 95)])          # by tier; the boss's own guard first
-        self.assertEqual(sorted(kit), [1, 2, 3, 4])
-        one = kit[1]
-        self.assertEqual((one["id"], one["skillTier"]), (1, 1))                 # the identity's id and tier
-        d = one["skillData"]
-        self.assertEqual(len(d), 1)
-        self.assertEqual((d[0]["skillMotion"], d[0]["gaksungLevel"], d[0]["defaultValue"]), ("S9", 1, 92))
-        self.assertEqual(len(d[0]["coinList"]), 3)                             # the boss's coins, as they are
-        self.assertEqual(kit[4]["skillData"][0]["defType"], "GUARD")
-        self.assertEqual(kit[4]["requireIDList"], [])                          # the identity's own fields stay
-        self.assertEqual(self.skills[92]["id"], 92)                            # the real boss is untouched
-        self.assertNotIn("gaksungLevel", self.skills[92]["skillData"][0])
+        self.skills[4] = {"id": 4, "skillTier": 1, "skillData": [{"defType": "GUARD", "skillMotion": "Default"}]}
+        attrs, guard = self.h.boss_moveset(self.ident, self.unit, self.skills, {"Default", "S4", "S7", "S8", "S9"})
+        self.assertEqual(attrs, [{"skillId": 91, "number": 1}, {"skillId": 92, "number": 3},
+                                 {"skillId": 93, "number": 2}])               # 94 is 93's move again
+        self.assertEqual(guard, [95])                                          # under the boss's own ids
+        self.assertEqual(self.skills[92]["skillData"][0]["defaultValue"], 92)  # its records as they are
+
+    def test_a_boss_form_leaves_out_moves_its_body_cant_play(self):
+        self._moves()
+        attrs, _ = self.h.boss_moveset(self.ident, self.unit, self.skills, {"S4", "S7", "S9"})
+        self.assertEqual([a["skillId"] for a in attrs], [91, 93])
 
     def test_a_boss_form_falls_back_to_a_counter_then_the_identitys_own_guard(self):
         self.ident["defenseSkillIDList"] = [4]
         self.skills[4] = {"id": 4, "skillTier": 1, "skillData": [{"defType": "GUARD", "skillMotion": "Default"}]}
         self.skills[96] = {"id": 96, "skillTier": 1, "skillData": [{"defType": "COUNTER", "skillMotion": "S5"}]}
         unit = {"id": 1327, "attributeList": [{"skillId": i} for i in (91, 92, 93, 96)]}
-        _, pairs = self.h.boss_kit(self.ident, unit, self.skills, {"Default", "S5", "S9"})
-        self.assertEqual(pairs[-1], (4, 96))                                   # Matthias: his counter
-        kit, pairs = self.h.boss_kit(self.ident, unit, self.skills, {"Default", "S9"})
-        self.assertEqual((pairs[-1], 4 in kit), ((4, 4), False))               # no counter motion: own guard, as is
+        self.assertEqual(self.h.boss_moveset(self.ident, unit, self.skills, {"Default", "S5", "S9"})[1], [96])  # Matthias
+        self.assertEqual(self.h.boss_moveset(self.ident, unit, self.skills, {"Default", "S9"})[1], [4])   # own guard
 
     def test_a_boss_form_refuses_what_its_body_cant_play(self):
-        with self.assertRaises(ValueError):                                    # no attack it has a motion for
-            self.h.boss_kit(self.ident, self.unit, self.skills, {"Default"})
+        with self.assertRaises(ValueError):                                    # no attack it has a move for
+            self.h.boss_moveset(self.ident, self.unit, self.skills, {"Default"})
         self.ident["defenseSkillIDList"] = [4]
         self.skills[4] = {"id": 4, "skillTier": 1, "skillData": [{"defType": "GUARD", "skillMotion": "S7"}]}
         with self.assertRaises(ValueError):                                    # no guard it can play either
-            self.h.boss_kit(self.ident, {"id": 1, "attributeList": [{"skillId": 91}]}, self.skills, {"S9"})
+            self.h.boss_moveset(self.ident, {"id": 1, "attributeList": [{"skillId": 91}]}, self.skills, {"S9"})
         with self.assertRaises(ValueError):                                    # the identity's battle script
-            self.h.boss_kit(dict(self.ident, unitScriptID=11115), self.unit, self.skills, {"S4", "S9"})
-
-    def test_every_defense_slot_and_hidden_skill_must_play_on_the_boss_body(self):
-        self.skills[4] = {"id": 4, "skillTier": 1, "skillData": [{"defType": "GUARD", "skillMotion": "Default"}]}
-        self.skills[5] = {"id": 5, "skillTier": 1, "skillData": [{"defType": "EVADE", "skillMotion": "S7"}]}
-        self.ident["defenseSkillIDList"] = [4, 5]
-        kit, pairs = self.h.boss_kit(self.ident, self.unit, self.skills, {"S4", "S9"})
-        self.assertEqual(pairs[-2:], [(4, 95), (5, 95)])                       # both take the boss's guard
-        self.assertEqual(sorted(kit), [1, 2, 3, 4, 5])
-        self.ident["attributeList"].append({"skillId": 5, "number": 0})       # a skill only a passive uses
+            self.h.boss_moveset(dict(self.ident, unitScriptID=11115), self.unit, self.skills, {"S4", "S9"})
+        self.ident["attributeList"].append({"skillId": 4, "number": 0})       # a skill only a passive uses
         with self.assertRaises(ValueError):
-            self.h.boss_kit(self.ident, self.unit, self.skills, {"S4", "S9"})
-
-    def test_too_few_boss_attacks_play_again_in_the_later_slots(self):
-        self.ident["defenseSkillIDList"] = [4]
-        self.skills[4] = {"id": 4, "skillTier": 1, "skillData": [{"defType": "GUARD", "skillMotion": "Default"}]}
-        unit = {"id": 1, "attributeList": [{"skillId": 91}, {"skillId": 92}, {"skillId": 95}]}
-        _, pairs = self.h.boss_kit(self.ident, unit, self.skills, {"S4", "S9"})
-        self.assertEqual(pairs, [(1, 92), (2, 91), (3, 91), (4, 95)])          # S3: its tier-3 skill again
-
-    def test_boss_texts_are_the_bosss_own_names_and_coin_lines(self):
-        texts = {92: {"id": 92, "levelList": [{"level": 1, "name": "Stomping", "desc": "Coin Power +1",
-                                                "coinlist": [{"coindescs": [{"desc": "[SuperCoin]"}, {"desc": "Inflict 3"}]},
-                                                             {"coindescs": [{"desc": "Inflict 1"}]},
-                                                             {"coindescs": [{"desc": "Inflict 2"}]},
-                                                             {"coindescs": [{"desc": "past its coins"}]}]}]}}
-        kit = {1: {"skillData": [{"coinList": [{}, {}, {}]}]}, 2: {"skillData": [{"coinList": [{}]}]}}
-        out = self.h.boss_texts([(1, 92), (2, 77)], kit, texts)
-        self.assertEqual(out, {1: {"name": "Stomping", "desc": "Coin Power +1", "flavor": "",
-                                   "coins": ["[SuperCoin]\nInflict 3", "Inflict 1", "Inflict 2"]}})
+            self.h.boss_moveset(self.ident, self.unit, self.skills, {"S4", "S9"})
 
     def test_body_motions_are_the_games_motion_names(self):
         self.assertEqual(repaint.motion_names([4, 0, 2, 3, 5, 7, 12, 17, 18, 1, 99]),

@@ -1,7 +1,7 @@
 """Repaint an identity's own battle body with another character's drawings.
 
 An identity put on another character's body with its own skills asks for motions that body
-lacks (a boss's own body and skills together is a boss skin: helpers.boss_kit). So a repaint
+lacks (a boss's own body and skills together is a boss skin: helpers.boss_moveset). So a repaint
 keeps the identity's own body - animations, timelines, skills and upties exactly as the game
 expects - and only the pictures change:
 every frame is pointed at the matching frame of the other character (idle->idle,

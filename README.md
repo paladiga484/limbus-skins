@@ -188,13 +188,14 @@ If one looks wrong or a fight freezes, turn it off with `limbus-skins off <skin>
 - **Helper skins** rewrite the identity's record in the static-data bundle: the helper's body,
   its skills, and its defence skill.
 - **Boss skins** do the same with a boss: the identity's body becomes the boss's appearance, and
-  its skills (S1-S3 by tier, and the boss's guard, counter or evade as its defence) become the
-  boss's own, whole - each plays the boss's own motion on the boss's own body, checked against
-  the body's motion list when it is built. They go under the identity's own skill ids, so the
-  real boss in the story keeps its own; their names and descriptions are the boss's, read from
-  your game. The game only looks for a sinner's body on the personality shelf of its asset
-  catalog, and a boss's is on the enemy shelf: the client patch's BossBodyPatch loads it from
-  there when the game's own load finds nothing.
+  its deck the boss's whole moveset - every attack it has, one per move, dealt as an identity's
+  skills are (tier 1 three times, tier 2 twice, tier 3 once) - with the boss's guard, counter or
+  evade as its defence, each checked against the body's motion list when it is built. They are
+  the boss's own skills, as a helper skin's are the helper's, so their names, icons and
+  descriptions are the game's own (a recoloured one, like the Roach Emperor's green, is green for
+  the story's boss too while skins are swapped in). The game only looks for a sinner's body on
+  the personality shelf of its asset catalog, and a boss's is on the enemy shelf: the client
+  patch's BossBodyPatch loads it from there when the game's own load finds nothing.
 - Since version 1.117.1 the game checks each cached file's CRC and re-downloads any that
   differ. Each built file is given the original's CRC (4 spare bytes after the last object),
   so the game keeps it.

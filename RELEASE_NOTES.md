@@ -3,8 +3,9 @@
 Boss skins: the real boss, not a repaint
 - **Matthias, the Roach Emperor and Distorted Hohenheim** (`matthias`, `roach-emperor`,
   `distorted-hohenheim`) are now the bosses themselves: the boss's own body from the game, with
-  its own animations and effects (the Roach Emperor's own swarm), and the boss's own skills by
-  tier, his guard or counter as the defence, under their own names. Before, the identity was
+  its own animations and effects (the Roach Emperor's own swarm), and the boss's **whole
+  moveset** under its own names - all nine of the Roach Emperor's attacks, Matthias's five and
+  his counter, Hohenheim's four - his guard or counter as the defence. Before, the identity was
   repainted with the boss's drawings: Matthias kept Outis's moves, the Roach Emperor was drawn
   at half size to fit, and his boss skills ran past their animation. Needs the Limbus Private
   Server's client patch, **build 6** or later (`run` refuses an older package's).
