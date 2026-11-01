@@ -1097,6 +1097,29 @@ class Allies(unittest.TestCase):
         self.assertEqual(g.written["swaps"][10198]["appearance"], "A_App")
         self.assertEqual(man["identities"], [{"id": 10198, "base": 10101}])
 
+    def test_helper_ally(self):
+        from limbus_skins import build
+        skins = {"qoh": {"key": "qoh", "kind": "helper", "identity": 10312, "helper": 400003, "ally": 10398,
+                         "unlock": "black-forest"}}
+        h = {"id": 400003, "appearance": "400003_QueenOfHatred", "attributeList": [{"skillId": 1, "number": 3}],
+             "defenseSkillIDList": [2]}
+        base = {"id": 10312, "appearance": "10312_X", "attributeList": [{"skillId": 9}]}
+        with tempfile.TemporaryDirectory() as data, \
+                FakeGame(skins, {10312: base}, helpers={400003: h},
+                         bodies={"400003_QueenOfHatred": {"S1", "Guard"}}) as g:
+            res = build.build(["qoh-id"], "game", "cache", data, log=lambda *a: None)
+            with open(os.path.join(data, "built", "helpers", "manifest.json")) as f:
+                man = json.load(f)
+        self.assertTrue(res["qoh-id"][0], res)
+        self.assertEqual(g.written["clones"], {10398: 10312})
+        self.assertEqual(set(g.written["swaps"]), {10398})                  # the base identity is untouched
+        swap = g.written["swaps"][10398]
+        self.assertEqual((swap["appearance"], swap["attributeList"], swap["defenseSkillIDList"]),
+                         ("400003_QueenOfHatred", [{"skillId": 1, "number": 3}], [2]))
+        self.assertEqual(man["identities"], [{"id": 10398, "base": 10312, "unlock": "black-forest"}])
+        self.assertEqual(man["skins"], ["qoh-id"])
+        self.assertEqual(base, {"id": 10312, "appearance": "10312_X", "attributeList": [{"skillId": 9}]})
+
 
 class Audit(unittest.TestCase):
     SKILLS = {1: {"id": 1, "skillData": [{"skillMotion": "S1"}]}, 2: {"id": 2, "skillData": [{"skillMotion": "S7"}]},

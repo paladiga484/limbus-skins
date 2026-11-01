@@ -150,8 +150,9 @@ def build(keys, game_dir, cache, data_dir, log=print, boss=(), static=True):
                 known_passives.append({r["id"] for r in game.static_lists(game.find_static(cache)[1], ("passive",))["passive"]})
             return known_passives[0]
 
+        dressed = want + [s for s in want_ids if s.get("helper")]   # helper skins, and helpers' allies
         located = lambda b: None  # noqa: E731 - set below when a helper or a boss form is wanted
-        if want or any(boss_form(s["key"], s, boss) for s in want_boss):  # the motions the body worn has
+        if dressed or any(boss_form(s["key"], s, boss) for s in want_boss):  # the motions the body worn has
             bodies_, have_ = game.body_index(game_dir, cache, os.path.join(data_dir, "bodies.json"), log=log)
             located = lambda b: have_.get(bodies_.get(b, ""))  # noqa: E731
         if any(lortext.uses_lor(s.get("texts")) for s in want_boss):
@@ -170,27 +171,35 @@ def build(keys, game_dir, cache, data_dir, log=print, boss=(), static=True):
             except ValueError as e:
                 bad.append(s["key"])
                 results[s["key"]] = (False, str(e))
-        for s in want:
+        for s in dressed:
+            ally = s["kind"] == "identity"          # a helper as an identity of its own: dresses its clone
+            if ally and s["identity"] not in clones:
+                continue                            # refused above
             h = helper_units.get(s["helper"])
-            if h is None or s["identity"] not in ids:
+
+            def refuse(why):
                 bad.append(s["key"])
-                results[s["key"]] = (False, "not in this game version")
+                results[s["key"]] = (False, why)
+                if ally:                            # no bare copy of its base either
+                    clones.pop(s["identity"], None)
+                    folders.pop(s["identity"], None)
+            if h is None or (not ally and s["identity"] not in ids):
+                refuse("not in this game version")
                 continue
             try:
+                ident = dict(pers[s["base"]], id=s["identity"]) if ally else pers[s["identity"]]
                 where = located(h["appearance"])
                 if not where:
                     raise ValueError(f"{h['appearance']} is not in the game's cache")
                 worn = repaint.body_motions(game.unitypy().load(where), h["appearance"])
-                attrs, guard, dropped = helpers.helper_kit(pers[s["identity"]], h, skills, bool(s.get("script")), worn)
+                attrs, guard, dropped = helpers.helper_kit(ident, h, skills, bool(s.get("script")), worn)
             except (KeyError, ValueError, OSError, repaint.RepaintError) as e:
-                bad.append(s["key"])
-                results[s["key"]] = (False, str(e))
+                refuse(str(e))
                 continue
             findings = audit.record(dict(h, attributeList=[{"skillId": a["skillId"], "number": 1} for a in attrs],
                                          defenseSkillIDList=guard), skills, worn)   # as written: each skill once
             if findings:
-                bad.append(s["key"])
-                results[s["key"]] = (False, "audit: " + "; ".join(findings))
+                refuse("audit: " + "; ".join(findings))
                 continue
             swaps[s["identity"]] = dict(h, attributeList=attrs, defenseSkillIDList=guard, _script=bool(s.get("script")))
             if dropped:
