@@ -1,8 +1,9 @@
 """Repaint an identity's own battle body with another character's drawings.
 
-Swapping an identity onto another character's body crashes battles (those bodies lack the
-per-uptie data an identity needs). So the identity keeps its own body - animations,
-timelines, skills and upties exactly as the game expects - and only the pictures change:
+An identity put on another character's body with its own skills asks for motions that body
+lacks (a boss's own body and skills together is a boss skin: helpers.boss_kit). So a repaint
+keeps the identity's own body - animations, timelines, skills and upties exactly as the game
+expects - and only the pictures change:
 every frame is pointed at the matching frame of the other character (idle->idle,
 guard->guard, skill 2 frame 7 -> the frame at the same point of their skill 2), packed
 into the body's own atlas pages. A head recipe can instead paint a new head over the
@@ -26,6 +27,16 @@ class RepaintError(Exception):
 KINDS = ("idle", "move", "gud", "miss", "dmg", "dead")
 CLIP_KIND = {"Default": "idle", "Move": "move", "Guard": "gud", "Evade": "miss",
              "Damaged": "dmg", "Dead": "dead", "Retire": "dead"}
+# the game's MOTION_DETAIL, in order: an appearance's motionList names its motions by these numbers
+MOTIONS = ("Default", "Dead", "Evade", "Guard", "Damaged", "Move", "Attack") + tuple(f"S{i}" for i in range(1, 11)) + (
+    "Parrying", "Idle", "Parrying_Range", "Special1", "Special2", "Special3", "Parrying_Lose") + tuple(
+    f"S{i}" for i in range(11, 22)) + ("Empty", "Duel_Ready", "Duel_Win", "Duel_Lose", "Damaged_2", "Damaged_3",
+                                       "Duel_Ready_Actor", "Duel_Ready_Target")
+
+
+def motion_names(ids):
+    """The motion names for a motionList's numbers (unknown numbers left out)."""
+    return {MOTIONS[i] for i in ids if 0 <= i < len(MOTIONS)}
 
 
 def bundle_assets(env):
@@ -96,6 +107,21 @@ def main_clips(env, root_id):
             out |= {c["m_PathID"] for c in t.get("m_AnimationClips", [])}
             ctrl = None
     return out or None
+
+
+def body_motions(env, appearance):
+    """The names of the motions body `appearance` lists (its CharacterAppearance's motionList)."""
+    assets = bundle_assets(env)
+    if appearance not in assets:
+        raise RepaintError(f"{appearance}: body not found in its bundle")
+    objs = {o.path_id: o for o in env.objects}
+    for c in objs[assets[appearance][0]].read_typetree()["m_Component"]:
+        o = objs.get(c["component"]["m_PathID"])
+        if o is not None and o.type.name == "MonoBehaviour":
+            t = o.read_typetree()
+            if "motionList" in t:
+                return motion_names(m["_motiondetail"] for m in t["motionList"])
+    raise RepaintError(f"{appearance}: no motion list on the body")
 
 
 def clip_frames(env, ids, wanted=None):
@@ -280,11 +306,13 @@ def head_art(env, r):
 
 def paint_head(frame, spec, art, width=1.9, glow=None):
     """Erase the old head inside a circle (hair, skin and the soft edge - white gloves,
-    guns and collars stay) and put the art there. spec = [cx, cy, diameter, rotation]
-    in frame pixels, y down."""
+    guns and collars stay) and put the art there. spec = [cx, cy, diameter, rotation, blur]
+    in frame pixels, y down; blur (optional) smears the art sideways over that many pixels, for
+    a frame drawn as a motion blur."""
     from PIL import Image
     cx, cy, dia = spec[:3]
     rot = spec[3] if len(spec) > 3 else 0
+    blur = spec[4] if len(spec) > 4 else 0
     im = frame.copy()
     px = im.load()
     W, H = im.size
@@ -304,6 +332,11 @@ def paint_head(frame, spec, art, width=1.9, glow=None):
     if glow:                                             # a soft halo behind the head
         a, _ = artfx.glow(a, glow["radius"] * a.width, tuple(glow["color"]),
                           (glow["low"] + glow["high"]) / 2)
+    if blur:                                             # squeeze and stretch back: a sideways smear
+        wide = Image.new("RGBA", (a.width + 2 * int(blur), a.height), (0, 0, 0, 0))
+        wide.alpha_composite(a, (int(blur), 0))
+        a = wide.resize((max(1, wide.width * 4 // max(4, int(blur))), wide.height), Image.BOX).resize(
+            wide.size, Image.BILINEAR)
     ax, ay = int(cx - a.width / 2), int(cy - a.height / 2 - 0.05 * dia)
     # grow the frame where the new head pokes out, rather than clipping it
     left, top = max(0, -ax), max(0, -ay)
@@ -765,7 +798,13 @@ def repaint(target, locate, source=None, clips=None, mapping=None, head=None, mi
 
     tpath = locate(target)
     tenv = UnityPy.load(tpath)
+    from . import share                                  # bodies sharing the bundle keep what is theirs
+    raw, shared = share.privatize(tenv, target)
+    if raw is not None:
+        tenv = UnityPy.load(raw)
+    notes += shared
     tobjs, troots = prefab_objects(tenv, target, forms=True)
+    tobjs -= share.foreign(tenv, target)
     tclips = clip_frames(tenv, tobjs)
     if layered(o.read().m_Name for o in tenv.objects if o.type.name == "Sprite" and o.path_id in tobjs):
         raise RepaintError(f"{target} draws its moves in layers of parts; a repaint would leave them "

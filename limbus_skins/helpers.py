@@ -5,9 +5,10 @@ the Walpurgis Queen of Hatred...). Their bodies were made to be played, so givin
 identity the helper's body together with the helper's own skills works in battle.
 (A body alone crashes: the identity's skills ask for motions the body lacks.)
 
-Boss skills go the other way: a repainted identity keeps its own body (already drawn as
-the boss) and its own skill records, which take the boss's numbers, coins and effects.
-Each skill keeps the identity's motion, so nothing asks for a motion the body lacks.
+Boss forms go the same way with a boss: the identity wears the boss's own body (its
+appearance) and fights with the boss's own skills, whole - each plays its own motion on the
+body made for it. They are put under the identity's own skill ids, so the real boss keeps
+its records (boss_kit).
 
 This changes skills, so it is a gameplay change: private servers only.
 """
@@ -15,12 +16,6 @@ import copy
 import json
 
 from .game import _text, lit, unitypy
-
-# what a boss skill brings; everything else (motion, view, uptie shell) stays the identity's
-BOSS_FIELDS = ("attributeType", "atkType", "defType", "skillTargetType", "targetNum", "arearange",
-               "defaultValue", "skillLevelCorrection", "coinList", "abilityScriptList",
-               "canTeamKill", "canDuel", "canChangeTarget")
-
 
 # Skills (helper or boss) that only work inside their own story fight: they end or stall the battle,
 # retreat, or kill the user. Outside it they hang the fight (A Certain Sinclair's S6 waits for
@@ -91,41 +86,87 @@ def _coin_cues(rec, n):
     return cues
 
 
-def _recue(coins, cues):
-    """The coins, each with its own cue keys swapped for the given cues."""
-    return [dict({k: v for k, v in c.items() if k not in COIN_CUES}, **cue) for c, cue in zip(coins, cues)]
+DEFENSES = ("GUARD", "COUNTER", "EVADE")
 
 
-def boss_skills(identity, unit, skills):
-    """{skill id: new record} for the identity's own attack skills, carrying the boss's.
-    When the boss has fewer attacks, the identity's last skills stay its own. Raises
-    ValueError when the boss has none."""
-    mine = [a["skillId"] for a in lit(identity.get("attributeList"))]
-    theirs = _attacks(unit, skills)
-    if not theirs:
-        raise ValueError(f"unit {unit['id']} has no attack skills")
-    mine = mine[:len(theirs)]
-    picked, left = [], list(theirs)
-    for n in range(len(mine)):                      # skill n+1 takes a boss skill of tier n+1 if any
-        boss = next((s for s in left if s.get("skillTier", 1) == n + 1), left[0])
-        left.remove(boss)
-        picked.append(boss)
-    out = {}
-    for sid, boss in zip(mine, picked):
-        rec = copy.deepcopy(skills[sid])
-        shell = rec["skillData"][0]
-        b = boss["skillData"][0]
-        cues = _coin_cues(rec, len(b.get("coinList") or []))     # before the boss's coins replace them
-        for k in BOSS_FIELDS:
-            if k in b:
-                shell[k] = copy.deepcopy(b[k])
+def _motion(rec):
+    return rec["skillData"][0].get("skillMotion")
+
+
+def _by_tier(n, attacks):
+    """The boss attack for slot n (1-based) among attacks (lowest tier first): one of tier n not
+    used yet, else any not used yet, else - too few to go round - one of tier n again, else the first."""
+    fresh = [s for s in attacks if not s.get("_used")]
+    pick = (next((s for s in fresh if s.get("skillTier", 1) == n), None) or (fresh[0] if fresh else None)
+            or next((s for s in attacks if s.get("skillTier", 1) == n), attacks[0]))
+    pick["_used"] = True
+    return pick
+
+
+def boss_kit(identity, unit, skills, motions):
+    """A boss form: the identity wears the boss's own body (kind "boss"), so it fights with the
+    boss's own skills, whole - motion, coins, effects - put under the identity's skill ids (the
+    real boss, which uses its own ids, is untouched). Slot n takes a boss attack of tier n; the
+    defense is the boss's own (its defense skill, else a guard, counter or evade it has), else the
+    identity's own as it is. motions: the names of the motions the boss's body has; a skill it
+    can't play is never picked. Returns ({identity skill id: new record}, [(identity skill id,
+    the skill it plays: a boss's, or its own)]). ValueError when the body can't carry the identity:
+    no attack or defense it can play, or an identity with a battle script of its own (it would
+    drive a body the identity no longer has)."""
+    if identity.get("unitScriptID"):
+        raise ValueError(f"identity {identity['id']} has its own battle script ({identity['unitScriptID']}), "
+                         "which would drive a body it no longer has - pick an identity without one")
+    listed = lit(identity.get("attributeList"))
+    mine = [a["skillId"] for a in listed if a.get("number", 1)]
+    hidden = [a["skillId"] for a in listed if not a.get("number", 1)]   # only a passive or script uses these
+    if any(i in skills and _motion(skills[i]) not in motions for i in hidden):
+        raise ValueError(f"identity {identity['id']} has hidden skills its new body can't play")
+    guard = list(lit(identity.get("defenseSkillIDList")))
+    attacks = [dict(s) for s in _attacks(unit, skills) if _motion(s) in motions]   # dict(): _by_tier marks them
+    if not attacks:
+        raise ValueError(f"unit {unit['id']} has no attack its body can play")
+    pairs = [(sid, _by_tier(n, attacks)["id"]) for n, sid in enumerate(mine, 1)]
+    if guard:
+        theirs = [skills.get(i) for i in list(lit(unit.get("defenseSkillIDList")))
+                  + [a["skillId"] for a in lit(unit.get("attributeList"))]]
+        boss = next((s for s in theirs if s and s.get("skillData") and s["skillData"][0].get("defType") in DEFENSES
+                     and not story_only(s) and _motion(s) in motions), None)
+        for g in guard:                                 # every defense slot must play on the new body
+            if boss is not None:
+                pairs.append((g, boss["id"]))
+            elif g in skills and _motion(skills[g]) in motions:
+                pairs.append((g, g))                    # its own guard, as it is
             else:
-                shell.pop(k, None)
-        if shell.get("coinList"):                   # the boss's coins, played in the identity's animation
-            shell["coinList"] = _recue(shell["coinList"], cues)
-        shell["gaksungLevel"] = 1
-        rec["skillData"] = [shell]                  # no uptie steps: the boss's numbers throughout
-        out[sid] = rec
+                raise ValueError(f"unit {unit['id']} has no defense its body can play, nor does the identity")
+    kit = {}
+    for sid, bid in pairs:
+        if sid == bid:
+            continue
+        own, boss = skills[sid], skills[bid]
+        rec = copy.deepcopy(boss)
+        for k, v in own.items():                        # the identity's own fields it lacks (requireIDList...)
+            rec.setdefault(k, copy.deepcopy(v))
+        rec["id"], rec["skillTier"] = sid, own.get("skillTier", boss.get("skillTier", 1))
+        shell = dict(rec["skillData"][0], gaksungLevel=1)
+        rec["skillData"] = [shell]                      # one step: the boss's numbers at every uptie
+        kit[sid] = rec
+    return kit, pairs
+
+
+def boss_texts(pairs, kit, texts):
+    """{identity skill id: {"name", "desc", "flavor", "coins"}}: what a boss form's skills show (by
+    myosotis's SkillTextPatch) - the boss skill's own name, description and coin lines, from the
+    game's own text records {skill id: record} (EN_Skills*). A skill with no text record is left out."""
+    out = {}
+    for sid, bid in pairs:
+        t = texts.get(bid)
+        if sid not in kit or not t or not t.get("levelList"):
+            continue
+        lv = t["levelList"][0]
+        have = len(kit[sid]["skillData"][0].get("coinList") or [])
+        coins = ["\n".join(d.get("desc", "") for d in c.get("coindescs") or []) for c in lv.get("coinlist") or []]
+        out[sid] = {"name": lv.get("name", ""), "desc": lv.get("desc", ""), "flavor": "",
+                    "coins": (coins + [""] * have)[:have]}
     return out
 
 
@@ -412,9 +453,12 @@ def rewrite_static(static_path, swaps, skill_swaps=None, clones=None, passive_sw
                     hit = True
                 if not h:
                     continue
-                new = {"appearance": h["appearance"],
-                       "attributeList": [{"skillId": a["skillId"], "number": 1} for a in lit(h.get("attributeList"))],
-                       "defenseSkillIDList": list(lit(h.get("defenseSkillIDList")))}
+                if h.get("_body_only"):                 # a boss form: its kit is under the identity's own ids
+                    new = {"appearance": h["appearance"]}
+                else:
+                    new = {"appearance": h["appearance"],
+                           "attributeList": [{"skillId": a["skillId"], "number": 1} for a in lit(h.get("attributeList"))],
+                           "defenseSkillIDList": list(lit(h.get("defenseSkillIDList")))}
                 if h.get("_script") and h.get("unitScriptID"):
                     # the helper's own battle script too: the identity's would drive a body it no
                     # longer has (Wild Hunt's mount)

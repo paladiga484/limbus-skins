@@ -6,6 +6,8 @@ client patch, reads them from its own folder (the one with myosotis.ini, beside 
                             <from>><to>#<skill id>  ...or on using that skill
   skilltext.txt  names and descriptions of our own for the skills a skin rewrote
 
+A boss skin (a boss's own body on a sinner) needs the patch itself to be new enough: wears_bosses.
+
 They come from the manifests of what was built (built/<folder>/manifest.json), and only from the
 folders swapped in this session (active.json): a build the game outdated, and so skipped, gets
 nothing. `run` sets them in a private-server package's client folders for the session and
@@ -137,6 +139,16 @@ def configure(folder, data_dir, on=True):
     _replace(ini, set_key(text, SHIFT, ",".join(hp_shifts(data_dir, done))))
     _replace(os.path.join(folder, "skilltext.txt"), skilltext_file(skill_texts(data_dir) if "helpers" in done else {}))
     return True
+
+
+def wears_bosses(folder):
+    """Can the client patch in folder put a boss's own body on a sinner (myosotis's BossBodyPatch,
+    from the Limbus Private Server's build 6)? Without it a boss skin's sinner has no body at all."""
+    try:
+        with open(os.path.join(folder, "myosotis.dll"), "rb") as f:
+            return b"bossbody" in f.read()
+    except OSError:
+        return False
 
 
 def folders_beside(command):

@@ -2,9 +2,10 @@
 
   limbus-skins                         what is on, and whether the game is ready
   limbus-skins list [all|on|<sinner>]  every skin you can turn on
-  limbus-skins on <skin|id|sinner|helpers|repaints|tested|all>...   turn skins on (saved)
-  limbus-skins off <skin|id|sinner|helpers|repaints|all>...         turn skins off
-  limbus-skins boss on|off <skin|all>   a repaint also fights with its boss's skills
+  limbus-skins on <skin|id|sinner|helpers|repaints|bosses|tested|all>...   turn skins on (saved)
+  limbus-skins off <skin|id|sinner|helpers|repaints|bosses|all>...         turn skins off
+  limbus-skins boss on|off <skin|all>   a repaint of a boss becomes it: the boss's own body
+                                        and skills (boss skins always are)
   limbus-skins run -- <launch command>  swap the skins in, start the game with your
                                         command, put the originals back when it exits
                                         (a private-server package's play.sh or app: its
@@ -75,13 +76,16 @@ SINNER_IDS = {_norm(n): k for k, n in SINNERS.items()}
 SINNER_IDS.update({"don": 3, "heath": 7})
 
 
+GROUPS = {"repaints": "repaint", "helpers": "helper", "tints": "tint", "bosses": "boss"}
+
+
 def select(words, skins):
     keys = []
     for w in words:
         n = _norm(w)
         hit = [k for k, s in skins.items() if
                n in ("all",) or (n == "tested" and s.get("tested")) or _norm(k) == n
-               or (n in ("repaints", "helpers", "tints") and s["kind"] == n[:-1])
+               or (n in GROUPS and s["kind"] == GROUPS[n])
                or str(s["identity"]) == w or (n in SINNER_IDS and s["identity"] // 100 % 100 == SINNER_IDS[n])]
         if not hit:
             raise SystemExit(f"limbus-skins: no skin, identity or sinner called '{w}' (see `limbus-skins list`)")
@@ -125,7 +129,7 @@ def _table(skins, on, keys, boss=()):
         mark = "ON " if k in on else "   "
         kind = f"{s['kind']:7}"
         tested = "" if s.get("tested") else "  (not yet seen in a fight)"
-        fights = "  +boss skills" if k in boss else ""
+        fights = "  +boss form" if k in boss else ""
         print(f"  {mark} {k:{width}}  {s['identity']}  {kind}  -> {s['becomes']}{fights}{tested}")
 
 
@@ -140,7 +144,7 @@ def split_launch(args):
 
 def _need_build(keys, skins, data_dir, cache, boss=()):
     """Enabled skins with no build, or built for an older game version."""
-    from .build import FORMAT, shares_static
+    from .build import FORMAT, boss_form, shares_static
     root = os.path.join(data_dir, "built")
     out = []
     try:
@@ -154,7 +158,7 @@ def _need_build(keys, skins, data_dir, cache, boss=()):
     want_boss = skill_edits(keys, skins, boss)
     for k in keys:
         # a skin with skill edits also needs the shared static-data file to be current
-        folders = ["helpers"] if shares_static(skins[k]) else [k]
+        folders = ["helpers"] if shares_static(skins[k]) or boss_form(k, skins[k], boss) else [k]
         if k in want_boss:
             folders.append("helpers")
         for folder in folders:
@@ -199,7 +203,7 @@ def main(argv=None):
         print(f"game:  {g}\ncache: {c}")
         return 0
 
-    from .build import build, built_dirs, catalog, shares_static
+    from .build import boss_form, build, built_dirs, catalog, shares_static
     from .mods import ModError, Session, game_running
     st, _, data = _state()
     allskins = catalog()
@@ -214,6 +218,10 @@ def main(argv=None):
         for f in folders:
             if not client.configure(f, data, on=not off):
                 raise SystemExit(f"{f}: no myosotis.ini there - not a client patch folder")
+            if not off and not client.wears_bosses(f) and any(
+                    boss_form(k, skins[k], set(st["boss"])) for k in client.applied(data) if k in skins):
+                print(f"warning: {f}'s client patch can't load a boss's body on a sinner - a boss skin "
+                      "swapped in will have no body (needs the Limbus Private Server's build 6)")
         return 0
     if cmd in ("status",):
         print(f"limbus-skins {__version__} - {len(st['on'])} skin(s) on" + (": " + ", ".join(st["on"]) if st["on"] else ""))
@@ -254,14 +262,14 @@ def main(argv=None):
             raise SystemExit("usage: limbus-skins boss on|off <skin|sinner|all>...")
         keys = [k for k in select(args[1:], skins) if skins[k]["kind"] == "repaint" and skins[k].get("source")]
         if not keys:
-            raise SystemExit("boss skills are for repaints of a boss (e.g. ahab, kromer)")
+            raise SystemExit("boss forms are for repaints of a boss (e.g. ahab, kromer); boss skins (bosses) always are one")
         if args[0] == "on":
             st["boss"] = sorted(set(st["boss"]) | set(keys))
-            print("boss skills on: " + ", ".join(keys))
+            print("boss form on (the boss's own body and skills): " + ", ".join(keys))
             print("these change skills and have not been seen in a fight yet - try them on a spare account")
         else:
             st["boss"] = [k for k in st["boss"] if k not in keys]
-            print("boss skills off: " + ", ".join(keys))
+            print("boss form off (back to the repaint): " + ", ".join(keys))
         _save_state(st)
         return 0
     if cmd == "doctor":
@@ -309,8 +317,10 @@ def main(argv=None):
             raise SystemExit("usage: limbus-skins preview <skin> [file.png]")
         refuse_locked(args[:1], locked, allskins)
         key = select(args[:1], skins)[0]
-        if shares_static(skins[key]):
-            raise SystemExit("previews are for repaints and tints (helpers and identities wear another skin's art)")
+        from .build import boss_form
+        if shares_static(skins[key]) or boss_form(key, skins[key], set(st["boss"])):
+            raise SystemExit("previews are for repaints and tints (helpers, boss forms and identities wear "
+                             "another body as the game draws it)")
         own = lambda: [d for label, d in built_dirs(data, [key]) if label == key]  # noqa: E731 - not the shared helpers file
         if not own():
             if sess.active():
@@ -354,6 +364,9 @@ def main(argv=None):
             if s["kind"] == "helper":
                 ha = helper_units.get(s["helper"], {}).get("appearance")
                 after = idle_image(have[bodies[ha]], ha, 300) if ha in bodies else None
+            elif boss_form(k, s, set(st["boss"])):         # the boss's own body, as the game draws it
+                ha = s.get("source")
+                after = idle_image(have[bodies[ha]], ha, 300) if ha in bodies else None
             else:
                 b = built_dirs(data, [k])
                 f = next((os.path.join(r, n) for r, _, ns in os.walk(b[0][1]) for n in ns if n == "__data"), None) if b else None
@@ -393,6 +406,14 @@ def main(argv=None):
             raise SystemExit("no skins are on - `limbus-skins list`, then `limbus-skins on <name>`")
         if game_running():
             raise SystemExit("Limbus is running - close it first")
+        from . import client
+        clients = client.folders_beside(args[0]) if args else []
+        bosses = [k for k in st["on"] if boss_form(k, skins[k], set(st["boss"]))]
+        old = [d for d in clients if not client.wears_bosses(d)]
+        if bosses and old:                      # a boss's body on a sinner needs BossBodyPatch
+            raise SystemExit(f"{', '.join(bosses)} wear a boss's own body, which this package's client patch "
+                             f"can't load ({old[0]}): update the Limbus Private Server package (build 6 or "
+                             f"later), or `limbus-skins off {' '.join(bosses)}`")
         sess.restore()
         stale = _need_build(st["on"], skins, data, c, set(st["boss"]))
         if stale:
@@ -406,8 +427,6 @@ def main(argv=None):
         if cmd == "apply":
             print("start the game now; `limbus-skins restore` (or `watch`) puts the originals back")
             return 0
-        from . import client
-        clients = client.folders_beside(args[0]) if args else []
         try:
             for d in clients:                   # the package's client patch: green coins, skill text, bodies
                 client.configure(d, data)

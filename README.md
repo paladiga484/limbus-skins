@@ -17,13 +17,16 @@ Dress Limbus Company identities as the characters they mirror, on a **private se
   pages - Level Slash, Upstanding Slash, Greater Split: Vertical, Retaliate - with their names,
   dice and Bleed, read from your Library of Ruina, wrapped in Sancho's blood mist. She is locked
   until Greencliff dies in a fight on the private server (the Black Forest).
+- **Boss skins:** the identity *becomes* the boss - the boss's own body from the game, with its
+  own animations, effects and skills: Matthias (the Middle Nursefather) on the Ring Pointillist
+  Student Outis, the Roach Emperor (his own swarm of roaches) on G Corp. Gregor, Distorted
+  Hohenheim on Heishou Si Gregor. Needs the Limbus Private Server's client patch, build 6 or later.
 - **Auras:** effect sprites taken from a boss's own bundle drift around the body, in every
-  frame and in the idle: the Roach Emperor's swarm of roaches, Sancho's blood mist.
+  frame and in the idle: Sancho's blood mist round Kali.
 - **Skill text:** a skin that rewrites skills also rewrites their names and descriptions, so a
   skill's text says what it does now (with the Limbus Private Server's client patch).
-- **Boss skills:** `limbus-skins boss on ahab` and a repainted identity also fights with its
-  boss's skills - the boss's power, coins and effects, played with the identity's own (repainted)
-  animations. Off by default.
+- **Boss forms:** `limbus-skins boss on ahab` and a repaint of a boss becomes a boss skin: the
+  boss's own body and skills instead of the repainted identity. Off by default.
 - **Helper skins:** the identity takes a story helper unit's body *and* its skills: LCB
   Ryōshū as Arayashiki Ryōshū from stage 9-49, LCB Sinclair as A Certain Sinclair, Love and
   Hate Don Quixote as the Walpurgis Night Queen of Hatred. Skills that only work inside the
@@ -42,10 +45,10 @@ contains no game art, and the tool never connects to the internet.
 You need the game installed through Steam (Windows, or Linux with Proton) and launched at least
 once, so its download cache exists, plus Python 3.9 or newer.
 
-Download `limbus_skins-1.2.0-py3-none-any.whl` from the release, then:
+Download `limbus_skins-1.4.0-py3-none-any.whl` from the release, then:
 
 ```
-pip install --user limbus_skins-1.2.0-py3-none-any.whl     # or: pipx install <the .whl>
+pip install --user limbus_skins-1.4.0-py3-none-any.whl     # or: pipx install <the .whl>
 limbus-skins doctor
 ```
 
@@ -68,7 +71,7 @@ Linux it's the same path inside the Proton prefix:
 limbus-skins list                      # every skin, by sinner
 limbus-skins on ahab arayashiki-ryoshu # by name; ids (10808), sinner names, `helpers`, `repaints`, `tested` and `all` work too
 limbus-skins off ishmael
-limbus-skins boss on ahab              # Ahab's own skills too (boss off ahab to undo)
+limbus-skins boss on ahab              # Ahab herself: her own body and skills (boss off ahab to undo)
 limbus-skins run --yes -- <the command that starts the game on your private server>
 ```
 
@@ -151,13 +154,13 @@ Skins only show in battle. Menus, portraits and identity art stay as they are.
 | `werner` | Sinclair 11012 | repaint | Werner | not yet |
 | `pwie` | Sinclair 11016 | helper | Pwie, the Crimson God | not yet |
 | `old-gcorp-head` | Outis 11103 | repaint | the Old G Corp. Head Manager | not yet |
-| `matthias` | Outis 11109 | repaint | the Middle Nursefather, Matthias | not yet |
+| `matthias` | Outis 11109 | boss | the Middle Nursefather, Matthias: his own body and skills | not yet |
 | `josephine` | Outis 11108 | repaint | Josephine | not yet |
 | `barber` | Outis 11111 | repaint | the Barber (bloodfiend) | not yet |
-| `roach-emperor` | Gregor 11203 | repaint | the Roach Emperor, in a swarm of his roaches; all skills Gluttony | not yet |
+| `roach-emperor` | Gregor 11203 | boss | the Roach Emperor: his own body, swarm and skills, all Gluttony | not yet |
 | `jun-gregor` | Gregor 11208 | repaint | Jun | not yet |
 | `priest` | Gregor 11210 | repaint | the Priest | not yet |
-| `distorted-hohenheim` | Gregor 11212 | repaint | Distorted Hohenheim | not yet |
+| `distorted-hohenheim` | Gregor 11212 | boss | Distorted Hohenheim: his own body and skills | not yet |
 | `hohenheim` | Gregor 11214 | helper | Hohenheim | not yet |
 
 "Not yet" means it builds and its frames check out, but nobody has watched it in a fight yet.
@@ -171,8 +174,10 @@ If one looks wrong or a fight freezes, turn it off with `limbus-skins off <skin>
 - **Repaints** rewrite only an identity's own body bundle. Each frame is pointed at the
   matching drawing of the other character (idle to idle, guard to guard, each skill's frames
   spread across theirs), packed into the body's own atlas pages. Only the objects the
-  identity's own body loads are touched (read from the bundle's preload table), so bundles
-  that hold several characters keep the others as they are, and only the character's own
+  identity's own body loads are touched (read from the bundle's preload table), and of those
+  nothing another body in the bundle loads too: the early identities of a sinner share one
+  bundle and its death frame, so the skin's identity gets a copy of that frame and its clip of
+  its own, and the others keep theirs as the game ships them. Only the character's own
   animator lends frames (not a summon or sidekick drawn alongside it). The identity's other
   motions (reloads, parries...) take the other character's motion of the same name, else
   its first skill; `build` says which motions the other character has no drawing for.
@@ -182,6 +187,14 @@ If one looks wrong or a fight freezes, turn it off with `limbus-skins off <skin>
   so the game finds everything it looks for. A head skin swaps only the skeleton's head part.
 - **Helper skins** rewrite the identity's record in the static-data bundle: the helper's body,
   its skills, and its defence skill.
+- **Boss skins** do the same with a boss: the identity's body becomes the boss's appearance, and
+  its skills (S1-S3 by tier, and the boss's guard, counter or evade as its defence) become the
+  boss's own, whole - each plays the boss's own motion on the boss's own body, checked against
+  the body's motion list when it is built. They go under the identity's own skill ids, so the
+  real boss in the story keeps its own; their names and descriptions are the boss's, read from
+  your game. The game only looks for a sinner's body on the personality shelf of its asset
+  catalog, and a boss's is on the enemy shelf: the client patch's BossBodyPatch loads it from
+  there when the game's own load finds nothing.
 - Since version 1.117.1 the game checks each cached file's CRC and re-downloads any that
   differ. Each built file is given the original's CRC (4 spare bytes after the last object),
   so the game keeps it.
@@ -198,8 +211,10 @@ If one looks wrong or a fight freezes, turn it off with `limbus-skins off <skin>
   look bent. The game draws them properly.
 - An identity can wear one skin at a time. Skins that share a bundle can't be on together; `apply` says which one it skipped.
 - Swapping an identity onto another character's body without that character's own skills
-  crashes battles, and boss units' skills only work in boss fights. That's why helper skins
-  are limited to the game's helper units.
+  asks for motions the body lacks. That's why a body comes with its own skills (helper and
+  boss skins) and a repaint keeps the identity's. A boss form needs an identity without a battle
+  script of its own (Middle Nursefather Outis has one, so Matthias is on the Ring Pointillist
+  Student), and a boss skill that leans on the boss's own buffs only does its plain part.
 
 ## Undo everything
 

@@ -13,22 +13,29 @@ from importlib import resources
 from . import art, bundle, game, helpers, lortext, repaint, tint
 
 FORMS = ".forms"  # built/<skin>.forms: another body a skin turns into, swapped in apart from it
-FORMAT = 19      # bump when built skins change shape: older builds are rebuilt on apply
+FORMAT = 20      # bump when built skins change shape: older builds are rebuilt on apply
 
 
 def catalog():
     with resources.files("limbus_skins").joinpath("data/skins.json").open(encoding="utf-8") as f:
         doc = json.load(f)
     skins = {}
-    for kind, one in (("helpers", "helper"), ("repaints", "repaint"), ("tints", "tint"), ("identities", "identity")):
+    for kind, one in (("helpers", "helper"), ("repaints", "repaint"), ("tints", "tint"), ("identities", "identity"),
+                      ("bosses", "boss")):
         for key, e in doc.get(kind, {}).items():
             skins[key] = dict(e, key=key, kind=one)
     return skins
 
 
 def shares_static(skin):
-    """Built into the one shared static-data file (helpers, and identities of our own)."""
-    return skin["kind"] in ("helper", "identity")
+    """Built into the one shared static-data file (helpers, boss skins, identities of our own)."""
+    return skin["kind"] in ("helper", "identity", "boss")
+
+
+def boss_form(key, skin, boss=()):
+    """Does the skin wear its boss's own body and skills (helpers.boss_kit)? Boss skins always do;
+    a repaint of a boss does with boss on - and then its repainted body isn't built or swapped in."""
+    return skin["kind"] == "boss" or (skin["kind"] == "repaint" and key in boss and bool(skin.get("source")))
 
 
 def head_recipe(name):
@@ -67,15 +74,15 @@ def _write(out_dir, cache, stock_path, raw):
 
 
 def skill_edits(keys, skins, boss=()):
-    """The skins among keys whose records go into the static-data bundle: repaints with boss
-    skills on, and skins that recolor a skill's sin, rewrite its moves or text, swap its passives
-    or change its stats."""
+    """The skins among keys whose records go into the static-data bundle: boss forms (boss skins,
+    and repaints of a boss with boss on), and skins that recolor a skill's sin, rewrite its moves
+    or text, swap its passives or change its stats."""
     return {k for k in keys if any(skins[k].get(f) for f in ("sins", "moves", "passives", "texts", "stats", "green_coins"))
-            or (k in boss and skins[k]["kind"] == "repaint" and skins[k].get("source"))}
+            or boss_form(k, skins[k], boss)}
 
 
 def build(keys, game_dir, cache, data_dir, log=print, boss=(), static=True):
-    """Build the given skin keys; repaints in `boss` also take their boss's skills.
+    """Build the given skin keys; repaints in `boss` become their boss (boss_form).
     static=False builds only the bodies and leaves the shared static-data file alone.
     Returns {key: (ok, message)}."""
     skins = catalog()
@@ -88,10 +95,15 @@ def build(keys, game_dir, cache, data_dir, log=print, boss=(), static=True):
     want = [skins[k] for k in keys if static and skins[k]["kind"] == "helper"]
     want_ids = [skins[k] for k in keys if static and skins[k]["kind"] == "identity"]
     want_boss = [skins[k] for k in sorted(skill_edits(keys, skins, boss))] if static else []
+    forms = [s for s in want_boss if s["kind"] == "boss"]     # boss skins: nothing but the static file
     if want or want_boss or want_ids:
         swaps, skill_swaps, bad, boss_ok, kit_notes, green, passives, texts, stats = {}, {}, [], [], {}, set(), {}, {}, {}
         pers, skills, units = game.boss_data(cache)
-        clones, ruina = {}, None
+        clones, ruina, located = {}, None, None
+        if any(boss_form(s["key"], s, boss) for s in want_boss):  # a boss form: the body's motions, the boss's words
+            bodies_, have_ = game.body_index(game_dir, cache, os.path.join(data_dir, "bodies.json"), log=log)
+            located = lambda b: have_.get(bodies_.get(b, ""))  # noqa: E731
+            boss_words = game.names(game_dir, "EN_Skills")
         if any(lortext.uses_lor(s.get("texts")) for s in want_boss):
             try:                                    # Ruina's own words, from the player's install
                 ruina = lortext.Book(lortext.read_tables())
@@ -119,50 +131,76 @@ def build(keys, game_dir, cache, data_dir, log=print, boss=(), static=True):
             swaps[s["identity"]] = dict(h, attributeList=attrs, defenseSkillIDList=guard, _script=bool(s.get("script")))
             if dropped:
                 kit_notes[s["key"]] = "story-only skills left out: " + ", ".join(str(i) for i, _ in dropped)
-        if want_boss:
-            for s in want_boss:
-                try:
-                    said, ident = [], pers[s["identity"]]
-                    if s["key"] in boss and s["kind"] == "repaint" and s.get("source"):
-                        unit = helpers.pick_unit(units[s["source"]], skills, s.get("unit"))
-                        skill_swaps.update(helpers.boss_skills(ident, unit, skills))
-                        said.append(f"boss skills from unit {unit['id']}")
-                    if s.get("moves"):                      # each edit stacks on the ones before it
-                        skill_swaps.update(helpers.move_skills(ident, skills, s["moves"], skill_swaps))
-                        said.append(f"own moves for S{', S'.join(sorted(s['moves']))}")
-                    if s.get("passives"):
-                        passives[s["identity"]] = s["passives"]
-                        said.append("passives: " + ", ".join(str(i) for i in s["passives"].get("battle", [])
-                                                           + s["passives"].get("support", [])))
-                    if s.get("sins"):
-                        recoloured = helpers.recolor_skills(ident, skills, s["sins"], skill_swaps)
-                        skill_swaps.update(recoloured)
-                        green.update(helpers.green_ids(recoloured))
-                        said.append("sins: " + ", ".join(f"{n} {v}" for n, v in sorted(s["sins"].items())))
-                    if s.get("green_coins"):                # green coins, keeping the skills' own sins
-                        green.update(helpers.all_skill_ids(ident))
-                        said.append("green coins")
-                    if s.get("texts") or s.get("moves"):    # shown by myosotis's SkillTextPatch
-                        mine = s.get("texts") or {}
-                        if lortext.uses_lor(mine):
-                            try:
-                                mine = lortext.resolve(mine, ruina) if ruina else None
-                            except lortext.LorTextError as e:
-                                said.append(str(e))
-                                mine = None
-                            if mine is None:                # the skill text without Ruina's words
-                                mine = {n: {k: v for k, v in t.items() if not k.startswith("lor_")}
-                                        for n, t in (s.get("texts") or {}).items()}
-                        texts.update(helpers.skill_texts(ident, skills, mine, s.get("moves")))
-                        said.append("own skill text")
-                    if s.get("stats"):
-                        helpers.edit_stats(dict(ident), s["stats"])         # refused here, not mid-rewrite
-                        stats[s["identity"]] = s["stats"]
-                        said.append("stats: " + ", ".join(f"{k} {v}" for k, v in sorted(s["stats"].items())))
-                    boss_notes[s["key"]] = "; ".join(said)
-                    boss_ok.append(s["key"])
-                except (KeyError, StopIteration, ValueError, IndexError, TypeError, AttributeError) as e:
-                    boss_notes[s["key"]] = f"skills unchanged ({e or 'no boss record'})"
+        for s in want_boss:
+            # every edit of one skin lands together or not at all: half a boss (its skills on a
+            # body that can't play them) would freeze the fight
+            mine_skills, mine_texts, mine_green, said = {}, {}, set(), []
+            mine_swap = mine_passives = mine_stats = None
+            try:
+                ident = pers[s["identity"]]
+                base = lambda: {**skill_swaps, **mine_skills}  # noqa: E731 - edits stack on earlier ones
+                if boss_form(s["key"], s, boss):                      # the boss's own body, and its skills whole
+                    unit = helpers.pick_unit(units[s["source"]], skills, s.get("unit"))
+                    where = located(unit["appearance"])
+                    if not where:
+                        raise ValueError(f"{unit['appearance']} is not in the game's cache")
+                    motions = repaint.body_motions(game.unitypy().load(where), unit["appearance"])
+                    kit, pairs = helpers.boss_kit(ident, unit, skills, motions)
+                    mine_skills.update(kit)
+                    mine_texts.update(helpers.boss_texts(pairs, kit, boss_words))
+                    mine_swap = {"appearance": unit["appearance"], "_body_only": True}
+                    said.append(f"the boss's own body {unit['appearance']} and skills (unit {unit['id']}: "
+                                + ", ".join(f"{sid}<-{bid}" for sid, bid in pairs) + ")")
+                if s.get("moves"):                          # each edit stacks on the ones before it
+                    mine_skills.update(helpers.move_skills(ident, skills, s["moves"], base()))
+                    said.append(f"own moves for S{', S'.join(sorted(s['moves']))}")
+                if s.get("passives"):
+                    mine_passives = s["passives"]
+                    said.append("passives: " + ", ".join(str(i) for i in s["passives"].get("battle", [])
+                                                       + s["passives"].get("support", [])))
+                if s.get("sins"):
+                    recoloured = helpers.recolor_skills(ident, skills, s["sins"], base())
+                    mine_skills.update(recoloured)
+                    mine_green.update(helpers.green_ids(recoloured))
+                    said.append("sins: " + ", ".join(f"{n} {v}" for n, v in sorted(s["sins"].items())))
+                if s.get("green_coins"):                    # green coins, keeping the skills' own sins
+                    mine_green.update(helpers.all_skill_ids(ident))
+                    said.append("green coins")
+                if s.get("texts") or s.get("moves"):        # shown by myosotis's SkillTextPatch
+                    mine = s.get("texts") or {}
+                    if lortext.uses_lor(mine):
+                        try:
+                            mine = lortext.resolve(mine, ruina) if ruina else None
+                        except lortext.LorTextError as e:
+                            said.append(str(e))
+                            mine = None
+                        if mine is None:                    # the skill text without Ruina's words
+                            mine = {n: {k: v for k, v in t.items() if not k.startswith("lor_")}
+                                    for n, t in (s.get("texts") or {}).items()}
+                    mine_texts.update(helpers.skill_texts(ident, skills, mine, s.get("moves")))
+                    said.append("own skill text")
+                if s.get("stats"):
+                    helpers.edit_stats(dict(ident), s["stats"])             # refused here, not mid-rewrite
+                    mine_stats = s["stats"]
+                    said.append("stats: " + ", ".join(f"{k} {v}" for k, v in sorted(s["stats"].items())))
+            except (KeyError, StopIteration, ValueError, IndexError, TypeError, AttributeError,
+                    repaint.RepaintError, OSError) as e:
+                if boss_form(s["key"], s, boss):                      # a boss form that can't be built isn't swapped in
+                    bad.append(s["key"])
+                    results[s["key"]] = (False, f"no boss form: {e or 'no boss record'}")
+                boss_notes[s["key"]] = f"skills unchanged ({e or 'no boss record'})"
+                continue
+            skill_swaps.update(mine_skills)
+            texts.update(mine_texts)
+            green.update(mine_green)
+            if mine_swap:
+                swaps[s["identity"]] = mine_swap
+            if mine_passives:
+                passives[s["identity"]] = mine_passives
+            if mine_stats:
+                stats[s["identity"]] = mine_stats
+            boss_notes[s["key"]] = "; ".join(said)
+            boss_ok.append(s["key"])
         out = os.path.join(built_root, "helpers")
         shutil.rmtree(out, ignore_errors=True)
         if swaps or skill_swaps or clones or passives or texts or stats:
@@ -171,7 +209,8 @@ def build(keys, game_dir, cache, data_dir, log=print, boss=(), static=True):
             os.makedirs(out)
             rel = _write(out, cache, static_path, raw)
             with open(os.path.join(out, "manifest.json"), "w", encoding="utf-8") as f:
-                json.dump({"format": FORMAT, "kind": "helpers", "skins": [s["key"] for s in want + want_ids if s["key"] not in bad],
+                json.dump({"format": FORMAT, "kind": "helpers",
+                           "skins": [s["key"] for s in want + want_ids + forms if s["key"] not in bad],
                            "skills": boss_ok, "files": [rel], "green_skills": sorted(green),
                            "skill_texts": {str(i): t for i, t in sorted(texts.items())},
                            # the server grants these while they're built (Server/OwnIdentities.cs)
@@ -183,10 +222,14 @@ def build(keys, game_dir, cache, data_dir, log=print, boss=(), static=True):
                     ok = s["identity"] in done
                     results[s["key"]] = (ok, "; ".join(["built"] + ([kit_notes[s["key"]]] if s["key"] in kit_notes else []))
                                          if ok else "identity not found in the static data")
+            for s in want_boss:
+                if boss_form(s["key"], s, boss) and s["key"] not in bad:
+                    ok = s["identity"] in done
+                    results[s["key"]] = (ok, boss_notes[s["key"]] if ok else "identity not found in the static data")
             log(f"  helpers: {len(done)} identities restyled, {len(boss_ok)} with new skills")
 
     # repaints and tints: one folder each
-    want = [skins[k] for k in keys if skins[k]["kind"] in ("repaint", "tint")]
+    want = [skins[k] for k in keys if skins[k]["kind"] in ("repaint", "tint") and not boss_form(k, skins[k], boss)]
     pers_all = None                                 # identity records, for a shift on a skill
     if want:
         bodies, have = game.body_index(game_dir, cache, os.path.join(data_dir, "bodies.json"), log=log)
@@ -283,7 +326,7 @@ def built_dirs(data_dir, keys, boss=()):
     except (OSError, ValueError):
         man = {}
     for k in keys:
-        folders = ["helpers"] if k in skins and shares_static(skins[k]) else [k, k + FORMS]
+        folders = ["helpers"] if k in skins and (shares_static(skins[k]) or boss_form(k, skins[k], boss)) else [k, k + FORMS]
         if k in edits and k in man.get("skills", []):
             folders.append("helpers")
         for folder in folders:

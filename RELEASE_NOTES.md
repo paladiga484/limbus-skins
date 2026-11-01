@@ -1,3 +1,31 @@
+# limbus-skins 1.4.0
+
+Boss skins: the real boss, not a repaint
+- **Matthias, the Roach Emperor and Distorted Hohenheim** (`matthias`, `roach-emperor`,
+  `distorted-hohenheim`) are now the bosses themselves: the boss's own body from the game, with
+  its own animations and effects (the Roach Emperor's own swarm), and the boss's own skills by
+  tier, his guard or counter as the defence, under their own names. Before, the identity was
+  repainted with the boss's drawings: Matthias kept Outis's moves, the Roach Emperor was drawn
+  at half size to fit, and his boss skills ran past their animation. Needs the Limbus Private
+  Server's client patch, **build 6** or later (`run` refuses an older package's).
+- `limbus-skins boss on <repaint of a boss>` now does the same: the boss's own body and skills.
+
+Fixes
+- **LCB Gregor, Outis, Sinclair and Meursault wore parts of other skins.** A sinner's early
+  identities share one bundle, and a repaint there changed what the others draw too: LCB Gregor
+  died as the Roach Emperor, LCB Outis fought as the Old G Corp. Head Manager. A skin now leaves
+  everything another body loads as it is, and its own identity gets a private copy of the shared
+  death frame. Greencliff no longer greens Heathcliff's other identities' death either.
+- **Solemn Lament flashed back to Yi Sang** (`butterfly-yisang`): one frame of S2, S3 and every
+  clash (a motion blur) kept his own head. It wears the butterfly too now, blurred to match.
+- **Greencliff vanished with `vergilius-wildhunt` on** (from 1.3.3, now released): only his green
+  Wild Hunt is skipped, Greencliff stays green.
+
+Update: `pipx install --force ./limbus_skins-1.4.0-py3-none-any.whl` (Linux) or
+`py -m pip install --user limbus_skins-1.4.0-py3-none-any.whl` (Windows); skins rebuild on the next run.
+Check the download with `sha256sum -c SHA256SUMS`. None of this has been seen in a fight yet:
+try boss skins on a spare account first.
+
 # limbus-skins 1.3.3
 
 Fix

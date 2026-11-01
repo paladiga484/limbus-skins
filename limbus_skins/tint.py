@@ -1,7 +1,8 @@
 """Tint skins: an identity keeps its own body and drawings, recolored (Greencliff).
 
 Only the pixels of the body's own textures change - atlas pages and Spine idle pages -
-so every frame keeps its exact geometry and nothing is re-packed.
+so every frame keeps its exact geometry and nothing is re-packed. Textures another body in
+the bundle loads stay as they are; a frame the identity shares gets a copy of its own (share.py).
 """
 import colorsys
 
@@ -105,10 +106,15 @@ def tint(target, locate, spec, stick=None):
     """Recolor every texture body `target` loads (its frames first drawn as a stick figure when
     `stick` is given: see stick.py). Returns (bundle bytes, notes); the bytes still need
     bundle.forge() to carry the stock CRC."""
+    from . import share
     from .repaint import RepaintError, prefab_objects
     UnityPy = unitypy()
     env = UnityPy.load(locate(target))
+    raw, shared = share.privatize(env, target, texture=True)   # bodies sharing the bundle keep theirs
+    if raw is not None:
+        env = UnityPy.load(raw)
     ids, roots = prefab_objects(env, target, forms=True)
+    ids -= share.foreign(env, target)
     pma = {}
     for root in roots:                            # Spine pages say whether they are premultiplied
         for rig in spine.body_spines(env, root):
@@ -131,7 +137,7 @@ def tint(target, locate, spec, stick=None):
         done += 1
     if not done:
         raise RepaintError(f"{target}: no textures to recolor")
-    notes = [f"{done} texture(s) recolored"]
+    notes = shared + [f"{done} texture(s) recolored"]
     if sticks:
         notes.append(f"a stick figure below the head on {len(sticks)} page(s)")
     return env.file.save(packer="none"), notes

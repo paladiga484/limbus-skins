@@ -91,6 +91,18 @@ class Sessions(unittest.TestCase):
         self.assertEqual(self.read("aa/11/__info"), b"info-a")
         self.assertIsNone(s.active())
 
+    def test_greencliff_stays_green_when_vergilius_wildhunt_holds_wild_hunt(self):
+        # a friend's `on all` (limbus-skins 1.3.2): vergilius-wildhunt and Greencliff's green Wild Hunt
+        # both change Wild Hunt's file. Only that part may be skipped - Greencliff's own body goes in.
+        s = mods.Session(self.cache, self.data)
+        logged = []
+        done = s.apply([self.mod("vergilius-wildhunt", {"bb/22/__data": b"VERG"}),
+                        self.mod("greencliff", {"aa/11/__data": b"GREEN"}),
+                        self.mod("greencliff.forms", {"bb/22/__data": b"GREENHUNT"})], log=logged.append)
+        self.assertEqual(done, ["vergilius-wildhunt", "greencliff"])
+        self.assertEqual((self.read("aa/11/__data"), self.read("bb/22/__data")), (b"GREEN", b"VERG"))
+        self.assertTrue(any("skipped greencliff.forms" in line for line in logged))
+
     def test_skips_mods_for_bundles_the_game_replaced(self):
         s = mods.Session(self.cache, self.data)
         done = s.apply([self.mod("old", {"zz/99/__data": b"MOD"})], log=lambda *a: None)
@@ -631,36 +643,6 @@ class BossSkills(unittest.TestCase):
                                                       {"skillId": 3, "number": 1}]}
         self.unit = {"id": 81912, "attributeList": [{"skillId": i, "number": 0} for i in (95, 91, 92, 93, 94)]}
 
-    def test_boss_attacks_by_tier_fill_the_identitys_own_skills(self):
-        out = self.h.boss_skills(self.ident, self.unit, self.skills)
-        self.assertEqual(sorted(out), [1, 2, 3])
-        self.assertEqual([out[i]["skillData"][0]["defaultValue"] for i in (1, 2, 3)], [92, 93, 91])
-        d = out[1]["skillData"]
-        self.assertEqual(len(d), 1)                                  # the boss's numbers at every uptie
-        self.assertEqual(d[0]["skillMotion"], "S1")                  # the identity's own (repainted) motion
-        self.assertEqual(d[0]["gaksungLevel"], 1)
-        self.assertEqual(d[0]["attributeType"], "INDIGO")
-        self.assertEqual(len(d[0]["coinList"]), 3)
-        self.assertEqual(self.skills[1]["skillData"][0]["attributeType"], "VIOLET")   # inputs untouched
-
-    def test_boss_coins_play_within_the_identitys_animation(self):
-        # the game: "the action number went past the motion count of the current hit data" -
-        # a boss coin's actionIndex is about the boss's animation, not the identity's
-        self.skills[1]["skillData"][0]["coinList"] = [{"scale": 1}, {"scale": 1}]            # S1: two hits
-        self.skills[92]["skillData"][0]["coinList"] = [{"scale": 4, "actionIndex": i, "cutsceneStart": True}
-                                                      for i in (1, 2, 3, 4)]
-        out = self.h.boss_skills(self.ident, self.unit, self.skills)
-        coins = out[1]["skillData"][0]["coinList"]
-        self.assertEqual([c.get("actionIndex") for c in coins], [None, None, 2, 2])        # past its hits: the last one
-        self.assertFalse(any("cutsceneStart" in c for c in coins))
-        self.assertEqual([c["scale"] for c in coins], [4, 4, 4, 4])
-
-    def test_too_few_boss_attacks_keep_the_identitys_last_skills(self):
-        unit = {"id": 1, "attributeList": [{"skillId": 91, "number": 0}, {"skillId": 95, "number": 0}]}
-        self.assertEqual(sorted(self.h.boss_skills(self.ident, unit, self.skills)), [1])
-        with self.assertRaises(ValueError):
-            self.h.boss_skills(self.ident, {"id": 2, "attributeList": [{"skillId": 95}]}, self.skills)
-
     def test_recolor_one_skill_at_every_uptie_that_names_a_sin(self):
         self.skills[3]["skillData"][1]["attributeType"] = "VIOLET"
         out = self.h.recolor_skills(self.ident, self.skills, {"3": "SHAMROCK"})
@@ -674,9 +656,10 @@ class BossSkills(unittest.TestCase):
         out = self.h.recolor_skills(self.ident, self.skills, {"all": "SHAMROCK"})
         self.assertEqual(sorted(out), [1, 2, 3, 95])
         self.assertTrue(all(r["skillData"][0]["attributeType"] == "SHAMROCK" for r in out.values()))
-        boss = self.h.boss_skills(self.ident, self.unit, self.skills)          # green on top of a boss's skill
+        boss, _ = self.h.boss_kit(self.ident, self.unit, self.skills, {"S4", "S9"})   # green on a boss form
         out = self.h.recolor_skills(self.ident, self.skills, {"all": "SHAMROCK"}, base=boss)
         self.assertEqual((out[1]["skillData"][0]["defaultValue"], out[1]["skillData"][0]["attributeType"]), (92, "SHAMROCK"))
+        self.assertEqual(out[1]["skillData"][0]["skillMotion"], "S9")           # still the boss's own motion
 
     def test_green_ids_are_the_skills_recoloured_shamrock(self):
         self.ident["defenseSkillIDList"] = [95]
@@ -854,8 +837,83 @@ class BossSkills(unittest.TestCase):
         self.assertEqual(self.h.helper_kit(self.ident, helper, self.skills)[1], [95])  # its own guard wins
         with self.assertRaises(ValueError):
             self.h.helper_kit(self.ident, {"id": 1, "attributeList": [{"skillId": 96}]}, self.skills)
-        unit = {"id": 2, "attributeList": [{"skillId": 96}, {"skillId": 92}]}      # bosses skip them too
-        self.assertEqual(self.h.boss_skills(self.ident, unit, self.skills)[1]["skillData"][0]["defaultValue"], 92)
+        unit = {"id": 2, "attributeList": [{"skillId": 96}, {"skillId": 92}]}      # boss forms skip them too
+        self.assertEqual(self.h.boss_kit(self.ident, unit, self.skills, {"Default", "S4", "S5", "S9"})[1][0], (1, 92))
+
+    def test_a_boss_form_takes_the_bosss_own_skills_whole_under_the_identitys_ids(self):
+        # the real boss's body plays its own motions, so its skills come whole - motion included
+        self.ident["defenseSkillIDList"] = [4]
+        self.skills[4] = {"id": 4, "skillTier": 1, "requireIDList": [],
+                          "skillData": [{"gaksungLevel": 1, "defType": "GUARD", "skillMotion": "Default"}]}
+        self.skills[96] = {"id": 96, "skillTier": 1, "skillData": [{"defType": "COUNTER", "skillMotion": "S5"}]}
+        self.unit["attributeList"].append({"skillId": 96, "number": 0})
+        motions = {"Default", "Dead", "Evade", "Guard", "S4", "S5", "S9"}
+        kit, pairs = self.h.boss_kit(self.ident, self.unit, self.skills, motions)
+        self.assertEqual(pairs, [(1, 92), (2, 93), (3, 91), (4, 95)])          # by tier; the boss's own guard first
+        self.assertEqual(sorted(kit), [1, 2, 3, 4])
+        one = kit[1]
+        self.assertEqual((one["id"], one["skillTier"]), (1, 1))                 # the identity's id and tier
+        d = one["skillData"]
+        self.assertEqual(len(d), 1)
+        self.assertEqual((d[0]["skillMotion"], d[0]["gaksungLevel"], d[0]["defaultValue"]), ("S9", 1, 92))
+        self.assertEqual(len(d[0]["coinList"]), 3)                             # the boss's coins, as they are
+        self.assertEqual(kit[4]["skillData"][0]["defType"], "GUARD")
+        self.assertEqual(kit[4]["requireIDList"], [])                          # the identity's own fields stay
+        self.assertEqual(self.skills[92]["id"], 92)                            # the real boss is untouched
+        self.assertNotIn("gaksungLevel", self.skills[92]["skillData"][0])
+
+    def test_a_boss_form_falls_back_to_a_counter_then_the_identitys_own_guard(self):
+        self.ident["defenseSkillIDList"] = [4]
+        self.skills[4] = {"id": 4, "skillTier": 1, "skillData": [{"defType": "GUARD", "skillMotion": "Default"}]}
+        self.skills[96] = {"id": 96, "skillTier": 1, "skillData": [{"defType": "COUNTER", "skillMotion": "S5"}]}
+        unit = {"id": 1327, "attributeList": [{"skillId": i} for i in (91, 92, 93, 96)]}
+        _, pairs = self.h.boss_kit(self.ident, unit, self.skills, {"Default", "S5", "S9"})
+        self.assertEqual(pairs[-1], (4, 96))                                   # Matthias: his counter
+        kit, pairs = self.h.boss_kit(self.ident, unit, self.skills, {"Default", "S9"})
+        self.assertEqual((pairs[-1], 4 in kit), ((4, 4), False))               # no counter motion: own guard, as is
+
+    def test_a_boss_form_refuses_what_its_body_cant_play(self):
+        with self.assertRaises(ValueError):                                    # no attack it has a motion for
+            self.h.boss_kit(self.ident, self.unit, self.skills, {"Default"})
+        self.ident["defenseSkillIDList"] = [4]
+        self.skills[4] = {"id": 4, "skillTier": 1, "skillData": [{"defType": "GUARD", "skillMotion": "S7"}]}
+        with self.assertRaises(ValueError):                                    # no guard it can play either
+            self.h.boss_kit(self.ident, {"id": 1, "attributeList": [{"skillId": 91}]}, self.skills, {"S9"})
+        with self.assertRaises(ValueError):                                    # the identity's battle script
+            self.h.boss_kit(dict(self.ident, unitScriptID=11115), self.unit, self.skills, {"S4", "S9"})
+
+    def test_every_defense_slot_and_hidden_skill_must_play_on_the_boss_body(self):
+        self.skills[4] = {"id": 4, "skillTier": 1, "skillData": [{"defType": "GUARD", "skillMotion": "Default"}]}
+        self.skills[5] = {"id": 5, "skillTier": 1, "skillData": [{"defType": "EVADE", "skillMotion": "S7"}]}
+        self.ident["defenseSkillIDList"] = [4, 5]
+        kit, pairs = self.h.boss_kit(self.ident, self.unit, self.skills, {"S4", "S9"})
+        self.assertEqual(pairs[-2:], [(4, 95), (5, 95)])                       # both take the boss's guard
+        self.assertEqual(sorted(kit), [1, 2, 3, 4, 5])
+        self.ident["attributeList"].append({"skillId": 5, "number": 0})       # a skill only a passive uses
+        with self.assertRaises(ValueError):
+            self.h.boss_kit(self.ident, self.unit, self.skills, {"S4", "S9"})
+
+    def test_too_few_boss_attacks_play_again_in_the_later_slots(self):
+        self.ident["defenseSkillIDList"] = [4]
+        self.skills[4] = {"id": 4, "skillTier": 1, "skillData": [{"defType": "GUARD", "skillMotion": "Default"}]}
+        unit = {"id": 1, "attributeList": [{"skillId": 91}, {"skillId": 92}, {"skillId": 95}]}
+        _, pairs = self.h.boss_kit(self.ident, unit, self.skills, {"S4", "S9"})
+        self.assertEqual(pairs, [(1, 92), (2, 91), (3, 91), (4, 95)])          # S3: its tier-3 skill again
+
+    def test_boss_texts_are_the_bosss_own_names_and_coin_lines(self):
+        texts = {92: {"id": 92, "levelList": [{"level": 1, "name": "Stomping", "desc": "Coin Power +1",
+                                                "coinlist": [{"coindescs": [{"desc": "[SuperCoin]"}, {"desc": "Inflict 3"}]},
+                                                             {"coindescs": [{"desc": "Inflict 1"}]},
+                                                             {"coindescs": [{"desc": "Inflict 2"}]},
+                                                             {"coindescs": [{"desc": "past its coins"}]}]}]}}
+        kit = {1: {"skillData": [{"coinList": [{}, {}, {}]}]}, 2: {"skillData": [{"coinList": [{}]}]}}
+        out = self.h.boss_texts([(1, 92), (2, 77)], kit, texts)
+        self.assertEqual(out, {1: {"name": "Stomping", "desc": "Coin Power +1", "flavor": "",
+                                   "coins": ["[SuperCoin]\nInflict 3", "Inflict 1", "Inflict 2"]}})
+
+    def test_body_motions_are_the_games_motion_names(self):
+        self.assertEqual(repaint.motion_names([4, 0, 2, 3, 5, 7, 12, 17, 18, 1, 99]),
+                         {"Damaged", "Default", "Evade", "Guard", "Move", "S1", "S6", "Parrying", "Idle", "Dead"})
 
     def test_pick_unit_prefers_most_attacks_or_the_named_one(self):
         recs = [{"id": 5, "attributeList": [{"skillId": 91}]}, self.unit]
@@ -1049,6 +1107,16 @@ class ClientPatch(unittest.TestCase):
         self.assertFalse(client.configure(empty, self.data))
         self.assertEqual(os.listdir(empty), [])
 
+
+    def test_a_boss_body_needs_a_client_patch_with_bossbodypatch(self):
+        from limbus_skins import client
+        self.assertFalse(client.wears_bosses(self.client))                    # no DLL
+        with open(os.path.join(self.client, "myosotis.dll"), "wb") as f:
+            f.write(b"MZ...skilltext...hpshift...")                           # build 5
+        self.assertFalse(client.wears_bosses(self.client))
+        with open(os.path.join(self.client, "myosotis.dll"), "wb") as f:
+            f.write(b"MZ...hpshift...bossbody...")
+        self.assertTrue(client.wears_bosses(self.client))
 
 class Stickman(unittest.TestCase):
     def _figure(self):

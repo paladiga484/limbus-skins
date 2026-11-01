@@ -1,5 +1,5 @@
 {
- "_note": "Every skin this tool can build. helpers: the identity takes a story helper unit's body and skills (changes skills: private servers only). repaints: the identity keeps its own body and skills and is redrawn as another character. tints: the identity keeps its own body and drawings, recolored. Nothing here is game art; everything is built from your own installed game.",
+ "_note": "Every skin this tool can build. helpers: the identity takes a story helper unit's body and skills (changes skills: private servers only). repaints: the identity keeps its own body and skills and is redrawn as another character. tints: the identity keeps its own body and drawings, recolored. bosses: the identity becomes a boss - the boss's own body and skills (needs the Limbus Private Server's client patch, build 6). Nothing here is game art; everything is built from your own installed game.",
  "helpers": {
   "arayashiki-ryoshu": {
    "identity": 10401,
@@ -559,45 +559,31 @@
      10
     ]
    }
-  },
+  }
+ },
+ "bosses": {
   "matthias": {
    "identity": 11109,
-   "becomes": "the Middle Nursefather Matthias (on the Ring Pointillist Student: Outis's own Middle Nursefather draws in layers a repaint can't redo)",
+   "becomes": "the Middle Nursefather Matthias - his own boss body and skills (on the Ring Pointillist Student: Outis's Middle Nursefather has a battle script of its own)",
    "source": "1327_MiddleFinger_fatherAppearance",
+   "unit": 1327,
    "tested": false
   },
   "roach-emperor": {
    "identity": 11203,
-   "becomes": "the Roach Emperor",
+   "becomes": "the Roach Emperor - his own boss body, swarm and skills; every skill Gluttony",
    "source": "1339_Gregor_EmperorAppearance",
+   "unit": 1339,
    "tested": false,
    "sins": {
     "all": "SHAMROCK"
-   },
-   "aura": {
-    "from": "1339_Gregor_EmperorAppearance",
-    "textures": [
-     "Fx_T_Shape_Flying_Roach_01"
-    ],
-    "split": {
-     "Fx_T_Shape_Flying_Roach_01": [
-      2,
-      1
-     ]
-    },
-    "style": "swarm",
-    "count": 10,
-    "size": 0.15,
-    "idle": {
-     "count": 22,
-     "size": 0.21
-    }
    }
   },
   "distorted-hohenheim": {
    "identity": 11212,
-   "becomes": "Distorted Hohenheim",
+   "becomes": "Distorted Hohenheim - his own boss body and skills",
    "source": "1082_Distorted_HohenheimAppearance",
+   "unit": 1082,
    "tested": false
   }
  },
