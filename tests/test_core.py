@@ -1152,6 +1152,80 @@ class Allies(unittest.TestCase):
         self.assertEqual(base, {"id": 10312, "appearance": "10312_X", "attributeList": [{"skillId": 9}]})
 
 
+class Covers(unittest.TestCase):
+    """An ally's own card pictures, cut from its villain's story portrait (covers.py)."""
+
+    def test_the_body_is_the_portraits_largest_sprite(self):
+        from PIL import Image
+        from limbus_skins import covers
+        tex = Image.new("RGBA", (100, 100), (0, 0, 0, 0))
+        tex.paste((200, 0, 0, 255), (10, 10, 60, 90))       # the body: x 10-60, y 10-90 (top-down)
+        tex.paste((0, 0, 200, 255), (70, 10, 90, 30))       # a face tile
+        body = covers.body(tex, [(70, 70, 20, 20), (10, 10, 50, 80)])   # Unity rects, bottom-up
+        self.assertEqual(body.size, (50, 80))
+        self.assertEqual(body.getpixel((25, 40)), (200, 0, 0, 255))
+        with self.assertRaises(ValueError):
+            covers.body(tex, [])
+
+    def test_every_card_picture_at_the_games_own_sizes(self):
+        from PIL import Image
+        from limbus_skins import covers
+        art = Image.new("RGBA", (300, 900), (0, 0, 0, 0))
+        art.paste((240, 240, 240, 255), (100, 50, 200, 880))
+        stock = {"": Image.new("RGB", (192, 108), (40, 40, 40)), "_info": Image.new("RGB", (54, 83)),
+                 "_profile": Image.new("RGB", (26, 26)), "_profile_support_personality": Image.new("RGB", (20, 98))}
+        pics = covers.pictures(art, stock)
+        self.assertEqual({s: im.size for s, im in pics.items()}, {s: im.size for s, im in stock.items()})
+        self.assertTrue(all(im.mode == "RGB" for im in pics.values()))    # saved as JPEG
+        # an identity without some picture of its own (no profile portrait): the game's usual size
+        pics = covers.pictures(art, {"": stock[""]})
+        self.assertEqual({s: im.size for s, im in pics.items()},
+                         {"": (192, 108), "_info": (537, 827), "_profile": (256, 256), "_profile_support_personality": (197, 982)})
+        # an identity whose card isn't in the cache at all: the usual sizes, over the art itself
+        self.assertEqual({s: im.size for s, im in covers.pictures(art, {}).items()}, covers.SIZES)
+        # a spear held above the head: the face is set by hand, and the pfp centres on it
+        tall = Image.new("RGBA", (300, 900), (0, 0, 0, 0))
+        tall.paste((240, 240, 240, 255), (20, 0, 40, 880))         # the spear, from the top
+        tall.paste((0, 0, 255, 255), (130, 300, 230, 880))          # the body
+        tall.paste((255, 0, 0, 255), (160, 220, 200, 300))          # the face
+        pfp = covers.pictures(tall, {"": stock[""]}, face=(180, 260))["_profile"]
+        r, g, b = pfp.getpixel((128, 118))
+        self.assertTrue(r > 200 and g < 60 and b < 60, (r, g, b))
+        self.assertEqual(covers.file_name(10999, "_info"), "10999_normal_info.jpg")
+        self.assertEqual(covers.file_name(10999, ""), "10999_normal.jpg")
+
+
+class CoverBuild(unittest.TestCase):
+    def test_an_ally_with_a_cover_gets_its_own_card_pictures(self):
+        from PIL import Image
+        from limbus_skins import build, covers
+        skins = {"a": {"key": "a", "kind": "repaint", "identity": 10101, "source": "A_App", "ally": 10198, "cover": "A_EGO"},
+                 "b": {"key": "b", "kind": "repaint", "identity": 10102, "source": "A_App", "ally": 10197, "cover": "Unseen"}}
+        unit = {"id": 9, "appearance": "A_App", "attributeList": [{"skillId": 1}], "defenseSkillIDList": [2]}
+        art = Image.new("RGBA", (100, 300), (0, 0, 0, 0))
+        art.paste((250, 250, 250, 255), (30, 20, 70, 290))
+        stock = {"": Image.new("RGB", (96, 54)), "_info": Image.new("RGB", (27, 41)), "_profile": Image.new("RGB", (16, 16)),
+                 "_profile_support_personality": Image.new("RGB", (10, 49))}
+        with tempfile.TemporaryDirectory() as data, \
+                FakeGame(skins, {10101: {"id": 10101}, 10102: {"id": 10102}}, {"A_App": [unit]}, bodies={"A_App": {"S1", "Guard"}}), \
+                mock.patch.object(covers, "portraits", return_value={"A_EGO": art}), \
+                mock.patch.object(covers, "stock_pictures", return_value=stock) as sp:
+            res = build.build(["a-id", "b-id"], "game", "cache", data, log=lambda *a: None)
+            out = os.path.join(data, "built", "a-id" + build.COVER)
+            with open(os.path.join(out, "manifest.json")) as f:
+                man = json.load(f)
+            pics = sorted(os.listdir(os.path.join(out, "pics")))
+            sizes = {f: Image.open(os.path.join(out, "pics", f)).size for f in pics}
+            self.assertFalse(os.path.exists(os.path.join(data, "built", "b-id" + build.COVER)))
+        self.assertEqual((man["identity"], man["from"]), (10198, "A_EGO"))
+        self.assertEqual(pics, ["10198_normal.jpg", "10198_normal_info.jpg", "10198_normal_profile.jpg",
+                                "10198_normal_profile_support_personality.jpg"])
+        self.assertEqual(sizes["10198_normal.jpg"], (96, 54))
+        sp.assert_any_call("game", "cache", 10101)                  # sized by its folder's own card
+        self.assertTrue(res["a-id"][0] and "cover: A_EGO" in res["a-id"][1], res)
+        self.assertTrue(res["b-id"][0] and "no cover" in res["b-id"][1], res)   # still built: its folder's card
+
+
 class Audit(unittest.TestCase):
     SKILLS = {1: {"id": 1, "skillData": [{"skillMotion": "S1"}]}, 2: {"id": 2, "skillData": [{"skillMotion": "S7"}]},
               9: {"id": 9, "skillData": [{"skillMotion": "Guard", "defType": "GUARD"}]}}
@@ -1220,8 +1294,9 @@ class Cards(unittest.TestCase):
         self.assertEqual(card_identity(sk["vergilius-id"]), 10710)           # its base
         self.assertEqual(card_identity(sk["matthias"]), 11109)               # its own identity
         self.assertEqual({k for k, s in sk.items() if s.get("card")},
-                         {"kali", "matthias", "roach-emperor", "distorted-hohenheim", "dulcinea-id",
-                          "distorted-kim-id", "vergilius-wildhunt", "vergilius-id"})
+                         {"kali", "matthias", "roach-emperor", "distorted-hohenheim", "vergilius-wildhunt", "vergilius-id"})
+        # an ally has a cover of its own instead: the identity whose card it borrows keeps its own
+        self.assertEqual((sk["dulcinea-id"]["cover"], sk["ahab-id"]["cover"]), ("Dolcinea", "Ahab_EGO"))
 
     def test_two_skins_drawing_the_same_card_swap_it_in_once(self):
         from limbus_skins.build import built_dirs
@@ -1341,6 +1416,22 @@ class ClientPatch(unittest.TestCase):
         self.assertIn("hp_shift=\n", ini)
         self.assertEqual(self.read("client", "skilltext.txt"), "")
         self.assertEqual(self.read("client", "allies.txt"), "")          # no ally borrows a card once it's over
+        self.assertEqual(os.listdir(os.path.join(self.client, "covers")), [])
+
+    def test_an_allys_cover_goes_beside_the_patch_for_the_session(self):
+        from limbus_skins import client
+        pics = os.path.join(self.data, "built", "ahab-id.cover", "pics")
+        os.makedirs(pics)
+        with open(os.path.join(self.data, "built", "ahab-id.cover", "manifest.json"), "w") as f:
+            json.dump({"kind": "cover", "identity": 10895, "files": ["10895_normal.jpg"]}, f)
+        with open(os.path.join(pics, "10895_normal.jpg"), "wb") as f:
+            f.write(b"jpg")
+        self.applied("helpers")
+        client.configure(self.client, self.data)
+        self.assertEqual(self.read("client", "covers", "10895_normal.jpg"), "jpg")
+        self.applied("greencliff")                                       # helpers not swapped in: no allies
+        client.configure(self.client, self.data)
+        self.assertEqual(os.listdir(os.path.join(self.client, "covers")), [])
 
     def test_a_helpers_build_counts_only_when_it_was_swapped_in(self):
         from limbus_skins import client

@@ -6,14 +6,16 @@
    "ally": 10498,
    "helper": 400015,
    "becomes": "Arayashiki Ryōshū (stage 9-49)",
-   "tested": true
+   "tested": true,
+   "cover": "Araya_Twenties"
   },
   "certain-sinclair": {
    "identity": 11001,
    "ally": 11098,
    "helper": 400013,
    "becomes": "A Certain Sinclair (Canto IX)",
-   "tested": true
+   "tested": true,
+   "cover": "Sinclair_War1"
   },
   "queen-of-hatred": {
    "identity": 10312,
@@ -29,14 +31,16 @@
    "ally": 10497,
    "helper": 400002,
    "becomes": "Lin Daiyu",
-   "tested": false
+   "tested": false,
+   "cover": "Daiyu_Hurt"
   },
   "jia-xichun": {
    "identity": 10812,
    "ally": 10898,
    "helper": 400005,
    "becomes": "Jia Xichun",
-   "tested": false
+   "tested": false,
+   "cover": "Xichun_final"
   },
   "aeng-du": {
    "identity": 10815,
@@ -50,14 +54,16 @@
    "ally": 10896,
    "helper": 400037,
    "becomes": "Kira",
-   "tested": false
+   "tested": false,
+   "cover": "NewKira2"
   },
   "bamboo-hatted-kim": {
    "identity": 10508,
    "ally": 10598,
    "helper": 400040,
    "becomes": "Bamboo-hatted Kim",
-   "tested": false
+   "tested": false,
+   "cover": "normal_KSG"
   },
   "alyssa": {
    "identity": 10211,
@@ -71,14 +77,16 @@
    "ally": 11298,
    "helper": 400008,
    "becomes": "Hohenheim",
-   "tested": false
+   "tested": false,
+   "cover": "Hohenheim2"
   },
   "pwie": {
    "identity": 11016,
    "ally": 11097,
    "helper": 400041,
    "becomes": "Pwie, the Crimson God",
-   "tested": false
+   "tested": false,
+   "cover": "Buffet_Adult"
   },
   "vergilius": {
    "identity": 10710,
@@ -111,7 +119,12 @@
     "S3": "Camellia_Awaken_3"
    },
    "tested": false,
-   "name": "Dongbaek (Bloomed)"
+   "name": "Dongbaek (Bloomed)",
+   "cover": "Dongback_EGO",
+   "cover_face": [
+    635,
+    255
+   ]
   },
   "dongbaek-sunshower": {
    "identity": 10705,
@@ -129,7 +142,8 @@
     "S3": "Camellia_S5"
    },
    "tested": false,
-   "name": "Dongbaek (Sunshower)"
+   "name": "Dongbaek (Sunshower)",
+   "cover": "Dongback_fox2"
   },
   "ahab": {
    "identity": 10808,
@@ -137,7 +151,12 @@
    "ally_unlock": "black-forest",
    "becomes": "Captain Ahab",
    "source": "8105_AhabAppearance",
-   "tested": false
+   "tested": false,
+   "cover": "Ahab_EGO",
+   "cover_face": [
+    190,
+    270
+   ]
   },
   "rien": {
    "identity": 10115,
@@ -145,42 +164,56 @@
    "ally_unlock": "black-forest",
    "becomes": "Rien",
    "source": "1347_Index_fatherAppearance",
-   "tested": false
+   "tested": false,
+   "cover": "IndexFather_3"
   },
   "pinky-nursefather": {
    "identity": 10415,
    "ally": 10496,
    "becomes": "the Pinky Nursefather",
    "source": "1322_Pinky_FatherAppearance",
-   "tested": false
+   "tested": false,
+   "cover": "PinkyFather_Branch"
   },
   "callisto": {
    "identity": 10614,
    "ally": 10698,
    "becomes": "Callisto",
    "source": "1331_RingFinger_FatherAppearance",
-   "tested": false
+   "tested": false,
+   "cover": "RingFather_2",
+   "cover_face": [
+    600,
+    200
+   ]
   },
   "valencina": {
    "identity": 10916,
    "ally": 10998,
    "becomes": "Valencina",
    "source": "1314_Thumb_FatherAppearance",
-   "tested": false
+   "tested": false,
+   "cover": "ThumbFather_Blood"
   },
   "lei-heng": {
    "identity": 10512,
    "ally": 10597,
    "becomes": "Lei Heng",
    "source": "1145_Thumb_LeiHengAppearance",
-   "tested": false
+   "tested": false,
+   "cover": "LeiHeng_Hurt2"
   },
   "cassetti": {
    "identity": 10513,
    "ally": 10596,
    "becomes": "Cassetti",
    "source": "8350_CassetteAppearance",
-   "tested": false
+   "tested": false,
+   "cover": "CassettiBF",
+   "cover_face": [
+    510,
+    300
+   ]
   },
   "dulcinea": {
    "identity": 10911,
@@ -193,7 +226,12 @@
    "ally": 11198,
    "becomes": "the Barber (bloodfiend)",
    "source": "8375A_Barber_Blood_RoseAppearance",
-   "tested": false
+   "tested": false,
+   "cover": "Barber",
+   "cover_face": [
+    400,
+    340
+   ]
   },
   "priest": {
    "identity": 11210,
@@ -201,7 +239,12 @@
    "ally_unlock": "black-forest",
    "becomes": "the Priest",
    "source": "8378_Priest_BossAppearance",
-   "tested": false
+   "tested": false,
+   "cover": "10Priest",
+   "cover_face": [
+    930,
+    440
+   ]
   },
   "kromer": {
    "identity": 10204,
@@ -209,14 +252,16 @@
    "ally_unlock": "black-forest",
    "becomes": "Kromer",
    "source": "8029_CromerAppearance",
-   "tested": false
+   "tested": false,
+   "cover": "CromerMonster"
   },
   "lucio": {
    "identity": 10716,
    "ally": 10797,
    "becomes": "Lucio",
    "source": "1306_Thumb_DiscipleAppearance",
-   "tested": false
+   "tested": false,
+   "cover": "ThumbChild"
   },
   "linamovible": {
    "identity": 10816,
@@ -239,42 +284,52 @@
    "ally": 10997,
    "becomes": "Rufo",
    "source": "1423_RingFinger_FauvismeDocent_Wolf2pAppearance",
-   "tested": false
+   "tested": false,
+   "cover": "Rufo2"
   },
   "albina": {
    "identity": 10215,
    "ally": 10296,
    "becomes": "Albina",
    "source": "1319_RingFinger_DiscipleAppearance",
-   "tested": false
+   "tested": false,
+   "cover": "RingChild_1",
+   "cover_face": [
+    312,
+    510
+   ]
   },
   "sora": {
    "identity": 10314,
    "ally": 10397,
    "becomes": "Sora",
    "source": "1325_Index_Disciple_NormalAppearance",
-   "tested": false
+   "tested": false,
+   "cover": "IndexChild_3"
   },
   "jun-ishmael": {
    "identity": 10811,
    "ally": 10893,
    "becomes": "Jun",
    "source": "91013_Kurokumo_MiddleBossAppearance",
-   "tested": false
+   "tested": false,
+   "cover": "Kuro_Jyun"
   },
   "werner": {
    "identity": 11012,
    "ally": 11096,
    "becomes": "Werner",
    "source": "91020_MiddleFinger_MiddleBroAppearance",
-   "tested": false
+   "tested": false,
+   "cover": "Werner_Hurt"
   },
   "camille": {
    "identity": 10511,
    "ally": 10595,
    "becomes": "Camille",
    "source": "8371_Cinq_CamilleAppearance",
-   "tested": false
+   "tested": false,
+   "cover": "Camille_rose"
   },
   "jia-qiu": {
    "identity": 10613,
@@ -282,49 +337,56 @@
    "ally_unlock": "black-forest",
    "becomes": "Jia Qiu",
    "source": "1137_JiaqiuAppearance",
-   "tested": false
+   "tested": false,
+   "cover": "Qiu"
   },
   "starbuck": {
    "identity": 10107,
    "ally": 10196,
    "becomes": "Starbuck",
    "source": "8104_StarbuckAppearance",
-   "tested": false
+   "tested": false,
+   "cover": "Starbuck"
   },
   "queequeg": {
    "identity": 10707,
    "ally": 10796,
    "becomes": "Queequeg",
    "source": "8103_QueequegAppearance",
-   "tested": false
+   "tested": false,
+   "cover": "Queequeg_Mask"
   },
   "nelly": {
    "identity": 10408,
    "ally": 10495,
    "becomes": "Nelly",
    "source": "8171_NellyAppearance",
-   "tested": false
+   "tested": false,
+   "cover": "Nellie_Hurt"
   },
   "josephine": {
    "identity": 11108,
    "ally": 11197,
    "becomes": "Josephine",
    "source": "91014_JosephineAppearance",
-   "tested": false
+   "tested": false,
+   "cover": "Josephine"
   },
   "guido": {
    "identity": 10504,
    "ally": 10594,
    "becomes": "Guido",
    "source": "91005_NCorpAppearance",
-   "tested": false
+   "tested": false,
+   "cover": "Guido_blood"
   },
   "niko": {
    "identity": 10905,
    "ally": 10996,
    "becomes": "Niko",
    "source": "91008_TroubleshooterAppearance",
-   "tested": false
+   "tested": false,
+   "cover": "Niko"
   },
   "aida": {
    "identity": 11004,
@@ -338,7 +400,8 @@
    "ally": 10593,
    "becomes": "the old Dead Rabbits Boss",
    "source": "91016_DeadRabbits_BossAppearance",
-   "tested": false
+   "tested": false,
+   "cover": "Deadrabbits_Boss"
   },
   "old-gcorp-head": {
    "identity": 11103,
@@ -353,7 +416,8 @@
    "ally": 11296,
    "becomes": "Jun",
    "source": "91013_Kurokumo_MiddleBossAppearance",
-   "tested": false
+   "tested": false,
+   "cover": "Kuro_Jyun_Clock"
   },
   "sasha": {
    "identity": 10210,
@@ -845,10 +909,14 @@
    "folder": 10911,
    "becomes": "Dulcinea as an identity of her own (Rodion's slot): the boss's own body and whole moveset, on Rodion 10917's record (10911's bloodfiend script would drive a body it no longer has)",
    "tested": false,
-   "card": "dulcinea",
    "unlock": "black-forest",
    "title": "Dulcinea, the boss herself - an identity of her own - Rodion",
-   "name": "Dulcinea"
+   "name": "Dulcinea",
+   "cover": "Dolcinea",
+   "cover_face": [
+    440,
+    490
+   ]
   },
   "distorted-kim-id": {
    "identity": 10599,
@@ -858,10 +926,10 @@
    "folder": 10508,
    "becomes": "Distorted Kim Satgat as an identity of his own (Meursault's slot): the boss's own body and whole moveset",
    "tested": false,
-   "card": "distorted-kim",
    "unlock": "black-forest",
    "title": "Distorted Kim Satgat, the boss himself - an identity of his own - Meursault",
-   "name": "Distorted Kim Satgat"
+   "name": "Distorted Kim Satgat",
+   "cover": "Angry_KSG"
   },
   "vergilius-boss-id": {
    "identity": 10795,
@@ -873,7 +941,8 @@
    "unlock": "black-forest",
    "title": "Vergilius, the Red Gaze - the boss himself, an identity of his own - Heathcliff",
    "tested": false,
-   "name": "Vergilius, the Red Gaze"
+   "name": "Vergilius, the Red Gaze",
+   "cover": "Vergilius_Hurt"
   }
  },
  "kits": {

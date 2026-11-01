@@ -6,6 +6,7 @@ client patch, reads them from its own folder (the one with myosotis.ini, beside 
                             <from>><to>#<skill id>  ...or on using that skill
   skilltext.txt  names and descriptions of our own for the skills a skin rewrote
   allies.txt     each identity of our own: the identity whose card it shows, and its name
+  covers/        an ally's own card pictures (covers.py), <id>_normal<suffix>.jpg
 
 A boss skin (a boss's own body on a sinner) needs the patch itself to be new enough: wears_bosses.
 
@@ -14,6 +15,7 @@ folders swapped in this session (active.json): a build the game outdated, and so
 nothing. `run` sets them in a private-server package's client folders for the session and
 clears them after; `limbus-skins client [--off] <folder>...` does it by hand.
 """
+import glob
 import json
 import os
 import re
@@ -21,6 +23,7 @@ import re
 GREEN = "green_coin_skills"
 SHIFT = "hp_shift"
 APPEARANCE = re.compile(r"[A-Za-z0-9_]{1,80}")
+COVER = re.compile(r"\d{1,9}_normal[a-z_]{0,40}\.jpg")
 
 
 def _json(path):
@@ -70,6 +73,40 @@ def allies(data_dir):
             continue
         out.append((i, folder, str(e.get("name") or "")))
     return sorted(out)
+
+
+def covers(data_dir, ids):
+    """{file name: path} of the cover pictures built for the identities ids (built/*.cover)."""
+    out = {}
+    for man in sorted(glob.glob(os.path.join(data_dir, "built", "*.cover", "manifest.json"))):
+        m = _json(man)
+        if m.get("identity") not in ids:
+            continue
+        pics = os.path.join(os.path.dirname(man), "pics")
+        for f in m.get("files") or []:
+            if isinstance(f, str) and COVER.fullmatch(f) and os.path.isfile(os.path.join(pics, f)):
+                out[f] = os.path.join(pics, f)
+    return out
+
+
+def _sync(folder, wanted):
+    """folder holds exactly the files wanted ({name: source}): linked where it can be, else
+    copied; a file already there and as new as its source is left alone."""
+    import shutil
+    os.makedirs(folder, exist_ok=True)
+    for f in os.listdir(folder):
+        if f not in wanted:
+            os.remove(os.path.join(folder, f))
+    for f, src in wanted.items():
+        dst = os.path.join(folder, f)
+        if os.path.isfile(dst) and os.path.getsize(dst) == os.path.getsize(src) and os.path.getmtime(dst) >= os.path.getmtime(src):
+            continue
+        tmp = dst + ".tmp"
+        try:
+            os.link(src, tmp)
+        except OSError:
+            shutil.copy2(src, tmp)
+        os.replace(tmp, dst)
 
 
 def allies_file(entries):
@@ -158,7 +195,9 @@ def configure(folder, data_dir, on=True):
     text = set_key(text, GREEN, ",".join(str(i) for i in (green_skills(data_dir) if "helpers" in done else [])))
     _replace(ini, set_key(text, SHIFT, ",".join(hp_shifts(data_dir, done))))
     _replace(os.path.join(folder, "skilltext.txt"), skilltext_file(skill_texts(data_dir) if "helpers" in done else {}))
-    _replace(os.path.join(folder, "allies.txt"), allies_file(allies(data_dir) if "helpers" in done else []))
+    ours = allies(data_dir) if "helpers" in done else []
+    _replace(os.path.join(folder, "allies.txt"), allies_file(ours))
+    _sync(os.path.join(folder, "covers"), covers(data_dir, {i for i, _, _ in ours}))
     return True
 
 

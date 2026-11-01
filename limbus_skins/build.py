@@ -11,10 +11,11 @@ import os
 import shutil
 from importlib import resources
 
-from . import art, audit, bundle, cards, game, helpers, lortext, repaint, tint
+from . import art, audit, bundle, cards, covers, game, helpers, lortext, repaint, tint
 
 FORMS = ".forms"  # built/<skin>.forms: another body a skin turns into, swapped in apart from it
 CARD = ".card"    # built/<skin>.card: the identity's card pictures, when they aren't in its body's file
+COVER = ".cover"  # built/<ally>.cover: an identity of our own's own card pictures (covers.py), not swapped in
 FORMAT = 24      # bump when built skins change shape: older builds are rebuilt on apply
 
 
@@ -50,7 +51,7 @@ def with_allies(skins):
             raise ValueError(f"skins.json: {key}'s ally would be '{k}', which is another skin")
         a = {"key": k, "kind": "identity", "identity": s["ally"], "of": s["identity"], "folder": s["identity"],
              "becomes": f"{s.get('becomes') or key} - as an identity of its own", "tested": False}
-        a.update({f: s[f] for f in ("source", "helper", "script") if f in s})
+        a.update({f: s[f] for f in ("source", "helper", "script", "cover", "cover_face", "cover_zoom") if f in s})
         unit, unlock = s.get("ally_unit", s.get("unit")), s.get("ally_unlock", s.get("unlock"))
         if unit is not None:
             a["unit"] = unit
@@ -433,6 +434,43 @@ def build(keys, game_dir, cache, data_dir, log=print, boss=(), static=True):
             ok, msg = results[key]
             results[key] = (ok, f"{msg}; {note}")
             log(f"  card {key}: {note}")
+
+    # covers: an identity of our own's own card pictures, from its villain's story portrait
+    if static:
+        wanted = [k for k in keys if skins[k]["kind"] == "identity" and skins[k].get("cover") and results.get(k, (False,))[0]]
+        for k in keys:
+            if k not in wanted:
+                shutil.rmtree(os.path.join(built_root, k + COVER), ignore_errors=True)
+        found = {}
+        if wanted:
+            try:
+                found = covers.portraits(game_dir, cache, {skins[k]["cover"] for k in wanted},
+                                         os.path.join(data_dir, "art", "covers"))
+            except (OSError, ValueError) as e:
+                log(f"  covers: the story portraits couldn't be read ({e})")
+        for k in wanted:
+            s, out = skins[k], os.path.join(built_root, k + COVER)
+            try:
+                if s["cover"] not in found:
+                    raise covers.CoverError(f"no story portrait called {s['cover']} in the game's cache")
+                stock = covers.stock_pictures(game_dir, cache, s.get("folder") or s["base"])
+                shutil.rmtree(out, ignore_errors=True)
+                os.makedirs(os.path.join(out, "pics"))
+                files = []
+                for suffix, im in covers.pictures(found[s["cover"]], stock, s.get("cover_face"),
+                                                  float(s.get("cover_zoom", 1.0))).items():
+                    files.append(covers.file_name(s["identity"], suffix))
+                    im.save(os.path.join(out, "pics", files[-1]), quality=90)
+                with open(os.path.join(out, "manifest.json"), "w", encoding="utf-8") as f:
+                    json.dump({"format": FORMAT, "kind": "cover", "skins": [k], "identity": s["identity"],
+                               "from": s["cover"], "files": files}, f, indent=1)
+                note = f"cover: {s['cover']}"
+            except (covers.CoverError, cards.CardError, OSError, ValueError) as e:
+                shutil.rmtree(out, ignore_errors=True)
+                note = f"no cover ({e}): it shows its folder's card"
+            ok, msg = results[k]
+            results[k] = (ok, f"{msg}; {note}")
+            log(f"  cover {k}: {note}")
     return results
 
 
