@@ -14,7 +14,7 @@ from . import art, audit, bundle, cards, game, helpers, lortext, repaint, tint
 
 FORMS = ".forms"  # built/<skin>.forms: another body a skin turns into, swapped in apart from it
 CARD = ".card"    # built/<skin>.card: the identity's card pictures, when they aren't in its body's file
-FORMAT = 22      # bump when built skins change shape: older builds are rebuilt on apply
+FORMAT = 23      # bump when built skins change shape: older builds are rebuilt on apply
 
 
 def catalog():
@@ -25,7 +25,34 @@ def catalog():
                       ("bosses", "boss"), ("kits", "kit")):
         for key, e in doc.get(kind, {}).items():
             skins[key] = dict(e, key=key, kind=one)
-    return skins
+    return with_allies(skins)
+
+
+def with_allies(skins):
+    """skins, plus "<key>-id" for each skin with an "ally" id: its character as an identity of its
+    own (kind "identity"), equipable beside the skin's identity - a boss in its own body with its
+    whole moveset, a helper with its kit - showing that identity's card. "ally_unit" and
+    "ally_unlock" choose its boss record and lock apart from the skin's; its base record is
+    chosen at build time (helpers.ally_base)."""
+    out = dict(skins)
+    for key, s in skins.items():
+        if not s.get("ally"):
+            continue
+        k = key + "-id"
+        if k in skins:
+            raise ValueError(f"skins.json: {key}'s ally would be '{k}', which is another skin")
+        a = {"key": k, "kind": "identity", "identity": s["ally"], "of": s["identity"], "folder": s["identity"],
+             "becomes": f"{s.get('becomes') or key} - as an identity of its own", "tested": False}
+        a.update({f: s[f] for f in ("source", "helper", "script") if f in s})
+        unit, unlock = s.get("ally_unit", s.get("unit")), s.get("ally_unlock", s.get("unlock"))
+        if unit is not None:
+            a["unit"] = unit
+        if unlock:
+            a["unlock"] = unlock
+        if s.get("title"):
+            a["title"] = s["title"] + " - ally"
+        out[k] = a
+    return out
 
 
 def shares_static(skin):
@@ -134,6 +161,8 @@ def build(keys, game_dir, cache, data_dir, log=print, boss=(), static=True):
                 log(f"  Library of Ruina's text: {e}")
         for s in want_ids:
             try:
+                if not s.get("base"):               # an ally: the record it copies is chosen now
+                    s["base"] = helpers.ally_base(pers, s["of"])
                 helpers.check_new_ids(set(ids), {s["identity"]: s["base"]})
                 clones[s["identity"]] = s["base"]
                 if s.get("folder"):                 # the card art it shows: that identity's

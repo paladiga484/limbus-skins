@@ -377,6 +377,20 @@ def add_clones(kind, records, clones, folders=None):
     return out
 
 
+def ally_base(pers, of):
+    """The identity record an ally of identity `of` is a copy of: `of` itself when it has no
+    battle script and no hidden skills (either would drive a body it no longer has), else the
+    lowest such identity of the same sinner. ValueError when the sinner has none."""
+    def clean(r):
+        return not r.get("unitScriptID") and all(a.get("number", 1) for a in lit(r.get("attributeList")))
+    if of in pers and clean(pers[of]):
+        return of
+    same = sorted(i for i, r in pers.items() if i // 100 == of // 100 and clean(r))
+    if not same:
+        raise ValueError(f"no identity of {of}'s sinner without a battle script of its own to copy")
+    return same[0]
+
+
 def check_new_ids(have, clones):
     """Refuse a new id the game already uses, or a base it doesn't have (ValueError)."""
     for new, base in clones.items():

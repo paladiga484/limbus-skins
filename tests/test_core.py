@@ -1003,6 +1003,101 @@ class Identities(unittest.TestCase):
         self.assertEqual((skins["kali-id"]["identity"], skins["kali-id"]["unlock"]), (10499, "black-forest"))
 
 
+class FakeGame:
+    """build() against a stand-in game: identity records, skills, boss units and the bodies that
+    carry them - no cache, no UnityPy. Enter it, then call build.build(keys, ...)."""
+    SKILLS = {1: {"id": 1, "skillTier": 1, "skillData": [{"skillMotion": "S1", "defType": "ATTACK"}]},
+              2: {"id": 2, "skillTier": 1, "skillData": [{"skillMotion": "Guard", "defType": "GUARD"}]}}
+
+    def __init__(self, skins, pers, units=None, helpers=None, bodies=None):
+        from limbus_skins import build, game, helpers as hp, repaint
+        self.written = {}
+        ids = {i: {"appearance": r.get("appearance", f"{i}_X")} for i, r in pers.items()}
+        bodies = bodies or {}
+
+        def rewrite(path, swaps, skill_swaps=None, clones=None, *a):
+            self.written = {"swaps": swaps, "clones": dict(clones or {})}
+            return b"raw", sorted(set(swaps) | set(clones or {})), []
+        self.patches = [
+            mock.patch.object(build, "catalog", return_value=build.with_allies(skins)),
+            mock.patch.object(game, "identities", return_value=(ids, helpers or {})),
+            mock.patch.object(game, "boss_data", return_value=(pers, self.SKILLS, units or {})),
+            mock.patch.object(game, "body_index", return_value=({b: b for b in bodies}, {b: b for b in bodies})),
+            mock.patch.object(game, "unitypy", return_value=mock.Mock(load=lambda p: p)),
+            mock.patch.object(repaint, "body_motions", side_effect=lambda env, app: bodies[env]),
+            mock.patch.object(game, "find_static", return_value=("static", None)),
+            mock.patch.object(hp, "rewrite_static", side_effect=rewrite),
+            mock.patch.object(build, "_write", return_value="ab/cd/__data"),
+        ]
+
+    def __enter__(self):
+        for p in self.patches:
+            p.start()
+        return self
+
+    def __exit__(self, *exc):
+        for p in reversed(self.patches):
+            p.stop()
+
+
+class Allies(unittest.TestCase):
+    """An "ally" on a skin: the same character as an identity of its own, equipable beside it."""
+
+    def test_ally_expands(self):
+        from limbus_skins.build import boss_form, with_allies
+        skins = {"ahab": {"key": "ahab", "kind": "repaint", "identity": 10808, "source": "8105_AhabAppearance",
+                          "unit": 8190, "ally": 10898, "title": "Ahab", "unlock": "black-forest", "card": "ahab"},
+                 "qoh": {"key": "qoh", "kind": "helper", "identity": 10312, "helper": 400003, "ally": 10398},
+                 "rien": {"key": "rien", "kind": "repaint", "identity": 10115, "source": "1347_X", "unit": 1380,
+                          "ally": 10198, "ally_unit": 1347, "ally_unlock": "black-forest"}}
+        out = with_allies(skins)
+        a = out["ahab-id"]
+        self.assertEqual((a["key"], a["kind"], a["identity"], a["of"], a["folder"], a["source"], a["unit"],
+                          a["unlock"], a["title"]),
+                         ("ahab-id", "identity", 10898, 10808, 10808, "8105_AhabAppearance", 8190,
+                          "black-forest", "Ahab - ally"))
+        self.assertNotIn("card", a)                  # its folder's card: the skin's own card step draws it
+        self.assertNotIn("base", a)                  # chosen at build time (helpers.ally_base)
+        self.assertTrue(boss_form("ahab-id", a))
+        q = out["qoh-id"]
+        self.assertEqual((q["kind"], q["identity"], q["of"], q["helper"], q.get("source")), ("identity", 10398, 10312, 400003, None))
+        self.assertNotIn("unlock", q)
+        r = out["rien-id"]
+        self.assertEqual((r["unit"], r["unlock"]), (1347, "black-forest"))
+        self.assertEqual(out["ahab"], skins["ahab"])                         # the skin itself stays as it was
+        with self.assertRaises(ValueError):                                  # a derived key may not hide another skin
+            with_allies({"x": {"key": "x", "kind": "repaint", "identity": 10101, "ally": 10199},
+                         "x-id": {"key": "x-id", "kind": "identity", "identity": 10198, "base": 10101}})
+
+    def test_ally_base(self):
+        from limbus_skins.helpers import ally_base
+        pers = {10101: {"id": 10101, "unitScriptID": 5},
+                10102: {"id": 10102, "attributeList": "[{'skillId': 1, 'number': 0}]"},     # a hidden skill
+                10103: {"id": 10103}, 10104: {"id": 10104}, 10201: {"id": 10201}}
+        self.assertEqual(ally_base(pers, 10104), 10104)                      # clean: its own record
+        self.assertEqual(ally_base(pers, 10101), 10103)                      # the lowest clean one of that sinner
+        with self.assertRaises(ValueError):
+            ally_base({10101: {"id": 10101, "unitScriptID": 5}}, 10101)
+
+    def test_ally_missing_unit(self):
+        from limbus_skins import build
+        skins = {"a": {"key": "a", "kind": "repaint", "identity": 10101, "source": "A_App", "ally": 10198},
+                 "b": {"key": "b", "kind": "repaint", "identity": 10102, "source": "Gone_App", "ally": 10197}}
+        unit = {"id": 9, "appearance": "A_App", "attributeList": [{"skillId": 1}], "defenseSkillIDList": [2]}
+        with tempfile.TemporaryDirectory() as data, \
+                FakeGame(skins, {10101: {"id": 10101}, 10102: {"id": 10102}}, {"A_App": [unit]},
+                         bodies={"A_App": {"S1", "Guard"}}) as g:
+            res = build.build(["a-id", "b-id"], "game", "cache", data, log=lambda *a: None)
+            with open(os.path.join(data, "built", "helpers", "manifest.json")) as f:
+                man = json.load(f)
+        self.assertEqual(res["a-id"][0], True, res)
+        self.assertEqual(res["b-id"][0], False)
+        self.assertIn("Gone_App", res["b-id"][1])
+        self.assertEqual(g.written["clones"], {10198: 10101})               # only the ally that built
+        self.assertEqual(g.written["swaps"][10198]["appearance"], "A_App")
+        self.assertEqual(man["identities"], [{"id": 10198, "base": 10101}])
+
+
 class Audit(unittest.TestCase):
     SKILLS = {1: {"id": 1, "skillData": [{"skillMotion": "S1"}]}, 2: {"id": 2, "skillData": [{"skillMotion": "S7"}]},
               9: {"id": 9, "skillData": [{"skillMotion": "Guard", "defType": "GUARD"}]}}
