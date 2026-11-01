@@ -134,27 +134,34 @@ def boss_moveset(identity, unit, skills, motions):
     return attrs, own
 
 
-def helper_kit(identity, helper, skills, script=False):
+def helper_kit(identity, helper, skills, script=False, motions=None):
     """(attributeList, defenseSkillIDList, [(skill id, why) dropped]) for an identity taking
     a helper's kit: the helper's skills minus the story-only ones (and those needing its
-    battle script, unless that comes along). A helper without a defense skill leaves the
-    identity its own, where the helper's body has the motion (Default, or one its kept skills
-    use). Raises ValueError when nothing usable is left."""
+    battle script, unless that comes along) and, given the helper body's motion names, those
+    it has no motion for (a helper's story script can lend it another body; the sinner's
+    can't). A helper without a defense skill leaves the identity its own, where the helper's
+    body has the motion (without motions: Default, or one its kept skills use). Raises
+    ValueError when nothing usable is left to attack or defend with."""
     attrs, dropped = [], []
     for a in lit(helper.get("attributeList")):
         rec = skills.get(a["skillId"])
         why = "not in the skill data" if rec is None else story_only(rec, script)
+        if not why and motions is not None and _motion(rec) not in motions:
+            why = f"its body has no {_motion(rec)} motion"
         if why:
             dropped.append((a["skillId"], why))
         else:
             attrs.append(a)
     if not attrs:
         raise ValueError(f"helper {helper['id']} has no skills that work outside its story fight")
-    guard = [g for g in lit(helper.get("defenseSkillIDList")) if g in skills]
+    can = motions if motions is not None else (
+        {"Default"} | {skills[a["skillId"]]["skillData"][0].get("skillMotion") for a in attrs})
+    guard = [g for g in lit(helper.get("defenseSkillIDList")) if g in skills and (motions is None or _motion(skills[g]) in can)]
     if not guard:
-        motions = {"Default"} | {skills[a["skillId"]]["skillData"][0].get("skillMotion") for a in attrs}
         guard = [g for g in lit(identity.get("defenseSkillIDList"))
-                 if g in skills and skills[g]["skillData"][0].get("skillMotion") in motions]
+                 if g in skills and skills[g]["skillData"][0].get("skillMotion") in can]
+    if not guard:
+        raise ValueError(f"helper {helper['id']}: no defense its body can play, nor does the identity have one")
     return attrs, guard, dropped
 
 

@@ -10,7 +10,7 @@ import os
 import shutil
 from importlib import resources
 
-from . import art, bundle, cards, game, helpers, lortext, repaint, tint
+from . import art, audit, bundle, cards, game, helpers, lortext, repaint, tint
 
 FORMS = ".forms"  # built/<skin>.forms: another body a skin turns into, swapped in apart from it
 CARD = ".card"    # built/<skin>.card: the identity's card pictures, when they aren't in its body's file
@@ -116,8 +116,15 @@ def build(keys, game_dir, cache, data_dir, log=print, boss=(), static=True):
         swaps, skill_swaps, bad, boss_ok, kit_notes, green, passives, texts, stats = {}, {}, [], [], {}, set(), {}, {}, {}
         pers, skills, units = game.boss_data(cache)
         clones, folders, ruina = {}, {}, None
-        located = lambda b: None  # noqa: E731 - set below when a boss form is wanted
-        if any(boss_form(s["key"], s, boss) for s in want_boss):  # a boss form: the motions its body has
+        known_passives = []
+
+        def passive_ids():                          # every passive the game has, read once if needed
+            if not known_passives:
+                known_passives.append({r["id"] for r in game.static_lists(game.find_static(cache)[1], ("passive",))["passive"]})
+            return known_passives[0]
+
+        located = lambda b: None  # noqa: E731 - set below when a helper or a boss form is wanted
+        if want or any(boss_form(s["key"], s, boss) for s in want_boss):  # the motions the body worn has
             bodies_, have_ = game.body_index(game_dir, cache, os.path.join(data_dir, "bodies.json"), log=log)
             located = lambda b: have_.get(bodies_.get(b, ""))  # noqa: E731
         if any(lortext.uses_lor(s.get("texts")) for s in want_boss):
@@ -141,19 +148,29 @@ def build(keys, game_dir, cache, data_dir, log=print, boss=(), static=True):
                 results[s["key"]] = (False, "not in this game version")
                 continue
             try:
-                attrs, guard, dropped = helpers.helper_kit(pers[s["identity"]], h, skills, bool(s.get("script")))
-            except (KeyError, ValueError) as e:
+                where = located(h["appearance"])
+                if not where:
+                    raise ValueError(f"{h['appearance']} is not in the game's cache")
+                worn = repaint.body_motions(game.unitypy().load(where), h["appearance"])
+                attrs, guard, dropped = helpers.helper_kit(pers[s["identity"]], h, skills, bool(s.get("script")), worn)
+            except (KeyError, ValueError, OSError, repaint.RepaintError) as e:
                 bad.append(s["key"])
                 results[s["key"]] = (False, str(e))
                 continue
+            findings = audit.record(dict(h, attributeList=[{"skillId": a["skillId"], "number": 1} for a in attrs],
+                                         defenseSkillIDList=guard), skills, worn)   # as written: each skill once
+            if findings:
+                bad.append(s["key"])
+                results[s["key"]] = (False, "audit: " + "; ".join(findings))
+                continue
             swaps[s["identity"]] = dict(h, attributeList=attrs, defenseSkillIDList=guard, _script=bool(s.get("script")))
             if dropped:
-                kit_notes[s["key"]] = "story-only skills left out: " + ", ".join(str(i) for i, _ in dropped)
+                kit_notes[s["key"]] = "left out: " + ", ".join(f"{i} ({why})" for i, why in dropped)
         for s in want_boss:
             # every edit of one skin lands together or not at all: half a boss (its skills on a
             # body that can't play them) would freeze the fight
             mine_skills, mine_texts, mine_green, said = {}, {}, set(), []
-            mine_swap = mine_passives = mine_stats = None
+            mine_swap = mine_passives = mine_stats = worn = None
             try:
                 if s["kind"] == "identity":              # a new id: its base's record, under its own id
                     if s["identity"] not in clones:
@@ -167,8 +184,8 @@ def build(keys, game_dir, cache, data_dir, log=print, boss=(), static=True):
                     where = located(unit["appearance"])
                     if not where:
                         raise ValueError(f"{unit['appearance']} is not in the game's cache")
-                    motions = repaint.body_motions(game.unitypy().load(where), unit["appearance"])
-                    attrs, guard = helpers.boss_moveset(ident, unit, skills, motions)
+                    worn = repaint.body_motions(game.unitypy().load(where), unit["appearance"])
+                    attrs, guard = helpers.boss_moveset(ident, unit, skills, worn)
                     mine_swap = {"appearance": unit["appearance"], "attributeList": attrs,
                                  "defenseSkillIDList": guard, "_numbers": True}
                     ident = dict(ident, attributeList=attrs, defenseSkillIDList=guard)   # what's below acts on them
@@ -206,6 +223,13 @@ def build(keys, game_dir, cache, data_dir, log=print, boss=(), static=True):
                     helpers.edit_stats(dict(ident), s["stats"])             # refused here, not mid-rewrite
                     mine_stats = s["stats"]
                     said.append("stats: " + ", ".join(f"{k} {v}" for k, v in sorted(s["stats"].items())))
+                # the audit: the record as the file will have it (a boss form: on the boss's body)
+                own = mine_passives and {"battlePassiveList": [{"passiveIDList": mine_passives.get("battle", [])}],
+                                         "supporterPassiveList": [{"passiveIDList": mine_passives.get("support", [])}]}
+                findings = audit.record(ident, {**skills, **skill_swaps, **mine_skills}, worn,
+                                        passive_ids() if own else None, own or None)
+                if findings:
+                    raise ValueError("audit: " + "; ".join(findings))
             except (KeyError, StopIteration, ValueError, IndexError, TypeError, AttributeError,
                     repaint.RepaintError, OSError) as e:
                 if boss_form(s["key"], s, boss):                      # a boss form that can't be built isn't swapped in
@@ -302,6 +326,9 @@ def build(keys, game_dir, cache, data_dir, log=print, boss=(), static=True):
                     except cards.CardError as e:
                         merged.add(key)             # nothing to put in a card file either
                         notes = notes + [str(e)]
+                findings = audit.body(locate(target), raw, target)
+                if findings:                        # never swapped in: it would draw wrong in a fight
+                    raise repaint.RepaintError("audit: " + "; ".join(findings))
                 shutil.rmtree(out, ignore_errors=True)
                 os.makedirs(out)
                 rels = [_write(out, cache, locate(target), raw)]
@@ -311,6 +338,9 @@ def build(keys, game_dir, cache, data_dir, log=print, boss=(), static=True):
                     if locate(shift["to"]) == locate(target):   # folder of its own, so a clash over it
                         raise repaint.RepaintError(f"{shift['to']} shares {target}'s bundle")  # skips only it
                     more, more_notes = tint.tint(shift["to"], locate, s["tint"])
+                    findings = audit.body(locate(shift["to"]), more, shift["to"])
+                    if findings:
+                        raise repaint.RepaintError(f"audit of {shift['to']}: " + "; ".join(findings))
                     os.makedirs(extra)
                     rel = _write(extra, cache, locate(shift["to"]), more)
                     with open(os.path.join(extra, "manifest.json"), "w", encoding="utf-8") as f:
@@ -322,6 +352,7 @@ def build(keys, game_dir, cache, data_dir, log=print, boss=(), static=True):
                 results[key] = (True, "; ".join(notes + ([boss_notes[key]] if key in boss_notes else [])))
             except (repaint.RepaintError, RuntimeError, KeyError, OSError, ValueError) as e:
                 shutil.rmtree(out, ignore_errors=True)
+                shutil.rmtree(out + FORMS, ignore_errors=True)
                 results[key] = (False, str(e))
             log(f"  {'ok  ' if results[key][0] else 'FAIL'} {key}: {results[key][1]}")
 
@@ -337,9 +368,13 @@ def build(keys, game_dir, cache, data_dir, log=print, boss=(), static=True):
                 path = cards.find_bundle(game_dir, cache, card_identity(s))
                 env = game.unitypy().load(path)
                 n = cards.apply(env, card_identity(s), art_)
+                raw = env.file.save(packer="none")
+                findings = audit.card(path, raw, card_identity(s))
+                if findings:
+                    raise cards.CardError("audit: " + "; ".join(findings))
                 shutil.rmtree(out, ignore_errors=True)
                 os.makedirs(out)
-                rel = _write(out, cache, path, env.file.save(packer="none"))
+                rel = _write(out, cache, path, raw)
                 with open(os.path.join(out, "manifest.json"), "w", encoding="utf-8") as f:
                     json.dump({"format": FORMAT, "kind": "card", "skins": [key], "files": [rel],
                                "identity": card_identity(s)}, f, indent=1)

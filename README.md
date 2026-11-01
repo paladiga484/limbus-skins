@@ -9,7 +9,8 @@ Dress Limbus Company identities as the characters they mirror, on a **private se
   animation, turned to face the sinners' way (Kromer, Lucio, Guido and the Old G Corp. Head
   Manager have none in the game and stand still).
 - **Tints:** the identity keeps its own body and drawings, recolored. LCB Heathcliff as
-  **Greencliff**, green from head to toe, a stickman below his head, and the best ID ever: 130 HP,
+  **Greencliff**, green from head to toe, an actual stick man - his own head on bold straight
+  sticks, bat and all - and the best ID ever: 130 HP,
   Speed 5-9, a pile of buffs on every Gluttony skill; his S3, The Greenest Hunt, turns him into a
   green Wild Hunt (so does half HP).
 - **Library of Ruina:** a repaint can draw from Library of Ruina too, if you own it. Kali,
@@ -21,6 +22,14 @@ Dress Limbus Company identities as the characters they mirror, on a **private se
   own animations, effects and skills: Matthias (the Middle Nursefather) on the Ring Pointillist
   Student Outis, the Roach Emperor (his own swarm of roaches) on G Corp. Gregor, Distorted
   Hohenheim on Heishou Si Gregor. Needs the Limbus Private Server's client patch, build 6 or later.
+- **Allies:** bosses as identities of their own, next to the ones you have: Dulcinea (Rodion's
+  slot) and the eroded Kim Satgat (Meursault's), each with the boss's own body and whole moveset.
+- **Kits:** an identity's moves and text only, for a body mod's character: `roland` gives Index
+  Father Yi Sang the Black Silence's pages (names from your Library of Ruina), Furioso on all
+  nine coins - with a Roland body mod, he is Roland.
+- **ID cards:** a skin with card art also redraws the identity's card - full art, uptie art,
+  info panel, portraits - from pictures you put in `<data>/art/cards/<name>/` (the tool never
+  downloads any). Turn the skin off and the game's card is back.
 - **Auras:** effect sprites taken from a boss's own bundle drift around the body, in every
   frame and in the idle: Sancho's blood mist round Kali.
 - **Skill text:** a skin that rewrites skills also rewrites their names and descriptions, so a

@@ -14,6 +14,9 @@
   limbus-skins apply / restore          the two halves of `run`, by hand
   limbus-skins watch                    restore as soon as the game exits
   limbus-skins build [<skin>...]        rebuild (apply does this when needed)
+  limbus-skins audit [<skin>...]        check what is built against the game's own files
+                                        (build does it as it goes: a skin with a finding
+                                        isn't swapped in)
   limbus-skins preview <skin> [file.png]  see a repaint's frames before playing it
   limbus-skins sheet [file.png]         every skin that is on: its idle before -> after
   limbus-skins art <skin> <picture> [--invert]   your own head art (art <skin> --reset)
@@ -361,6 +364,19 @@ def main(argv=None):
         res = build(keys, g, c, data, boss=set(st["boss"]))
         bad = [k for k, (ok, _) in res.items() if not ok]
         print(f"built {len(res) - len(bad)} of {len(res)}" + (f"; failed: {', '.join(bad)}" if bad else ""))
+        return 1 if bad else 0
+    if cmd == "audit":
+        # what is built, checked again against the game's own files (build checks each as it goes)
+        keys = select(args, skins) if args else st["on"]
+        if sess.active():
+            raise SystemExit("a modded session is live - `limbus-skins restore` first (with the game closed)")
+        from .audit import built as audit_built
+        res = audit_built(keys, g, c, data, set(st["boss"]))
+        bad = {k: v for k, v in res.items() if v}
+        for k, found in sorted(bad.items()):
+            print(f"  {k}: " + "; ".join(found))
+        print(f"audited {len(res)} built file(s) of {len(keys)} skin(s): "
+              + (f"{len(bad)} with findings" if bad else "all sound"))
         return 1 if bad else 0
     if cmd == "preview":
         if not args:

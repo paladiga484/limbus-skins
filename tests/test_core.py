@@ -862,6 +862,20 @@ class BossSkills(unittest.TestCase):
         self.assertEqual(self.h.boss_moveset(self.ident, unit, self.skills, {"Default", "S4", "S5", "S9"})[0],
                          [{"skillId": 92, "number": 3}])
 
+    def test_helper_kit_leaves_out_what_the_helpers_body_cant_play(self):
+        # Pwie: the Little Buffe has S1-S4; its story script plays S5-S7 on another body
+        self.skills[93] = {"id": 93, "skillTier": 1, "skillData": [{"skillMotion": "S7"}]}
+        self.skills[98] = {"id": 98, "skillTier": 1, "skillData": [{"defType": "EVADE", "skillMotion": "Default"}]}
+        self.ident["defenseSkillIDList"] = [95, 98]
+        helper = {"id": 400041, "attributeList": [{"skillId": 91, "number": 1}, {"skillId": 93, "number": 0}]}
+        motions = {"Default", "Guard", "S1", "S2", "S3", "S4", "S9"}
+        attrs, guard, dropped = self.h.helper_kit(self.ident, helper, self.skills, motions=motions)
+        self.assertEqual([a["skillId"] for a in attrs], [91])
+        self.assertEqual(dropped, [(93, "its body has no S7 motion")])
+        self.assertEqual(guard, [95, 98])                   # the identity's own, both playable (S4, Default)
+        with self.assertRaises(ValueError):                 # nothing to defend with that it can play
+            self.h.helper_kit(dict(self.ident, defenseSkillIDList=[]), helper, self.skills, motions=motions)
+
     def _moves(self):
         """The boss's attacks, each with a move of its own (setUp gives them all S9)."""
         for i, m in ((91, "S7"), (92, "S8"), (93, "S9"), (94, "S9")):
@@ -987,6 +1001,27 @@ class Identities(unittest.TestCase):
         self.assertEqual((skins["vergilius-id"]["kind"], skins["vergilius-id"]["identity"], skins["vergilius-id"]["base"]),
                          ("identity", 10799, 10710))
         self.assertEqual((skins["kali-id"]["identity"], skins["kali-id"]["unlock"]), (10499, "black-forest"))
+
+
+class Audit(unittest.TestCase):
+    SKILLS = {1: {"id": 1, "skillData": [{"skillMotion": "S1"}]}, 2: {"id": 2, "skillData": [{"skillMotion": "S7"}]},
+              9: {"id": 9, "skillData": [{"skillMotion": "Guard", "defType": "GUARD"}]}}
+
+    def test_a_sound_record_has_no_findings(self):
+        from limbus_skins import audit
+        rec = {"id": 10999, "attributeList": [{"skillId": 1, "number": 3}], "defenseSkillIDList": [9]}
+        passives = {"battlePassiveList": [{"level": 1, "passiveIDList": [50]}]}
+        self.assertEqual(audit.record(rec, self.SKILLS, {"S1", "Guard"}, {50}, passives), [])
+
+    def test_what_would_freeze_or_break_a_fight_is_found(self):
+        from limbus_skins import audit
+        rec = {"id": 10999, "attributeList": "[{'skillId': 2, 'number': 1}, {'skillId': 7}]", "defenseSkillIDList": [9]}
+        found = audit.record(rec, self.SKILLS, {"S1", "Guard"}, {50},
+                             {"supporterPassiveList": [{"passiveIDList": [51]}]})
+        self.assertEqual(found, ["passive 51 isn't in the game's data", "skill 2's motion S7 isn't one its body has",
+                                 "skill 7 isn't in the game's data"])
+        self.assertEqual(audit.record({"attributeList": [{"skillId": 1, "number": 0}], "defenseSkillIDList": []},
+                                      self.SKILLS), ["no defense skill", "nothing in the deck"])
 
 
 class Cards(unittest.TestCase):

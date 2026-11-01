@@ -11,6 +11,27 @@ Boss skins: the real boss, not a repaint
   Server's client patch, **build 6** or later (`run` refuses an older package's).
 - `limbus-skins boss on <repaint of a boss>` now does the same: the boss's own body and skills.
 
+Allies, kits and ID cards
+- **Allies** (`dulcinea-id`, `distorted-kim-id`): bosses as identities of their own, equipped
+  like any other - Dulcinea in Rodion's slot and the eroded Kim Satgat in Meursault's, each with
+  the boss's own body and whole moveset. Built only while the private server grants them.
+- **Kits** (`roland`): an identity's moves and text only, for a body mod's character - the Black
+  Silence's pages on Index Father Yi Sang (Durandal, Ranga Workshop, Crystal Atelier, Old Boys
+  Workshop; Furioso on the nine-coin skill), names and dice read from your Library of Ruina.
+- **ID cards** (`"card"`): Kali, the three boss skins, the allies and Vergilius redraw their
+  identity's card - full art, uptie art, info, profile and support portraits - from card art you
+  put in `<data dir>/art/cards/<name>/`. Off with the skin. The game may still play an uptie card
+  that is a Spine animation in its detail screen.
+- **The Black Forest** also keeps Vergilius (`vergilius-id`, `vergilius-wildhunt`), the Queen of
+  Hatred, Solemn Lament's butterfly and Roland's pages until Greencliff falls; the private server's
+  mod menu lists them (limbus-skins writes `locks.json` for it).
+- **Greencliff is an actual stick man**: his head as drawn on bold straight sticks. Before, a third
+  of his height stayed as drawn, so most frames kept his shoulders, arms and bat.
+- **The audit**: every built skin is checked before it goes in - other bodies in its file left
+  alone, nothing of the game's file gone, no frame that drew the body drawing nothing now, every
+  skill and passive real and every motion one the body has. A skin with a finding isn't swapped
+  in; `limbus-skins audit` checks what is built.
+
 Fixes
 - **LCB Gregor, Outis, Sinclair and Meursault wore parts of other skins.** A sinner's early
   identities share one bundle, and a repaint there changed what the others draw too: LCB Gregor
