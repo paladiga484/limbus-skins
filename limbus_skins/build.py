@@ -49,8 +49,7 @@ def with_allies(skins):
             a["unit"] = unit
         if unlock:
             a["unlock"] = unlock
-        if s.get("title"):
-            a["title"] = s["title"] + " - ally"
+        a["title"] = f"{s.get('title') or s.get('becomes') or key} - ally"    # how the forest's gifts name it
         out[k] = a
     return out
 

@@ -113,14 +113,19 @@ def boss_moveset(identity, unit, skills, motions):
     if any(i in skills and _motion(skills[i]) not in motions for i in hidden):
         raise ValueError(f"identity {identity['id']} has hidden skills its new body can't play")
     listed = [a["skillId"] for a in lit(unit.get("attributeList"))]
+    playable = [skills[i] for i in listed if i in skills and skills[i].get("skillData")
+                and skills[i]["skillData"][0].get("defType", "ATTACK") == "ATTACK" and not story_only(skills[i])
+                and _motion(skills[i]) in motions]
     attrs, moves = [], set()
-    for sid in listed:
-        s = skills.get(sid)
-        if not s or not s.get("skillData") or s["skillData"][0].get("defType", "ATTACK") != "ATTACK" or story_only(s):
-            continue
-        if _motion(s) in motions and _motion(s) not in moves:       # a move it plays already: once is its moveset
+    for s in playable:
+        if _motion(s) not in moves:                 # a move it plays already: once is its moveset
             moves.add(_motion(s))
-            attrs.append({"skillId": sid, "number": DECK.get(s.get("skillTier", 1), 1)})
+            attrs.append({"skillId": s["id"], "number": DECK.get(s.get("skillTier", 1), 1)})
+    tiers = {skills[a["skillId"]].get("skillTier", 1) for a in attrs}
+    for s in playable:                              # a boss that plays all its tiers with one move (Rien)
+        if s.get("skillTier", 1) not in tiers:      # still deals each tier: its first skill of that tier
+            tiers.add(s.get("skillTier", 1))
+            attrs.append({"skillId": s["id"], "number": DECK.get(s.get("skillTier", 1), 1)})
     if not attrs:
         raise ValueError(f"unit {unit['id']} has no attack its body can play")
     theirs = [skills.get(i) for i in list(lit(unit.get("defenseSkillIDList"))) + listed]

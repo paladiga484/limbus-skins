@@ -240,6 +240,11 @@ class Locked(unittest.TestCase):
         forest = {k: s for k, s in catalog().items() if s.get("unlock")}
         self.assertTrue({"kali", "kali-id", "vergilius-id", "vergilius-wildhunt", "queen-of-hatred", "butterfly-yisang",
                          "roland"} <= set(forest))
+        strongest = {"ahab-id", "jia-qiu-id", "kromer-id", "dongbaek-spicebush-id", "priest-id", "rien-id",
+                     "queen-of-hatred-id", "dulcinea-id", "distorted-kim-id", "vergilius-boss-id",
+                     "distorted-hohenheim", "roach-emperor"}
+        self.assertTrue(strongest <= set(forest), strongest - set(forest))
+        self.assertFalse({"callisto-id", "kira-id", "ahab", "rien"} & set(forest))     # the rest stay open
         self.assertTrue(all(s["unlock"] == "black-forest" and s.get("title") for s in forest.values()))
 
 
@@ -678,7 +683,7 @@ class BossSkills(unittest.TestCase):
         attrs, guard = self.h.boss_moveset(self.ident, self.unit, self.skills, {"S4", "S9"})   # green on a boss form
         out = self.h.recolor_skills(dict(self.ident, attributeList=attrs, defenseSkillIDList=guard),
                                     self.skills, {"all": "SHAMROCK"})
-        self.assertEqual(sorted(out), [91, 95])                               # its own moves, recoloured
+        self.assertEqual(sorted(out), [91, 92, 93, 95])                       # its own moves (a tier each), recoloured
         self.assertEqual((out[91]["skillData"][0]["attributeType"], out[91]["skillData"][0]["skillMotion"]),
                          ("SHAMROCK", "S9"))
 
@@ -881,6 +886,13 @@ class BossSkills(unittest.TestCase):
         for i, m in ((91, "S7"), (92, "S8"), (93, "S9"), (94, "S9")):
             self.skills[i]["skillData"][0]["skillMotion"] = m
 
+    def test_a_boss_with_one_move_still_deals_every_tier(self):
+        # Rien: every attack he has plays S1 - two coins, three, four; one per move would leave one
+        unit = {"id": 1347, "attributeList": [{"skillId": i} for i in (95, 92, 94, 93, 91)]}
+        attrs, _ = self.h.boss_moveset(self.ident, unit, self.skills, {"S4", "S9"})
+        self.assertEqual(attrs, [{"skillId": 92, "number": 3}, {"skillId": 93, "number": 2},
+                                 {"skillId": 91, "number": 1}])               # 94: tier 1 is dealt already
+
     def test_a_boss_form_takes_the_bosss_whole_moveset(self):
         # the boss's own body plays its own moves: every attack it has, one per move, dealt as an
         # identity's deck is (tier 1 three times, tier 2 twice, tier 3 once), and its own guard
@@ -896,7 +908,7 @@ class BossSkills(unittest.TestCase):
     def test_a_boss_form_leaves_out_moves_its_body_cant_play(self):
         self._moves()
         attrs, _ = self.h.boss_moveset(self.ident, self.unit, self.skills, {"S4", "S7", "S9"})
-        self.assertEqual([a["skillId"] for a in attrs], [91, 93])
+        self.assertEqual([a["skillId"] for a in attrs], [91, 93, 94])        # 92 (S8) can't: 94 deals tier 1
 
     def test_a_boss_form_falls_back_to_a_counter_then_the_identitys_own_guard(self):
         self.ident["defenseSkillIDList"] = [4]
@@ -1049,7 +1061,7 @@ class Allies(unittest.TestCase):
                           "unit": 8190, "ally": 10898, "title": "Ahab", "unlock": "black-forest", "card": "ahab"},
                  "qoh": {"key": "qoh", "kind": "helper", "identity": 10312, "helper": 400003, "ally": 10398},
                  "rien": {"key": "rien", "kind": "repaint", "identity": 10115, "source": "1347_X", "unit": 1380,
-                          "ally": 10198, "ally_unit": 1347, "ally_unlock": "black-forest"}}
+                          "ally": 10198, "ally_unit": 1347, "ally_unlock": "black-forest", "becomes": "Rien"}}
         out = with_allies(skins)
         a = out["ahab-id"]
         self.assertEqual((a["key"], a["kind"], a["identity"], a["of"], a["folder"], a["source"], a["unit"],
@@ -1064,6 +1076,7 @@ class Allies(unittest.TestCase):
         self.assertNotIn("unlock", q)
         r = out["rien-id"]
         self.assertEqual((r["unit"], r["unlock"]), (1347, "black-forest"))
+        self.assertEqual((r["title"], q["title"]), ("Rien - ally", "qoh - ally"))   # the forest's gift list names each
         self.assertEqual(out["ahab"], skins["ahab"])                         # the skin itself stays as it was
         with self.assertRaises(ValueError):                                  # a derived key may not hide another skin
             with_allies({"x": {"key": "x", "kind": "repaint", "identity": 10101, "ally": 10199},
