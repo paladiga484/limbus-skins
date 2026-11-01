@@ -99,7 +99,8 @@ def build(keys, game_dir, cache, data_dir, log=print, boss=(), static=True):
     if want or want_boss or want_ids:
         swaps, skill_swaps, bad, boss_ok, kit_notes, green, passives, texts, stats = {}, {}, [], [], {}, set(), {}, {}, {}
         pers, skills, units = game.boss_data(cache)
-        clones, ruina, located = {}, None, None
+        clones, ruina, boss_words = {}, None, {}
+        located = lambda b: None  # noqa: E731 - set below when a boss form is wanted
         if any(boss_form(s["key"], s, boss) for s in want_boss):  # a boss form: the body's motions, the boss's words
             bodies_, have_ = game.body_index(game_dir, cache, os.path.join(data_dir, "bodies.json"), log=log)
             located = lambda b: have_.get(bodies_.get(b, ""))  # noqa: E731
@@ -226,6 +227,9 @@ def build(keys, game_dir, cache, data_dir, log=print, boss=(), static=True):
                 if boss_form(s["key"], s, boss) and s["key"] not in bad:
                     ok = s["identity"] in done
                     results[s["key"]] = (ok, boss_notes[s["key"]] if ok else "identity not found in the static data")
+                    if ok:                              # a body built before (as a repaint) is never used again
+                        for folder in (s["key"], s["key"] + FORMS):
+                            shutil.rmtree(os.path.join(built_root, folder), ignore_errors=True)
             log(f"  helpers: {len(done)} identities restyled, {len(boss_ok)} with new skills")
 
     # repaints and tints: one folder each
