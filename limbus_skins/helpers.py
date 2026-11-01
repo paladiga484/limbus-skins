@@ -207,20 +207,6 @@ def green_ids(recoloured):
 
 SINS = ("CRIMSON", "SCARLET", "AMBER", "SHAMROCK", "AZURE", "INDIGO", "VIOLET")
 ATK = ("SLASH", "PENETRATE", "HIT")
-RUINA_ATK = {"Slash": "SLASH", "Penetrate": "PENETRATE", "Hit": "HIT"}
-
-
-def dice_coins(dice, n=None):
-    """(base power, [coin powers], attack type) for Library of Ruina dice [(min, max, type,
-    detail)...]: each hit as hard as Ruina's die - all tails the lowest die's min, all heads the
-    highest die's max - over n coins (one per die unless given; the rest of the split on the last
-    coins). The attack type is the first die's (None for a block or an evade)."""
-    if not dice:
-        raise ValueError("no dice to read")
-    n = n or len(dice)
-    base = min(d[0] for d in dice)
-    q, r = divmod(max(d[1] for d in dice) - base, n)
-    return base, [q] * (n - r) + [q + 1] * r, RUINA_ATK.get(dice[0][3])
 COIN_CUES = ("actionIndex", "actionindex", "cutsceneStart")    # a coin's place in its animation
 
 

@@ -30,6 +30,11 @@ def catalog():
     return with_allies(skins)
 
 
+def display_name(s, key):
+    """The name an identity of ours shows in game: its own, else the short form of what it becomes."""
+    return s.get("name") or short_name(s.get("becomes") or s.get("title") or key)
+
+
 def short_name(text):
     """A skin's name as the game shows an identity's: its words up to a bracket, colon or dash."""
     name = re.split(r"[:;(]| - ", text)[0].strip()
@@ -58,7 +63,7 @@ def with_allies(skins):
         if unlock:
             a["unlock"] = unlock
         a["title"] = f"{s.get('title') or s.get('becomes') or key} - ally"    # how the forest's gifts name it
-        a["name"] = s.get("name") or short_name(s.get("becomes") or s.get("title") or key)
+        a["name"] = display_name(s, key)
         out[k] = a
     return out
 
@@ -312,7 +317,7 @@ def build(keys, game_dir, cache, data_dir, log=print, boss=(), static=True):
                            "skill_texts": {str(i): t for i, t in sorted(texts.items())},
                            # the server grants these while they're built (Server/OwnIdentities.cs)
                            "identities": [dict({"id": s["identity"], "base": s["base"], "folder": s.get("folder") or s["base"],
-                                                "name": s.get("name") or short_name(s.get("becomes") or s["key"])},
+                                                "name": display_name(s, s["key"])},
                                                **({"unlock": s["unlock"]} if s.get("unlock") else {}))
                                           for s in want_ids if s["key"] not in bad]}, f, indent=1)
             for s in want + want_ids:

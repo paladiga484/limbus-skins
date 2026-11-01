@@ -894,7 +894,7 @@ class BossSkills(unittest.TestCase):
                                  {"skillId": 91, "number": 1}])               # 94: tier 1 is dealt already
 
     def test_dice_coins(self):
-        dc = self.h.dice_coins
+        from limbus_skins.lortext import dice_coins as dc
         self.assertEqual(dc([(5, 9, "Atk", "Slash"), (5, 9, "Atk", "Slash")]), (5, [2, 2], "SLASH"))       # Durandal
         self.assertEqual(dc([(20, 39, "Atk", "Slash")]), (20, [19], "SLASH"))                             # Furioso
         self.assertEqual(dc([(3, 7, "Atk", "Penetrate")] * 3), (3, [1, 1, 2], "PENETRATE"))               # Ranga
@@ -1176,7 +1176,7 @@ class Covers(unittest.TestCase):
                  "_profile": Image.new("RGB", (26, 26)), "_profile_support_personality": Image.new("RGB", (20, 98))}
         pics = covers.pictures(art, stock)
         self.assertEqual({s: im.size for s, im in pics.items()}, {s: im.size for s, im in stock.items()})
-        self.assertTrue(all(im.mode == "RGB" for im in pics.values()))    # saved as JPEG
+        self.assertTrue(all(im.mode == "RGB" for im in pics.values()))    # opaque: DXT1 would punch holes
         # an identity without some picture of its own (no profile portrait): the game's usual size
         pics = covers.pictures(art, {"": stock[""]})
         self.assertEqual({s: im.size for s, im in pics.items()},

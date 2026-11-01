@@ -14,7 +14,6 @@ card, info, profile and support portrait; the uptie card shows the same). limbus
 beside the client patch for the session (client.py), and myosotis's AllyFacePatch shows them
 for that identity's id alone - the identity whose card it otherwise borrows keeps its own.
 """
-import glob
 import os
 
 from . import cards
@@ -51,7 +50,7 @@ def body(texture, rects):
         raise ValueError("the portrait has no sprites")
     x, y, w, h = max(rects, key=lambda r: r[2] * r[3])
     top = texture.height - y - h
-    return texture.convert("RGBA").crop((round(x), round(top), round(x + w), round(top + h)))
+    return texture.crop((round(x), round(top), round(x + w), round(top + h))).convert("RGBA")
 
 
 # the game's card picture sizes, for a role the borrowed identity has no picture of its own for
@@ -62,7 +61,7 @@ def pictures(art, stock, face=None, zoom=1.0):
     """{suffix: picture} for every card role - the full card, info, profile (the pfp the game
     shows in lists) and support portrait: art framed as cards.render frames it, at the size of
     the identity's own picture for that role (else the game's usual size), over that picture
-    blurred (else the full card's, else the art's own) - opaque, for JPEG. face: [x, y] in the
+    blurred (else the full card's, else the art's own) - opaque, so DXT1 punches no holes. face: [x, y] in the
     art's pixels when the top of the figure isn't its head (a weapon or wings above it)."""
     out = {}
     for suffix, role in cards.ROLES.items():
@@ -76,9 +75,8 @@ def pictures(art, stock, face=None, zoom=1.0):
 def story_bundles(game_dir, cache):
     """The cached story-portrait bundles (paths)."""
     from . import game
-    names = game.catalog_names(game_dir)
-    hashes = [h for h, n in names.items() if "standing" in n.lower()]
-    return [p for h in hashes for p in glob.glob(os.path.join(cache, "*", h, "__data"))]
+    have = game.cache_bundles(cache)
+    return [have[h] for h, n in game.catalog_names(game_dir).items() if "standing" in n.lower() and h in have]
 
 
 def portraits(game_dir, cache, names, keep):

@@ -118,12 +118,25 @@ def resolve(texts, book):
     return out
 
 
+RUINA_ATK = {"Slash": "SLASH", "Penetrate": "PENETRATE", "Hit": "HIT"}
+
+
+def dice_coins(dice, n=None):
+    """(base power, [coin powers], attack type) for Library of Ruina dice [(min, max, type,
+    detail)...]: each hit as hard as Ruina's die - all tails the lowest die's min, all heads the
+    highest die's max - over n coins (one per die unless given; the rest of the split on the last
+    coins). The attack type is the first die's (None for a block or an evade)."""
+    if not dice:
+        raise ValueError("no dice to read")
+    n = n or len(dice)
+    base = min(d[0] for d in dice)
+    q, r = divmod(max(d[1] for d in dice) - base, n)
+    return base, [q] * (n - r) + [q + 1] * r, RUINA_ATK.get(dice[0][3])
 def resolve_moves(moves, book):
     """A skin's moves with every "lor_dice": <page> turned into that page's dice
-    (helpers.dice_coins): its attack dice for a skill, its block or evade die for "defense". The
+    (dice_coins): its attack dice for a skill, its block or evade die for "defense". The
     coin count stays the one written (the animation's); an attack type written out wins. Without
     Ruina (book None) a move that needs its dice raises LorTextError rather than guess."""
-    from .helpers import dice_coins
     out = {}
     for n, m in moves.items():
         if "lor_dice" not in m:

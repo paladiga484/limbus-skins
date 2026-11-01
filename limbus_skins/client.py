@@ -19,6 +19,7 @@ import glob
 import json
 import os
 import re
+import shutil
 
 GREEN = "green_coin_skills"
 SHIFT = "hp_shift"
@@ -92,7 +93,6 @@ def covers(data_dir, ids):
 def _sync(folder, wanted):
     """folder holds exactly the files wanted ({name: source}): linked where it can be, else
     copied; a file already there and as new as its source is left alone."""
-    import shutil
     os.makedirs(folder, exist_ok=True)
     for f in os.listdir(folder):
         if f not in wanted:
