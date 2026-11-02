@@ -1215,7 +1215,7 @@ class Covers(unittest.TestCase):
 
 
 class CoverBuild(unittest.TestCase):
-    def test_an_ally_with_a_cover_gets_its_own_card_pictures(self):
+    def build(self, idles):
         from PIL import Image
         from limbus_skins import build, covers
         skins = {"a": {"key": "a", "kind": "repaint", "identity": 10101, "source": "A_App", "ally": 10198, "cover": "A_EGO"},
@@ -1225,22 +1225,69 @@ class CoverBuild(unittest.TestCase):
         art.paste((250, 250, 250, 255), (30, 20, 70, 290))
         stock = {"": Image.new("RGB", (96, 54)), "_info": Image.new("RGB", (27, 41)), "_profile": Image.new("RGB", (16, 16)),
                  "_profile_support_personality": Image.new("RGB", (10, 49))}
+        out = {}
         with tempfile.TemporaryDirectory() as data, \
                 FakeGame(skins, {10101: {"id": 10101}, 10102: {"id": 10102}}, {"A_App": [unit]}, bodies={"A_App": {"S1", "Guard"}}), \
                 mock.patch.object(covers, "portraits", return_value={"A_EGO": art}), \
+                mock.patch.object(covers, "idle_frames", return_value=idles) as idle, \
                 mock.patch.object(covers, "stock_pictures", return_value=stock) as sp:
             res = build.build(["a-id", "b-id"], "game", "cache", data, log=lambda *a: None)
-            out = os.path.join(data, "built", "a-id" + build.COVER)
-            with open(os.path.join(out, "manifest.json")) as f:
-                man = json.load(f)
-            pics = sorted(os.listdir(os.path.join(out, "pics")))
-            self.assertFalse(os.path.exists(os.path.join(data, "built", "b-id" + build.COVER)))
-        self.assertEqual((man["identity"], man["from"]), (10198, "A_EGO"))
+            for k in ("a-id", "b-id"):
+                d = os.path.join(data, "built", k + build.COVER)
+                if os.path.exists(d):
+                    with open(os.path.join(d, "manifest.json")) as f:
+                        out[k] = (json.load(f), sorted(os.listdir(os.path.join(d, "pics"))))
+        return res, out, idle, sp
+
+    def test_an_ally_with_a_cover_gets_its_own_card_pictures(self):
+        res, out, idle, sp = self.build({})
+        man, pics = out["a-id"]
+        self.assertEqual((man["identity"], man["from"]), (10198, "story A_EGO"))
         self.assertEqual(pics, ["10198_normal.dxt", "10198_normal_info.dxt", "10198_normal_profile.dxt",
                                 "10198_normal_profile_support_personality.dxt"])
         sp.assert_any_call("game", "cache", 10101)                  # sized by its folder's own card
-        self.assertTrue(res["a-id"][0] and "cover: A_EGO" in res["a-id"][1], res)
-        self.assertTrue(res["b-id"][0] and "no cover" in res["b-id"][1], res)   # still built: its folder's card
+        self.assertEqual(idle.call_args[0][3], {"A_App"})          # the body each ally wears
+        self.assertTrue(res["a-id"][0] and "cover: story A_EGO" in res["a-id"][1], res)
+        self.assertNotIn("b-id", out)                               # no portrait, no idle: its folder's card
+        self.assertTrue(res["b-id"][0] and "no cover" in res["b-id"][1], res)
+
+    def test_its_pfp_is_its_body_standing_idle_and_no_portrait_means_idle_everywhere(self):
+        from PIL import Image
+        stand = Image.new("RGBA", (120, 360), (0, 0, 0, 0))
+        stand.paste((255, 0, 0, 255), (40, 10, 80, 60))             # a red head
+        stand.paste((0, 0, 255, 255), (30, 60, 90, 350))            # a blue body
+        res, out, _, _ = self.build({"A_App": stand})
+        self.assertEqual(out["a-id"][0]["from"], "story A_EGO + idle A_App")
+        self.assertEqual(out["b-id"][0]["from"], "idle A_App")      # its portrait isn't cached: the idle frame for all
+        self.assertEqual(len(out["b-id"][1]), 4)
+        self.assertTrue(res["b-id"][0] and "cover: idle A_App" in res["b-id"][1], res)
+
+    def test_the_pfp_role_alone_takes_the_idle_frame(self):
+        from PIL import Image
+        from limbus_skins import covers
+        story = Image.new("RGBA", (100, 300), (0, 0, 0, 0))
+        story.paste((250, 250, 250, 255), (30, 20, 70, 290))        # white
+        stand = Image.new("RGBA", (120, 360), (0, 0, 0, 0))
+        stand.paste((255, 0, 0, 255), (30, 10, 90, 350))            # red
+        pics = covers.pictures(story, {}, pfp=stand)
+        r, g, b = pics["_profile"].getpixel((128, 128))
+        self.assertTrue(r > 200 and g < 60, (r, g, b))
+        r, g, b = pics["_info"].getpixel((268, 413))
+        self.assertTrue(r > 200 and g > 200, (r, g, b))
+        # a battle sprite: a spear held up beside it and a charm floating over its head aren't its face
+        sprite = Image.new("RGBA", (400, 900), (0, 0, 0, 0))
+        sprite.paste((200, 200, 200, 255), (20, 0, 32, 900))        # the spear: thin, the whole height
+        sprite.paste((255, 0, 255, 255), (170, 60, 230, 110))       # the charm, with a gap under it
+        sprite.paste((255, 0, 0, 255), (130, 200, 270, 420))        # the head
+        sprite.paste((0, 0, 255, 255), (140, 420, 260, 890))        # the body
+        x, y = covers.sprite_face(sprite)
+        self.assertTrue(180 <= x <= 220 and 200 < y < 420, (x, y))
+        r, g, b = covers.pictures(story, {}, pfp=sprite)["_profile"].getpixel((128, 128))
+        self.assertTrue(r > 200 and g < 60 and b < 60, (r, g, b))  # the pfp is the head
+        self.assertIsNone(covers.sprite_face(Image.new("RGBA", (10, 10))))
+        self.assertEqual(covers.idle_body({"helper": 7}, {}, {7: {"appearance": "H_App"}}), "H_App")
+        self.assertEqual(covers.idle_body({"source": "B_App", "base": 1}, {1: {"appearance": "X"}}, {}), "B_App")
+        self.assertEqual(covers.idle_body({"base": 1}, {1: {"appearance": "X"}}, {}), "X")
 
 
 class Audit(unittest.TestCase):

@@ -16,7 +16,7 @@ from . import art, audit, bundle, cards, covers, game, helpers, lortext, repaint
 FORMS = ".forms"  # built/<skin>.forms: another body a skin turns into, swapped in apart from it
 CARD = ".card"    # built/<skin>.card: the identity's card pictures, when they aren't in its body's file
 COVER = ".cover"  # built/<ally>.cover: an identity of our own's own card pictures (covers.py), not swapped in
-FORMAT = 24      # bump when built skins change shape: older builds are rebuilt on apply
+FORMAT = 25      # bump when built skins change shape: older builds are rebuilt on apply
 
 
 def catalog():
@@ -440,37 +440,49 @@ def build(keys, game_dir, cache, data_dir, log=print, boss=(), static=True):
             results[key] = (ok, f"{msg}; {note}")
             log(f"  card {key}: {note}")
 
-    # covers: an identity of our own's own card pictures, from its villain's story portrait
+    # covers: an identity of our own's own card pictures - its villain's story portrait, and its pfp
+    # from the body it wears standing idle in a fight (that frame for everything when it has no portrait)
     if static:
-        wanted = [k for k in keys if skins[k]["kind"] == "identity" and skins[k].get("cover") and results.get(k, (False,))[0]]
+        wanted = [k for k in keys if skins[k]["kind"] == "identity" and (skins[k].get("cover") or skins[k].get("source")
+                  or skins[k].get("helper")) and results.get(k, (False,))[0]]
         for k in keys:
             if k not in wanted:
                 shutil.rmtree(os.path.join(built_root, k + COVER), ignore_errors=True)
-        found = {}
+        found, idles = {}, {}
+        body_of = {k: covers.idle_body(skins[k], ids, helper_units) for k in wanted}
         if wanted:
             try:
-                found = covers.portraits(game_dir, cache, {skins[k]["cover"] for k in wanted},
+                found = covers.portraits(game_dir, cache, {skins[k]["cover"] for k in wanted if skins[k].get("cover")},
                                          os.path.join(data_dir, "art", "covers"))
             except (OSError, ValueError) as e:
                 log(f"  covers: the story portraits couldn't be read ({e})")
+            try:
+                idles = covers.idle_frames(game_dir, cache, data_dir, set(body_of.values()),
+                                           os.path.join(data_dir, "art", "covers", "idle"), log=log)
+            except (OSError, ValueError) as e:
+                log(f"  covers: the idle frames couldn't be read ({e})")
         for k in wanted:
             s, out = skins[k], os.path.join(built_root, k + COVER)
             try:
-                if s["cover"] not in found:
-                    raise covers.CoverError(f"no story portrait called {s['cover']} in the game's cache")
+                portrait, idle = found.get(s.get("cover")), idles.get(body_of[k])
+                if portrait is None and idle is None:
+                    raise covers.CoverError(f"no story portrait {s.get('cover')} nor idle frame of {body_of[k]} in the game's cache")
                 stock = covers.stock_pictures(game_dir, cache, s.get("folder") or s["base"])
                 shutil.rmtree(out, ignore_errors=True)
                 os.makedirs(os.path.join(out, "pics"))
                 files = []
-                for suffix, im in covers.pictures(found[s["cover"]], stock, s.get("cover_face"),
-                                                  float(s.get("cover_zoom", 1.0))).items():
+                art, face = (portrait, s.get("cover_face")) if portrait is not None else (idle, covers.sprite_face(idle))
+                for suffix, im in covers.pictures(art, stock, face, float(s.get("cover_zoom", 1.0)) if portrait is not None else 1.0,
+                                                  pfp=idle).items():
                     files.append(covers.file_name(s["identity"], suffix))
                     with open(os.path.join(out, "pics", files[-1]), "wb") as f:
                         f.write(covers.dxt1_file(im))
+                made = [f"story {s['cover']}"] if portrait is not None else []
+                made += [f"idle {body_of[k]}"] if idle is not None else []
                 with open(os.path.join(out, "manifest.json"), "w", encoding="utf-8") as f:
                     json.dump({"format": FORMAT, "kind": "cover", "skins": [k], "identity": s["identity"],
-                               "from": s["cover"], "files": files}, f, indent=1)
-                note = f"cover: {s['cover']}"
+                               "from": " + ".join(made), "files": files}, f, indent=1)
+                note = "cover: " + " + ".join(made)
             except (covers.CoverError, cards.CardError, OSError, ValueError) as e:
                 shutil.rmtree(out, ignore_errors=True)
                 note = f"no cover ({e}): it shows its folder's card"

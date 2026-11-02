@@ -57,18 +57,88 @@ def body(texture, rects):
 SIZES = {"": (1920, 1080), "_info": (537, 827), "_profile": (256, 256), "_profile_support_personality": (197, 982)}
 
 
-def pictures(art, stock, face=None, zoom=1.0):
+def pictures(art, stock, face=None, zoom=1.0, pfp=None):
     """{suffix: picture} for every card role - the full card, info, profile (the pfp the game
     shows in lists) and support portrait: art framed as cards.render frames it, at the size of
     the identity's own picture for that role (else the game's usual size), over that picture
     blurred (else the full card's, else the art's own) - opaque, so DXT1 punches no holes. face: [x, y] in the
-    art's pixels when the top of the figure isn't its head (a weapon or wings above it)."""
+    art's pixels when the top of the figure isn't its head (a weapon or wings above it). pfp: a
+    picture of its own for the profile (the body standing idle in a fight, idle_frames)."""
     out = {}
     for suffix, role in cards.ROLES.items():
         st = stock.get(suffix)
         size = st.size if st is not None else SIZES[suffix]
         behind = st if st is not None else stock.get("", art)      # none cached: the art itself, blurred
-        out[suffix] = cards.render(role, size, art, behind, face=face, zoom=zoom).convert("RGB")
+        if suffix == "_profile" and pfp is not None:
+            out[suffix] = cards.render(role, size, pfp, behind, face=sprite_face(pfp), zoom=SPRITE_ZOOM).convert("RGB")
+        else:
+            out[suffix] = cards.render(role, size, art, behind, face=face, zoom=zoom).convert("RGB")
+    return out
+
+
+SPRITE_ZOOM = 0.7      # a battle sprite's pfp a little wider than a portrait's: the whole head, hat and all
+
+
+def sprite_face(img):
+    """Where a battle sprite's face is (x, y), or None for an empty picture. Its top isn't its
+    head when a weapon is raised, and its middle isn't its body when a blade sticks out: the body
+    is the densest band of columns (a spear or a sword is a thin one), the head the first solid
+    rows on it, the face a tenth of the body's height below that."""
+    from PIL import Image
+    a = img.getchannel("A").point(lambda v: 255 if v > 16 else 0)
+    box = a.getbbox()
+    if not box:
+        return None
+    left, top, right, bottom = box
+    band = max(4, int(0.12 * (bottom - top)))
+    cols = list(a.resize((img.width, 1), Image.BOX).getdata())
+    run = [0]
+    for c in cols:
+        run.append(run[-1] + c)
+    half = band // 2
+    axis = max(range(left, right), key=lambda x: run[min(len(cols), x + half)] - run[max(0, x - half)])
+    strip = a.crop((max(0, axis - half), top, min(img.width, axis + half), bottom))
+    rows = [v > 0.35 * 255 for v in strip.resize((1, strip.height), Image.BOX).getdata()]
+    run_ = max(1, int(0.15 * len(rows)))            # a head goes on into a body; a prop held up doesn't
+    head = top + next((i for i in range(len(rows)) if rows[i] and sum(rows[i:i + run_]) >= 0.8 * run_), 0)
+    return float(axis), head + 0.12 * (bottom - head)
+
+
+def idle_body(skin, ids, helper_units):
+    """The body an identity of ours wears in a fight (an appearance name): its helper's, else its
+    boss's (source), else its base identity's own. None when none is known."""
+    if skin.get("helper"):
+        return (helper_units.get(skin["helper"]) or {}).get("appearance")
+    return skin.get("source") or (ids.get(skin.get("base")) or {}).get("appearance")
+
+
+def idle_frames(game_dir, cache, data_dir, bodies_wanted, keep, log=print):
+    """{appearance: picture (PIL RGBA, cut out)} of each body standing idle in a fight - the first
+    moment of its idle, as repaint.idle_image renders it - from the player's cache; kept in
+    keep/<appearance>.png and read from there next time. A body that isn't cached is left out."""
+    from PIL import Image
+    from . import game, repaint
+    out, want = {}, {b for b in bodies_wanted if b}
+    for app in sorted(want):
+        saved = os.path.join(keep, app + ".png")
+        if os.path.isfile(saved):
+            out[app] = Image.open(saved).convert("RGBA")
+    want -= set(out)
+    if not want:
+        return out
+    bodies, have = game.body_index(game_dir, cache, os.path.join(data_dir, "bodies.json"), log=log)
+    for app in sorted(want):
+        if app not in bodies or bodies[app] not in have:
+            continue
+        try:
+            img = repaint.idle_image(have[bodies[app]], app, height=900)
+        except Exception as e:                       # a body that won't render keeps its story art
+            log(f"  idle {app}: not rendered ({e})")
+            continue
+        if img is not None:
+            os.makedirs(keep, exist_ok=True)
+            img.save(os.path.join(keep, app + ".png"))
+            out[app] = img
     return out
 
 
