@@ -1,3 +1,23 @@
+# limbus-skins 1.6.0
+
+Skins never touch the game's own files
+- **The leak is fixed.** Before, a session copied the skins over the game's own downloaded files
+  and only put the originals back when it ended properly - so a closed window, a crash or a
+  reboot left them in the official game too. Now the game's files are never changed: the skins
+  go in a `modcache` folder beside the private server's client patch, and the patch has the game
+  read them from there, in that session alone. However a session ends, the official game only
+  ever sees its own files.
+- **Healed on the spot:** every limbus-skins command first puts back what an older version left in
+  the game's files (the original, or - if that was lost - the entry removed, so the game downloads
+  its own again). Run any command once, e.g. `limbus-skins status`, with the game closed.
+- Needs the Limbus Private Server package **app-1.118.0-2** or later (its client patch reads the
+  `modcache` folder); with an older one, limbus-skins puts no skins in and says so.
+  `limbus-skins apply` now takes the client patch folder: `apply --client <folder>`.
+- **Every skin's pfp is its idle sprite**, and the lists (sinner and identity select) ask the
+  client patch for them too.
+- **No Black Forest:** nothing waits for it; every boss, ally and kit is open from the start.
+- Kali is for the developer's own machine only.
+
 # limbus-skins 1.5.0
 
 44 allies, each with its villain's own face
