@@ -23,7 +23,6 @@
    "helper": 400003,
    "becomes": "Queen of Hatred (Walpurgis Night 6)",
    "tested": true,
-   "unlock": "black-forest",
    "title": "The Queen of Hatred (Walpurgis Night) - Don Quixote"
   },
   "lin-daiyu": {
@@ -103,13 +102,11 @@
    "self": true,
    "head": "10110.json",
    "tested": false,
-   "unlock": "black-forest",
    "title": "The Funeral of the Dead Butterflies (Lobotomy Corp.) - Yi Sang"
   },
   "dongbaek-spicebush": {
    "identity": 10104,
    "ally": 10198,
-   "ally_unlock": "black-forest",
    "becomes": "Dongbaek (bloomed)",
    "source": "8044_Camellia_AwakenAppearance",
    "clips": "Camellia_Awaken",
@@ -148,7 +145,6 @@
   "ahab": {
    "identity": 10808,
    "ally": 10895,
-   "ally_unlock": "black-forest",
    "becomes": "Captain Ahab",
    "source": "8105_AhabAppearance",
    "tested": false,
@@ -161,7 +157,6 @@
   "rien": {
    "identity": 10115,
    "ally": 10197,
-   "ally_unlock": "black-forest",
    "becomes": "Rien",
    "source": "1347_Index_fatherAppearance",
    "tested": false,
@@ -236,7 +231,6 @@
   "priest": {
    "identity": 11210,
    "ally": 11297,
-   "ally_unlock": "black-forest",
    "becomes": "the Priest",
    "source": "8378_Priest_BossAppearance",
    "tested": false,
@@ -249,7 +243,6 @@
   "kromer": {
    "identity": 10204,
    "ally": 10297,
-   "ally_unlock": "black-forest",
    "becomes": "Kromer",
    "source": "8029_CromerAppearance",
    "tested": false,
@@ -334,7 +327,6 @@
   "jia-qiu": {
    "identity": 10613,
    "ally": 10697,
-   "ally_unlock": "black-forest",
    "becomes": "Jia Qiu",
    "source": "1137_JiaqiuAppearance",
    "tested": false,
@@ -438,7 +430,6 @@
    },
    "tested": false,
    "mirror": false,
-   "unlock": "black-forest",
    "title": "Vergilius - as Wild Hunt Heathcliff",
    "card": "vergilius"
   },
@@ -596,7 +587,6 @@
      ]
     }
    },
-   "unlock": "black-forest",
    "aura": [
     {
      "from": "1079_Sancho_BerserkAppearance",
@@ -700,7 +690,6 @@
     "all": "SHAMROCK"
    },
    "card": "roach-emperor",
-   "unlock": "black-forest",
    "title": "The Roach Emperor, the boss himself - Gregor"
   },
   "distorted-hohenheim": {
@@ -710,7 +699,6 @@
    "unit": 1082,
    "tested": false,
    "card": "distorted-hohenheim",
-   "unlock": "black-forest",
    "title": "Distorted Hohenheim, the boss himself - Gregor"
   }
  },
@@ -887,7 +875,6 @@
    "base": 10710,
    "becomes": "Vergilius as an identity of his own (Heathcliff's slot), wearing what 10710 wears",
    "tested": false,
-   "unlock": "black-forest",
    "title": "Vergilius, an identity of his own - Heathcliff",
    "card": "vergilius",
    "name": "Vergilius"
@@ -896,7 +883,6 @@
    "identity": 10499,
    "base": 10410,
    "becomes": "Kali as an identity of her own (Ryōshū's slot), wearing what 10410 wears",
-   "unlock": "black-forest",
    "tested": false,
    "title": "Kali, an identity of her own - Ryōshū",
    "name": "Kali, the Red Mist"
@@ -909,7 +895,6 @@
    "folder": 10911,
    "becomes": "Dulcinea as an identity of her own (Rodion's slot): the boss's own body and whole moveset, on Rodion 10917's record (10911's bloodfiend script would drive a body it no longer has)",
    "tested": false,
-   "unlock": "black-forest",
    "title": "Dulcinea, the boss herself - an identity of her own - Rodion",
    "name": "Dulcinea",
    "cover": "Dolcinea",
@@ -926,7 +911,6 @@
    "folder": 10508,
    "becomes": "Distorted Kim Satgat as an identity of his own (Meursault's slot): the boss's own body and whole moveset",
    "tested": false,
-   "unlock": "black-forest",
    "title": "Distorted Kim Satgat, the boss himself - an identity of his own - Meursault",
    "name": "Distorted Kim Satgat",
    "cover": "Angry_KSG"
@@ -938,7 +922,6 @@
    "source": "9999_VergiliusAppearance",
    "unit": 9999,
    "folder": 10710,
-   "unlock": "black-forest",
    "title": "Vergilius, the Red Gaze - the boss himself, an identity of his own - Heathcliff",
    "tested": false,
    "name": "Vergilius, the Red Gaze",
@@ -949,7 +932,6 @@
   "roland": {
    "identity": 10115,
    "becomes": "Roland, the Black Silence (Library of Ruina): his pages on Index Father Yi Sang, at their own dice (Durandal, Ranga, Crystal Atelier, Furioso on all nine coins, Old Boys); 250 HP, Speed 6-10 - his body is the roland-yisang mod's",
-   "unlock": "black-forest",
    "tested": false,
    "moves": {
     "1": {
