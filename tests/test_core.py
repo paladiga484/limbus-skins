@@ -77,69 +77,116 @@ class Sessions(unittest.TestCase):
                 f.write(body)
         return name, root
 
-    def read(self, rel):
-        with open(os.path.join(self.cache, rel), "rb") as f:
+    def read(self, rel, root=None):
+        with open(os.path.join(root or self.cache, rel), "rb") as f:
             return f.read()
 
-    def test_apply_then_restore_is_byte_exact(self):
-        s = mods.Session(self.cache, self.data)
-        done = s.apply([self.mod("one", {"aa/11/__data": b"MOD", "aa/11/__info": b"MODINFO"})], log=lambda *a: None)
+    def client(self, name="client"):
+        d = os.path.join(self.tmp.name, "pkg", name)
+        os.makedirs(d, exist_ok=True)
+        return d
+
+    def stock(self):
+        return (self.read("aa/11/__data"), self.read("aa/11/__info"), self.read("bb/22/__data"))
+
+    def test_a_session_never_writes_the_games_own_files(self):
+        s, c = mods.Session(self.cache, self.data), self.client()
+        done = s.apply([self.mod("one", {"aa/11/__data": b"MOD", "aa/11/__info": b"MODINFO"})], [c], log=lambda *a: None)
         self.assertEqual(done, ["one"])
-        self.assertEqual(self.read("aa/11/__data"), b"MOD")
+        self.assertEqual(self.stock(), (b"stock-a", b"info-a", b"stock-b"))      # an official session sees these
+        self.assertEqual(self.read("aa/11/__data", os.path.join(c, mods.MODCACHE)), b"MOD")   # the patch reads this
+        self.assertFalse(os.path.exists(os.path.join(c, mods.MODCACHE, "aa/11/__info")))   # bundles alone
+        self.assertEqual(s.current()["mods"], ["one"])
         s.restore(log=lambda *a: None)
-        self.assertEqual(self.read("aa/11/__data"), b"stock-a")
-        self.assertEqual(self.read("aa/11/__info"), b"info-a")
+        self.assertFalse(os.path.exists(os.path.join(c, mods.MODCACHE)))
+        self.assertIsNone(s.current())
+        self.assertEqual(self.stock(), (b"stock-a", b"info-a", b"stock-b"))
+
+    def test_a_session_that_ends_badly_leaves_the_official_game_stock(self):
+        # the window closed, the PC rebooted: nothing ran restore - and nothing needs to have
+        s, c = mods.Session(self.cache, self.data), self.client()
+        s.apply([self.mod("a", {"aa/11/__data": b"A"}), self.mod("b", {"bb/22/__data": b"B"})], [c], log=lambda *a: None)
+        self.assertEqual(self.stock(), (b"stock-a", b"info-a", b"stock-b"))
+        self.assertTrue(os.path.samefile(os.path.join(c, mods.MODCACHE, "aa", "11", "__data"),
+                                         os.path.join(self.tmp.name, "built", "a", "files", "aa", "11", "__data")))
+
+    def test_an_older_limbus_skins_swap_is_healed(self):
+        # what 1.5 and before left after a bad end: the skin in the cache, the original in stock/
+        with open(os.path.join(self.cache, "aa/11/__data"), "wb") as f:
+            f.write(b"LEAKED")
+        with open(os.path.join(self.cache, "bb/22/__data"), "wb") as f:
+            f.write(b"LEAKED-NO-ORIGINAL")
+        os.makedirs(os.path.join(self.data, "stock", "aa", "11"))
+        with open(os.path.join(self.data, "stock", "aa", "11", "__data"), "wb") as f:
+            f.write(b"stock-a")
+        os.makedirs(os.path.join(self.cache, "cc", "33"))
+        with open(os.path.join(self.cache, "cc", "33", "__extra"), "wb") as f:
+            f.write(b"new")
+        with open(os.path.join(self.data, "active.json"), "w") as f:
+            json.dump({"files": [{"rel": "aa/11/__data", "new": False}, {"rel": "bb/22/__data", "new": False},
+                                 {"rel": "cc/33/__extra", "new": True}, {"rel": "../../escape", "new": True}],
+                       "mods": ["x"]}, f)
+        s, logged = mods.Session(self.cache, self.data), []
+        with mock.patch.object(mods, "game_running", return_value=True):
+            with self.assertRaises(mods.ModError):              # not while the game has them open
+                s.heal(log=logged.append)
+        self.assertEqual(s.heal(log=logged.append), 3)
+        self.assertEqual(self.read("aa/11/__data"), b"stock-a")             # its original back
+        self.assertFalse(os.path.exists(os.path.join(self.cache, "bb", "22")))   # no original: the game re-downloads it
+        self.assertFalse(os.path.exists(os.path.join(self.cache, "cc", "33", "__extra")))
         self.assertIsNone(s.active())
+        self.assertFalse(os.path.exists(os.path.join(self.data, "stock")))
+        self.assertTrue(any("1 the game downloads again" in line for line in logged), logged)
+        self.assertEqual(s.heal(), 0)                                        # once is enough
 
     def test_greencliff_stays_green_when_vergilius_wildhunt_holds_wild_hunt(self):
         # a friend's `on all` (limbus-skins 1.3.2): vergilius-wildhunt and Greencliff's green Wild Hunt
         # both change Wild Hunt's file. Only that part may be skipped - Greencliff's own body goes in.
-        s = mods.Session(self.cache, self.data)
-        logged = []
+        s, c, logged = mods.Session(self.cache, self.data), self.client(), []
         done = s.apply([self.mod("vergilius-wildhunt", {"bb/22/__data": b"VERG"}),
                         self.mod("greencliff", {"aa/11/__data": b"GREEN"}),
-                        self.mod("greencliff.forms", {"bb/22/__data": b"GREENHUNT"})], log=logged.append)
+                        self.mod("greencliff.forms", {"bb/22/__data": b"GREENHUNT"})], [c], log=logged.append)
         self.assertEqual(done, ["vergilius-wildhunt", "greencliff"])
-        self.assertEqual((self.read("aa/11/__data"), self.read("bb/22/__data")), (b"GREEN", b"VERG"))
+        mc = os.path.join(c, mods.MODCACHE)
+        self.assertEqual((self.read("aa/11/__data", mc), self.read("bb/22/__data", mc)), (b"GREEN", b"VERG"))
         self.assertTrue(any("skipped greencliff.forms" in line for line in logged))
 
     def test_skips_mods_for_bundles_the_game_replaced(self):
-        s = mods.Session(self.cache, self.data)
-        done = s.apply([self.mod("old", {"zz/99/__data": b"MOD"})], log=lambda *a: None)
+        s, c = mods.Session(self.cache, self.data), self.client()
+        done = s.apply([self.mod("old", {"zz/99/__data": b"MOD"})], [c], log=lambda *a: None)
         self.assertEqual(done, [])
-        self.assertFalse(os.path.exists(os.path.join(self.cache, "zz")))
+        self.assertFalse(os.path.exists(os.path.join(c, mods.MODCACHE, "zz")))
 
-    def test_two_mods_on_one_file_keep_the_first(self):
-        s = mods.Session(self.cache, self.data)
-        done = s.apply([self.mod("a", {"aa/11/__data": b"A"}), self.mod("b", {"aa/11/__data": b"B"})], log=lambda *a: None)
-        self.assertEqual(done, ["a"])
-        self.assertEqual(self.read("aa/11/__data"), b"A")
-        s.restore(log=lambda *a: None)
-        self.assertEqual(self.read("aa/11/__data"), b"stock-a")
-
-    def test_new_files_are_removed_on_restore(self):
-        s = mods.Session(self.cache, self.data)
-        s.apply([self.mod("n", {"aa/11/__data": b"X", "aa/11/__extra": b"new"})], log=lambda *a: None)
-        s.restore(log=lambda *a: None)
-        self.assertFalse(os.path.exists(os.path.join(self.cache, "aa/11/__extra")))
-
-    def test_reapply_restores_first(self):
-        s = mods.Session(self.cache, self.data)
-        s.apply([self.mod("a", {"aa/11/__data": b"A"})], log=lambda *a: None)
-        s.apply([self.mod("b", {"bb/22/__data": b"B"})], log=lambda *a: None)
-        self.assertEqual(self.read("aa/11/__data"), b"stock-a")
-        s.restore(log=lambda *a: None)
-        self.assertEqual(self.read("bb/22/__data"), b"stock-b")
+    def test_every_client_folder_gets_the_session_and_a_new_one_replaces_it(self):
+        s, c, j = mods.Session(self.cache, self.data), self.client(), self.client("join")
+        s.apply([self.mod("a", {"aa/11/__data": b"A"})], [c, j], log=lambda *a: None)
+        s.apply([self.mod("b", {"bb/22/__data": b"B"})], [c], log=lambda *a: None)
+        self.assertFalse(os.path.exists(os.path.join(j, mods.MODCACHE)))            # the last session's cleared
+        self.assertFalse(os.path.exists(os.path.join(c, mods.MODCACHE, "aa")))
+        self.assertEqual(self.read("bb/22/__data", os.path.join(c, mods.MODCACHE)), b"B")
+        self.assertEqual(self.stock(), (b"stock-a", b"info-a", b"stock-b"))
 
     def test_refuses_while_the_game_runs(self):
-        s = mods.Session(self.cache, self.data)
-        s.apply([self.mod("a", {"aa/11/__data": b"A"})], log=lambda *a: None)
+        s, c = mods.Session(self.cache, self.data), self.client()
+        s.apply([self.mod("a", {"aa/11/__data": b"A"})], [c], log=lambda *a: None)
         with mock.patch.object(mods, "game_running", return_value=True):
             with self.assertRaises(mods.ModError):
                 s.restore(log=lambda *a: None)
             with self.assertRaises(mods.ModError):
-                s.apply([], log=lambda *a: None)
-        self.assertEqual(self.read("aa/11/__data"), b"A")
+                s.apply([], [c], log=lambda *a: None)
+        self.assertEqual(self.read("aa/11/__data", os.path.join(c, mods.MODCACHE)), b"A")
+
+    def test_sync_tree_keeps_only_whats_wanted_and_stays_inside(self):
+        root, src = os.path.join(self.tmp.name, "tree"), os.path.join(self.tmp.name, "src")
+        with open(src, "wb") as f:
+            f.write(b"S")
+        os.makedirs(os.path.join(root, "old", "x"))
+        with open(os.path.join(root, "old", "x", "__data"), "wb") as f:
+            f.write(b"O")
+        mods.sync_tree(root, {"new/y/__data": src})
+        self.assertEqual(sorted(os.listdir(root)), ["new"])
+        with self.assertRaises(mods.ModError):
+            mods.sync_tree(root, {"../outside": src})
 
 
 class Selection(unittest.TestCase):
@@ -215,7 +262,7 @@ class Locked(unittest.TestCase):
         self.assertEqual(sorted(cli.select(["all"], visible)), ["ahab"])
         with self.assertRaises(SystemExit) as e:
             cli.refuse_locked(["Kali"], locked, self.SK)
-        self.assertIn("Black Forest", str(e.exception))
+        self.assertIn("is locked", str(e.exception))
 
     def test_unlocked_it_is_an_ordinary_skin(self):
         st = {"on": ["kali"], "unlocked": ["black-forest"]}
@@ -235,17 +282,12 @@ class Locked(unittest.TestCase):
             cli.write_locks(data, sk)
             self.assertEqual(os.stat(path).st_mtime_ns, before)        # unchanged: not rewritten
 
-    def test_every_forest_skin_has_a_title(self):
+    def test_nothing_waits_for_the_black_forest_any_more(self):
+        # friend, 2026-11-04: "remove the black forest" - every boss, ally and kit is open from the start
         from limbus_skins.build import catalog
-        forest = {k: s for k, s in catalog().items() if s.get("unlock")}
-        self.assertTrue({"kali", "kali-id", "vergilius-id", "vergilius-wildhunt", "queen-of-hatred", "butterfly-yisang",
-                         "roland"} <= set(forest))
-        strongest = {"ahab-id", "jia-qiu-id", "kromer-id", "dongbaek-spicebush-id", "priest-id", "rien-id",
-                     "queen-of-hatred-id", "dulcinea-id", "distorted-kim-id", "vergilius-boss-id",
-                     "distorted-hohenheim", "roach-emperor"}
-        self.assertTrue(strongest <= set(forest), strongest - set(forest))
-        self.assertFalse({"callisto-id", "kira-id", "ahab", "rien"} & set(forest))     # the rest stay open
-        self.assertTrue(all(s["unlock"] == "black-forest" and s.get("title") for s in forest.values()))
+        skins = catalog()
+        self.assertEqual({k for k, s in skins.items() if s.get("unlock") or s.get("ally_unlock")}, set())
+        self.assertTrue({"kali", "kali-id", "vergilius-id", "roland", "dulcinea-id", "rien-id"} <= set(skins))
 
 
 class LaunchArgs(unittest.TestCase):
@@ -1024,7 +1066,8 @@ class Identities(unittest.TestCase):
         skins = catalog()
         self.assertEqual((skins["vergilius-id"]["kind"], skins["vergilius-id"]["identity"], skins["vergilius-id"]["base"]),
                          ("identity", 10799, 10710))
-        self.assertEqual((skins["kali-id"]["identity"], skins["kali-id"]["unlock"]), (10499, "black-forest"))
+        self.assertEqual(skins["kali-id"]["identity"], 10499)
+        self.assertNotIn("unlock", skins["kali-id"])                    # the Black Forest is gone: open from the start
 
 
 class FakeGame:
@@ -1526,8 +1569,8 @@ class ClientPatch(unittest.TestCase):
         self.tmp.cleanup()
 
     def applied(self, *mods):
-        with open(os.path.join(self.data, "active.json"), "w") as f:
-            json.dump({"files": [], "mods": list(mods)}, f)
+        with open(os.path.join(self.data, "session.json"), "w") as f:
+            json.dump({"files": [], "folders": [], "mods": list(mods)}, f)
 
     def read(self, *parts):
         with open(os.path.join(self.pkg, *parts), encoding="utf-8", newline="") as f:
@@ -1624,7 +1667,7 @@ class ClientPatch(unittest.TestCase):
         client.configure(self.client, self.data)
         self.assertIn("green_coin_skills=\n", self.read("client", "myosotis.ini"))
         self.assertEqual(self.read("client", "skilltext.txt"), "")
-        os.remove(os.path.join(self.data, "active.json"))       # no session at all
+        os.remove(os.path.join(self.data, "session.json"))      # no session at all
         client.configure(self.client, self.data)
         self.assertIn("hp_shift=\n", self.read("client", "myosotis.ini"))
 

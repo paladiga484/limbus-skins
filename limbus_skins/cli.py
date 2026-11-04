@@ -6,12 +6,15 @@
   limbus-skins off <skin|id|sinner|helpers|repaints|bosses|kits|identities|all>...         turn skins off
   limbus-skins boss on|off <skin|all>   a repaint of a boss becomes it: the boss's own body
                                         and skills (boss skins always are)
-  limbus-skins run -- <launch command>  swap the skins in, start the game with your
-                                        command, put the originals back when it exits
+  limbus-skins run -- <launch command>  the skins for a private session (through its client
+                                        patch - the game's own files are never changed), start
+                                        the game with your command, end the session when it exits
                                         (a private-server package's play.sh or app: its
                                         client patch also gets green coins, skill text
                                         and body changes for the session)
-  limbus-skins apply / restore          the two halves of `run`, by hand
+  limbus-skins apply --client <folder> / restore   the two halves of `run`, by hand: the skins go
+                                        in that client patch's modcache folder for the session
+                                        (the game's own files are never changed)
   limbus-skins watch                    restore as soon as the game exits
   limbus-skins build [<skin>...]        rebuild (apply does this when needed)
   limbus-skins audit [<skin>...]        check what is built against the game's own files
@@ -99,7 +102,7 @@ def select(words, skins):
     return keys
 
 
-UNLOCK_HINT = {"black-forest": "waits in the Black Forest: let Greencliff die in a fight first"}
+UNLOCK_HINT = {}
 
 
 def unlocked(skins, st):
@@ -215,6 +218,22 @@ def _need_build(keys, skins, data_dir, cache, boss=()):
     return out
 
 
+def _heal(data):
+    """Before anything else: the game's own files back, if an older limbus-skins left skins in
+    them (its session ended without putting them back) - else the official game plays with them."""
+    from .mods import ModError, Session
+    if not os.path.exists(os.path.join(data, "active.json")):
+        return
+    try:
+        _, c = paths.find()
+        Session(c, data).heal()
+    except ModError as e:
+        print(f"warning: an older limbus-skins left skins in the game's own files - {e}", file=sys.stderr)
+    except SystemExit as e:
+        print(f"warning: an older limbus-skins left skins in the game's own files, and the game wasn't found ({e})",
+              file=sys.stderr)
+
+
 def main(argv=None):
     argv = list(sys.argv[1:] if argv is None else argv)
     cmd, args = (argv[0], argv[1:]) if argv else ("status", [])
@@ -237,6 +256,7 @@ def main(argv=None):
     from .build import boss_form, build, built_dirs, catalog, shares_static
     from .mods import ModError, Session, game_running
     st, _, data = _state()
+    _heal(data)
     allskins = catalog()
     write_locks(data, allskins)
     skins, locked = unlocked(allskins, st)
@@ -259,8 +279,9 @@ def main(argv=None):
         print(f"limbus-skins {__version__} - {len(st['on'])} skin(s) on" + (": " + ", ".join(st["on"]) if st["on"] else ""))
         try:
             g, c = paths.find()
-            sess = Session(c, data).active()
-            print("swapped in right now: " + (", ".join(sess["mods"]) if sess else "nothing (the game is stock)"))
+            sess = Session(c, data).current()
+            print("in a session right now: " + (", ".join(sess.get("mods") or []) if sess else "nothing")
+                  + " (the game's own files are never changed)")
         except SystemExit as e:
             print(e)
         print("`limbus-skins help` for commands")
@@ -458,6 +479,16 @@ def main(argv=None):
         print(f"{len(cells)} skins -> {out} (left: as the game ships it, right: with the skin)")
         return 0
     if cmd in ("apply", "run"):
+        given = []
+        if cmd == "apply":                      # apply --client <folder>...: the client patch folders
+            rest = []
+            it = iter(args)
+            for a in it:
+                if a == "--client":
+                    given.append(next(it, ""))
+                else:
+                    rest.append(a)
+            args = rest
         yes, launch = split_launch(args)
         if launch and cmd == "apply":
             raise SystemExit(f"limbus-skins apply: unknown option {launch[0]}")
@@ -474,6 +505,20 @@ def main(argv=None):
             raise SystemExit("Limbus is running - close it first")
         from . import client
         clients = client.folders_beside(args[0]) if args else []
+        if cmd == "apply":
+            clients = [os.path.abspath(f) for f in given if f]
+            bad = [f for f in clients if not os.path.isfile(os.path.join(f, "myosotis.ini"))]
+            if bad:
+                raise SystemExit(f"{bad[0]}: no myosotis.ini there - not a client patch folder")
+        if not clients:
+            raise SystemExit("skins go in through the private server's client patch, never the game's own files: "
+                             + ("`limbus-skins apply --client <its folder>`" if cmd == "apply" else
+                                "launch its play.sh or app (`limbus-skins run -- <it>`)"))
+        old = [d for d in clients if not client.reads_modcache(d)]
+        if old:
+            raise SystemExit(f"{old[0]}'s client patch is older than limbus-skins {__version__}: it can't read skins "
+                             "from its own modcache folder, and limbus-skins no longer changes the game's files - "
+                             "update the Limbus Private Server package")
         bosses = [k for k in st["on"] if boss_form(k, skins[k], set(st["boss"]))]
         old = [d for d in clients if not client.wears_bosses(d)]
         if bosses and old:                      # a boss's body on a sinner needs BossBodyPatch
@@ -486,12 +531,12 @@ def main(argv=None):
             print(f"building {len(stale)} skin(s) for this game version...")
             build(stale, g, c, data, boss=set(st["boss"]))
         try:
-            done = sess.apply(built_dirs(data, st["on"], set(st["boss"])))
+            done = sess.apply(built_dirs(data, st["on"], set(st["boss"])), clients)
         except ModError as e:
             raise SystemExit(str(e))
-        print(f"swapped in: {', '.join(done) if done else 'nothing'}")
+        print(f"skins for this session: {', '.join(done) if done else 'nothing'} (the game's own files are untouched)")
         if cmd == "apply":
-            print("start the game now; `limbus-skins restore` (or `watch`) puts the originals back")
+            print("start the game now through the private server; `limbus-skins restore` (or `watch`) ends the session")
             return 0
         try:
             for d in clients:                   # the package's client patch: green coins, skill text, bodies

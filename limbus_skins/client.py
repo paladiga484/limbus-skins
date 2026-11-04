@@ -14,7 +14,7 @@ client patch, reads them from its own folder (the one with myosotis.ini, beside 
 A boss skin (a boss's own body on a sinner) needs the patch itself to be new enough: wears_bosses.
 
 They come from the manifests of what was built (built/<folder>/manifest.json), and only from the
-folders swapped in this session (active.json): a build the game outdated, and so skipped, gets
+folders in this session (session.json): a build the game outdated, and so skipped, gets
 nothing. `run` sets them in a private-server package's client folders for the session and
 clears them after; `limbus-skins client [--off] <folder>...` does it by hand.
 """
@@ -44,8 +44,8 @@ def _manifest(data_dir, folder):
 
 
 def applied(data_dir):
-    """The built folders swapped into the game this session (none without one)."""
-    mods = _json(os.path.join(data_dir, "active.json")).get("mods")
+    """The built folders in this session (session.json; none without one)."""
+    mods = _json(os.path.join(data_dir, "session.json")).get("mods")
     return {m for m in mods if isinstance(m, str)} if isinstance(mods, list) else set()
 
 
@@ -234,6 +234,17 @@ def wears_bosses(folder):
     try:
         with open(os.path.join(folder, "myosotis.dll"), "rb") as f:
             return b"bossbody" in f.read()
+    except OSError:
+        return False
+
+
+def reads_modcache(folder):
+    """Does the client patch in folder read a session's skins from its modcache/ (myosotis's
+    ModCachePatch)? An older one only sees skins copied into the game's own files, which
+    limbus-skins no longer does: such a package gets no skins at all, and is told so."""
+    try:
+        with open(os.path.join(folder, "myosotis.dll"), "rb") as f:
+            return b"modcache" in f.read()
     except OSError:
         return False
 
