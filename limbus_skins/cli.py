@@ -67,8 +67,11 @@ def _state():
 def _save_state(st):
     cfg, _ = paths.home_dirs()
     os.makedirs(cfg, exist_ok=True)
+    kept = st.get("_kept") or []
+    doc = {k: v for k, v in st.items() if k != "_kept"}
+    doc["on"] = list(st.get("on", [])) + [k for k in kept if k not in st.get("on", [])]   # patchlc-only ones stay on
     with open(os.path.join(cfg, "state.json") + ".tmp", "w", encoding="utf-8") as f:
-        json.dump(st, f, indent=1)
+        json.dump(doc, f, indent=1)
     os.replace(os.path.join(cfg, "state.json") + ".tmp", os.path.join(cfg, "state.json"))
 
 
@@ -105,13 +108,26 @@ def select(words, skins):
 UNLOCK_HINT = {}
 
 
+PATCHLC_ONLY = "patchlc"      # a skin's "only": made and used on the machine patchlc runs on, never shipped
+
+
+def here_only(skins):
+    """The skins that are only for patchlc ("only": "patchlc", e.g. Kali - Library of Ruina's
+    Gebura) when this isn't patchlc (it sets LIMBUS_SKINS_PATCHLC=1)."""
+    if os.environ.get("LIMBUS_SKINS_PATCHLC") == "1":
+        return set()
+    return {k for k, s in skins.items() if s.get("only") == PATCHLC_ONLY}
+
+
 def unlocked(skins, st):
     """(the skins that can be used, the locked ones). A skin with "unlock" stays out of sight
-    and is never swapped in until state["unlocked"] holds that word (the private server's
-    Black Forest writes it when Greencliff dies). Locked ones are dropped from state["on"]
-    in memory, so nothing locked is built or applied."""
+    and is never swapped in until state["unlocked"] holds that word; a patchlc-only one, outside
+    patchlc. Locked ones are dropped from state["on"] in memory, so nothing locked is built or
+    applied - but a patchlc-only one that is on stays on in the saved state (_save_state)."""
     have = set(st.get("unlocked", []))
-    locked = {k for k, s in skins.items() if s.get("unlock") and s["unlock"] not in have}
+    hidden = here_only(skins)
+    locked = {k for k, s in skins.items() if s.get("unlock") and s["unlock"] not in have} | hidden
+    st["_kept"] = [k for k in st["on"] if k in hidden]
     # names this version doesn't know (a skin renamed since, e.g. gebura -> kali) drop out too
     st["on"] = [k for k in st["on"] if k in skins and k not in locked]
     return {k: v for k, v in skins.items() if k not in locked}, locked
@@ -147,7 +163,8 @@ def refuse_locked(words, locked, skins):
     for w in words:
         hit = next((k for k in locked if _norm(k) == _norm(w)), None)
         if hit:
-            why = UNLOCK_HINT.get(skins[hit]["unlock"], "is locked")
+            why = ("is only for patchlc (this machine's private server)" if skins[hit].get("only") == PATCHLC_ONLY
+                   else UNLOCK_HINT.get(skins[hit].get("unlock"), "is locked"))
             raise SystemExit(f"limbus-skins: {hit} {why}")
 
 
