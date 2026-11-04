@@ -30,6 +30,10 @@ Dress Limbus Company identities as the characters they mirror, on a **private se
 - **ID cards:** a skin with card art also redraws the identity's card - full art, uptie art,
   info panel, portraits - from pictures you put in `<data>/art/cards/<name>/` (the tool never
   downloads any). Turn the skin off and the game's card is back.
+- **Profile pictures:** every repaint, tint, helper and boss skin's pfp (the picture lists and the
+  team screen show) is its body standing idle in a fight - a repaint in its own colours - framed
+  on its face; allies get theirs the same way. Shown by the private server's client patch while
+  the skin is on; the card itself stays the game's (or the skin's card art).
 - **Auras:** effect sprites taken from a boss's own bundle drift around the body, in every
   frame and in the idle: Sancho's blood mist round Kali.
 - **Skill text:** a skin that rewrites skills also rewrites their names and descriptions, so a

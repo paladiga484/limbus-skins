@@ -16,7 +16,7 @@ from . import art, audit, bundle, cards, covers, game, helpers, lortext, repaint
 FORMS = ".forms"  # built/<skin>.forms: another body a skin turns into, swapped in apart from it
 CARD = ".card"    # built/<skin>.card: the identity's card pictures, when they aren't in its body's file
 COVER = ".cover"  # built/<ally>.cover: an identity of our own's own card pictures (covers.py), not swapped in
-FORMAT = 25      # bump when built skins change shape: older builds are rebuilt on apply
+FORMAT = 26      # bump when built skins change shape: older builds are rebuilt on apply
 
 
 def catalog():
@@ -489,7 +489,74 @@ def build(keys, game_dir, cache, data_dir, log=print, boss=(), static=True):
             ok, msg = results[k]
             results[k] = (ok, f"{msg}; {note}")
             log(f"  cover {k}: {note}")
+
+    # every other skin's pfp: its body standing idle in a fight
+    if static:
+        _pfps(keys, skins, results, ids, helper_units, set(boss), game_dir, cache, data_dir, built_root, log)
     return results
+
+
+PFP_KINDS = ("repaint", "tint", "helper", "boss")    # a kit changes moves only: it looks as it did
+
+
+def pfp_body(key, skin, ids, helper_units, boss=()):
+    """(appearance, built) of the body a skin's pfp shows: built when it's the skin's own build (a
+    repaint or a tint, in its own colours), else the body as the game draws it (a helper's, a boss's)."""
+    if skin["kind"] == "helper":
+        return (helper_units.get(skin.get("helper")) or {}).get("appearance"), False
+    if boss_form(key, skin, boss):
+        return skin.get("source"), False
+    return (ids.get(skin["identity"]) or {}).get("appearance"), True
+
+
+def _pfps(keys, skins, results, ids, helper_units, boss, game_dir, cache, data_dir, built_root, log):
+    """built/<skin>.cover holding one picture, the identity's pfp: the skin's body standing idle in a
+    fight, framed on its face. The client patch shows it for that identity's id while the skin is on
+    (client.py lists the identity with no name of its own: its card and name stay the game's)."""
+    want = [k for k in keys if skins[k]["kind"] in PFP_KINDS and results.get(k, (False,))[0]]
+    for k in keys:
+        if skins[k]["kind"] != "identity" and k not in want:
+            shutil.rmtree(os.path.join(built_root, k + COVER), ignore_errors=True)
+    if not want:
+        return
+    body = {k: pfp_body(k, skins[k], ids, helper_units, boss) for k in want}
+    cached = {}
+    try:
+        cached = covers.idle_frames(game_dir, cache, data_dir, {a for a, own in body.values() if a and not own},
+                                    os.path.join(data_dir, "art", "covers", "idle"), log=log)
+    except (OSError, ValueError) as e:
+        log(f"  pfps: the idle frames couldn't be read ({e})")
+    for k in want:
+        s, out = skins[k], os.path.join(built_root, k + COVER)
+        app, own = body[k]
+        try:
+            if not app:
+                raise covers.CoverError("its body isn't known")
+            if own:
+                try:
+                    idle = covers.built_idle(os.path.join(built_root, k, "files"), app)
+                except Exception as e:              # a body that won't render keeps the game's pfp
+                    raise covers.CoverError(f"its idle didn't render: {e}")
+            else:
+                idle = cached.get(app)
+            if idle is None:
+                raise covers.CoverError(f"no idle frame of {app}")
+            pic = covers.profile(idle, covers.stock_pictures(game_dir, cache, s["identity"]))
+            name = covers.file_name(s["identity"], "_profile")
+            shutil.rmtree(out, ignore_errors=True)
+            os.makedirs(os.path.join(out, "pics"))
+            with open(os.path.join(out, "pics", name), "wb") as f:
+                f.write(covers.dxt1_file(pic))
+            with open(os.path.join(out, "manifest.json"), "w", encoding="utf-8") as f:
+                json.dump({"format": FORMAT, "kind": "cover", "pfp": True, "skins": [k], "identity": s["identity"],
+                           "from": f"idle {app}", "files": [name]}, f, indent=1)
+            note = f"pfp: idle {app}"
+        except (covers.CoverError, cards.CardError, OSError, ValueError) as e:
+            shutil.rmtree(out, ignore_errors=True)
+            note = f"no pfp ({e}): the game's own"
+        ok, msg = results[k]
+        results[k] = (ok, f"{msg}; {note}")
+        log(f"  pfp {k}: {note}")
 
 
 def shift_rule(skin, ids, identity_rec=None):

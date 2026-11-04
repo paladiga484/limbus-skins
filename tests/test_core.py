@@ -1290,6 +1290,91 @@ class CoverBuild(unittest.TestCase):
         self.assertEqual(covers.idle_body({"base": 1}, {1: {"appearance": "X"}}, {}), "X")
 
 
+class SkinPfps(unittest.TestCase):
+    """Every other skin's pfp: its body standing idle in a fight, as the skin makes it look."""
+
+    @staticmethod
+    def stand():
+        from PIL import Image
+        img = Image.new("RGBA", (120, 360), (0, 0, 0, 0))
+        img.paste((255, 0, 0, 255), (40, 10, 80, 60))           # a red head
+        img.paste((0, 0, 255, 255), (30, 60, 90, 350))          # a blue body
+        return img
+
+    def run_pfps(self, built_idle, cached, results=None, stale=()):
+        from PIL import Image
+        from limbus_skins import build, covers
+        skins = {"rep": {"key": "rep", "kind": "repaint", "identity": 10101},
+                 "hel": {"key": "hel", "kind": "helper", "identity": 10301, "helper": 7},
+                 "bos": {"key": "bos", "kind": "boss", "identity": 10501, "source": "B_App"},
+                 "kit": {"key": "kit", "kind": "kit", "identity": 10115},
+                 "ally-id": {"key": "ally-id", "kind": "identity", "identity": 10198, "base": 10101}}
+        keys = list(skins)
+        results = results or {k: (True, "built") for k in keys}
+        ids = {10101: {"appearance": "10101_App"}, 10301: {"appearance": "10301_App"}, 10501: {"appearance": "10501_App"}}
+        out, logged = {}, []
+        with tempfile.TemporaryDirectory() as data:
+            root = os.path.join(data, "built")
+            for k in stale:
+                os.makedirs(os.path.join(root, k + build.COVER, "pics"))
+            with mock.patch.object(covers, "idle_frames", return_value=cached) as frames, \
+                    mock.patch.object(covers, "built_idle", side_effect=built_idle) as own, \
+                    mock.patch.object(covers, "stock_pictures", return_value={"_profile": Image.new("RGB", (16, 16))}):
+                build._pfps(keys, skins, results, ids, {7: {"appearance": "H_App"}}, set(), "game", "cache", data, root,
+                            logged.append)
+                for k in keys:
+                    d = os.path.join(root, k + build.COVER)
+                    if os.path.exists(d):
+                        with open(os.path.join(d, "manifest.json")) as f:
+                            out[k] = (json.load(f), sorted(os.listdir(os.path.join(d, "pics"))))
+            return out, results, frames, own, root, logged
+
+    def test_a_repaint_shows_its_own_build_and_a_helper_or_boss_the_games_body(self):
+        out, results, frames, own, root, _ = self.run_pfps(lambda files, app: self.stand(),
+                                                           {"H_App": self.stand(), "B_App": self.stand()})
+        man, pics = out["rep"]
+        self.assertEqual((man["kind"], man["pfp"], man["identity"], man["skins"], man["from"]),
+                         ("cover", True, 10101, ["rep"], "idle 10101_App"))
+        self.assertEqual(pics, ["10101_normal_profile.dxt"])          # the pfp alone: the card stays the game's
+        own.assert_called_once_with(os.path.join(root, "rep", "files"), "10101_App")   # in its own colours
+        self.assertEqual(frames.call_args[0][3], {"H_App", "B_App"})  # the others as the game draws them
+        self.assertEqual(out["hel"][0]["from"], "idle H_App")
+        self.assertEqual(out["bos"][0]["from"], "idle B_App")
+        self.assertNotIn("kit", out)                                   # moves only: it looks as it did
+        self.assertNotIn("ally-id", out)                               # an ally's cover is covers.py's
+        self.assertTrue(results["rep"][0] and "pfp: idle 10101_App" in results["rep"][1], results)
+
+    def test_without_an_idle_frame_the_game_keeps_its_pfp_and_an_old_one_goes(self):
+        out, results, _, _, root, logged = self.run_pfps(lambda files, app: None, {}, stale=("rep", "hel"))
+        self.assertEqual(out, {})
+        self.assertFalse(os.path.exists(os.path.join(root, "rep.cover")))
+        self.assertTrue(results["rep"][0] and "no pfp" in results["rep"][1], results)    # the skin itself is fine
+        self.assertTrue(any("pfp hel" in line for line in logged), logged)
+
+    def test_a_skin_that_failed_to_build_gets_no_pfp(self):
+        from limbus_skins import build
+        res = {k: (True, "built") for k in ("rep", "hel", "bos", "kit", "ally-id")}
+        res["rep"] = (False, "audit: wrong")
+        out, results, _, own, _, _ = self.run_pfps(lambda files, app: self.stand(), {"H_App": self.stand()},
+                                                   results=res, stale=("rep",))
+        self.assertNotIn("rep", out)
+        own.assert_not_called()
+        self.assertEqual(results["rep"], (False, "audit: wrong"))
+        self.assertIn("hel", out)
+        self.assertEqual(build.FORMAT, 26)                             # built output changed shape: rebuilt on apply
+
+    def test_the_pfp_is_framed_on_the_sprites_head_at_the_identitys_size(self):
+        from PIL import Image
+        from limbus_skins import covers
+        pic = covers.profile(self.stand(), {})
+        self.assertEqual(pic.size, (256, 256))
+        red = [(x, y) for y in range(0, 256, 4) for x in range(0, 256, 4)
+               if (lambda p: p[0] > 200 and p[1] < 60 and p[2] < 60)(pic.getpixel((x, y)))]
+        self.assertTrue(red, "the head is in the pfp")
+        self.assertLess(sum(y for _, y in red) / len(red), 128)            # in its upper half, the body below
+        self.assertEqual(covers.profile(self.stand(), {"_profile": Image.new("RGB", (40, 40))}).size, (40, 40))
+
+
 class Audit(unittest.TestCase):
     SKILLS = {1: {"id": 1, "skillData": [{"skillMotion": "S1"}]}, 2: {"id": 2, "skillData": [{"skillMotion": "S7"}]},
               9: {"id": 9, "skillData": [{"skillMotion": "Guard", "defType": "GUARD"}]}}
@@ -1495,6 +1580,42 @@ class ClientPatch(unittest.TestCase):
         self.assertEqual(self.read("client", "covers", "10895_normal.dxt"), "jpg")
         self.applied("greencliff")                                       # helpers not swapped in: no allies
         client.configure(self.client, self.data)
+        self.assertEqual(os.listdir(os.path.join(self.client, "covers")), [])
+
+    def pfp(self, key, identity, body):
+        d = os.path.join(self.data, "built", key + ".cover")
+        os.makedirs(os.path.join(d, "pics"))
+        name = f"{identity}_normal_profile.dxt"
+        with open(os.path.join(d, "manifest.json"), "w") as f:
+            json.dump({"kind": "cover", "pfp": True, "skins": [key], "identity": identity, "files": [name]}, f)
+        with open(os.path.join(d, "pics", name), "wb") as f:
+            f.write(body)
+
+    def test_a_skins_pfp_is_shown_for_its_identity_only_while_that_skin_is_on(self):
+        from limbus_skins import client
+        self.pfp("red", 10101, b"red")
+        self.pfp("blue", 10101, b"blue")                 # another skin of the same identity, off
+        self.pfp("queen", 10312, b"queen")               # a helper skin: in the helpers build
+        with open(os.path.join(self.data, "built", "helpers", "manifest.json")) as f:
+            man = json.load(f)
+        man["skins"] = ["queen"]
+        with open(os.path.join(self.data, "built", "helpers", "manifest.json"), "w") as f:
+            json.dump(man, f)
+        self.applied("red")
+        client.configure(self.client, self.data)
+        self.assertEqual(self.read("client", "allies.txt"), "10101\t10101\t\n")   # no name: the game's stays
+        self.assertEqual(sorted(os.listdir(os.path.join(self.client, "covers"))), ["10101_normal_profile.dxt"])
+        self.assertEqual(self.read("client", "covers", "10101_normal_profile.dxt"), "red")
+        self.applied("blue", "helpers")
+        client.configure(self.client, self.data)
+        allies = self.read("client", "allies.txt").splitlines()
+        self.assertIn("10101\t10101\t", allies)
+        self.assertIn("10312\t10312\t", allies)
+        self.assertIn("10999\t10911\tDulcinea", allies)                          # the allies, as before
+        self.assertEqual(self.read("client", "covers", "10101_normal_profile.dxt"), "blue")
+        self.assertEqual(self.read("client", "covers", "10312_normal_profile.dxt"), "queen")
+        client.configure(self.client, self.data, on=False)
+        self.assertEqual(self.read("client", "allies.txt"), "")
         self.assertEqual(os.listdir(os.path.join(self.client, "covers")), [])
 
     def test_a_helpers_build_counts_only_when_it_was_swapped_in(self):

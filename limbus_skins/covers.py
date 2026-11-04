@@ -70,13 +70,34 @@ def pictures(art, stock, face=None, zoom=1.0, pfp=None):
         size = st.size if st is not None else SIZES[suffix]
         behind = st if st is not None else stock.get("", art)      # none cached: the art itself, blurred
         if suffix == "_profile" and pfp is not None:
-            out[suffix] = cards.render(role, size, pfp, behind, face=sprite_face(pfp), zoom=SPRITE_ZOOM).convert("RGB")
+            out[suffix] = profile(pfp, stock, fallback=art)
         else:
             out[suffix] = cards.render(role, size, art, behind, face=face, zoom=zoom).convert("RGB")
     return out
 
 
-SPRITE_ZOOM = 0.7      # a battle sprite's pfp a little wider than a portrait's: the whole head, hat and all
+SPRITE_ZOOM = 0.5      # a battle sprite's pfp wider than a portrait's: the whole head, hat and all
+
+
+def profile(sprite, stock, fallback=None):
+    """The pfp (the profile card role) from a battle sprite, framed on its face: at the size of
+    the identity's own pfp (else the game's usual), over that pfp blurred - else its full card,
+    else fallback, else the sprite itself."""
+    st = stock.get("_profile")
+    size = st.size if st is not None else SIZES["_profile"]
+    behind = st if st is not None else stock.get("", fallback if fallback is not None else sprite)
+    return cards.render(cards.ROLES["_profile"], size, sprite, behind, face=sprite_face(sprite), zoom=SPRITE_ZOOM).convert("RGB")
+
+
+def built_idle(files_dir, appearance):
+    """A built body - a repaint or a tint, in its own colours - standing idle in a fight, as
+    repaint.idle_image renders it: the first __data under files_dir. None when there's none."""
+    from . import repaint
+    for root, dirs, names in os.walk(files_dir):
+        dirs.sort()
+        if "__data" in names:
+            return repaint.idle_image(os.path.join(root, "__data"), appearance, height=900)
+    return None
 
 
 def sprite_face(img):
@@ -98,7 +119,8 @@ def sprite_face(img):
     half = band // 2
     axis = max(range(left, right), key=lambda x: run[min(len(cols), x + half)] - run[max(0, x - half)])
     strip = a.crop((max(0, axis - half), top, min(img.width, axis + half), bottom))
-    rows = [v > 0.35 * 255 for v in strip.resize((1, strip.height), Image.BOX).getdata()]
+    # half the band filled: a head is; antlers or a stem rising from it aren't (Old G Corp head)
+    rows = [v > 0.5 * 255 for v in strip.resize((1, strip.height), Image.BOX).getdata()]
     run_ = max(1, int(0.15 * len(rows)))            # a head goes on into a body; a prop held up doesn't
     head = top + next((i for i in range(len(rows)) if rows[i] and sum(rows[i:i + run_]) >= 0.8 * run_), 0)
     return float(axis), head + 0.12 * (bottom - head)

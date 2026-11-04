@@ -5,8 +5,11 @@ client patch, reads them from its own folder (the one with myosotis.ini, beside 
                  hp_shift = <from>><to>@<percent>   a body the unit turns into at low HP
                             <from>><to>#<skill id>  ...or on using that skill
   skilltext.txt  names and descriptions of our own for the skills a skin rewrote
-  allies.txt     each identity of our own: the identity whose card it shows, and its name
-  covers/        an ally's own card pictures (covers.py), <id>_normal<suffix>.dxt
+  allies.txt     each identity of our own: the identity whose card it shows, and its name; and
+                 each identity a skin that's on has a pfp for, as itself with no name (its card
+                 and name stay the game's)
+  covers/        an ally's own card pictures (covers.py), and those skins' pfps:
+                 <id>_normal<suffix>.dxt
 
 A boss skin (a boss's own body on a sinner) needs the patch itself to be new enough: wears_bosses.
 
@@ -76,12 +79,34 @@ def allies(data_dir):
     return sorted(out)
 
 
-def covers(data_dir, ids):
-    """{file name: path} of the cover pictures built for the identities ids (built/*.cover)."""
+def session_skins(data_dir, done):
+    """The skins swapped in this session: the folders applied, and the skins in the helpers build
+    when it was (helpers and bosses share it)."""
+    helpers = _manifest(data_dir, "helpers").get("skins") if "helpers" in done else None
+    return set(done) | {k for k in helpers or [] if isinstance(k, str)}
+
+
+def pfps(data_dir, live):
+    """[(identity, identity, "")] for each skin in live with a pfp of its own (built/<skin>.cover
+    with "pfp"): listed as itself with no name, the client patch shows that pfp alone."""
+    out = set()
+    for man in glob.glob(os.path.join(data_dir, "built", "*.cover", "manifest.json")):
+        m = _json(man)
+        ident = m.get("identity")
+        if m.get("pfp") and isinstance(ident, int) and 0 < ident < 10 ** 9 and set(m.get("skins") or []) & live:
+            out.add((ident, ident, ""))
+    return sorted(out)
+
+
+def covers(data_dir, ids, live=frozenset()):
+    """{file name: path} of the cover pictures built for the identities ids (built/*.cover); a
+    skin's pfp only while that skin is in live (two skins of one identity: the one that's on)."""
     out = {}
     for man in sorted(glob.glob(os.path.join(data_dir, "built", "*.cover", "manifest.json"))):
         m = _json(man)
         if m.get("identity") not in ids:
+            continue
+        if m.get("pfp") and not set(m.get("skins") or []) & live:
             continue
         pics = os.path.join(os.path.dirname(man), "pics")
         for f in m.get("files") or []:
@@ -196,8 +221,10 @@ def configure(folder, data_dir, on=True):
     _replace(ini, set_key(text, SHIFT, ",".join(hp_shifts(data_dir, done))))
     _replace(os.path.join(folder, "skilltext.txt"), skilltext_file(skill_texts(data_dir) if "helpers" in done else {}))
     ours = allies(data_dir) if "helpers" in done else []
-    _replace(os.path.join(folder, "allies.txt"), allies_file(ours))
-    _sync(os.path.join(folder, "covers"), covers(data_dir, {i for i, _, _ in ours}))
+    live = session_skins(data_dir, done)
+    ours += [p for p in pfps(data_dir, live) if p[0] not in {i for i, _, _ in ours}]
+    _replace(os.path.join(folder, "allies.txt"), allies_file(sorted(ours)))
+    _sync(os.path.join(folder, "covers"), covers(data_dir, {i for i, _, _ in ours}, live))
     return True
 
 
