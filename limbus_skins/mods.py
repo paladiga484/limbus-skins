@@ -113,11 +113,39 @@ class Session:
     """A private session's skins (session.json: the skins, and the client folders whose
     modcache/ holds them), and the cache swap an older limbus-skins may have left (active.json)."""
 
-    def __init__(self, cache, data_dir):
+    def __init__(self, cache, data_dir, game=None):
         self.cache = cache
+        self.game = game                                        # LimbusCompany_Data: its shipped catalog
+        self.data = data_dir
         self.stock = os.path.join(data_dir, "stock")
         self.path = os.path.join(data_dir, "active.json")      # an older limbus-skins' swap into the cache
         self.live = os.path.join(data_dir, "session.json")
+        self.clean = os.path.join(data_dir, "clean.json")      # the cache as it was when last found clean
+
+    def heal_leftovers(self, log=print):
+        """Remove every cached bundle that isn't as the game ships it (game.leftovers) - whatever
+        left it, whether or not anything wrote it down - so the official game downloads its own
+        again. Skipped while nothing in the cache changed since it was last found clean. Returns
+        how many went."""
+        from . import game
+        doc = self._load(self.clean)
+        if doc and doc.get("clean") == game.fingerprint(self.cache, self.game):
+            return 0
+        if game_running():
+            raise ModError("Limbus is running - its files are checked once it exits")
+        rows = game.leftovers(self.cache, game.catalogs(self.cache, self.game))
+        if rows is None:
+            log("warning: the game's catalog couldn't be read, so its files weren't checked for leftovers")
+            return 0
+        for rel, real, stock in rows:
+            shutil.rmtree(os.path.join(self.cache, *rel.split("/")), ignore_errors=True)
+            log(f"removed {rel} from the game's own files: {real} bytes where the game ships {stock} - a "
+                "modded copy something older left there; the game downloads its own again")
+        os.makedirs(self.data, exist_ok=True)
+        with open(self.clean + ".tmp", "w", encoding="utf-8") as f:
+            json.dump({"clean": game.fingerprint(self.cache, self.game)}, f)
+        os.replace(self.clean + ".tmp", self.clean)
+        return len(rows)
 
     @staticmethod
     def _load(path):
@@ -215,15 +243,15 @@ class Session:
         modcache/ of the session. Returns how many files that took."""
         n = self.heal(log)
         doc = self.current()
-        if doc is None:
-            return n
-        if game_running():
-            raise ModError("Limbus is running - the session's skins go once it exits")
-        for f in doc.get("folders") or []:
-            if isinstance(f, str):
-                shutil.rmtree(os.path.join(f, MODCACHE), ignore_errors=True)
-        os.remove(self.live)
-        return n + len(doc.get("files") or [])
+        if doc is not None:
+            if game_running():
+                raise ModError("Limbus is running - the session's skins go once it exits")
+            for f in doc.get("folders") or []:
+                if isinstance(f, str):
+                    shutil.rmtree(os.path.join(f, MODCACHE), ignore_errors=True)
+            os.remove(self.live)
+            n += len(doc.get("files") or [])
+        return n + self.heal_leftovers(log)               # and nothing modded in the game's own files
 
     def watch(self, appear_timeout=600, log=print):
         """Wait for the game to start, then to exit, then restore."""

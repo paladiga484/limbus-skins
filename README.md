@@ -185,9 +185,15 @@ If one looks wrong or a fight freezes, turn it off with `limbus-skins off <skin>
 
 ## How it works
 
-- The game reads battle bodies and its static data from Unity's download cache. A session
-  copies the built files over the cached ones and keeps the originals aside. `restore` puts
-  them back byte for byte. Nothing is changed while the game is running.
+- The game reads battle bodies and its static data from Unity's download cache. limbus-skins
+  never writes there: a session links the built files into a `modcache` folder beside the
+  private server's client patch, which has the game read them instead - in that session only.
+  The official game only ever reads its own files.
+- Before and after every session (and on `status`, `build` and `restore`), each cached bundle is
+  held against the size the game's own catalog says it ships with. One that differs - a modded
+  copy an older version or a mod left behind, which the game can't tell apart since it carries
+  the stock CRC - is removed, and the game downloads its own again. Nothing is checked or
+  removed while the game runs, and nothing at all if the catalog can't be read.
 - **Repaints** rewrite only an identity's own body bundle. Each frame is pointed at the
   matching drawing of the other character (idle to idle, guard to guard, each skill's frames
   spread across theirs), packed into the body's own atlas pages. Only the objects the
@@ -236,8 +242,11 @@ If one looks wrong or a fight freezes, turn it off with `limbus-skins off <skin>
 
 ## Undo everything
 
-`limbus-skins restore` with the game closed, then `pip uninstall limbus-skins`. If anything
-ever goes wrong, Steam's *Verify integrity of game files* puts the game back too.
+`limbus-skins restore` with the game closed (it also removes any modded game file an older
+version left), then `pip uninstall limbus-skins`. Steam's *Verify integrity of game files*
+doesn't look at the download cache; to start it over, the game folder's own
+`delete_addressable_cache.bat` (Project Moon's) empties it - or delete the cache folder named
+above - and the game downloads everything again.
 Its own files live in `~/.config/limbus-skins` and `~/.local/share/limbus-skins` (Linux) or
 `%APPDATA%\limbus-skins` and `%LOCALAPPDATA%\limbus-skins` (Windows).
 

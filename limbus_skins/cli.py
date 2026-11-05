@@ -256,6 +256,16 @@ def _need_build(keys, skins, data_dir, cache, boss=()):
     return out
 
 
+def _check_game_files(sess):
+    """No modded copy may stay in the game's own files (Session.heal_leftovers) - checked before a
+    build or a session, and after one; while the game runs it waits."""
+    from .mods import ModError
+    try:
+        sess.heal_leftovers(log=lambda line: print(line, file=sys.stderr))
+    except ModError as e:
+        print(f"warning: the game's own files weren't checked - {e}", file=sys.stderr)
+
+
 def _heal(data):
     """Before anything else: the game's own files back, if an older limbus-skins left skins in
     them (its session ended without putting them back) - else the official game plays with them."""
@@ -322,7 +332,9 @@ def main(argv=None):
         print(f"limbus-skins {__version__} - {len(st['on'])} skin(s) on" + (": " + ", ".join(st["on"]) if st["on"] else ""))
         try:
             g, c = paths.find()
-            sess = Session(c, data).current()
+            s = Session(c, data, game=g)
+            _check_game_files(s)
+            sess = s.current()
             print("in a session right now: " + (", ".join(sess.get("mods") or []) if sess else "nothing")
                   + " (the game's own files are never changed)")
         except SystemExit as e:
@@ -423,7 +435,9 @@ def main(argv=None):
         return 0
 
     g, c = paths.find()
-    sess = Session(c, data)
+    sess = Session(c, data, game=g)
+    if cmd in ("build", "audit", "apply", "run", "restore", "watch"):
+        _check_game_files(sess)             # a build from a modded copy, or a session beside one, leaks
 
     if cmd == "build":
         refuse_locked(args, locked, allskins)
@@ -635,6 +649,16 @@ def doctor(skins, st, data):
         from .game import find_static
         p, _ = find_static(c)
         print(f"  ok   static data: {os.path.relpath(p, c)}")
+        from .game import catalogs, leftovers
+        rows = leftovers(c, catalogs(c, g))
+        if rows is None:
+            print("  ??   game files: the game's catalog couldn't be read - not checked")
+        elif rows:
+            ok = False
+            print(f"  LEAK {len(rows)} of the game's own file(s) aren't as it ships them: "
+                  + ", ".join(r for r, _, _ in rows[:5]) + " - `limbus-skins restore` (game closed) removes them")
+        else:
+            print("  ok   game files: every cached bundle is as the game ships it")
     except SystemExit as e:
         ok = False
         print(f"  FAIL {e}")

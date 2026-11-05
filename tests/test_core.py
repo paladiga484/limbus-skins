@@ -285,6 +285,118 @@ class OneCopy(unittest.TestCase):
             self.assertEqual(on(), ["sora-id", "ahab"])
 
 
+def fake_catalog(entries, mislabel=()):
+    """An Addressables catalog.bin as the game's lays out a bundle: its 16-byte hash, its folder name
+    (u32 length 32, then the name), and the record [where the hash is][where the name is][CRC][size].
+    mislabel: hashes whose record points at another folder's name."""
+    blob = bytearray(64)
+    for folder, h, size in entries:
+        blob += f"sd_x_assets_all_{h}.bundle".encode()
+        x = len(blob)
+        blob += bytes.fromhex(h)
+        blob += struct.pack("<I", 32)
+        n = len(blob)
+        blob += (("f" * 32) if h in mislabel else folder).encode() + b"\x00\x00"
+        blob += struct.pack("<IIII", x, n, 0xBC5EE30D, size)
+    return bytes(blob)
+
+
+class CacheLeftovers(unittest.TestCase):
+    # friend, 2026-11-05: "i need it to not leak" - a modded bundle swapped in with no record of it
+    # stays in the game's own cache, and its stock CRC hides it from the game. Every cached bundle
+    # is held against the size the game's own catalog says it ships with.
+    A, B, C, D = ("a" * 32, "1" * 32), ("b" * 32, "2" * 32), ("c" * 32, "3" * 32), ("d" * 32, "4" * 32)
+
+    def cache(self, root, sizes):
+        c = os.path.join(root, "LocalLow", "Unity", "ProjectMoon_LimbusCompany")
+        for (folder, h), n in sizes.items():
+            os.makedirs(os.path.join(c, folder, h))
+            with open(os.path.join(c, folder, h, "__data"), "wb") as f:
+                f.write(b"U" * n)
+        return c
+
+    def put_catalog(self, root, blob):
+        d = os.path.join(root, "LocalLow", "ProjectMoon", "LimbusCompany", "com.unity.addressables")
+        os.makedirs(d, exist_ok=True)
+        with open(os.path.join(d, "catalog_S1.bin"), "wb") as f:
+            f.write(blob)
+
+    def test_the_catalog_gives_each_bundle_its_stock_size(self):
+        from limbus_skins import game
+        cat = fake_catalog([(*self.A, 100), (*self.B, 200)], mislabel={self.B[1]})
+        self.assertEqual(game.stock_size(cat, *self.A), 100)
+        self.assertIsNone(game.stock_size(cat, *self.B))       # its record names another folder: not taken
+        self.assertIsNone(game.stock_size(cat, *self.C))       # not in the catalog
+
+    def test_a_bundle_that_isnt_its_stock_size_is_a_leftover(self):
+        from limbus_skins import game
+        with tempfile.TemporaryDirectory() as tmp:
+            c = self.cache(tmp, {self.A: 100, self.B: 200, self.C: 999, self.D: 50})
+            cat = fake_catalog([(*self.A, 100), (*self.B, 200), (*self.C, 300)])    # D: an older version
+            self.assertEqual(game.leftovers(c, [cat]), [("/".join(self.C), 999, 300)])
+
+    def test_an_unreadable_catalog_never_removes_anything(self):
+        from limbus_skins import game
+        with tempfile.TemporaryDirectory() as tmp:
+            c = self.cache(tmp, {self.A: 100, self.B: 200, self.C: 300})
+            self.assertIsNone(game.leftovers(c, []))                                  # no catalog
+            self.assertIsNone(game.leftovers(c, [b"\x00" * 4096]))                    # its layout changed
+            wrong = fake_catalog([(*self.A, 1), (*self.B, 2), (*self.C, 3)])
+            self.assertIsNone(game.leftovers(c, [wrong]))                             # everything "modded": no
+
+    def test_the_catalogs_are_the_downloaded_one_and_the_shipped_one(self):
+        from limbus_skins import game
+        with tempfile.TemporaryDirectory() as tmp:
+            c = self.cache(tmp, {self.A: 100})
+            self.put_catalog(tmp, b"downloaded")
+            g = os.path.join(tmp, "LimbusCompany_Data")
+            os.makedirs(os.path.join(g, "StreamingAssets", "aa"))
+            with open(os.path.join(g, "StreamingAssets", "aa", "catalog.bin"), "wb") as f:
+                f.write(b"shipped")
+            self.assertEqual(game.catalogs(c, g), [b"downloaded", b"shipped"])
+
+    def test_leftovers_go_and_the_game_downloads_its_own(self):
+        from limbus_skins import game
+        with tempfile.TemporaryDirectory() as tmp:
+            c = self.cache(tmp, {self.A: 100, self.B: 200, self.C: 999})
+            self.put_catalog(tmp, fake_catalog([(*self.A, 100), (*self.B, 200), (*self.C, 300)]))
+            data = os.path.join(tmp, "data")
+            sess = mods.Session(c, data)
+            said = []
+            with mock.patch.object(mods, "game_running", return_value=True):
+                with self.assertRaises(mods.ModError):                        # never under the running game
+                    sess.heal_leftovers(log=said.append)
+            self.assertTrue(os.path.isdir(os.path.join(c, *self.C)))
+            self.assertEqual(sess.heal_leftovers(log=said.append), 1)
+            self.assertFalse(os.path.exists(os.path.join(c, *self.C)))           # gone: fetched again, stock
+            self.assertTrue(os.path.isfile(os.path.join(c, *self.A, "__data")))  # the rest untouched
+            self.assertIn("/".join(self.C), said[-1])
+            with mock.patch.object(game, "leftovers", side_effect=AssertionError("checked again")):
+                self.assertEqual(sess.heal_leftovers(log=said.append), 0)     # nothing changed: not again
+            with open(os.path.join(c, *self.B, "__data"), "ab") as f:
+                f.write(b"modded")                                            # something wrote a game file
+            self.assertEqual(sess.heal_leftovers(log=said.append), 1)
+            self.assertFalse(os.path.exists(os.path.join(c, *self.B)))
+
+    def test_status_and_restore_check_the_game_files(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            c = self.cache(tmp, {self.A: 100, self.B: 200, self.C: 999})
+            self.put_catalog(tmp, fake_catalog([(*self.A, 100), (*self.B, 200), (*self.C, 300)]))
+            g = os.path.join(tmp, "LimbusCompany_Data")
+            os.makedirs(g)
+            env = {"XDG_CONFIG_HOME": tmp, "XDG_DATA_HOME": tmp, "APPDATA": tmp, "LOCALAPPDATA": tmp,
+                   "LIMBUS_GAME": g, "LIMBUS_CACHE": c}
+            with mock.patch.dict(os.environ, env), mock.patch.object(mods, "game_running", return_value=False), \
+                    mock.patch("sys.stdout"), mock.patch("sys.stderr"):
+                self.assertEqual(cli.main(["status"]), 0)
+                self.assertFalse(os.path.exists(os.path.join(c, *self.C)))
+                os.makedirs(os.path.join(c, *self.C))
+                with open(os.path.join(c, *self.C, "__data"), "wb") as f:
+                    f.write(b"x" * 5)                                         # left behind again
+                self.assertEqual(cli.main(["restore"]), 0)
+                self.assertFalse(os.path.exists(os.path.join(c, *self.C)))
+
+
 class Rebuilds(unittest.TestCase):
     SK = {"ahab": {"identity": 10808, "kind": "repaint", "source": "x"},
           "kira": {"identity": 10814, "kind": "helper"}}

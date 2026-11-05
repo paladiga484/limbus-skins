@@ -7,6 +7,7 @@ import glob
 import json
 import os
 import re
+import struct
 import warnings
 
 UNITY_VERSION = "6000.3.12f1"            # bundles carry a stripped version string
@@ -33,6 +34,120 @@ def cache_bundles(cache):
             if os.path.isfile(p):
                 out[h] = p
     return out
+
+
+def _cached(cache):
+    """(folder, hash, __data path) of every cached bundle, in a fixed order."""
+    try:
+        folders = sorted(os.listdir(cache))
+    except OSError:
+        return
+    for d in folders:
+        dd = os.path.join(cache, d)
+        if not os.path.isdir(dd):
+            continue
+        for h in sorted(os.listdir(dd)):
+            p = os.path.join(dd, h, "__data")
+            if os.path.isfile(p):
+                yield d, h, p
+
+
+def catalog_paths(cache, game=None):
+    """The game's Addressables catalogs: the ones it downloaded (under LocalLow, beside the
+    cache), newest first, then the one it shipped with."""
+    locallow = os.path.dirname(os.path.dirname(os.path.abspath(cache)))
+    found = sorted(glob.glob(os.path.join(locallow, "ProjectMoon", "LimbusCompany", "com.unity.addressables",
+                                          "catalog_*.bin")), key=os.path.getmtime, reverse=True)
+    if game:
+        found.append(os.path.join(game, "StreamingAssets", "aa", "catalog.bin"))
+    return found
+
+
+def catalogs(cache, game=None):
+    """The bytes of each catalog that can be read (catalog_paths)."""
+    out = []
+    for p in catalog_paths(cache, game):
+        try:
+            with open(p, "rb") as f:
+                out.append(f.read())
+        except OSError:
+            pass
+    return out
+
+
+def _record(cat, p, name):
+    """The size in the record at p, if its folder-name pointer names `name`."""
+    if p < 0 or p + 16 > len(cat):
+        return None
+    q = struct.unpack_from("<I", cat, p + 4)[0]
+    return struct.unpack_from("<I", cat, p + 12)[0] if cat[q:q + len(name)] == name else None
+
+
+def stock_size(cat, folder, h):
+    """The size catalog bytes `cat` give bundle <folder>/<h> as the game ships it, or None. Its
+    record is four u32s - where its 16-byte hash is, where its folder name is, its CRC, its size -
+    a little after those bytes; the folder name must be this bundle's own."""
+    try:
+        raw, name = bytes.fromhex(h), folder.encode()
+    except ValueError:
+        return None
+    if len(raw) != 16:
+        return None
+    x = cat.find(raw)
+    while x != -1:
+        ptr = struct.pack("<I", x)
+        size = _record(cat, cat.find(ptr, x + 16, x + 16 + 1024), name)   # the record follows its strings
+        p = cat.find(ptr) if size is None else -1
+        while size is None and p != -1:
+            size = _record(cat, p, name)
+            p = cat.find(ptr, p + 1)
+        if size is not None:
+            return size
+        x = cat.find(raw, x + 1)
+    return None
+
+
+def leftovers(cache, cats):
+    """[(<folder>/<hash>, its size, the size it ships with)] for each cached bundle whose size isn't
+    the one the game's catalog gives it: a modded copy (an older limbus-skins' swap, or a mod's)
+    forged to the stock CRC, so the game never fetched its own. None when the catalogs can't be
+    read with confidence - then nothing may be removed."""
+    if not cats:
+        return None
+    rows, known, total = [], 0, 0
+    for folder, h, path in _cached(cache):
+        total += 1
+        sizes = {s for cat in cats for s in (stock_size(cat, folder, h),) if s is not None}
+        if not sizes:
+            continue                                   # an older version: the game no longer loads it
+        known += 1
+        real = os.path.getsize(path)
+        if real not in sizes:
+            rows.append((f"{folder}/{h}", real, max(sizes)))
+    if not total:
+        return []
+    if not known or known * 2 < total or (rows and len(rows) == known) or (len(rows) > 8 and len(rows) * 4 > known):
+        return None                                    # most unknown, or most "modded": the layout changed
+    return rows
+
+
+def fingerprint(cache, game=None):
+    """Size and time of every cached bundle and catalog: while it's the same, nothing changed."""
+    import hashlib
+    h = hashlib.sha256()
+    for p in catalog_paths(cache, game):
+        try:
+            st = os.stat(p)
+        except OSError:
+            continue
+        h.update(f"{p}\0{st.st_size}\0{st.st_mtime_ns}\n".encode())
+    for folder, hh, path in _cached(cache):
+        try:
+            st = os.stat(path)
+        except OSError:
+            continue
+        h.update(f"{folder}/{hh}\0{st.st_size}\0{st.st_mtime_ns}\n".encode())
+    return h.hexdigest()
 
 
 def catalog_names(game):

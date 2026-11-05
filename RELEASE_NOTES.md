@@ -1,6 +1,14 @@
 # limbus-skins 1.6.1
 
-Every skin moves, and each character is on once
+Nothing modded left in the game, every skin moves, and each character is on once
+- **No leftovers in the official game.** 1.6.0 put back what an older version had written down
+  as swapped in, but a file swapped in without a record could stay - and since it carries the
+  stock CRC, the game never noticed and played with it. Now every bundle in the game's download
+  cache is held against the size the game's own catalog says it ships with, before and after
+  every session and on `status`, `build` and `restore`; any that differs is removed, and the
+  game downloads its own again. Nothing is checked while the game runs, and nothing is removed
+  if the catalog can't be read. **If you used skins before 1.6.0:** run `limbus-skins restore`
+  once with the game closed. `limbus-skins doctor` shows the check without changing anything.
 - **Still skins move again.** 24 repaints (Werner, Sora, Rufo, Starbuck, Nelly, Cassetti and
   others) stood still in their idle: they were built while an older version's skins were still
   left in the game's own files, and their animation clashed with those leftovers. This version
