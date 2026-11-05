@@ -1053,6 +1053,10 @@ def repaint(target, locate, source=None, clips=None, mapping=None, head=None, mi
             if sp["skeleton"].path_id in done_skel:
                 continue                                 # forms of one identity can share an idle
             done_skel.add(sp["skeleton"].path_id)
+            try:
+                spine.refuse_modded(json.loads(spine.text_of(sp["skeleton"])))
+            except spine.ModdedCopy as e:
+                raise RepaintError(f"{target}: {e}") from None
             src, rigs_ = rsrc, rrigs
             try:
                 if rigs_:

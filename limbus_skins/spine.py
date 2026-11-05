@@ -26,6 +26,20 @@ class SpineError(Exception):
     pass
 
 
+class ModdedCopy(Exception):
+    """The skeleton already carries our parts: the game's cache holds a modded copy."""
+
+
+def refuse_modded(doc):
+    """Raise ModdedCopy when `doc` was rewritten by us before (a bone or slot named with
+    PREFIX). Built on top of that, a borrowed rig clashes with itself and the idle freezes."""
+    for kind in ("bones", "slots"):
+        for x in doc.get(kind, []):
+            if x["name"].startswith(PREFIX):
+                raise ModdedCopy(f"its idle already has our {kind[:-1]} {x['name']} - the game's cache "
+                                 "holds a modded copy; run `limbus-skins restore` with the game closed")
+
+
 # --- atlas text -------------------------------------------------------------------
 
 def parse_atlas(text):

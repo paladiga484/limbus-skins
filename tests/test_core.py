@@ -596,6 +596,14 @@ class Rigs(unittest.TestCase):
         self.assertEqual(d["animations"]["animation"]["drawOrder"][0]["offsets"][0]["slot"], p + "body")
         spine.check(d, self.regions())
 
+    def test_a_target_we_already_rewrote_is_refused(self):
+        # a modded copy left in the game's cache must fail the build, not freeze the idle
+        spine.refuse_modded(self.target())
+        d = spine.transplant(self.target(), self.rig(), 0, 0, "idle", skin="basic", names=["animation"])
+        with self.assertRaises(spine.ModdedCopy):
+            spine.refuse_modded(d)
+        self.assertFalse(issubclass(spine.ModdedCopy, spine.SpineError))   # never caught as "frames instead"
+
     def test_transplant_maps_matching_skins(self):
         t = self.target()
         t["skins"] += [{"name": "1", "attachments": {}}, {"name": "2", "attachments": {}}]
@@ -1425,7 +1433,7 @@ class SkinPfps(unittest.TestCase):
         own.assert_not_called()
         self.assertEqual(results["rep"], (False, "audit: wrong"))
         self.assertIn("hel", out)
-        self.assertEqual(build.FORMAT, 26)                             # built output changed shape: rebuilt on apply
+        self.assertEqual(build.FORMAT, 27)                             # built while the cache held a leaked copy: rebuilt on apply
 
     def test_the_pfp_is_framed_on_the_sprites_head_at_the_identitys_size(self):
         from PIL import Image
