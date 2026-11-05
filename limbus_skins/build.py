@@ -27,7 +27,29 @@ def catalog():
                       ("bosses", "boss"), ("kits", "kit")):
         for key, e in doc.get(kind, {}).items():
             skins[key] = dict(e, key=key, kind=one)
-    return with_allies(skins)
+    skins = with_allies(skins)
+    check_copies(skins)
+    return skins
+
+
+def character(skins, key):
+    """The skin that stands for key's character: "dupe_of" (the same character, in the same
+    body) followed to the one that has none. One copy of a character is on at a time."""
+    seen = set()
+    while skins.get(key, {}).get("dupe_of"):
+        if key in seen:
+            raise ValueError(f"skins.json: {key}'s dupe_of goes round in a circle")
+        seen.add(key)
+        key = skins[key]["dupe_of"]
+    return key
+
+
+def check_copies(skins):
+    """Raise ValueError for a "dupe_of" that names no skin, or one that loops."""
+    for key, s in skins.items():
+        if s.get("dupe_of") and s["dupe_of"] not in skins:
+            raise ValueError(f"skins.json: {key} is a copy of '{s['dupe_of']}', which is no skin")
+        character(skins, key)
 
 
 def display_name(s, key):
@@ -46,7 +68,8 @@ def with_allies(skins):
     own (kind "identity"), equipable beside the skin's identity - a boss in its own body with its
     whole moveset, a helper with its kit - showing that identity's card. "ally_unit" and
     "ally_unlock" choose its boss record and lock apart from the skin's; its base record is
-    chosen at build time (helpers.ally_base)."""
+    chosen at build time (helpers.ally_base). The skin and its ally are one character in one
+    body ("dupe_of"): the ally stands for it, and "ally_dupe_of" names the ally's own copy."""
     out = dict(skins)
     for key, s in skins.items():
         if not s.get("ally"):
@@ -54,6 +77,7 @@ def with_allies(skins):
         k = key + "-id"
         if k in skins:
             raise ValueError(f"skins.json: {key}'s ally would be '{k}', which is another skin")
+        out[key] = dict(s, dupe_of=s.get("dupe_of") or k)
         a = {"key": k, "kind": "identity", "identity": s["ally"], "of": s["identity"], "folder": s["identity"],
              "becomes": f"{s.get('becomes') or key} - as an identity of its own", "tested": False}
         a.update({f: s[f] for f in ("source", "helper", "script", "cover", "cover_face", "cover_zoom") if f in s})
@@ -64,6 +88,8 @@ def with_allies(skins):
             a["unlock"] = unlock
         a["title"] = f"{s.get('title') or s.get('becomes') or key} - ally"    # how the forest's gifts name it
         a["name"] = display_name(s, key)
+        if s.get("ally_dupe_of"):
+            a["dupe_of"] = s["ally_dupe_of"]
         out[k] = a
     return out
 

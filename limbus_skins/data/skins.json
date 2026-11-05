@@ -1,5 +1,5 @@
 {
- "_note": "Every skin this tool can build. helpers: the identity takes a story helper unit's body and skills (changes skills: private servers only). repaints: the identity keeps its own body and skills and is redrawn as another character. tints: the identity keeps its own body and drawings, recolored. bosses: the identity becomes a boss - the boss's own body and skills (needs the Limbus Private Server's client patch, build 6). identities: a new identity of our own, cloned from a base (with \"source\"/\"unit\": a boss's own body and skills - an ally). kits: an identity's moves and text only, for a body mod's character. \"card\": the identity's ID card pictures drawn from the player's own card art (<data dir>/art/cards/<name>/), while the skin is on. \"unlock\": waits for the private server's Black Forest. Nothing here is game art; everything is built from your own installed game.",
+ "_note": "Every skin this tool can build. helpers: the identity takes a story helper unit's body and skills (changes skills: private servers only). repaints: the identity keeps its own body and skills and is redrawn as another character. tints: the identity keeps its own body and drawings, recolored. bosses: the identity becomes a boss - the boss's own body and skills (needs the Limbus Private Server's client patch, build 6). identities: a new identity of our own, cloned from a base (with \"source\"/\"unit\": a boss's own body and skills - an ally). kits: an identity's moves and text only, for a body mod's character. \"card\": the identity's ID card pictures drawn from the player's own card art (<data dir>/art/cards/<name>/), while the skin is on. \"unlock\": waits for the private server's Black Forest. \"dupe_of\": the same character in the same body as that skin - one copy is on at a time (a skin with an \"ally\" is one with it; \"ally_dupe_of\" names the ally's own copy). Nothing here is game art; everything is built from your own installed game.",
  "helpers": {
   "arayashiki-ryoshu": {
    "identity": 10401,
@@ -214,7 +214,8 @@
    "identity": 10911,
    "becomes": "Dulcinea",
    "source": "8381_Dulcinea_BossAppearance",
-   "tested": false
+   "tested": false,
+   "dupe_of": "dulcinea-id"
   },
   "barber": {
    "identity": 11111,
@@ -409,7 +410,8 @@
    "becomes": "Jun",
    "source": "91013_Kurokumo_MiddleBossAppearance",
    "tested": false,
-   "cover": "Kuro_Jyun_Clock"
+   "cover": "Kuro_Jyun_Clock",
+   "ally_dupe_of": "jun-ishmael-id"
   },
   "sasha": {
    "identity": 10210,
@@ -878,7 +880,8 @@
    "tested": false,
    "title": "Vergilius, an identity of his own - Heathcliff",
    "card": "vergilius",
-   "name": "Vergilius"
+   "name": "Vergilius",
+   "dupe_of": "vergilius"
   },
   "kali-id": {
    "only": "patchlc",
@@ -887,7 +890,8 @@
    "becomes": "Kali as an identity of her own (Ryōshū's slot), wearing what 10410 wears",
    "tested": false,
    "title": "Kali, an identity of her own - Ryōshū",
-   "name": "Kali, the Red Mist"
+   "name": "Kali, the Red Mist",
+   "dupe_of": "kali"
   },
   "dulcinea-id": {
    "identity": 10999,

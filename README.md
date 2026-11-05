@@ -88,6 +88,10 @@ limbus-skins boss on ahab              # Ahab herself: her own body and skills (
 limbus-skins run --yes -- <the command that starts the game on your private server>
 ```
 
+One skin per identity, and one copy of a character: a skin and its own identity (`starbuck`
+and `starbuck-id`) wear the same body, so turning one on turns the other off. `all` picks each
+character's own identity and leaves the sinner's identity as it was.
+
 With the Limbus Private Server packages, the launcher is the package's own:
 
 ```

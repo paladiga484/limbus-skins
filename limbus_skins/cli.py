@@ -3,6 +3,7 @@
   limbus-skins                         what is on, and whether the game is ready
   limbus-skins list [all|on|<sinner>]  every skin you can turn on
   limbus-skins on <skin|id|sinner|helpers|repaints|bosses|kits|identities|tested|all>...   turn skins on (saved)
+                                        one per identity, one copy of a character: the newest wins
   limbus-skins off <skin|id|sinner|helpers|repaints|bosses|kits|identities|all>...         turn skins off
   limbus-skins boss on|off <skin|all>   a repaint of a boss becomes it: the boss's own body
                                         and skills (boss skins always are)
@@ -103,6 +104,26 @@ def select(words, skins):
             raise SystemExit(f"limbus-skins: no skin, identity or sinner called '{w}' (see `limbus-skins list`)")
         keys += [k for k in hit if k not in keys]
     return keys
+
+
+def one_each(keys, skins):
+    """keys with one copy of each character (build.character): the character's own skin when it
+    is among them, else the newest (last) named."""
+    from .build import character
+    pick = {}
+    for k in keys:
+        c = character(skins, k)
+        if pick.get(c) != c:
+            pick[c] = k
+    keep = set(pick.values())
+    return [k for k in keys if k in keep]
+
+
+def dedupe(on, skins):
+    """(on with one copy of each character, the copies turned off): an older limbus-skins could
+    have both on. The character's own skin stays when it is on, else the newest."""
+    keep = one_each(on, skins)
+    return keep, [k for k in on if k not in keep]
 
 
 UNLOCK_HINT = {}
@@ -270,13 +291,18 @@ def main(argv=None):
         print(f"game:  {g}\ncache: {c}")
         return 0
 
-    from .build import boss_form, build, built_dirs, catalog, shares_static
+    from .build import boss_form, build, built_dirs, catalog, character, shares_static
     from .mods import ModError, Session, game_running
     st, _, data = _state()
     _heal(data)
     allskins = catalog()
     write_locks(data, allskins)
     skins, locked = unlocked(allskins, st)
+    st["on"], copies = dedupe(st["on"], allskins)
+    if copies:                                           # both copies on, from an older limbus-skins
+        _save_state(st)
+        print(f"limbus-skins: one copy of a character at a time now - off: {', '.join(copies)} "
+              "(`limbus-skins on <name>` picks that copy instead)", file=sys.stderr)
 
     if cmd == "client":
         from . import client
@@ -318,13 +344,20 @@ def main(argv=None):
         if cmd == "on":
             refuse_locked(args, locked, allskins)
         keys = select(args, skins)
+        copies = []
         if cmd == "on":
-            # one skin per identity: the newest choice wins
-            for k in keys:
-                st["on"] = [x for x in st["on"] if skins[x]["identity"] != skins[k]["identity"]] + [k]
+            # one skin per identity and one copy per character: the newest choice wins
+            for k in one_each(keys, allskins):
+                c = character(allskins, k)
+                copies += [x for x in st["on"] if x != k and character(allskins, x) == c and x not in copies]
+                st["on"] = [x for x in st["on"] if skins[x]["identity"] != skins[k]["identity"]
+                            and character(allskins, x) != c] + [k]
+            copies = [x for x in copies if x not in st["on"]]
         else:
             st["on"] = [x for x in st["on"] if x not in keys]
         _save_state(st)
+        if copies:
+            print(f"off now, the same character as one turned on: {', '.join(copies)}")
         print(f"{len(st['on'])} skin(s) on. They are swapped in the next time you `run` or `apply`.")
         return 0
     if cmd == "boss":

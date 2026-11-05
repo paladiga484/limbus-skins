@@ -213,6 +213,78 @@ class Selection(unittest.TestCase):
             cli.select(["nobody"], self.SK)
 
 
+class OneCopy(unittest.TestCase):
+    # friend, 2026-11-05: "remove dupes" - a reskin and its own identity, or two reskins in one
+    # body, put the same character in the game twice; one copy of a character is on at a time
+    SK = {"starbuck": {"identity": 10107, "kind": "repaint", "dupe_of": "starbuck-id"},
+          "starbuck-id": {"identity": 10196, "kind": "identity"},
+          "jun-gregor": {"identity": 11208, "kind": "repaint", "dupe_of": "jun-gregor-id"},
+          "jun-gregor-id": {"identity": 11296, "kind": "identity", "dupe_of": "jun-ishmael-id"},
+          "jun-ishmael": {"identity": 10811, "kind": "repaint", "dupe_of": "jun-ishmael-id"},
+          "jun-ishmael-id": {"identity": 10893, "kind": "identity"},
+          "ahab": {"identity": 10808, "kind": "repaint"}}
+
+    def test_the_catalog_knows_each_characters_copies(self):
+        from limbus_skins.build import catalog, character
+        sk = catalog()
+        self.assertEqual(sk["starbuck"]["dupe_of"], "starbuck-id")              # its own identity stands for it
+        self.assertEqual(sk["queen-of-hatred"]["dupe_of"], "queen-of-hatred-id")
+        self.assertEqual(sk["dulcinea"]["dupe_of"], "dulcinea-id")
+        self.assertEqual(sk["vergilius-id"]["dupe_of"], "vergilius")            # a copy of what 10710 wears
+        self.assertEqual(sk["kali-id"]["dupe_of"], "kali")
+        self.assertEqual({character(sk, k) for k in ("jun-ishmael", "jun-ishmael-id", "jun-gregor", "jun-gregor-id")},
+                         {"jun-ishmael-id"})                                    # four Juns, one body
+        for k in ("vergilius-boss-id", "distorted-kim-id", "butterfly-yisang", "roland", "matthias"):
+            self.assertEqual(character(sk, k), k)                               # a body of their own
+        bodies = {}
+        for k, s in sk.items():                                # no two characters left in one body
+            body = s.get("source") or s.get("helper")
+            if body and character(sk, k) == k:
+                self.assertNotIn(body, bodies, (k, bodies.get(body)))
+                bodies[body] = k
+
+    def test_a_copy_must_name_a_skin_and_never_loop(self):
+        from limbus_skins.build import check_copies
+        check_copies(self.SK)
+        with self.assertRaises(ValueError):
+            check_copies(dict(self.SK, ahab={"identity": 10808, "kind": "repaint", "dupe_of": "nobody"}))
+        with self.assertRaises(ValueError):
+            check_copies(dict(self.SK, **{"starbuck-id": {"identity": 10196, "kind": "identity", "dupe_of": "starbuck"}}))
+
+    def test_all_turns_on_one_copy_of_each_character(self):
+        self.assertEqual(cli.one_each(list(self.SK), self.SK), ["starbuck-id", "jun-ishmael-id", "ahab"])
+        self.assertEqual(cli.one_each(["jun-gregor", "jun-ishmael"], self.SK), ["jun-ishmael"])  # the newest
+        self.assertEqual(cli.one_each(["starbuck"], self.SK), ["starbuck"])
+
+    def test_an_older_state_with_both_copies_keeps_the_characters_own_identity(self):
+        on = ["starbuck", "starbuck-id", "jun-gregor", "jun-ishmael", "ahab"]
+        self.assertEqual(cli.dedupe(on, self.SK), (["starbuck-id", "jun-ishmael", "ahab"], ["starbuck", "jun-gregor"]))
+        self.assertEqual(cli.dedupe(["ahab", "starbuck"], self.SK), (["ahab", "starbuck"], []))
+
+    def test_the_commands_keep_one_copy_on(self):
+        from limbus_skins.build import catalog, character
+        with tempfile.TemporaryDirectory() as home, mock.patch.dict(
+                os.environ, {"XDG_CONFIG_HOME": home, "XDG_DATA_HOME": home, "APPDATA": home, "LOCALAPPDATA": home,
+                             "LIMBUS_SKINS_PATCHLC": ""}), mock.patch("sys.stdout"), mock.patch("sys.stderr"):
+            state = os.path.join(home, "limbus-skins", "state.json")
+
+            def on():
+                with open(state) as f:
+                    return json.load(f)["on"]
+            self.assertEqual(cli.main(["on", "starbuck-id"]), 0)
+            self.assertEqual(cli.main(["on", "starbuck"]), 0)
+            self.assertEqual(on(), ["starbuck"])                                 # the newest choice wins
+            self.assertEqual(cli.main(["on", "all"]), 0)
+            sk, now = catalog(), on()
+            self.assertIn("starbuck-id", now)
+            self.assertNotIn("starbuck", now)
+            self.assertEqual(len({character(sk, k) for k in now}), len(now))     # no character twice
+            with open(state, "w") as f:                                          # as an older limbus-skins left it
+                json.dump({"on": ["sora", "sora-id", "ahab"]}, f)
+            self.assertEqual(cli.main(["list"]), 0)
+            self.assertEqual(on(), ["sora-id", "ahab"])
+
+
 class Rebuilds(unittest.TestCase):
     SK = {"ahab": {"identity": 10808, "kind": "repaint", "source": "x"},
           "kira": {"identity": 10814, "kind": "helper"}}
@@ -1166,7 +1238,8 @@ class Allies(unittest.TestCase):
         self.assertEqual((a["name"], r["name"], q["name"]), ("Ahab", "Rien", "Qoh"))
         self.assertEqual(with_allies({"b": {"key": "b", "kind": "repaint", "identity": 11111, "ally": 11198,
                                             "becomes": "the Barber (bloodfiend)"}})["b-id"]["name"], "The Barber")
-        self.assertEqual(out["ahab"], skins["ahab"])                         # the skin itself stays as it was
+        # the skin itself stays as it was, one character with its ally: the ally stands for both
+        self.assertEqual(out["ahab"], dict(skins["ahab"], dupe_of="ahab-id"))
         with self.assertRaises(ValueError):                                  # a derived key may not hide another skin
             with_allies({"x": {"key": "x", "kind": "repaint", "identity": 10101, "ally": 10199},
                          "x-id": {"key": "x-id", "kind": "identity", "identity": 10198, "base": 10101}})
