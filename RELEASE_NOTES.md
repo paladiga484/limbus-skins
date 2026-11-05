@@ -1,3 +1,21 @@
+# limbus-skins 1.6.1
+
+Every skin moves, and each character is on once
+- **Still skins move again.** 24 repaints (Werner, Sora, Rufo, Starbuck, Nelly, Cassetti and
+  others) stood still in their idle: they were built while an older version's skins were still
+  left in the game's own files, and their animation clashed with those leftovers. This version
+  rebuilds every skin once, on your next session, and each plays its character's own idle. A
+  build that meets such a leftover now stops and says to run `limbus-skins restore` instead of
+  making a still skin. Guido, Kromer, Lucio and the Old G Corp. Head Manager have no idle
+  animation in the game to borrow and stand still as before.
+- **One copy of a character at a time.** A skin and its own identity (`starbuck` and
+  `starbuck-id`) wear the same body, so with both on the same character showed up twice. Now
+  turning one on turns the other off, `on all` picks each character's own identity (the sinner's
+  identity keeps its own look), and if you had both on, your next command keeps one and says which
+  went off. The four Juns are one (Ishmael's), and the two Dulcineas are one.
+  `limbus-skins on <name>` puts the other copy in its place.
+- For Limbus 1.118.1, with the Limbus Private Server package **app-1.118.1**.
+
 # limbus-skins 1.6.0
 
 Skins never touch the game's own files
