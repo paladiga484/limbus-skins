@@ -1,7 +1,7 @@
 """limbus-skins: dress Limbus Company identities as the characters they mirror.
 
   limbus-skins                         what is on, and whether the game is ready
-  limbus-skins list [all|on|<sinner>]  every skin you can turn on
+  limbus-skins list [all|on|<sinner>|--json]  every skin you can turn on (--json: for an app)
   limbus-skins on <skin|id|sinner|helpers|repaints|bosses|kits|identities|tested|all>...   turn skins on (saved)
                                         one per identity, one copy of a character: the newest wins
   limbus-skins off <skin|id|sinner|helpers|repaints|bosses|kits|identities|all>...         turn skins off
@@ -343,6 +343,14 @@ def main(argv=None):
         return 0
     if cmd == "list":
         keys = list(skins)
+        if "--json" in args:                    # for an app's skin picker: every skin, one object each
+            on, boss = set(st["on"]), set(st["boss"])
+            print(json.dumps([{"key": k, "sinner": SINNERS.get(skins[k]["identity"] // 100 % 100, "?"),
+                               "identity": skins[k]["identity"], "kind": skins[k]["kind"],
+                               "becomes": skins[k]["becomes"], "on": k in on,
+                               "tested": bool(skins[k].get("tested")), "boss": k in boss}
+                              for k in sorted(keys, key=lambda k: (skins[k]["identity"], k))], ensure_ascii=False, separators=(",", ":")))
+            return 0
         if args and args[0] == "on":
             keys = [k for k in keys if k in st["on"]]
         elif args and args[0] != "all":

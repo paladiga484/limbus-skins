@@ -329,8 +329,10 @@ def skill_texts(identity, skills, texts, moves=None):
 
 
 def edit_stats(rec, stats):
-    """Set an identity record's HP ("hp": its base HP, the growth per level kept) and Speed
-    ("speed": [min, max] at every uptie), in place and in the record's own encoding."""
+    """Set an identity record's HP ("hp": its base HP, the growth per level kept), Speed
+    ("speed": [min, max] at every uptie), resistances ("resist": {"SLASH"|"PENETRATE"|"HIT":
+    multiplier 0.25-2.0}, the others kept) and defense level offset ("def": -20..20), in place
+    and in the record's own encoding."""
     def put(key, change):
         old = rec.get(key)
         new = change(lit(old) if isinstance(old, str) else old)
@@ -345,6 +347,25 @@ def edit_stats(rec, stats):
             raise ValueError("speed must be [min, max] with 1 <= min <= max <= 99")
         put("minSpeedList", lambda old: [lo] * max(1, len(old or [])))
         put("maxSpeedList", lambda old: [hi] * max(1, len(old or [])))
+    if "resist" in stats:
+        want = stats["resist"]
+        if not isinstance(want, dict) or not want or not set(want) <= {"SLASH", "PENETRATE", "HIT"}:
+            raise ValueError('resist must map SLASH, PENETRATE and/or HIT to a multiplier')
+        if not all(isinstance(v, (int, float)) and 0.25 <= v <= 2.0 for v in want.values()):
+            raise ValueError("resist multipliers must be 0.25-2.0")
+
+        def resist(old):
+            info = dict(old or {})
+            have = {r.get("type"): r for r in info.get("atkResistList") or []}
+            for t, v in want.items():
+                have[t] = dict(have.get(t, {}), type=t, value=v)
+            info["atkResistList"] = [have[t] for t in ("SLASH", "PENETRATE", "HIT") if t in have]
+            return info
+        put("resistInfo", resist)
+    if "def" in stats:
+        if not isinstance(stats["def"], int) or not -20 <= stats["def"] <= 20:
+            raise ValueError("def must be a whole number -20..20")
+        put("defCorrection", lambda old: stats["def"])
 
 
 # Identities of our own: a new id cloned from an existing identity, in every table the client

@@ -284,6 +284,23 @@ class OneCopy(unittest.TestCase):
             self.assertEqual(cli.main(["list"]), 0)
             self.assertEqual(on(), ["sora-id", "ahab"])
 
+    def test_list_json_is_what_an_app_reads(self):
+        import io
+        with tempfile.TemporaryDirectory() as home, mock.patch.dict(
+                os.environ, {"XDG_CONFIG_HOME": home, "XDG_DATA_HOME": home, "APPDATA": home, "LOCALAPPDATA": home,
+                             "LIMBUS_SKINS_PATCHLC": ""}), mock.patch("sys.stderr"):
+            with mock.patch("sys.stdout"):
+                self.assertEqual(cli.main(["on", "ahab"]), 0)
+            out = io.StringIO()
+            with mock.patch("sys.stdout", out):
+                self.assertEqual(cli.main(["list", "--json"]), 0)
+            rows = json.loads(out.getvalue())
+            ahab = next(r for r in rows if r["key"] == "ahab")
+            self.assertTrue(ahab["on"])
+            self.assertEqual(sum(r["on"] for r in rows), 1)
+            self.assertEqual(set(ahab), {"key", "sinner", "identity", "kind", "becomes", "on", "tested", "boss"})
+            self.assertTrue(all(isinstance(r["sinner"], str) and r["sinner"] for r in rows))
+
 
 def fake_catalog(entries, mislabel=()):
     """An Addressables catalog.bin as the game's lays out a bundle: its 16-byte hash, its folder name
@@ -1053,6 +1070,22 @@ class BossSkills(unittest.TestCase):
         self.assertEqual(rec["maxSpeedList"], [9, 9, 9, 9])
         with self.assertRaises(ValueError):
             self.h.edit_stats(rec, {"speed": [9, 5]})
+
+    def test_stats_set_resistances_and_defense_keeping_the_rest(self):
+        rec = {"id": 10701, "defCorrection": 0, "resistInfo": {"atkResistList": [
+            {"type": "SLASH", "value": 2}, {"type": "PENETRATE", "value": 1}, {"type": "HIT", "value": 0.5}],
+            "other": 1}}
+        self.h.edit_stats(rec, {"resist": {"PENETRATE": 2.0, "HIT": 2.0}, "def": -5})
+        self.assertEqual(rec["resistInfo"], {"atkResistList": [
+            {"type": "SLASH", "value": 2}, {"type": "PENETRATE", "value": 2.0}, {"type": "HIT", "value": 2.0}],
+            "other": 1})
+        self.assertEqual(rec["defCorrection"], -5)
+        enc = {"resistInfo": '{"atkResistList": [{"type": "SLASH", "value": 1}]}'}
+        self.h.edit_stats(enc, {"resist": {"HIT": 1.5}})
+        self.assertIsInstance(enc["resistInfo"], str)          # kept in the record's own encoding
+        for bad in ({"resist": {"FIRE": 2}}, {"resist": {"HIT": 3}}, {"resist": {}}, {"def": 50}, {"def": 1.5}):
+            with self.subTest(bad=bad), self.assertRaises(ValueError):
+                self.h.edit_stats(dict(rec), bad)
 
     def test_moved_coins_keep_the_hosts_animation_cues(self):
         self.skills[2]["skillData"][0]["coinList"] = [{"scale": 1, "actionIndex": 1, "color": "x", "grade": 2},

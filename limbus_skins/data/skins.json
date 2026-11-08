@@ -932,6 +932,28 @@
    "tested": false,
    "name": "Vergilius, the Red Gaze",
    "cover": "Vergilius_Hurt"
+  },
+  "greencliff-id": {
+   "identity": 10794,
+   "base": 10701,
+   "becomes": "Greencliff as an identity of his own (Heathcliff's slot): LCB Heathcliff with Greencliff's kit, glass-boned (Fatal to everything, defense -5) so he falls to half HP fast, and at half HP he turns into the green Wild Hunt; wears what 10701 wears (turn greencliff on for the green body)",
+   "tested": false,
+   "title": "Greencliff, an identity of his own - Heathcliff",
+   "name": "Greencliff",
+   "stats": {
+    "hp": 200,
+    "speed": [
+     6,
+     10
+    ],
+    "resist": {
+     "SLASH": 2.0,
+     "PENETRATE": 2.0,
+     "HIT": 2.0
+    },
+    "def": -5
+   },
+   "cover_art": "greencliff"
   }
  },
  "kits": {

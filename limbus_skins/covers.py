@@ -9,6 +9,9 @@ its face tiles; the body is its largest sprite. "cover_face": [x, y] in the body
 the top of the figure isn't its head (a spear, a parasol, wings), "cover_zoom" below 1 to show
 more of it.
 
+"cover_art": "<name>" instead: the player's own picture, <data dir>/art/cards/<name>/normal.png
+(card.json's "face" and "zoom" apply), for an identity of our own the story has no portrait of.
+
 The pictures go to built/<ally>.cover/pics/<id>_normal<suffix>.dxt (one per card role: the full
 card, info, profile and support portrait; the uptie card shows the same). limbus-skins puts them
 beside the client patch for the session (client.py), and myosotis's AllyFacePatch shows them

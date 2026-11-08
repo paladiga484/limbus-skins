@@ -469,8 +469,8 @@ def build(keys, game_dir, cache, data_dir, log=print, boss=(), static=True):
     # covers: an identity of our own's own card pictures - its villain's story portrait, and its pfp
     # from the body it wears standing idle in a fight (that frame for everything when it has no portrait)
     if static:
-        wanted = [k for k in keys if skins[k]["kind"] == "identity" and (skins[k].get("cover") or skins[k].get("source")
-                  or skins[k].get("helper")) and results.get(k, (False,))[0]]
+        wanted = [k for k in keys if skins[k]["kind"] == "identity" and (skins[k].get("cover") or skins[k].get("cover_art")
+                  or skins[k].get("source") or skins[k].get("helper")) and results.get(k, (False,))[0]]
         for k in keys:
             if k not in wanted:
                 shutil.rmtree(os.path.join(built_root, k + COVER), ignore_errors=True)
@@ -491,19 +491,25 @@ def build(keys, game_dir, cache, data_dir, log=print, boss=(), static=True):
             s, out = skins[k], os.path.join(built_root, k + COVER)
             try:
                 portrait, idle = found.get(s.get("cover")), idles.get(body_of[k])
+                face, zoom = s.get("cover_face"), s.get("cover_zoom")
+                if s.get("cover_art"):                  # the player's own art: <data dir>/art/cards/<name>/
+                    mine = cards.load_art(cards.art_dir(data_dir, s["cover_art"]))
+                    portrait = mine["normal"]
+                    face = face or mine["spec"].get("face")
+                    zoom = zoom if zoom is not None else mine["spec"].get("zoom")
                 if portrait is None and idle is None:
                     raise covers.CoverError(f"no story portrait {s.get('cover')} nor idle frame of {body_of[k]} in the game's cache")
                 stock = covers.stock_pictures(game_dir, cache, s.get("folder") or s["base"])
                 shutil.rmtree(out, ignore_errors=True)
                 os.makedirs(os.path.join(out, "pics"))
                 files = []
-                art, face = (portrait, s.get("cover_face")) if portrait is not None else (idle, covers.sprite_face(idle))
-                for suffix, im in covers.pictures(art, stock, face, float(s.get("cover_zoom", 1.0)) if portrait is not None else 1.0,
+                art, face = (portrait, face) if portrait is not None else (idle, covers.sprite_face(idle))
+                for suffix, im in covers.pictures(art, stock, face, float(zoom if zoom is not None else 1.0) if portrait is not None else 1.0,
                                                   pfp=idle).items():
                     files.append(covers.file_name(s["identity"], suffix))
                     with open(os.path.join(out, "pics", files[-1]), "wb") as f:
                         f.write(covers.dxt1_file(im))
-                made = [f"story {s['cover']}"] if portrait is not None else []
+                made = ([f"art {s['cover_art']}"] if s.get("cover_art") else [f"story {s['cover']}"]) if portrait is not None else []
                 made += [f"idle {body_of[k]}"] if idle is not None else []
                 with open(os.path.join(out, "manifest.json"), "w", encoding="utf-8") as f:
                     json.dump({"format": FORMAT, "kind": "cover", "skins": [k], "identity": s["identity"],
