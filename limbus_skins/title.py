@@ -47,13 +47,14 @@ def fit(img, box):
     return img.resize((max(1, round(w * scale)), max(1, round(h * scale))), Image.LANCZOS)
 
 
-def save(picture, data_dir, logo=False):
-    """Make the background (or, logo=True, the logo) from a picture file; its path."""
+def save(picture, data_dir, logo=False, stretch=False):
+    """Make the background (or, logo=True, the logo) from a picture file; its path. stretch: the
+    background is pulled to the screen's edges, its shape not kept."""
     from PIL import Image
     from .covers import dxt1_file, dxt5_file
     with Image.open(picture) as src:
         img = src.convert("RGBA")
-    blob = dxt5_file(fit(img, LOGO_BOX)) if logo else dxt1_file(frame(img.convert("RGB"), SCREEN))
+    blob = dxt5_file(fit(img, LOGO_BOX)) if logo else dxt1_file(img.convert("RGB").resize(SCREEN, Image.LANCZOS) if stretch else frame(img.convert("RGB"), SCREEN))
     os.makedirs(folder(data_dir), exist_ok=True)
     out = os.path.join(folder(data_dir), LOGO if logo else BACKGROUND)
     with open(out + ".tmp", "wb") as f:

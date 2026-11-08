@@ -28,8 +28,9 @@
                                         (a body mod's): the card art in <data>/art/cards/<art>
   limbus-skins client [--off] <folder>...  set (or clear) those client patch settings
                                         in a folder holding myosotis.ini, by hand
-  limbus-skins title [<picture>] [--logo] [--off]   the title screen's background (or, with
-                                        --logo, its logo) from your own picture; --off: the game's
+  limbus-skins title [<picture>] [--logo] [--stretch] [--off]   the title screen's background
+                                        (or, with --logo, its logo) from your own picture;
+                                        --stretch pulls it to the screen's edges; --off: the game's
   limbus-skins doctor                   check paths, Python packages and the cache
   limbus-skins config --game DIR --cache DIR   set paths by hand
 
@@ -408,7 +409,7 @@ def main(argv=None):
             print(("logo" if logo else "background") + ": the game's own again, from the next start")
         elif pics:
             try:
-                out = title.save(pics[0], data, logo)
+                out = title.save(pics[0], data, logo, stretch="--stretch" in args)
             except OSError as e:
                 raise SystemExit(f"{pics[0]}: {e}")
             print(f"{'logo' if logo else 'background'}: {pics[0]}, from the next start ({out})")

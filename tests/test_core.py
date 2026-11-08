@@ -1500,6 +1500,9 @@ class Covers(unittest.TestCase):
             self.assertEqual(px[mid + 2], 0)                            # a portrait: black at the side
             self.assertGreater(px[mid + 960 * 4 + 2], 150)              # and itself in the middle
             self.assertEqual(title.frame(Image.new("RGB", (1600, 1000)), title.SCREEN).size, title.SCREEN)
+            with open(title.save(tall, d, stretch=True), "rb") as f:
+                px = texture2ddecoder.decode_bc1(f.read()[16:], 1920, 1080)
+            self.assertGreater(px[mid + 2], 150)                        # stretched: the picture reaches the side
             logo = Image.new("RGBA", (400, 100), (0, 0, 0, 0))
             logo.paste((255, 255, 255, 255), (0, 0, 200, 100))          # left half solid, right clear
             src = os.path.join(d, "logo.png")
