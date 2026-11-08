@@ -1876,6 +1876,19 @@ class ClientPatch(unittest.TestCase):
         client.configure(self.client, self.data)
         self.assertNotIn("!", self.read("client", "myosotis.ini").split("hp_shift=")[1].splitlines()[0])
 
+    def test_a_skin_that_makes_an_identity_someone_else_shows_that_characters_name(self):
+        from limbus_skins import client
+        with open(os.path.join(self.data, "built", "names.json"), "w") as f:
+            json.dump({"names": [{"skin": "greencliff", "identity": 10701, "name": "Greencliff"},
+                                 {"skin": "matthias", "identity": 11109, "name": "The Middle Nursefather Matthias"},
+                                 {"skin": "greencliff", "identity": "x", "name": "bad"}, {"skin": "greencliff", "identity": 5, "name": " "}]}, f)
+        self.applied("helpers", "greencliff")                            # matthias isn't in this session
+        client.configure(self.client, self.data)
+        allies = self.read("client", "allies.txt")
+        self.assertIn("10701\t10701\tGreencliff\n", allies)
+        self.assertNotIn("11109", allies)
+        self.assertIn("10999\t10911\tDulcinea\n", allies)                # an ally keeps its own name
+
     def test_an_allys_cover_goes_beside_the_patch_for_the_session(self):
         from limbus_skins import client
         pics = os.path.join(self.data, "built", "ahab-id.cover", "pics")

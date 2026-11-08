@@ -135,6 +135,19 @@ def _sync(folder, wanted):
         os.replace(tmp, dst)
 
 
+def names(data_dir, live):
+    """{identity: name} for the skins in live that make their identity someone else (built/names.json):
+    the client patch shows that name instead of the identity's own."""
+    out = {}
+    for e in _json(os.path.join(data_dir, "built", "names.json")).get("names") or []:
+        if not isinstance(e, dict) or e.get("skin") not in live:
+            continue
+        i, n = e.get("identity"), e.get("name")
+        if isinstance(i, int) and 0 < i < 10 ** 9 and isinstance(n, str) and n.strip():
+            out[i] = n.strip()[:80]
+    return out
+
+
 def allies_file(entries):
     """allies.txt: <id> TAB <folder id> TAB <name> per identity of our own - the client patch
     shows each with its folder's card pictures and that name (AllyFacePatch)."""
@@ -238,6 +251,10 @@ def configure(folder, data_dir, on=True):
     ours = allies(data_dir) if "helpers" in done else []
     live = session_skins(data_dir, done)
     ours += [p for p in pfps(data_dir, live) if p[0] not in {i for i, _, _ in ours}]
+    # the character's own name on an identity a skin turned into someone else
+    named = names(data_dir, live)
+    ours = [(i, folder, name or named.get(i, "")) for i, folder, name in ours]
+    ours += [(i, i, n) for i, n in sorted(named.items()) if i not in {j for j, _, _ in ours}]
     _replace(os.path.join(folder, "allies.txt"), allies_file(sorted(ours)))
     _sync(os.path.join(folder, "covers"), covers(data_dir, {i for i, _, _ in ours}, live))
     return True

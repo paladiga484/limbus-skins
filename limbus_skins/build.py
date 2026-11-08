@@ -537,7 +537,19 @@ def build(keys, game_dir, cache, data_dir, log=print, boss=(), static=True):
     # every other skin's pfp: its body standing idle in a fight
     if static:
         _pfps(keys, skins, results, ids, helper_units, set(boss), game_dir, cache, data_dir, built_root, log)
+    # the name each skin's identity shows in game: the character it became, not the identity it
+    # borrowed (Matthias, not "Ring Pointillist Student") - names.json, read by client.names
+    named = [{"skin": k, "identity": skins[k]["identity"], "name": display_name(skins[k], k)}
+             for k in keys if skins[k]["kind"] in NAME_KINDS and results.get(k, (False,))[0]]
+    try:
+        with open(os.path.join(built_root, "names.json"), "w", encoding="utf-8") as f:
+            json.dump({"format": FORMAT, "names": named}, f, indent=1, ensure_ascii=False)
+    except OSError as e:
+        log(f"  names: {e}")
     return results
+
+
+NAME_KINDS = ("repaint", "tint", "helper", "boss", "kit")    # skins that make an identity someone else
 
 
 PFP_KINDS = ("repaint", "tint", "helper", "boss")    # a kit changes moves only: it looks as it did
