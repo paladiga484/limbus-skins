@@ -4,6 +4,7 @@ client patch, reads them from its own folder (the one with myosotis.ini, beside 
   myosotis.ini   green_coin_skills = <skill ids>   skills recoloured to Gluttony draw green coins
                  hp_shift = <from>><to>@<percent>   a body the unit turns into at low HP
                             <from>><to>#<skill id>  ...or on using that skill
+                            <from>><to>!            ...or at the killing blow (a body with no death of its own)
   skilltext.txt  names and descriptions of our own for the skills a skin rewrote
   allies.txt     each identity of our own: the identity whose card it shows, and its name; and
                  each identity a skin that's on has a pfp for, as itself with no name (its card
@@ -159,6 +160,18 @@ def hp_shifts(data_dir, folders):
     return out
 
 
+def death_shifts(data_dir, skins):
+    """["<from>><to>!"] for the skins given whose borrowed body has no death of its own (the shared
+    build's "deaths"): at the killing blow the unit turns into its sinner's body, whose death plays."""
+    out = []
+    for key, d in sorted((_manifest(data_dir, "helpers").get("deaths") or {}).items()):
+        frm, to = (d or {}).get("from"), (d or {}).get("to")
+        if key in skins and isinstance(frm, str) and isinstance(to, str) and frm != to \
+                and APPEARANCE.fullmatch(frm) and APPEARANCE.fullmatch(to):
+            out.append(f"{frm}>{to}!")
+    return out
+
+
 def _escape(text):
     return (str(text).replace("\\", "\\\\").replace("\r\n", "\n").replace("\r", "")
             .replace("\n", "\\n").replace("\t", "\\t"))
@@ -218,7 +231,9 @@ def configure(folder, data_dir, on=True):
     with open(ini, encoding="utf-8", newline="") as f:
         text = f.read()
     text = set_key(text, GREEN, ",".join(str(i) for i in (green_skills(data_dir) if "helpers" in done else [])))
-    _replace(ini, set_key(text, SHIFT, ",".join(hp_shifts(data_dir, done))))
+    live_now = session_skins(data_dir, done)
+    _replace(ini, set_key(text, SHIFT, ",".join(hp_shifts(data_dir, done)
+                                               + (death_shifts(data_dir, live_now) if "helpers" in done else []))))
     _replace(os.path.join(folder, "skilltext.txt"), skilltext_file(skill_texts(data_dir) if "helpers" in done else {}))
     ours = allies(data_dir) if "helpers" in done else []
     live = session_skins(data_dir, done)

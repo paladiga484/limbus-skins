@@ -16,7 +16,7 @@ from . import art, audit, bundle, cards, covers, game, helpers, lortext, repaint
 FORMS = ".forms"  # built/<skin>.forms: another body a skin turns into, swapped in apart from it
 CARD = ".card"    # built/<skin>.card: the identity's card pictures, when they aren't in its body's file
 COVER = ".cover"  # built/<ally>.cover: an identity of our own's own card pictures (covers.py), not swapped in
-FORMAT = 27      # bump when built skins change shape: older builds are rebuilt on apply
+FORMAT = 28      # bump when built skins change shape: older builds are rebuilt on apply
 
 
 def catalog():
@@ -210,6 +210,15 @@ def build(keys, game_dir, cache, data_dir, log=print, boss=(), static=True):
             except ValueError as e:
                 bad.append(s["key"])
                 results[s["key"]] = (False, str(e))
+        # a borrowed body with no death of its own dies as its sinner (myosotis's hp_shift "from>to!"):
+        # the sinner's own body, whose death the game then plays
+        deaths = {}
+
+        def no_death(s, body, motions):
+            base = pers.get(s["identity"] // 100 * 100 + 1)
+            if "Dead" not in motions and base and base.get("appearance") and base["appearance"] != body:
+                deaths[s["key"]] = {"from": body, "to": base["appearance"]}
+
         for s in dressed:
             ally = s["kind"] == "identity"          # a helper as an identity of its own: dresses its clone
             if ally and s["identity"] not in clones:
@@ -241,6 +250,7 @@ def build(keys, game_dir, cache, data_dir, log=print, boss=(), static=True):
                 refuse("audit: " + "; ".join(findings))
                 continue
             swaps[s["identity"]] = dict(h, attributeList=attrs, defenseSkillIDList=guard, _script=bool(s.get("script")))
+            no_death(s, h["appearance"], worn)
             if dropped:
                 kit_notes[s["key"]] = "left out: " + ", ".join(f"{i} ({why})" for i, why in dropped)
         for s in want_boss:
@@ -262,6 +272,7 @@ def build(keys, game_dir, cache, data_dir, log=print, boss=(), static=True):
                     if not where:
                         raise ValueError(f"{unit['appearance']} is not in the game's cache")
                     worn = repaint.body_motions(game.unitypy().load(where), unit["appearance"])
+                    no_death(s, unit["appearance"], worn)
                     attrs, guard = helpers.boss_moveset(ident, unit, skills, worn)
                     mine_swap = {"appearance": unit["appearance"], "attributeList": attrs,
                                  "defenseSkillIDList": guard, "_numbers": True}
@@ -345,7 +356,8 @@ def build(keys, game_dir, cache, data_dir, log=print, boss=(), static=True):
                            "identities": [dict({"id": s["identity"], "base": s["base"], "folder": s.get("folder") or s["base"],
                                                 "name": display_name(s, s["key"])},
                                                **({"unlock": s["unlock"]} if s.get("unlock") else {}))
-                                          for s in want_ids if s["key"] not in bad]}, f, indent=1)
+                                          for s in want_ids if s["key"] not in bad],
+                           "deaths": {k: v for k, v in sorted(deaths.items()) if k not in bad}}, f, indent=1)
             for s in want + want_ids:
                 if s["key"] not in bad:
                     ok = s["identity"] in done

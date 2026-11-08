@@ -1651,7 +1651,7 @@ class SkinPfps(unittest.TestCase):
         own.assert_not_called()
         self.assertEqual(results["rep"], (False, "audit: wrong"))
         self.assertIn("hel", out)
-        self.assertEqual(build.FORMAT, 27)                             # built while the cache held a leaked copy: rebuilt on apply
+        self.assertEqual(build.FORMAT, 28)                             # 28: the shared build records bodies with no death of their own
 
     def test_the_pfp_is_framed_on_the_sprites_head_at_the_identitys_size(self):
         from PIL import Image
@@ -1856,6 +1856,25 @@ class ClientPatch(unittest.TestCase):
         self.assertEqual(self.read("client", "skilltext.txt"), "")
         self.assertEqual(self.read("client", "allies.txt"), "")          # no ally borrows a card once it's over
         self.assertEqual(os.listdir(os.path.join(self.client, "covers")), [])
+
+    def test_a_body_with_no_death_dies_as_its_sinner_while_its_skin_is_in_the_session(self):
+        from limbus_skins import client
+        with open(os.path.join(self.data, "built", "helpers", "manifest.json")) as f:
+            man = json.load(f)
+        man["skins"] = ["kim-id", "whole-id"]
+        man["deaths"] = {"kim-id": {"from": "400040_LCD_KimSatGatAppearance", "to": "10501_Meursault_BaseAppearance"},
+                         "gone-id": {"from": "X_Appearance", "to": "10101_Yisang_BaseAppearance"},   # not this session
+                         "odd-id": {"from": "x y", "to": "B"}, "same-id": {"from": "A", "to": "A"}}
+        with open(os.path.join(self.data, "built", "helpers", "manifest.json"), "w") as f:
+            json.dump(man, f)
+        self.applied("helpers", "greencliff")
+        client.configure(self.client, self.data)
+        ini = self.read("client", "myosotis.ini")
+        self.assertIn("hp_shift=10701_>10710_Heathclif_WHuntAppearance@50,10701_>10710_Heathclif_WHuntAppearance#1070103,"
+                      "400040_LCD_KimSatGatAppearance>10501_Meursault_BaseAppearance!\n", ini)
+        self.applied("greencliff")                                       # helpers not swapped in: no deaths
+        client.configure(self.client, self.data)
+        self.assertNotIn("!", self.read("client", "myosotis.ini").split("hp_shift=")[1].splitlines()[0])
 
     def test_an_allys_cover_goes_beside_the_patch_for_the_session(self):
         from limbus_skins import client
