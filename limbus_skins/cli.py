@@ -28,6 +28,8 @@
                                         (a body mod's): the card art in <data>/art/cards/<art>
   limbus-skins client [--off] <folder>...  set (or clear) those client patch settings
                                         in a folder holding myosotis.ini, by hand
+  limbus-skins title [<picture>] [--logo] [--off]   the title screen's background (or, with
+                                        --logo, its logo) from your own picture; --off: the game's
   limbus-skins doctor                   check paths, Python packages and the cache
   limbus-skins config --game DIR --cache DIR   set paths by hand
 
@@ -397,6 +399,24 @@ def main(argv=None):
         return 0
     if cmd == "doctor":
         return doctor(skins, st, data)
+    if cmd == "title":
+        from . import title
+        logo = "--logo" in args
+        pics = [a for a in args if not a.startswith("--")]
+        if "--off" in args:
+            title.clear(data, logo)
+            print(("logo" if logo else "background") + ": the game's own again, from the next start")
+        elif pics:
+            try:
+                out = title.save(pics[0], data, logo)
+            except OSError as e:
+                raise SystemExit(f"{pics[0]}: {e}")
+            print(f"{'logo' if logo else 'background'}: {pics[0]}, from the next start ({out})")
+        else:
+            have = title.files(data)
+            print("background: " + ("yours" if title.BACKGROUND in have else "the game's"))
+            print("logo:       " + ("yours" if title.LOGO in have else "the game's"))
+        return 0
     if cmd == "art":
         from . import art
         if not args:

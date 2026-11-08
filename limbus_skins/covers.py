@@ -46,6 +46,19 @@ def dxt1_file(img):
     return struct.pack("<4sHHHH4x", b"LSD1", w, h, sw, sh) + etcpak.compress_bc1(flipped.tobytes(), w, h)
 
 
+def dxt5_file(img):
+    """The same with alpha kept ("LSD5", DXT5 blocks): for a picture with see-through parts, a logo."""
+    import struct
+    import etcpak
+    from PIL import Image
+    sw, sh = img.size
+    w, h = (sw + 3) // 4 * 4, (sh + 3) // 4 * 4
+    canvas = Image.new("RGBA", (w, h), (0, 0, 0, 0))
+    canvas.paste(img.convert("RGBA"), (0, h - sh))
+    flipped = canvas.transpose(Image.FLIP_TOP_BOTTOM)
+    return struct.pack("<4sHHHH4x", b"LSD5", w, h, sw, sh) + etcpak.compress_bc3(flipped.tobytes(), w, h)
+
+
 def body(texture, rects):
     """The body cut from a portrait texture (PIL, top-down): the largest of its sprites' rects
     (x, y, w, h in Unity's bottom-up pixels). ValueError when it has none."""

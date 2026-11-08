@@ -1484,6 +1484,34 @@ class Covers(unittest.TestCase):
         self.assertEqual(covers.file_name(10999, "_info"), "10999_normal_info.dxt")
         self.assertEqual(covers.file_name(10999, ""), "10999_normal.dxt")
 
+    def test_a_title_background_fills_the_screen_and_a_logo_keeps_its_alpha(self):
+        import struct
+        import texture2ddecoder
+        from PIL import Image
+        from limbus_skins import title
+        with tempfile.TemporaryDirectory() as d:
+            tall = os.path.join(d, "tall.png")
+            Image.new("RGB", (1000, 2000), (200, 0, 0)).save(tall)
+            with open(title.save(tall, d), "rb") as f:
+                raw = f.read()
+            self.assertEqual(struct.unpack("<4sHHHH", raw[:12]), (b"LSD1", 1920, 1080, 1920, 1080))
+            logo = Image.new("RGBA", (400, 100), (0, 0, 0, 0))
+            logo.paste((255, 255, 255, 255), (0, 0, 200, 100))          # left half solid, right clear
+            src = os.path.join(d, "logo.png")
+            logo.save(src)
+            with open(title.save(src, d, logo=True), "rb") as f:
+                raw = f.read()
+            magic, w, h, sw, sh = struct.unpack("<4sHHHH", raw[:12])
+            self.assertEqual((magic, sw, sh), (b"LSD5", 800, 200))    # fit to the logo's box, x2 at most
+            self.assertEqual(len(raw), 16 + (w // 4) * (h // 4) * 16)
+            px = texture2ddecoder.decode_bc3(raw[16:], w, h)            # BGRA, rows bottom-up
+            row = (h - 1 - 100) * w * 4                                 # a row in the middle
+            self.assertEqual(px[row + 3], 255)                         # left: solid
+            self.assertEqual(px[row + 700 * 4 + 3], 0)                 # right: see-through
+            self.assertEqual(sorted(title.files(d)), ["background.dxt", "logo.dxt"])
+            title.clear(d, logo=True)
+            self.assertEqual(sorted(title.files(d)), ["background.dxt"])
+
     def test_a_cover_is_saved_as_the_games_own_dxt1(self):
         # this Limbus build has no image decoder (ImageConversion.LoadImage is stripped): the
         # client patch hands Texture2D.LoadRawTextureData DXT1 blocks, rows bottom-up as Unity's
@@ -1903,6 +1931,17 @@ class ClientPatch(unittest.TestCase):
         self.applied("greencliff")                                       # helpers not swapped in: no allies
         client.configure(self.client, self.data)
         self.assertEqual(os.listdir(os.path.join(self.client, "covers")), [])
+
+    def test_the_title_pictures_go_beside_the_patch_and_leave_with_the_session(self):
+        from PIL import Image
+        from limbus_skins import client, title
+        pic = os.path.join(self.tmp.name, "wide.png")
+        Image.new("RGB", (3000, 1000), (40, 90, 40)).save(pic)
+        title.save(pic, self.data)
+        client.configure(self.client, self.data)
+        self.assertEqual(os.listdir(os.path.join(self.client, "title")), ["background.dxt"])
+        client.configure(self.client, self.data, on=False)
+        self.assertEqual(os.listdir(os.path.join(self.client, "title")), [])
 
     def pfp(self, key, identity, body):
         d = os.path.join(self.data, "built", key + ".cover")

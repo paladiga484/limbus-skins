@@ -11,6 +11,7 @@ client patch, reads them from its own folder (the one with myosotis.ini, beside 
                  and name stay the game's)
   covers/        an ally's own card pictures (covers.py), and those skins' pfps:
                  <id>_normal<suffix>.dxt
+  title/         the title screen's background and logo, when chosen (title.py)
 
 A boss skin (a boss's own body on a sinner) needs the patch itself to be new enough: wears_bosses.
 
@@ -257,6 +258,8 @@ def configure(folder, data_dir, on=True):
     ours += [(i, i, n) for i, n in sorted(named.items()) if i not in {j for j, _, _ in ours}]
     _replace(os.path.join(folder, "allies.txt"), allies_file(sorted(ours)))
     _sync(os.path.join(folder, "covers"), covers(data_dir, {i for i, _, _ in ours}, live))
+    from . import title
+    _sync(os.path.join(folder, "title"), title.files(data_dir) if on else {})
     return True
 
 
