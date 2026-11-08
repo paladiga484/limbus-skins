@@ -25,6 +25,20 @@ def cover(img, size):
     return img.crop((left, top, left + cw, top + ch)).resize(size, Image.LANCZOS)
 
 
+def frame(img, size):
+    """The background: a picture near the screen's shape fills it (cover); a much narrower one -
+    a portrait, a card - stands full height in the middle, on black."""
+    from PIL import Image
+    w, h = img.size
+    if w / h >= 0.75 * size[0] / size[1]:
+        return cover(img, size)
+    scale = size[1] / h
+    pic = img.resize((max(1, round(w * scale)), size[1]), Image.LANCZOS)
+    out = Image.new("RGB", size, (0, 0, 0))
+    out.paste(pic, ((size[0] - pic.width) // 2, 0))
+    return out
+
+
 def fit(img, box):
     """img scaled to fit inside box, its shape kept (never enlarged past twice its size)."""
     from PIL import Image
@@ -39,7 +53,7 @@ def save(picture, data_dir, logo=False):
     from .covers import dxt1_file, dxt5_file
     with Image.open(picture) as src:
         img = src.convert("RGBA")
-    blob = dxt5_file(fit(img, LOGO_BOX)) if logo else dxt1_file(cover(img.convert("RGB"), SCREEN))
+    blob = dxt5_file(fit(img, LOGO_BOX)) if logo else dxt1_file(frame(img.convert("RGB"), SCREEN))
     os.makedirs(folder(data_dir), exist_ok=True)
     out = os.path.join(folder(data_dir), LOGO if logo else BACKGROUND)
     with open(out + ".tmp", "wb") as f:
