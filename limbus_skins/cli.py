@@ -415,7 +415,8 @@ def main(argv=None):
             print(f"{'logo' if logo else 'background'}: {pics[0]}, from the next start ({out})")
         else:
             have = title.files(data)
-            print("background: " + ("yours" if title.BACKGROUND in have else "the game's"))
+            print("background: " + ("yours" if title.BACKGROUND in have else "the game's" if title.OFF in have
+                                    else "the package's (the game's own where it has none)"))
             print("logo:       " + ("yours" if title.LOGO in have else "the game's"))
         return 0
     if cmd == "art":

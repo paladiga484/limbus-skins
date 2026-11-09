@@ -1519,6 +1519,10 @@ class Covers(unittest.TestCase):
             self.assertEqual(sorted(title.files(d)), ["background.dxt", "logo.dxt"])
             title.clear(d, logo=True)
             self.assertEqual(sorted(title.files(d)), ["background.dxt"])
+            title.clear(d)                                              # the game's own, not the default
+            self.assertEqual(sorted(title.files(d)), ["off"])
+            title.save(tall, d)
+            self.assertEqual(sorted(title.files(d)), ["background.dxt"])
 
     def test_a_cover_is_saved_as_the_games_own_dxt1(self):
         # this Limbus build has no image decoder (ImageConversion.LoadImage is stripped): the

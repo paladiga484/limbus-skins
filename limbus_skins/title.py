@@ -6,6 +6,7 @@ import os
 
 BACKGROUND = "background.dxt"
 LOGO = "logo.dxt"
+OFF = "off"                      # the game's own background: the package's default picture stays away
 SCREEN = (1920, 1080)
 LOGO_BOX = (807, 399)            # the game's own logo's size: ours fits inside it
 
@@ -60,17 +61,27 @@ def save(picture, data_dir, logo=False, stretch=False):
     with open(out + ".tmp", "wb") as f:
         f.write(blob)
     os.replace(out + ".tmp", out)
+    if not logo:
+        _remove(os.path.join(folder(data_dir), OFF))
     return out
 
 
-def clear(data_dir, logo=False):
+def _remove(path):
     try:
-        os.remove(os.path.join(folder(data_dir), LOGO if logo else BACKGROUND))
+        os.remove(path)
     except FileNotFoundError:
         pass
 
 
+def clear(data_dir, logo=False):
+    """The game's own background (or logo) again - also instead of the package's default picture."""
+    _remove(os.path.join(folder(data_dir), LOGO if logo else BACKGROUND))
+    if not logo:
+        os.makedirs(folder(data_dir), exist_ok=True)
+        open(os.path.join(folder(data_dir), OFF), "wb").close()
+
+
 def files(data_dir):
-    """{file name: path} of the title pictures chosen."""
-    return {f: os.path.join(folder(data_dir), f) for f in (BACKGROUND, LOGO)
+    """{file name: path} of the title pictures chosen (and OFF, when the game's own was)."""
+    return {f: os.path.join(folder(data_dir), f) for f in (BACKGROUND, LOGO, OFF)
             if os.path.isfile(os.path.join(folder(data_dir), f))}
