@@ -437,7 +437,6 @@
    "card": "vergilius"
   },
   "kali": {
-   "only": "patchlc",
    "identity": 10410,
    "becomes": "Kali, the Red Mist (Library of Ruina): Wrath with green coins; her own pages at their own dice; 250 HP, Speed 6-10",
    "lor": {
@@ -885,7 +884,6 @@
    "dupe_of": "vergilius"
   },
   "kali-id": {
-   "only": "patchlc",
    "identity": 10499,
    "base": 10410,
    "becomes": "Kali as an identity of her own (Ryōshū's slot), wearing what 10410 wears",

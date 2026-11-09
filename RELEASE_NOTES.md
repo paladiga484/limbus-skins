@@ -1,3 +1,21 @@
+# limbus-skins 1.7.1
+
+Gebura is out for everyone
+- **Kali, the Red Mist (Library of Ruina's Gebura)** on Ryōshū, and as an identity of her own
+  (`kali-id`): her own body and poses, her own pages at their own dice, Wrath with green coins.
+  Her art is read from your own Library of Ruina install, so she needs that game installed through
+  Steam; without it, that one skin says so and the rest build as usual.
+- For Limbus 1.118.1, with the Limbus Private Server package **app-1.118.1-5**.
+
+# limbus-skins 1.7.0
+
+Title screen, deaths, names, Greencliff
+- **`limbus-skins title <picture>`**: your own picture behind the title screen (`--stretch` fills
+  it, `--logo` swaps the logo, `--off` brings the game's own back).
+- A skin whose body has no death animation of its own dies as its sinner, with the sinner's death.
+- Skins that turn an identity into another character show that character's name in game.
+- Greencliff as an identity of his own (`greencliff-id`), with his own card.
+
 # limbus-skins 1.6.1
 
 Nothing modded left in the game, every skin moves, and each character is on once

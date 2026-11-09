@@ -483,8 +483,8 @@ class Locked(unittest.TestCase):
             cli.write_locks(data, sk)
             self.assertEqual(os.stat(path).st_mtime_ns, before)        # unchanged: not rewritten
 
-    def test_gebura_is_only_for_patchlc_and_stays_on_for_it(self):
-        # friend, 2026-11-04: "make gebura used ONLY when shes enabled and only in patchlc"
+    def test_a_patchlc_only_skin_is_out_of_sight_elsewhere_and_stays_on_for_it(self):
+        # the "only": "patchlc" mechanism (Gebura used it 2026-11-04 to 11-09)
         sk = dict(self.SK, kali={"identity": 10410, "kind": "repaint", "becomes": "Kali", "only": "patchlc"})
         with tempfile.TemporaryDirectory() as cfg, mock.patch.object(cli.paths, "home_dirs", return_value=(cfg, cfg)), \
                 mock.patch.dict(os.environ, {"LIMBUS_SKINS_PATCHLC": ""}):
@@ -501,8 +501,13 @@ class Locked(unittest.TestCase):
             st = {"on": ["ahab", "kali"]}
             visible, locked = cli.unlocked(sk, st)
             self.assertEqual((sorted(visible), locked, st["on"]), (["ahab", "kali"], set(), ["ahab", "kali"]))
+
+    def test_every_skin_is_public(self):
+        # friend, 2026-11-09: "make everything public skins and everything i want it out!"
         from limbus_skins.build import catalog
-        self.assertEqual({k for k, s in catalog().items() if s.get("only") == "patchlc"}, {"kali", "kali-id"})
+        skins = catalog()
+        self.assertEqual({k for k, s in skins.items() if s.get("only")}, set())
+        self.assertTrue({"kali", "kali-id", "roland"} <= set(skins))
 
     def test_nothing_waits_for_the_black_forest_any_more(self):
         # friend, 2026-11-04: "remove the black forest" - every boss, ally and kit is open from the start
