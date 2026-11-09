@@ -13,11 +13,10 @@ Dress Limbus Company identities as the characters they mirror, on a **private se
   sticks, bat and all - and the best ID ever: 130 HP,
   Speed 5-9, a pile of buffs on every Gluttony skill; his S3, The Greenest Hunt, turns him into a
   green Wild Hunt (so does half HP).
-- **Library of Ruina:** a repaint can draw from Library of Ruina too, if you own it. Kali,
-  the Red Mist, fights with her Ruina poses (her chibi head brought down to size) and her own
-  pages - Level Slash, Upstanding Slash, Greater Split: Vertical, Retaliate - with their names,
-  dice and Bleed, read from your Library of Ruina, wrapped in Sancho's blood mist. She is locked
-  until Greencliff dies in a fight on the private server (the Black Forest).
+- **Library of Ruina:** Kali, the Red Mist, fights with her Ruina poses (her chibi head brought
+  down to size) and her own pages - Level Slash, Upstanding Slash, Greater Split: Vertical,
+  Retaliate - with their names, dice and Bleed, wrapped in Sancho's blood mist. Her poses and
+  pages ship with limbus-skins: Library of Ruina isn't needed.
 - **Boss skins:** the identity *becomes* the boss - the boss's own body from the game, with its
   own animations, effects and skills: Matthias (the Middle Nursefather) on the Ring Pointillist
   Student Outis, the Roach Emperor (his own swarm of roaches) on G Corp. Gregor, Distorted
@@ -25,11 +24,11 @@ Dress Limbus Company identities as the characters they mirror, on a **private se
 - **Allies:** bosses as identities of their own, next to the ones you have: Dulcinea (Rodion's
   slot) and the eroded Kim Satgat (Meursault's), each with the boss's own body and whole moveset.
 - **Kits:** an identity's moves and text only, for a body mod's character: `roland` gives Index
-  Father Yi Sang the Black Silence's pages (names from your Library of Ruina), Furioso on all
-  nine coins - with a Roland body mod, he is Roland.
+  Father Yi Sang the Black Silence's pages, Furioso on all nine coins - with a Roland body mod,
+  he is Roland.
 - **ID cards:** a skin with card art also redraws the identity's card - full art, uptie art,
-  info panel, portraits - from pictures you put in `<data>/art/cards/<name>/` (the tool never
-  downloads any). Turn the skin off and the game's card is back.
+  info panel, portraits. The skins' own card art ships with limbus-skins; pictures you put in
+  `<data>/art/cards/<name>/` replace it. Turn the skin off and the game's card is back.
 - **Profile pictures:** every repaint, tint, helper and boss skin's pfp (the picture lists and the
   team screen show) is its body standing idle in a fight - a repaint in its own colours - framed
   on its face; allies get theirs the same way. Shown by the private server's client patch while
@@ -46,8 +45,9 @@ Dress Limbus Company identities as the characters they mirror, on a **private se
   helper's own story fight (they end or stall it, or kill the user) are left out, and a helper
   without a defense skill keeps the identity's own.
 
-Everything is built on your machine from the game files you already have. This repository
-contains no game art, and the tool never connects to the internet.
+Everything is built on your machine from the game files you already have, plus the few pictures
+that ship with limbus-skins (Kali's poses and pages, the skins' card art, Butterfly Yi Sang's
+head). The tool never connects to the internet.
 
 > **Private servers only.** Helper skins change skills. Any modified game file on the
 > official servers breaks the terms of service and can get your account banned. The tool asks
@@ -140,7 +140,7 @@ Skins only show in battle. Menus, portraits and identity art stay as they are.
 | `arayashiki-ryoshu` | Ryōshū 10401 | helper | Arayashiki Ryōshū (stage 9-49) | yes |
 | `nelly` | Ryōshū 10408 | repaint | Nelly | not yet |
 | `lin-daiyu` | Ryōshū 10413 | helper | Lin Daiyu | not yet |
-| `kali` | Ryōshū 10410 | repaint | Kali, the Red Mist (Library of Ruina), in Sancho's blood mist; her own pages, all Wrath with green coins, hitting for hundreds. Locked: the Black Forest | not yet |
+| `kali` | Ryōshū 10410 | repaint | Kali, the Red Mist (Library of Ruina), in Sancho's blood mist; her own pages, all Wrath with green coins, hitting for hundreds | not yet |
 | `pinky-nursefather` | Ryōshū 10415 | repaint | the Pinky Nursefather | not yet |
 | `guido` | Meursault 10504 | repaint | Guido | not yet |
 | `bamboo-hatted-kim` | Meursault 10508 | helper | Bamboo-hatted Kim | not yet |

@@ -1,0 +1,260 @@
+{
+ "abilities": {
+  "blackSilenceSpecial": "This page can be used after using all 9 Combat Pages of the Black Silence",
+  "blackSilenceSpecialDice": "[On Clash Win] Destroy all of opponent's dice",
+  "bleeding2atk": "[On Hit] Inflict 2 Bleed next Scene",
+  "bleeding3atk": "[On Hit] Inflict 3 Bleed next Scene",
+  "energy3AndDraw1": "[On Use] Restore 3 Light; draw 1 page",
+  "fixedCost": "The Cost of this page cannot be changed",
+  "kaliAreaDice": "[On Hit] Inflict 5 Bleed next Scene",
+  "kaliNormalAttackH": "If 8 or more damage was dealt with this page, restore 2 Light and reduce the Cost of all other 'Level Slashes' by 1",
+  "kaliNormalAttackJ": "If 8 or more damage was dealt with this page, draw 1 page and reduce the Cost of all other 'Upstanding Slashes' by 1",
+  "kaliSuperAttack": "[On Hit] Destroy a Combat Page set on another random Speed die of the target.",
+  "recoverBreak5atk": "[On Hit] Recover 5 Stagger Resist",
+  "strength1atk": "[On Hit] Gain 1 Strength next Scene"
+ },
+ "cards": {
+  "607001": {
+   "cost": "6",
+   "dice": [
+    [
+     "Atk",
+     "Slash",
+     "28",
+     "42",
+     "kaliAreaDice"
+    ]
+   ],
+   "range": "FarArea",
+   "rarity": "Rare",
+   "script": "kaliArea"
+  },
+  "607002": {
+   "cost": "5",
+   "dice": [
+    [
+     "Atk",
+     "Slash",
+     "20",
+     "39",
+     ""
+    ]
+   ],
+   "range": "Near",
+   "rarity": "Unique",
+   "script": "kaliSuperAttack"
+  },
+  "607003": {
+   "cost": "2",
+   "dice": [
+    [
+     "Atk",
+     "Hit",
+     "6",
+     "10",
+     ""
+    ],
+    [
+     "Atk",
+     "Hit",
+     "6",
+     "9",
+     ""
+    ]
+   ],
+   "range": "Near",
+   "rarity": "Common",
+   "script": "kaliNormalAttackJ"
+  },
+  "607005": {
+   "cost": "2",
+   "dice": [
+    [
+     "Atk",
+     "Slash",
+     "5",
+     "9",
+     "bleeding3atk"
+    ],
+    [
+     "Atk",
+     "Slash",
+     "5",
+     "8",
+     "bleeding3atk"
+    ]
+   ],
+   "range": "Near",
+   "rarity": "Common",
+   "script": "kaliNormalAttackH"
+  },
+  "702004": {
+   "cost": "1",
+   "dice": [
+    [
+     "Def",
+     "Guard",
+     "5",
+     "9",
+     ""
+    ],
+    [
+     "Atk",
+     "Hit",
+     "4",
+     "8",
+     "recoverBreak5atk"
+    ]
+   ],
+   "range": "Near",
+   "rarity": "Common",
+   "script": "energy3AndDraw1"
+  },
+  "702006": {
+   "cost": "0",
+   "dice": [
+    [
+     "Atk",
+     "Penetrate",
+     "3",
+     "7",
+     ""
+    ],
+    [
+     "Atk",
+     "Penetrate",
+     "3",
+     "7",
+     ""
+    ],
+    [
+     "Atk",
+     "Slash",
+     "3",
+     "7",
+     "bleeding2atk"
+    ]
+   ],
+   "range": "Near",
+   "rarity": "Common",
+   "script": "fixedCost"
+  },
+  "702007": {
+   "cost": "3",
+   "dice": [
+    [
+     "Def",
+     "Evasion",
+     "8",
+     "11",
+     ""
+    ],
+    [
+     "Atk",
+     "Slash",
+     "7",
+     "11",
+     ""
+    ],
+    [
+     "Atk",
+     "Slash",
+     "7",
+     "11",
+     ""
+    ],
+    [
+     "Standby",
+     "Slash",
+     "4",
+     "8",
+     ""
+    ]
+   ],
+   "range": "Near",
+   "rarity": "Uncommon",
+   "script": ""
+  },
+  "702009": {
+   "cost": "2",
+   "dice": [
+    [
+     "Atk",
+     "Slash",
+     "5",
+     "9",
+     "strength1atk"
+    ],
+    [
+     "Atk",
+     "Slash",
+     "5",
+     "9",
+     "strength1atk"
+    ]
+   ],
+   "range": "Near",
+   "rarity": "Rare",
+   "script": ""
+  },
+  "702010": {
+   "cost": "3",
+   "dice": [
+    [
+     "Atk",
+     "Slash",
+     "20",
+     "39",
+     "blackSilenceSpecialDice"
+    ]
+   ],
+   "range": "Near",
+   "rarity": "Unique",
+   "script": "blackSilenceSpecial"
+  }
+ },
+ "names": {
+  "607001": [
+   "Greater Split: Horizontal",
+   ""
+  ],
+  "607002": [
+   "Greater Split: Vertical",
+   ""
+  ],
+  "607003": [
+   "Upstanding Slash",
+   ""
+  ],
+  "607005": [
+   "Level Slash",
+   ""
+  ],
+  "702004": [
+   "Old Boys Workshop",
+   ""
+  ],
+  "702006": [
+   "Ranga Workshop",
+   ""
+  ],
+  "702007": [
+   "Crystal Atelier",
+   ""
+  ],
+  "702009": [
+   "Durandal",
+   ""
+  ],
+  "702010": [
+   "Furioso",
+   ""
+  ]
+ },
+ "passives": {
+  "250222": [
+   "Retaliate",
+   "Gain a Counter die (Slash, 4-8) at combat start."
+  ]
+ }
+}

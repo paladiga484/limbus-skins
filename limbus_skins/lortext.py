@@ -1,13 +1,17 @@
 """Library of Ruina's own words for a page or a passive: its name, and its cost, dice and
-abilities as a skill's flavor text (Kali's pages). Read from the player's own Library of Ruina
-install when a skin is built (resources.assets), never shipped.
+abilities as a skill's flavor text (Kali's pages, Roland's). The pages and passives the skins use
+ship with limbus-skins (data/lor/book.json, written once by ship() from a Library of Ruina
+install), so players don't need the game; without that file they're read from the player's own
+install (resources.assets).
 
 skins.json "texts": {"1": {"lor_card": 607005}, "defense": {"lor_passive": 250222}} - a name or
 flavor written out in the skin wins over Ruina's.
 """
+import json
 import os
 import re
 import xml.etree.ElementTree as ET
+from importlib import resources
 
 from . import paths
 from .game import unitypy
@@ -72,6 +76,24 @@ class Book:
             else:
                 for p in root.iter("PassiveDesc"):
                     self.passives[p.get("ID")] = ((p.findtext("Name") or "").strip(), (p.findtext("Desc") or "").strip())
+
+    def subset(self, card_ids, passive_ids):
+        """The part of the book these pages and passives need (their abilities too), as plain
+        data for book.json."""
+        cards = {c: self.cards[c] for c in map(str, card_ids) if c in self.cards}
+        scripts = {c["script"] for c in cards.values()} | {d[4] for c in cards.values() for d in c["dice"]}
+        return {"cards": cards, "names": {c: self.names[c] for c in cards if c in self.names},
+                "abilities": {a: self.abilities[a] for a in sorted(scripts) if a in self.abilities},
+                "passives": {p: self.passives[p] for p in map(str, passive_ids) if p in self.passives}}
+
+    @classmethod
+    def from_data(cls, d):
+        book = cls([])
+        book.cards = {k: dict(v, dice=[tuple(x) for x in v["dice"]]) for k, v in d["cards"].items()}
+        book.names = {k: tuple(v) for k, v in d["names"].items()}
+        book.abilities = dict(d["abilities"])
+        book.passives = {k: tuple(v) for k, v in d["passives"].items()}
+        return book
 
     def page(self, card_id):
         """{"name", "flavor"} for a combat page: "Combat Page · Unique · Cost 5 · Slash 20-39",
@@ -154,6 +176,44 @@ def resolve_moves(moves, book):
             m.setdefault("atkType", atk)
         out[n] = m
     return out
+
+
+def referenced(skins):
+    """(page ids, passive ids) the skins' moves and texts name."""
+    cards, passives = set(), set()
+    for s in skins.values():
+        for m in (s.get("moves") or {}).values():
+            if "lor_dice" in m:
+                cards.add(str(m["lor_dice"]))
+        for t in (s.get("texts") or {}).values():
+            if "lor_card" in t:
+                cards.add(str(t["lor_card"]))
+            if "lor_passive" in t:
+                passives.add(str(t["lor_passive"]))
+    return sorted(cards), sorted(passives)
+
+
+def ship(skins, path, tables=None):
+    """Write book.json for the skins: the pages and passives they name, from Library of Ruina."""
+    book = Book(tables if tables is not None else read_tables())
+    cards, passives = referenced(skins)
+    data = book.subset(cards, passives)
+    missing = [c for c in cards if c not in data["cards"]] + [p for p in passives if p not in data["passives"]]
+    if missing:
+        raise LorTextError("Library of Ruina has no " + ", ".join(missing))
+    with open(path, "w", encoding="utf-8") as f:
+        json.dump(data, f, indent=1, sort_keys=True, ensure_ascii=False)
+        f.write("\n")
+    return len(data["cards"]), len(data["passives"])
+
+
+def shipped_book():
+    """The book shipped with limbus-skins, or None."""
+    try:
+        raw = resources.files("limbus_skins").joinpath("data", "lor", "book.json").read_text(encoding="utf-8")
+        return Book.from_data(json.loads(raw))
+    except (OSError, ValueError, KeyError):
+        return None
 
 
 def uses_dice(moves):

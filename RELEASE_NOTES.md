@@ -1,3 +1,14 @@
+# limbus-skins 1.7.2
+
+Gebura and Roland need nothing else
+- **Kali, the Red Mist (Gebura)** ships whole: her poses and her pages come with limbus-skins.
+  Library of Ruina isn't needed any more.
+- **Roland's pages** (names, dice, texts) ship too.
+- The skins' card art (Kali, Matthias, the Roach Emperor, Distorted Hohenheim, Vergilius,
+  Greencliff) and Butterfly Yi Sang's head ship with limbus-skins; pictures of your own in
+  `<data>/art/` still replace them.
+- For Limbus 1.118.1, with the Limbus Private Server package **app-1.118.1-6**.
+
 # limbus-skins 1.7.1
 
 Gebura is out for everyone

@@ -32,7 +32,13 @@ def card_name(ident, variant, suffix=""):
 
 
 def art_dir(data_dir, name):
-    return os.path.join(data_dir, "art", "cards", name)
+    """A card art folder: the player's own (<data dir>/art/cards/<name>/) when it has a picture,
+    else the one shipped with limbus-skins, else the player's (whose absence load_art reports)."""
+    mine = os.path.join(data_dir, "art", "cards", name)
+    if os.path.isfile(os.path.join(mine, "normal.png")):
+        return mine
+    shipped = os.path.join(os.path.dirname(os.path.abspath(__file__)), "data", "art", "cards", name)
+    return shipped if os.path.isfile(os.path.join(shipped, "normal.png")) else mine
 
 
 def load_art(folder):

@@ -26,4 +26,4 @@ packages = ["limbus_skins"]
 version = {attr = "limbus_skins.__version__"}
 
 [tool.setuptools.package-data]
-limbus_skins = ["data/*.json", "data/heads/*.json"]
+limbus_skins = ["data/*.json", "data/heads/*.json", "data/lor/*.json", "data/lor/*/*", "data/art/cards/*/*", "data/art/heads/*.png"]

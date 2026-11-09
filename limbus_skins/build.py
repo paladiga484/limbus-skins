@@ -126,12 +126,13 @@ def head_recipe(name):
 
 
 def _head(skin, data_dir):
-    """The skin's head recipe, with the player's own art (limbus-skins art) if set."""
+    """The skin's head recipe, with its art: the player's own (limbus-skins art), else the one
+    shipped with limbus-skins."""
     if not skin.get("head"):
         return None
     recipe = head_recipe(skin["head"])
-    mine = art.path_for(data_dir, skin["key"])
-    if os.path.exists(mine):
+    mine = art.head_art(data_dir, skin["key"])
+    if mine:
         recipe["art"] = {"image_path": mine}
         recipe["width"] = recipe.get("own_width", recipe.get("width", 1.9))
     return recipe
@@ -195,8 +196,8 @@ def build(keys, game_dir, cache, data_dir, log=print, boss=(), static=True):
             bodies_, have_ = game.body_index(game_dir, cache, os.path.join(data_dir, "bodies.json"), log=log)
             located = lambda b: have_.get(bodies_.get(b, ""))  # noqa: E731
         if any(lortext.uses_lor(s.get("texts")) or lortext.uses_dice(s.get("moves")) for s in want_boss):
-            try:                                    # Ruina's own words, from the player's install
-                ruina = lortext.Book(lortext.read_tables())
+            try:                                    # Ruina's own words: shipped, else the player's install
+                ruina = lortext.shipped_book() or lortext.Book(lortext.read_tables())
             except (lortext.LorTextError, OSError) as e:
                 log(f"  Library of Ruina's text: {e}")
         for s in want_ids:
@@ -504,7 +505,7 @@ def build(keys, game_dir, cache, data_dir, log=print, boss=(), static=True):
             try:
                 portrait, idle = found.get(s.get("cover")), idles.get(body_of[k])
                 face, zoom = s.get("cover_face"), s.get("cover_zoom")
-                if s.get("cover_art"):                  # the player's own art: <data dir>/art/cards/<name>/
+                if s.get("cover_art"):                  # <data dir>/art/cards/<name>/, else the shipped one
                     mine = cards.load_art(cards.art_dir(data_dir, s["cover_art"]))
                     portrait = mine["normal"]
                     face = face or mine["spec"].get("face")

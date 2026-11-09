@@ -4,10 +4,14 @@ A Library of Ruina character draws each motion (Default, Slash, Guard, S1...) as
 prefab per motion whose children are separate sprites (body, hair, blade, mist), each with
 its own transform. This assembles every pose into one image and hands repaint() frames
 that look like Limbus sprites, so the identity's own body gets redrawn as that character.
-Read from the player's own Library of Ruina install; nothing is shipped.
+The poses a skin uses ship with limbus-skins (data/lor/<prefab>/, written once by ship() from a
+Library of Ruina install), so players don't need the game; a source with nothing shipped is read
+from the player's own Library of Ruina install.
 """
+import json
 import math
 import os
+from importlib import resources
 
 from . import paths
 from .game import unitypy
@@ -162,6 +166,49 @@ def afterimage(img, pivot, dx, copies=3):
     return out, (pivot[0] * img.width / out.width, pivot[1])
 
 
+def _shipped_dir(prefab):
+    return resources.files("limbus_skins").joinpath("data", "lor", prefab)
+
+
+def ship(bundle, prefab, head, folder, motions=None):
+    """Write a source's poses (from the Library of Ruina install here) into folder - the copy
+    shipped_poses() reads: a PNG per motion and poses.json (where each was cut from, its pivot).
+    motions: only those (the ones a skin's map uses)."""
+    got = poses(bundle_path(bundle), prefab, head=head)
+    if motions is not None:
+        got = {m: v for m, v in got.items() if m in set(motions)}
+    os.makedirs(folder, exist_ok=True)
+    index = {"bundle": bundle, "prefab": prefab, "head": head, "poses": {}}
+    for motion, (img, pivot) in sorted(got.items()):
+        name = f"{motion}.png"
+        img.save(os.path.join(folder, name), optimize=True)
+        index["poses"][motion] = {"file": name, "pivot": [round(pivot[0], 6), round(pivot[1], 6)]}
+    with open(os.path.join(folder, "poses.json"), "w", encoding="utf-8") as f:
+        json.dump(index, f, indent=1, sort_keys=True)
+        f.write("\n")
+    return sorted(got)
+
+
+def shipped_poses(bundle, prefab, head):
+    """poses()' answer from the copy shipped with limbus-skins, or None when there's none for
+    this source (or it was cut with another bundle, prefab or head)."""
+    from PIL import Image
+    folder = _shipped_dir(prefab)
+    try:
+        index = json.loads(folder.joinpath("poses.json").read_text(encoding="utf-8"))
+    except (OSError, ValueError):
+        return None
+    if (index.get("bundle"), index.get("prefab"), index.get("head")) != (bundle, prefab, head):
+        return None
+    out = {}
+    for motion, p in index["poses"].items():
+        with folder.joinpath(p["file"]).open("rb") as f:
+            img = Image.open(f)
+            img.load()
+        out[motion] = (img.convert("RGBA"), tuple(p["pivot"]))
+    return out
+
+
 def source_table(spec, height=2.6):
     """repaint()'s source table from a skins.json "lor" entry: {"bundle", "prefab", "map":
     {kind: [motion, ...]}, "smear": [kind, ...], "sources": {name: {"bundle", "prefab"}},
@@ -181,7 +228,10 @@ def source_table(spec, height=2.6):
             raise LorError(f"{ref}: no source called {name!r}")
         if name not in loaded:
             bundle, prefab = sources[name]
-            got = poses(bundle_path(bundle), prefab, head=spec.get("head") if name == "" else None)
+            head = spec.get("head") if name == "" else None
+            got = shipped_poses(bundle, prefab, head)          # shipped with limbus-skins
+            if got is None:
+                got = poses(bundle_path(bundle), prefab, head=head)
             if "Default" not in got:
                 raise LorError(f"{prefab} has no Default pose")
             img, (_, py) = got["Default"]                  # its feet to the top of its head,

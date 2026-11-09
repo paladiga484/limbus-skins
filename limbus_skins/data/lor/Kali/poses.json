@@ -1,0 +1,121 @@
+{
+ "bundle": "char/char_490.pres",
+ "head": {
+  "neck": "P voo",
+  "parts": [
+   "back hair",
+   "head",
+   "front hair",
+   "face"
+  ],
+  "scale": 0.7
+ },
+ "poses": {
+  "A1": {
+   "file": "A1.png",
+   "pivot": [
+    0.707407,
+    -0.007982
+   ]
+  },
+  "A2": {
+   "file": "A2.png",
+   "pivot": [
+    0.904639,
+    -0.014315
+   ]
+  },
+  "A3": {
+   "file": "A3.png",
+   "pivot": [
+    0.907035,
+    -0.013861
+   ]
+  },
+  "A5": {
+   "file": "A5.png",
+   "pivot": [
+    0.593353,
+    0.377009
+   ]
+  },
+  "Damaged": {
+   "file": "Damaged.png",
+   "pivot": [
+    0.665017,
+    0.325615
+   ]
+  },
+  "Default": {
+   "file": "Default.png",
+   "pivot": [
+    0.845515,
+    0.316493
+   ]
+  },
+  "Evade": {
+   "file": "Evade.png",
+   "pivot": [
+    0.636364,
+    0.101394
+   ]
+  },
+  "Guard": {
+   "file": "Guard.png",
+   "pivot": [
+    0.486726,
+    0.181664
+   ]
+  },
+  "Hit": {
+   "file": "Hit.png",
+   "pivot": [
+    0.360144,
+    -0.007924
+   ]
+  },
+  "Hit2": {
+   "file": "Hit2.png",
+   "pivot": [
+    0.593353,
+    0.377009
+   ]
+  },
+  "Move": {
+   "file": "Move.png",
+   "pivot": [
+    0.32,
+    0.207469
+   ]
+  },
+  "Penetrate": {
+   "file": "Penetrate.png",
+   "pivot": [
+    0.958794,
+    -0.010571
+   ]
+  },
+  "Slash": {
+   "file": "Slash.png",
+   "pivot": [
+    0.526265,
+    0.261286
+   ]
+  },
+  "Slash2": {
+   "file": "Slash2.png",
+   "pivot": [
+    0.890777,
+    -0.015453
+   ]
+  },
+  "Standing": {
+   "file": "Standing.png",
+   "pivot": [
+    0.845515,
+    0.316493
+   ]
+  }
+ },
+ "prefab": "Kali"
+}

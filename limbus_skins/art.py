@@ -84,7 +84,18 @@ def invert(img):
 
 
 def path_for(data_dir, key):
+    """Where the player's own head art for a skin goes (limbus-skins art)."""
     return os.path.join(data_dir, "art", f"{key}.png")
+
+
+def head_art(data_dir, key):
+    """The head art a build uses: the player's own, else the one shipped with limbus-skins, else
+    None (the in-game art)."""
+    for p in (path_for(data_dir, key),
+              os.path.join(os.path.dirname(os.path.abspath(__file__)), "data", "art", "heads", f"{key}.png")):
+        if os.path.isfile(p):
+            return p
+    return None
 
 
 def save(picture, data_dir, key, do_invert=False):

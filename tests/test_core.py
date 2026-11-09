@@ -2165,7 +2165,8 @@ class LorText(unittest.TestCase):
         skins = {"k": {"key": "k", "kind": "kit", "identity": 10101, "moves": {"1": {"lor_dice": 1, "coins": [0, 0]}}}}
         pers = {10101: {"id": 10101, "attributeList": [{"skillId": 1, "number": 3}], "defenseSkillIDList": [2]}}
         with tempfile.TemporaryDirectory() as data, FakeGame(skins, pers) as g, \
-                mock.patch.object(lortext, "read_tables", return_value=self.TABLES):
+                mock.patch.object(lortext, "shipped_book", return_value=None), \
+                mock.patch.object(lortext, "read_tables", return_value=self.TABLES):   # nothing shipped: the install
             res = build.build(["k"], "game", "cache", data, log=lambda *a: None)
         self.assertTrue(res["k"][0], res)
         shell = g.written["skills"][1]["skillData"][0]
@@ -2346,3 +2347,56 @@ class Tints(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class Shipped(unittest.TestCase):
+    """friend, 2026-11-09: "keep my gebura sprite as global and push thats it and any other external
+    id" - what a skin draws from outside the Limbus install ships with limbus-skins."""
+
+    def setUp(self):
+        from limbus_skins.build import catalog
+        self.skins = catalog()
+
+    def test_gebura_builds_without_library_of_ruina(self):
+        from limbus_skins import lor
+        spec = self.skins["kali"]["lor"]
+        with mock.patch.object(lor.paths, "steam_roots", return_value=[]), \
+                mock.patch.object(lor, "poses", side_effect=AssertionError("read Library of Ruina")):
+            table = lor.source_table(spec)
+        self.assertEqual(set(table) - {"idle_time"}, set(spec["map"]))
+        self.assertTrue(all(table[k] for k in spec["map"]))
+
+    def test_every_outside_input_ships(self):
+        from limbus_skins import art, cards, lor
+        with tempfile.TemporaryDirectory() as nobody:            # a player with no art of their own
+            for key, s in self.skins.items():
+                if s.get("lor"):
+                    self.assertIsNotNone(lor.shipped_poses(s["lor"]["bundle"], s["lor"]["prefab"], s["lor"].get("head")), key)
+                for name in filter(None, (s.get("card"), s.get("cover_art"))):
+                    folder = cards.art_dir(nobody, name)
+                    self.assertTrue(os.path.isfile(os.path.join(folder, "normal.png")), f"{key}: {name}")
+                    cards.load_art(folder)
+            self.assertIsNotNone(art.head_art(nobody, "butterfly-yisang"))
+
+    def test_the_players_own_art_comes_first(self):
+        from PIL import Image
+        from limbus_skins import art, cards
+        with tempfile.TemporaryDirectory() as data:
+            mine = os.path.join(data, "art", "cards", "kali")
+            os.makedirs(mine)
+            Image.new("RGB", (8, 8)).save(os.path.join(mine, "normal.png"))
+            self.assertEqual(cards.art_dir(data, "kali"), mine)
+            Image.new("RGBA", (8, 8)).save(art.path_for(data, "butterfly-yisang"))
+            self.assertEqual(art.head_art(data, "butterfly-yisang"), art.path_for(data, "butterfly-yisang"))
+
+    def test_ruinas_pages_ship_for_the_skins_that_use_them(self):
+        from limbus_skins import lortext
+        book = lortext.shipped_book()
+        self.assertIsNotNone(book)
+        with mock.patch.object(lortext, "read_tables", side_effect=AssertionError("read Library of Ruina")):
+            for key in ("kali", "roland"):
+                s = self.skins[key]
+                moves = lortext.resolve_moves(s["moves"], book)
+                self.assertFalse(any("lor_dice" in m for m in moves.values()), key)
+                texts = lortext.resolve(s.get("texts") or {}, book)
+                self.assertTrue(all(t.get("name") for t in texts.values() if t), key)
