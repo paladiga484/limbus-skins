@@ -962,6 +962,87 @@
    "title": "Baral, an identity of his own - Ishmael",
    "name": "Baral",
    "dupe_of": "baral"
+  },
+  "binah-id": {
+   "identity": 10993,
+   "base": 10901,
+   "becomes": "Binah as an identity of their own (Rodion's slot), with Binah's kit, wearing what 10901 wears",
+   "tested": false,
+   "title": "Binah, an identity of their own - Rodion",
+   "name": "Binah",
+   "dupe_of": "binah"
+  },
+  "ayin-id": {
+   "identity": 11293,
+   "base": 11201,
+   "becomes": "Ayin as an identity of their own (Gregor's slot), with Ayin's kit, wearing what 11201 wears",
+   "tested": false,
+   "title": "Ayin, an identity of their own - Gregor",
+   "name": "Ayin",
+   "dupe_of": "ayin"
+  },
+  "malkuth-id": {
+   "identity": 10393,
+   "base": 10301,
+   "becomes": "Malkuth as an identity of their own (Don Quixote's slot), with Malkuth's kit, wearing what 10301 wears",
+   "tested": false,
+   "title": "Malkuth, an identity of their own - Don Quixote",
+   "name": "Malkuth",
+   "dupe_of": "malkuth"
+  },
+  "yesod-id": {
+   "identity": 10593,
+   "base": 10501,
+   "becomes": "Yesod as an identity of their own (Meursault's slot), with Yesod's kit, wearing what 10501 wears",
+   "tested": false,
+   "title": "Yesod, an identity of their own - Meursault",
+   "name": "Yesod",
+   "dupe_of": "yesod"
+  },
+  "hod-id": {
+   "identity": 11093,
+   "base": 11002,
+   "becomes": "Hod as an identity of their own (Sinclair's slot), with Hod's kit, wearing what 11002 wears",
+   "tested": false,
+   "title": "Hod, an identity of their own - Sinclair",
+   "name": "Hod",
+   "dupe_of": "hod"
+  },
+  "netzach-id": {
+   "identity": 10693,
+   "base": 10601,
+   "becomes": "Netzach as an identity of their own (Hong Lu's slot), with Netzach's kit, wearing what 10601 wears",
+   "tested": false,
+   "title": "Netzach, an identity of their own - Hong Lu",
+   "name": "Netzach",
+   "dupe_of": "netzach"
+  },
+  "tiphereth-id": {
+   "identity": 10193,
+   "base": 10101,
+   "becomes": "Tiphereth as an identity of their own (Yi Sang's slot), with Tiphereth's kit, wearing what 10101 wears",
+   "tested": false,
+   "title": "Tiphereth, an identity of their own - Yi Sang",
+   "name": "Tiphereth",
+   "dupe_of": "tiphereth"
+  },
+  "chesed-id": {
+   "identity": 10293,
+   "base": 10201,
+   "becomes": "Chesed as an identity of their own (Faust's slot), with Chesed's kit, wearing what 10201 wears",
+   "tested": false,
+   "title": "Chesed, an identity of their own - Faust",
+   "name": "Chesed",
+   "dupe_of": "chesed"
+  },
+  "hokma-id": {
+   "identity": 11193,
+   "base": 11101,
+   "becomes": "Hokma as an identity of their own (Outis's slot), with Hokma's kit, wearing what 11101 wears",
+   "tested": false,
+   "title": "Hokma, an identity of their own - Outis",
+   "name": "Hokma",
+   "dupe_of": "hokma"
   }
  },
  "kits": {
@@ -1183,6 +1264,1029 @@
     }
    },
    "title": "Baral's pages (Library of Ruina) - LCB Ishmael"
+  },
+  "binah": {
+   "identity": 10901,
+   "becomes": "Binah: her Degraded pages (Library of Ruina) at their own dice: Fairy, Pillar, Shockwave, Lock on defense; Tremor and Rupture; 260 HP, Speed 4-8 - no body art, Rodion's own look",
+   "tested": false,
+   "stats": {
+    "hp": 260,
+    "speed": [
+     4,
+     8
+    ]
+   },
+   "moves": {
+    "1": {
+     "lor_dice": 607202,
+     "attributeType": "VIOLET",
+     "coins": [
+      0
+     ],
+     "onHit": [
+      {
+       "buffKeyword": "Vibration",
+       "activeRound": 0,
+       "stack": 2
+      }
+     ]
+    },
+    "2": {
+     "lor_dice": 607204,
+     "attributeType": "INDIGO",
+     "coins": [
+      0,
+      0
+     ],
+     "onHit": [
+      {
+       "buffKeyword": "Vibration",
+       "activeRound": 0,
+       "stack": 3
+      },
+      {
+       "buffKeyword": "Laceration",
+       "activeRound": 0,
+       "stack": 2
+      }
+     ]
+    },
+    "3": {
+     "lor_dice": 607203,
+     "attributeType": "INDIGO",
+     "coins": [
+      0,
+      0,
+      0,
+      0
+     ],
+     "onUse": [
+      {
+       "buffKeyword": "AttackDmgUp",
+       "activeRound": 1,
+       "stack": 2
+      }
+     ],
+     "onHit": [
+      {
+       "buffKeyword": "Vibration",
+       "activeRound": 0,
+       "stack": 3
+      },
+      {
+       "buffKeyword": "Burst",
+       "activeRound": 0,
+       "stack": 3
+      }
+     ]
+    },
+    "defense": {
+     "lor_dice": 607201,
+     "attributeType": "VIOLET",
+     "coins": [
+      0
+     ],
+     "onUse": [
+      {
+       "buffKeyword": "Protection",
+       "activeRound": 0,
+       "stack": 3
+      }
+     ]
+    }
+   },
+   "texts": {
+    "1": {
+     "lor_card": 607202
+    },
+    "2": {
+     "lor_card": 607204
+    },
+    "3": {
+     "lor_card": 607203
+    },
+    "defense": {
+     "lor_card": 607201
+    }
+   },
+   "title": "Binah's kit - Rodion (10901)"
+  },
+  "ayin": {
+   "identity": 11201,
+   "becomes": "Ayin: light, Cogito and the reset: Poise and Rupture; 240 HP, Speed 5-9 - no body art, Gregor's own look",
+   "tested": false,
+   "stats": {
+    "hp": 240,
+    "speed": [
+     5,
+     9
+    ]
+   },
+   "moves": {
+    "1": {
+     "attributeType": "INDIGO",
+     "atkType": "HIT",
+     "defaultValue": 4,
+     "coins": [
+      3
+     ],
+     "onUse": [
+      {
+       "buffKeyword": "Breath",
+       "activeRound": 0,
+       "stack": 2
+      }
+     ],
+     "onHit": [
+      {
+       "buffKeyword": "Burst",
+       "activeRound": 0,
+       "stack": 2
+      }
+     ]
+    },
+    "2": {
+     "attributeType": "INDIGO",
+     "atkType": "PENETRATE",
+     "defaultValue": 5,
+     "coins": [
+      3
+     ],
+     "onUse": [
+      {
+       "buffKeyword": "Breath",
+       "activeRound": 0,
+       "stack": 3
+      }
+     ],
+     "onHit": [
+      {
+       "buffKeyword": "Vibration",
+       "activeRound": 0,
+       "stack": 2
+      },
+      {
+       "buffKeyword": "Burst",
+       "activeRound": 0,
+       "stack": 2
+      }
+     ]
+    },
+    "3": {
+     "attributeType": "INDIGO",
+     "atkType": "HIT",
+     "defaultValue": 7,
+     "coins": [
+      3,
+      3
+     ],
+     "onUse": [
+      {
+       "buffKeyword": "AttackDmgUp",
+       "activeRound": 1,
+       "stack": 2
+      },
+      {
+       "buffKeyword": "Breath",
+       "activeRound": 0,
+       "stack": 3,
+       "target": "EveryAlly"
+      }
+     ],
+     "onHit": [
+      {
+       "buffKeyword": "Burst",
+       "activeRound": 0,
+       "stack": 4
+      }
+     ]
+    },
+    "defense": {
+     "attributeType": "INDIGO",
+     "atkType": "SLASH",
+     "defaultValue": 5,
+     "coins": [
+      3
+     ],
+     "onUse": [
+      {
+       "buffKeyword": "Protection",
+       "activeRound": 0,
+       "stack": 3
+      }
+     ]
+    }
+   },
+   "texts": {
+    "1": {
+     "name": "Seed of Light"
+    },
+    "2": {
+     "name": "Cogito"
+    },
+    "3": {
+     "name": "Reset"
+    },
+    "defense": {
+     "name": "Founder's Resolve"
+    }
+   },
+   "title": "Ayin's kit - Gregor (11201)"
+  },
+  "malkuth": {
+   "identity": 10301,
+   "becomes": "Malkuth: always busy: Haste and Bleed; 200 HP, Speed 6-10 - no body art, Don Quixote's own look",
+   "tested": false,
+   "stats": {
+    "hp": 200,
+    "speed": [
+     6,
+     10
+    ]
+   },
+   "moves": {
+    "1": {
+     "attributeType": "SCARLET",
+     "atkType": "SLASH",
+     "defaultValue": 4,
+     "coins": [
+      3
+     ],
+     "onUse": [
+      {
+       "buffKeyword": "Agility",
+       "activeRound": 1,
+       "stack": 2
+      }
+     ],
+     "onHit": [
+      {
+       "buffKeyword": "Laceration",
+       "activeRound": 0,
+       "stack": 1
+      }
+     ]
+    },
+    "2": {
+     "attributeType": "SCARLET",
+     "atkType": "PENETRATE",
+     "defaultValue": 5,
+     "coins": [
+      3
+     ],
+     "onUse": [
+      {
+       "buffKeyword": "Agility",
+       "activeRound": 1,
+       "stack": 2
+      }
+     ],
+     "onHit": [
+      {
+       "buffKeyword": "Laceration",
+       "activeRound": 0,
+       "stack": 2
+      }
+     ]
+    },
+    "3": {
+     "attributeType": "SCARLET",
+     "atkType": "PENETRATE",
+     "defaultValue": 7,
+     "coins": [
+      2,
+      2,
+      2
+     ],
+     "onUse": [
+      {
+       "buffKeyword": "AttackDmgUp",
+       "activeRound": 1,
+       "stack": 2
+      }
+     ],
+     "onHit": [
+      {
+       "buffKeyword": "Laceration",
+       "activeRound": 0,
+       "stack": 3
+      }
+     ]
+    },
+    "defense": {
+     "attributeType": "SCARLET",
+     "atkType": "SLASH",
+     "defaultValue": 5,
+     "coins": [
+      3
+     ],
+     "onUse": [
+      {
+       "buffKeyword": "Protection",
+       "activeRound": 0,
+       "stack": 2
+      }
+     ]
+    }
+   },
+   "texts": {
+    "1": {
+     "name": "Busy Hands"
+    },
+    "2": {
+     "name": "Overtime"
+    },
+    "3": {
+     "name": "Full Effort!"
+    },
+    "defense": {
+     "name": "Clipboard Block"
+    }
+   },
+   "title": "Malkuth's kit - Don Quixote (10301)"
+  },
+  "yesod": {
+   "identity": 10501,
+   "becomes": "Yesod: rules and records: Tremor and Protection; 240 HP, Speed 3-7 - no body art, Meursault's own look",
+   "tested": false,
+   "stats": {
+    "hp": 240,
+    "speed": [
+     3,
+     7
+    ]
+   },
+   "moves": {
+    "1": {
+     "attributeType": "AZURE",
+     "atkType": "HIT",
+     "defaultValue": 4,
+     "coins": [
+      3,
+      3
+     ],
+     "onHit": [
+      {
+       "buffKeyword": "Vibration",
+       "activeRound": 0,
+       "stack": 2
+      }
+     ]
+    },
+    "2": {
+     "attributeType": "AZURE",
+     "atkType": "HIT",
+     "defaultValue": 5,
+     "coins": [
+      3
+     ],
+     "onUse": [
+      {
+       "buffKeyword": "Protection",
+       "activeRound": 0,
+       "stack": 2
+      }
+     ],
+     "onHit": [
+      {
+       "buffKeyword": "Vibration",
+       "activeRound": 0,
+       "stack": 3
+      }
+     ]
+    },
+    "3": {
+     "attributeType": "AZURE",
+     "atkType": "HIT",
+     "defaultValue": 8,
+     "coins": [
+      2,
+      2,
+      2,
+      2
+     ],
+     "onUse": [
+      {
+       "buffKeyword": "AttackDmgUp",
+       "activeRound": 1,
+       "stack": 1
+      }
+     ],
+     "onHit": [
+      {
+       "buffKeyword": "Vibration",
+       "activeRound": 0,
+       "stack": 4
+      }
+     ]
+    },
+    "defense": {
+     "attributeType": "AZURE",
+     "atkType": "HIT",
+     "defaultValue": 6,
+     "coins": [
+      3
+     ],
+     "onUse": [
+      {
+       "buffKeyword": "Protection",
+       "activeRound": 0,
+       "stack": 3
+      }
+     ]
+    }
+   },
+   "texts": {
+    "1": {
+     "name": "Report"
+    },
+    "2": {
+     "name": "Regulation"
+    },
+    "3": {
+     "name": "Final Correction"
+    },
+    "defense": {
+     "name": "By the Book"
+    }
+   },
+   "title": "Yesod's kit - Meursault (10501)"
+  },
+  "hod": {
+   "identity": 11002,
+   "becomes": "Hod: training: buffs the whole team; 190 HP, Speed 4-8 - no body art, Sinclair's own look",
+   "tested": false,
+   "stats": {
+    "hp": 190,
+    "speed": [
+     4,
+     8
+    ]
+   },
+   "moves": {
+    "1": {
+     "attributeType": "AMBER",
+     "atkType": "SLASH",
+     "defaultValue": 3,
+     "coins": [
+      3,
+      3
+     ],
+     "onUse": [
+      {
+       "buffKeyword": "Breath",
+       "activeRound": 0,
+       "stack": 2,
+       "target": "EveryAlly"
+      }
+     ],
+     "onHit": [
+      {
+       "buffKeyword": "Burst",
+       "activeRound": 0,
+       "stack": 1
+      }
+     ]
+    },
+    "2": {
+     "attributeType": "AMBER",
+     "atkType": "SLASH",
+     "defaultValue": 5,
+     "coins": [
+      2,
+      2,
+      2
+     ],
+     "onUse": [
+      {
+       "buffKeyword": "Protection",
+       "activeRound": 0,
+       "stack": 2,
+       "target": "EveryAlly"
+      }
+     ],
+     "onHit": [
+      {
+       "buffKeyword": "Burst",
+       "activeRound": 0,
+       "stack": 2
+      }
+     ]
+    },
+    "3": {
+     "attributeType": "AMBER",
+     "atkType": "PENETRATE",
+     "defaultValue": 6,
+     "coins": [
+      4
+     ],
+     "onUse": [
+      {
+       "buffKeyword": "AttackDmgUp",
+       "activeRound": 1,
+       "stack": 1,
+       "target": "EveryAlly"
+      },
+      {
+       "buffKeyword": "Breath",
+       "activeRound": 0,
+       "stack": 3,
+       "target": "EveryAlly"
+      }
+     ],
+     "onHit": [
+      {
+       "buffKeyword": "Burst",
+       "activeRound": 0,
+       "stack": 3
+      }
+     ]
+    },
+    "defense": {
+     "attributeType": "AMBER",
+     "atkType": "SLASH",
+     "defaultValue": 4,
+     "coins": [
+      3
+     ],
+     "onUse": [
+      {
+       "buffKeyword": "Protection",
+       "activeRound": 0,
+       "stack": 2
+      }
+     ]
+    }
+   },
+   "texts": {
+    "1": {
+     "name": "Gentle Push"
+    },
+    "2": {
+     "name": "Lesson Plan"
+    },
+    "3": {
+     "name": "Everyone Grows"
+    },
+    "defense": {
+     "name": "I'll Try My Best"
+    }
+   },
+   "title": "Hod's kit - Sinclair (11002)"
+  },
+  "netzach": {
+   "identity": 10601,
+   "becomes": "Netzach: too tired to die: slow and very tough; 260 HP, Speed 2-6 - no body art, Hong Lu's own look",
+   "tested": false,
+   "stats": {
+    "hp": 260,
+    "speed": [
+     2,
+     6
+    ]
+   },
+   "moves": {
+    "1": {
+     "attributeType": "AMBER",
+     "atkType": "HIT",
+     "defaultValue": 4,
+     "coins": [
+      3
+     ],
+     "onHit": [
+      {
+       "buffKeyword": "Vibration",
+       "activeRound": 0,
+       "stack": 1
+      }
+     ]
+    },
+    "2": {
+     "attributeType": "AMBER",
+     "atkType": "HIT",
+     "defaultValue": 5,
+     "coins": [
+      3,
+      3
+     ],
+     "onUse": [
+      {
+       "buffKeyword": "Protection",
+       "activeRound": 0,
+       "stack": 3
+      }
+     ],
+     "onHit": [
+      {
+       "buffKeyword": "Vibration",
+       "activeRound": 0,
+       "stack": 2
+      }
+     ]
+    },
+    "3": {
+     "attributeType": "AMBER",
+     "atkType": "HIT",
+     "defaultValue": 8,
+     "coins": [
+      3,
+      3
+     ],
+     "onUse": [
+      {
+       "buffKeyword": "Protection",
+       "activeRound": 0,
+       "stack": 4
+      }
+     ],
+     "onHit": [
+      {
+       "buffKeyword": "Vibration",
+       "activeRound": 0,
+       "stack": 3
+      }
+     ]
+    },
+    "defense": {
+     "attributeType": "AMBER",
+     "atkType": "HIT",
+     "defaultValue": 7,
+     "coins": [
+      3
+     ],
+     "onUse": [
+      {
+       "buffKeyword": "Protection",
+       "activeRound": 0,
+       "stack": 4
+      }
+     ]
+    }
+   },
+   "texts": {
+    "1": {
+     "name": "Half-hearted Swing"
+    },
+    "2": {
+     "name": "Bottoms Up"
+    },
+    "3": {
+     "name": "Wake Me When It's Over"
+    },
+    "defense": {
+     "name": "Can't Be Bothered"
+    }
+   },
+   "title": "Netzach's kit - Hong Lu (10601)"
+  },
+  "tiphereth": {
+   "identity": 10101,
+   "becomes": "Tiphereth: central command: Poise for the team; 210 HP, Speed 4-9 - no body art, Yi Sang's own look",
+   "tested": false,
+   "stats": {
+    "hp": 210,
+    "speed": [
+     4,
+     9
+    ]
+   },
+   "moves": {
+    "1": {
+     "attributeType": "INDIGO",
+     "atkType": "PENETRATE",
+     "defaultValue": 4,
+     "coins": [
+      3
+     ],
+     "onUse": [
+      {
+       "buffKeyword": "Breath",
+       "activeRound": 0,
+       "stack": 2
+      }
+     ],
+     "onHit": [
+      {
+       "buffKeyword": "Laceration",
+       "activeRound": 0,
+       "stack": 1
+      }
+     ]
+    },
+    "2": {
+     "attributeType": "INDIGO",
+     "atkType": "PENETRATE",
+     "defaultValue": 5,
+     "coins": [
+      3,
+      3
+     ],
+     "onUse": [
+      {
+       "buffKeyword": "Breath",
+       "activeRound": 0,
+       "stack": 2
+      }
+     ],
+     "onHit": [
+      {
+       "buffKeyword": "Laceration",
+       "activeRound": 0,
+       "stack": 2
+      },
+      {
+       "buffKeyword": "Burst",
+       "activeRound": 0,
+       "stack": 1
+      }
+     ]
+    },
+    "3": {
+     "attributeType": "INDIGO",
+     "atkType": "PENETRATE",
+     "defaultValue": 7,
+     "coins": [
+      2,
+      2,
+      2
+     ],
+     "onUse": [
+      {
+       "buffKeyword": "AttackDmgUp",
+       "activeRound": 1,
+       "stack": 2
+      },
+      {
+       "buffKeyword": "Breath",
+       "activeRound": 0,
+       "stack": 2,
+       "target": "EveryAlly"
+      }
+     ],
+     "onHit": [
+      {
+       "buffKeyword": "Burst",
+       "activeRound": 0,
+       "stack": 3
+      }
+     ]
+    },
+    "defense": {
+     "attributeType": "INDIGO",
+     "atkType": "SLASH",
+     "defaultValue": 5,
+     "coins": [
+      3
+     ],
+     "onUse": [
+      {
+       "buffKeyword": "Protection",
+       "activeRound": 0,
+       "stack": 2
+      }
+     ]
+    }
+   },
+   "texts": {
+    "1": {
+     "name": "Dispatch"
+    },
+    "2": {
+     "name": "Two Halves"
+    },
+    "3": {
+     "name": "Central Order"
+    },
+    "defense": {
+     "name": "Stand Together"
+    }
+   },
+   "title": "Tiphereth's kit - Yi Sang (10101)"
+  },
+  "chesed": {
+   "identity": 10201,
+   "becomes": "Chesed: welfare: shields for everyone; 230 HP, Speed 3-8 - no body art, Faust's own look",
+   "tested": false,
+   "stats": {
+    "hp": 230,
+    "speed": [
+     3,
+     8
+    ]
+   },
+   "moves": {
+    "1": {
+     "attributeType": "SHAMROCK",
+     "atkType": "HIT",
+     "defaultValue": 4,
+     "coins": [
+      3
+     ],
+     "onHit": [
+      {
+       "buffKeyword": "Burst",
+       "activeRound": 0,
+       "stack": 2
+      }
+     ]
+    },
+    "2": {
+     "attributeType": "SHAMROCK",
+     "atkType": "HIT",
+     "defaultValue": 5,
+     "coins": [
+      3,
+      3
+     ],
+     "onUse": [
+      {
+       "buffKeyword": "Protection",
+       "activeRound": 0,
+       "stack": 2,
+       "target": "EveryAlly"
+      }
+     ],
+     "onHit": [
+      {
+       "buffKeyword": "Burst",
+       "activeRound": 0,
+       "stack": 2
+      }
+     ]
+    },
+    "3": {
+     "attributeType": "SHAMROCK",
+     "atkType": "HIT",
+     "defaultValue": 7,
+     "coins": [
+      3,
+      3
+     ],
+     "onUse": [
+      {
+       "buffKeyword": "Protection",
+       "activeRound": 0,
+       "stack": 3,
+       "target": "EveryAlly"
+      }
+     ],
+     "onHit": [
+      {
+       "buffKeyword": "Burst",
+       "activeRound": 0,
+       "stack": 3
+      }
+     ]
+    },
+    "defense": {
+     "attributeType": "SHAMROCK",
+     "atkType": "HIT",
+     "defaultValue": 5,
+     "coins": [
+      3
+     ],
+     "onUse": [
+      {
+       "buffKeyword": "Protection",
+       "activeRound": 0,
+       "stack": 3
+      }
+     ]
+    }
+   },
+   "texts": {
+    "1": {
+     "name": "Bitter Brew"
+    },
+    "2": {
+     "name": "Steady Care"
+    },
+    "3": {
+     "name": "Last Cup"
+    },
+    "defense": {
+     "name": "Calm Shoulder"
+    }
+   },
+   "title": "Chesed's kit - Faust (10201)"
+  },
+  "hokma": {
+   "identity": 11101,
+   "becomes": "Hokma: time: Poise and heavy Tremor; 250 HP, Speed 3-7 - no body art, Outis's own look",
+   "tested": false,
+   "stats": {
+    "hp": 250,
+    "speed": [
+     3,
+     7
+    ]
+   },
+   "moves": {
+    "1": {
+     "attributeType": "AZURE",
+     "atkType": "SLASH",
+     "defaultValue": 4,
+     "coins": [
+      2,
+      2,
+      2
+     ],
+     "onUse": [
+      {
+       "buffKeyword": "Breath",
+       "activeRound": 0,
+       "stack": 2
+      }
+     ],
+     "onHit": [
+      {
+       "buffKeyword": "Vibration",
+       "activeRound": 0,
+       "stack": 2
+      }
+     ]
+    },
+    "2": {
+     "attributeType": "AZURE",
+     "atkType": "SLASH",
+     "defaultValue": 6,
+     "coins": [
+      3,
+      3
+     ],
+     "onUse": [
+      {
+       "buffKeyword": "Breath",
+       "activeRound": 0,
+       "stack": 3
+      }
+     ],
+     "onHit": [
+      {
+       "buffKeyword": "Vibration",
+       "activeRound": 0,
+       "stack": 3
+      }
+     ]
+    },
+    "3": {
+     "attributeType": "AZURE",
+     "atkType": "SLASH",
+     "defaultValue": 8,
+     "coins": [
+      4
+     ],
+     "onUse": [
+      {
+       "buffKeyword": "AttackDmgUp",
+       "activeRound": 1,
+       "stack": 2
+      }
+     ],
+     "onHit": [
+      {
+       "buffKeyword": "Vibration",
+       "activeRound": 0,
+       "stack": 4
+      },
+      {
+       "buffKeyword": "Burst",
+       "activeRound": 0,
+       "stack": 2
+      }
+     ]
+    },
+    "defense": {
+     "attributeType": "AZURE",
+     "atkType": "SLASH",
+     "defaultValue": 5,
+     "coins": [
+      3
+     ],
+     "onUse": [
+      {
+       "buffKeyword": "Protection",
+       "activeRound": 0,
+       "stack": 3
+      }
+     ]
+    }
+   },
+   "texts": {
+    "1": {
+     "name": "Ticking Hand"
+    },
+    "2": {
+     "name": "Lost Hours"
+    },
+    "3": {
+     "name": "Old Man's Patience"
+    },
+    "defense": {
+     "name": "Measured Step"
+    }
+   },
+   "title": "Hokma's kit - Outis (11101)"
   }
  }
 }
