@@ -197,7 +197,10 @@ def build(keys, game_dir, cache, data_dir, log=print, boss=(), static=True):
             located = lambda b: have_.get(bodies_.get(b, ""))  # noqa: E731
         if any(lortext.uses_lor(s.get("texts")) or lortext.uses_dice(s.get("moves")) for s in want_boss):
             try:                                    # Ruina's own words: shipped, else the player's install
-                ruina = lortext.shipped_book() or lortext.Book(lortext.read_tables())
+                ruina = lortext.shipped_book()
+                wanted, _ = lortext.referenced({s["key"]: s for s in want_boss})
+                if ruina is None or any(c not in ruina.cards for c in wanted):
+                    ruina = lortext.Book(lortext.read_tables())     # a page the shipped book lacks
             except (lortext.LorTextError, OSError) as e:
                 log(f"  Library of Ruina's text: {e}")
         for s in want_ids:

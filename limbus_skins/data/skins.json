@@ -953,6 +953,15 @@
     "def": -5
    },
    "cover_art": "greencliff"
+  },
+  "baral-id": {
+   "identity": 10894,
+   "base": 10801,
+   "becomes": "Baral as an identity of his own (Ishmael's slot), with Baral's kit, wearing what 10801 wears",
+   "tested": false,
+   "title": "Baral, an identity of his own - Ishmael",
+   "name": "Baral",
+   "dupe_of": "baral"
   }
  },
  "kits": {
@@ -1072,6 +1081,108 @@
     ]
    },
    "title": "Roland's pages (Library of Ruina) - Index Father Yi Sang"
+  },
+  "baral": {
+   "identity": 10801,
+   "becomes": "Baral (Library of Ruina): his pages on LCB Ishmael, at their own dice (Trail, Serum R, Serum W, Serum K on defense); serums for haste, power and Bleed; 220 HP, Speed 5-9 - no body art, Ishmael's own look",
+   "tested": false,
+   "stats": {
+    "hp": 220,
+    "speed": [
+     5,
+     9
+    ]
+   },
+   "moves": {
+    "1": {
+     "lor_dice": 706001,
+     "attributeType": "CRIMSON",
+     "coins": [
+      0
+     ],
+     "onHit": [
+      {
+       "buffKeyword": "Laceration",
+       "activeRound": 0,
+       "stack": 2
+      }
+     ]
+    },
+    "2": {
+     "lor_dice": 706003,
+     "attributeType": "SHAMROCK",
+     "coins": [
+      0
+     ],
+     "onUse": [
+      {
+       "buffKeyword": "Agility",
+       "activeRound": 1,
+       "stack": 2
+      },
+      {
+       "buffKeyword": "AttackDmgUp",
+       "activeRound": 1,
+       "stack": 1
+      }
+     ],
+     "onHit": [
+      {
+       "buffKeyword": "Vibration",
+       "activeRound": 0,
+       "stack": 2
+      }
+     ]
+    },
+    "3": {
+     "lor_dice": 706004,
+     "attributeType": "AZURE",
+     "coins": [
+      0
+     ],
+     "onHit": [
+      {
+       "buffKeyword": "Laceration",
+       "activeRound": 0,
+       "stack": 3
+      },
+      {
+       "buffKeyword": "Vibration",
+       "activeRound": 0,
+       "stack": 3
+      }
+     ]
+    },
+    "defense": {
+     "lor_dice": 706006,
+     "attributeType": "SHAMROCK",
+     "coins": [
+      0
+     ],
+     "onUse": [
+      {
+       "buffKeyword": "Protection",
+       "activeRound": 0,
+       "stack": 3
+      }
+     ]
+    }
+   },
+   "texts": {
+    "1": {
+     "lor_card": 706001
+    },
+    "2": {
+     "lor_card": 706003
+    },
+    "3": {
+     "lor_card": 706004
+    },
+    "defense": {
+     "lor_card": 706006
+    }
+   },
+   "title": "Baral's pages (Library of Ruina) - LCB Ishmael"
   }
  }
 }
