@@ -1165,14 +1165,19 @@
   },
   "baral": {
    "identity": 10801,
-   "becomes": "Baral (Library of Ruina): his pages on LCB Ishmael, at their own dice (Trail, Serum R, Serum W, Serum K on defense); serums for haste, power and Bleed; 220 HP, Speed 5-9 - no body art, Ishmael's own look",
+   "becomes": "Baral (Library of Ruina): his pages on LCB Ishmael, at their own dice (Trail, Serum R, Serum W, Serum K on defense); BROKEN on purpose: x1.6 HP, +3/+4 Speed, half damage taken, harder hits, double statuses",
    "tested": false,
    "stats": {
-    "hp": 220,
+    "hp": 352,
     "speed": [
-     5,
-     9
-    ]
+     8,
+     13
+    ],
+    "resist": {
+     "SLASH": 0.5,
+     "PENETRATE": 0.5,
+     "HIT": 0.5
+    }
    },
    "moves": {
     "1": {
@@ -1185,6 +1190,13 @@
       {
        "buffKeyword": "Laceration",
        "activeRound": 0,
+       "stack": 4
+      }
+     ],
+     "onUse": [
+      {
+       "buffKeyword": "AttackDmgUp",
+       "activeRound": 1,
        "stack": 2
       }
      ]
@@ -1205,13 +1217,18 @@
        "buffKeyword": "AttackDmgUp",
        "activeRound": 1,
        "stack": 1
+      },
+      {
+       "buffKeyword": "AttackDmgUp",
+       "activeRound": 1,
+       "stack": 2
       }
      ],
      "onHit": [
       {
        "buffKeyword": "Vibration",
        "activeRound": 0,
-       "stack": 2
+       "stack": 4
       }
      ]
     },
@@ -1225,11 +1242,18 @@
       {
        "buffKeyword": "Laceration",
        "activeRound": 0,
-       "stack": 3
+       "stack": 6
       },
       {
        "buffKeyword": "Vibration",
        "activeRound": 0,
+       "stack": 6
+      }
+     ],
+     "onUse": [
+      {
+       "buffKeyword": "AttackDmgUp",
+       "activeRound": 1,
        "stack": 3
       }
      ]
@@ -1244,7 +1268,12 @@
       {
        "buffKeyword": "Protection",
        "activeRound": 0,
-       "stack": 3
+       "stack": 6
+      },
+      {
+       "buffKeyword": "AttackDmgUp",
+       "activeRound": 1,
+       "stack": 2
       }
      ]
     }
@@ -1267,14 +1296,19 @@
   },
   "binah": {
    "identity": 10901,
-   "becomes": "Binah: her Degraded pages (Library of Ruina) at their own dice: Fairy, Pillar, Shockwave, Lock on defense; Tremor and Rupture; 260 HP, Speed 4-8 - no body art, Rodion's own look",
+   "becomes": "Binah: her Degraded pages (Library of Ruina) at their own dice: Fairy, Pillar, Shockwave, Lock on defense; BROKEN on purpose: x1.6 HP, +3/+4 Speed, half damage taken, harder hits, double statuses",
    "tested": false,
    "stats": {
-    "hp": 260,
+    "hp": 416,
     "speed": [
-     4,
-     8
-    ]
+     7,
+     12
+    ],
+    "resist": {
+     "SLASH": 0.5,
+     "PENETRATE": 0.5,
+     "HIT": 0.5
+    }
    },
    "moves": {
     "1": {
@@ -1287,6 +1321,13 @@
       {
        "buffKeyword": "Vibration",
        "activeRound": 0,
+       "stack": 4
+      }
+     ],
+     "onUse": [
+      {
+       "buffKeyword": "AttackDmgUp",
+       "activeRound": 1,
        "stack": 2
       }
      ]
@@ -1302,11 +1343,18 @@
       {
        "buffKeyword": "Vibration",
        "activeRound": 0,
-       "stack": 3
+       "stack": 6
       },
       {
        "buffKeyword": "Laceration",
        "activeRound": 0,
+       "stack": 4
+      }
+     ],
+     "onUse": [
+      {
+       "buffKeyword": "AttackDmgUp",
+       "activeRound": 1,
        "stack": 2
       }
      ]
@@ -1325,18 +1373,23 @@
        "buffKeyword": "AttackDmgUp",
        "activeRound": 1,
        "stack": 2
+      },
+      {
+       "buffKeyword": "AttackDmgUp",
+       "activeRound": 1,
+       "stack": 3
       }
      ],
      "onHit": [
       {
        "buffKeyword": "Vibration",
        "activeRound": 0,
-       "stack": 3
+       "stack": 6
       },
       {
        "buffKeyword": "Burst",
        "activeRound": 0,
-       "stack": 3
+       "stack": 6
       }
      ]
     },
@@ -1350,7 +1403,12 @@
       {
        "buffKeyword": "Protection",
        "activeRound": 0,
-       "stack": 3
+       "stack": 6
+      },
+      {
+       "buffKeyword": "AttackDmgUp",
+       "activeRound": 1,
+       "stack": 2
       }
      ]
     }
@@ -1373,27 +1431,37 @@
   },
   "ayin": {
    "identity": 11201,
-   "becomes": "Ayin: light, Cogito and the reset: Poise and Rupture; 240 HP, Speed 5-9 - no body art, Gregor's own look",
+   "becomes": "Ayin: light, Cogito and the reset: Poise and Rupture; BROKEN on purpose: x1.6 HP, +3/+4 Speed, half damage taken, harder hits, double statuses",
    "tested": false,
    "stats": {
-    "hp": 240,
+    "hp": 384,
     "speed": [
-     5,
-     9
-    ]
+     8,
+     13
+    ],
+    "resist": {
+     "SLASH": 0.5,
+     "PENETRATE": 0.5,
+     "HIT": 0.5
+    }
    },
    "moves": {
     "1": {
      "attributeType": "INDIGO",
      "atkType": "HIT",
-     "defaultValue": 4,
+     "defaultValue": 8,
      "coins": [
-      3
+      6
      ],
      "onUse": [
       {
        "buffKeyword": "Breath",
        "activeRound": 0,
+       "stack": 2
+      },
+      {
+       "buffKeyword": "AttackDmgUp",
+       "activeRound": 1,
        "stack": 2
       }
      ],
@@ -1401,44 +1469,49 @@
       {
        "buffKeyword": "Burst",
        "activeRound": 0,
-       "stack": 2
+       "stack": 4
       }
      ]
     },
     "2": {
      "attributeType": "INDIGO",
      "atkType": "PENETRATE",
-     "defaultValue": 5,
+     "defaultValue": 9,
      "coins": [
-      3
+      6
      ],
      "onUse": [
       {
        "buffKeyword": "Breath",
        "activeRound": 0,
        "stack": 3
+      },
+      {
+       "buffKeyword": "AttackDmgUp",
+       "activeRound": 1,
+       "stack": 2
       }
      ],
      "onHit": [
       {
        "buffKeyword": "Vibration",
        "activeRound": 0,
-       "stack": 2
+       "stack": 4
       },
       {
        "buffKeyword": "Burst",
        "activeRound": 0,
-       "stack": 2
+       "stack": 4
       }
      ]
     },
     "3": {
      "attributeType": "INDIGO",
      "atkType": "HIT",
-     "defaultValue": 7,
+     "defaultValue": 11,
      "coins": [
-      3,
-      3
+      6,
+      6
      ],
      "onUse": [
       {
@@ -1451,28 +1524,38 @@
        "activeRound": 0,
        "stack": 3,
        "target": "EveryAlly"
+      },
+      {
+       "buffKeyword": "AttackDmgUp",
+       "activeRound": 1,
+       "stack": 3
       }
      ],
      "onHit": [
       {
        "buffKeyword": "Burst",
        "activeRound": 0,
-       "stack": 4
+       "stack": 8
       }
      ]
     },
     "defense": {
      "attributeType": "INDIGO",
      "atkType": "SLASH",
-     "defaultValue": 5,
+     "defaultValue": 9,
      "coins": [
-      3
+      6
      ],
      "onUse": [
       {
        "buffKeyword": "Protection",
        "activeRound": 0,
-       "stack": 3
+       "stack": 6
+      },
+      {
+       "buffKeyword": "AttackDmgUp",
+       "activeRound": 1,
+       "stack": 2
       }
      ]
     }
@@ -1495,70 +1578,34 @@
   },
   "malkuth": {
    "identity": 10301,
-   "becomes": "Malkuth: always busy: Haste and Bleed; 200 HP, Speed 6-10 - no body art, Don Quixote's own look",
+   "becomes": "Malkuth: always busy: Haste and Bleed; BROKEN on purpose: x1.6 HP, +3/+4 Speed, half damage taken, harder hits, double statuses",
    "tested": false,
    "stats": {
-    "hp": 200,
+    "hp": 320,
     "speed": [
-     6,
-     10
-    ]
+     9,
+     14
+    ],
+    "resist": {
+     "SLASH": 0.5,
+     "PENETRATE": 0.5,
+     "HIT": 0.5
+    }
    },
    "moves": {
     "1": {
      "attributeType": "SCARLET",
      "atkType": "SLASH",
-     "defaultValue": 4,
+     "defaultValue": 8,
      "coins": [
-      3
+      6
      ],
      "onUse": [
       {
        "buffKeyword": "Agility",
        "activeRound": 1,
        "stack": 2
-      }
-     ],
-     "onHit": [
-      {
-       "buffKeyword": "Laceration",
-       "activeRound": 0,
-       "stack": 1
-      }
-     ]
-    },
-    "2": {
-     "attributeType": "SCARLET",
-     "atkType": "PENETRATE",
-     "defaultValue": 5,
-     "coins": [
-      3
-     ],
-     "onUse": [
-      {
-       "buffKeyword": "Agility",
-       "activeRound": 1,
-       "stack": 2
-      }
-     ],
-     "onHit": [
-      {
-       "buffKeyword": "Laceration",
-       "activeRound": 0,
-       "stack": 2
-      }
-     ]
-    },
-    "3": {
-     "attributeType": "SCARLET",
-     "atkType": "PENETRATE",
-     "defaultValue": 7,
-     "coins": [
-      2,
-      2,
-      2
-     ],
-     "onUse": [
+      },
       {
        "buffKeyword": "AttackDmgUp",
        "activeRound": 1,
@@ -1569,21 +1616,82 @@
       {
        "buffKeyword": "Laceration",
        "activeRound": 0,
+       "stack": 2
+      }
+     ]
+    },
+    "2": {
+     "attributeType": "SCARLET",
+     "atkType": "PENETRATE",
+     "defaultValue": 9,
+     "coins": [
+      6
+     ],
+     "onUse": [
+      {
+       "buffKeyword": "Agility",
+       "activeRound": 1,
+       "stack": 2
+      },
+      {
+       "buffKeyword": "AttackDmgUp",
+       "activeRound": 1,
+       "stack": 2
+      }
+     ],
+     "onHit": [
+      {
+       "buffKeyword": "Laceration",
+       "activeRound": 0,
+       "stack": 4
+      }
+     ]
+    },
+    "3": {
+     "attributeType": "SCARLET",
+     "atkType": "PENETRATE",
+     "defaultValue": 11,
+     "coins": [
+      5,
+      5,
+      5
+     ],
+     "onUse": [
+      {
+       "buffKeyword": "AttackDmgUp",
+       "activeRound": 1,
+       "stack": 2
+      },
+      {
+       "buffKeyword": "AttackDmgUp",
+       "activeRound": 1,
        "stack": 3
+      }
+     ],
+     "onHit": [
+      {
+       "buffKeyword": "Laceration",
+       "activeRound": 0,
+       "stack": 6
       }
      ]
     },
     "defense": {
      "attributeType": "SCARLET",
      "atkType": "SLASH",
-     "defaultValue": 5,
+     "defaultValue": 9,
      "coins": [
-      3
+      6
      ],
      "onUse": [
       {
        "buffKeyword": "Protection",
        "activeRound": 0,
+       "stack": 4
+      },
+      {
+       "buffKeyword": "AttackDmgUp",
+       "activeRound": 1,
        "stack": 2
       }
      ]
@@ -1607,70 +1715,28 @@
   },
   "yesod": {
    "identity": 10501,
-   "becomes": "Yesod: rules and records: Tremor and Protection; 240 HP, Speed 3-7 - no body art, Meursault's own look",
+   "becomes": "Yesod: rules and records: Tremor and Protection; BROKEN on purpose: x1.6 HP, +3/+4 Speed, half damage taken, harder hits, double statuses",
    "tested": false,
    "stats": {
-    "hp": 240,
+    "hp": 384,
     "speed": [
-     3,
-     7
-    ]
+     6,
+     11
+    ],
+    "resist": {
+     "SLASH": 0.5,
+     "PENETRATE": 0.5,
+     "HIT": 0.5
+    }
    },
    "moves": {
     "1": {
      "attributeType": "AZURE",
      "atkType": "HIT",
-     "defaultValue": 4,
-     "coins": [
-      3,
-      3
-     ],
-     "onHit": [
-      {
-       "buffKeyword": "Vibration",
-       "activeRound": 0,
-       "stack": 2
-      }
-     ]
-    },
-    "2": {
-     "attributeType": "AZURE",
-     "atkType": "HIT",
-     "defaultValue": 5,
-     "coins": [
-      3
-     ],
-     "onUse": [
-      {
-       "buffKeyword": "Protection",
-       "activeRound": 0,
-       "stack": 2
-      }
-     ],
-     "onHit": [
-      {
-       "buffKeyword": "Vibration",
-       "activeRound": 0,
-       "stack": 3
-      }
-     ]
-    },
-    "3": {
-     "attributeType": "AZURE",
-     "atkType": "HIT",
      "defaultValue": 8,
      "coins": [
-      2,
-      2,
-      2,
-      2
-     ],
-     "onUse": [
-      {
-       "buffKeyword": "AttackDmgUp",
-       "activeRound": 1,
-       "stack": 1
-      }
+      6,
+      6
      ],
      "onHit": [
       {
@@ -1678,20 +1744,89 @@
        "activeRound": 0,
        "stack": 4
       }
+     ],
+     "onUse": [
+      {
+       "buffKeyword": "AttackDmgUp",
+       "activeRound": 1,
+       "stack": 2
+      }
      ]
     },
-    "defense": {
+    "2": {
      "attributeType": "AZURE",
      "atkType": "HIT",
-     "defaultValue": 6,
+     "defaultValue": 9,
      "coins": [
-      3
+      6
      ],
      "onUse": [
       {
        "buffKeyword": "Protection",
        "activeRound": 0,
+       "stack": 2
+      },
+      {
+       "buffKeyword": "AttackDmgUp",
+       "activeRound": 1,
+       "stack": 2
+      }
+     ],
+     "onHit": [
+      {
+       "buffKeyword": "Vibration",
+       "activeRound": 0,
+       "stack": 6
+      }
+     ]
+    },
+    "3": {
+     "attributeType": "AZURE",
+     "atkType": "HIT",
+     "defaultValue": 12,
+     "coins": [
+      5,
+      5,
+      5,
+      5
+     ],
+     "onUse": [
+      {
+       "buffKeyword": "AttackDmgUp",
+       "activeRound": 1,
+       "stack": 1
+      },
+      {
+       "buffKeyword": "AttackDmgUp",
+       "activeRound": 1,
        "stack": 3
+      }
+     ],
+     "onHit": [
+      {
+       "buffKeyword": "Vibration",
+       "activeRound": 0,
+       "stack": 8
+      }
+     ]
+    },
+    "defense": {
+     "attributeType": "AZURE",
+     "atkType": "HIT",
+     "defaultValue": 10,
+     "coins": [
+      6
+     ],
+     "onUse": [
+      {
+       "buffKeyword": "Protection",
+       "activeRound": 0,
+       "stack": 6
+      },
+      {
+       "buffKeyword": "AttackDmgUp",
+       "activeRound": 1,
+       "stack": 2
       }
      ]
     }
@@ -1714,23 +1849,28 @@
   },
   "hod": {
    "identity": 11002,
-   "becomes": "Hod: training: buffs the whole team; 190 HP, Speed 4-8 - no body art, Sinclair's own look",
+   "becomes": "Hod: training: buffs the whole team; BROKEN on purpose: x1.6 HP, +3/+4 Speed, half damage taken, harder hits, double statuses",
    "tested": false,
    "stats": {
-    "hp": 190,
+    "hp": 304,
     "speed": [
-     4,
-     8
-    ]
+     7,
+     12
+    ],
+    "resist": {
+     "SLASH": 0.5,
+     "PENETRATE": 0.5,
+     "HIT": 0.5
+    }
    },
    "moves": {
     "1": {
      "attributeType": "AMBER",
      "atkType": "SLASH",
-     "defaultValue": 3,
+     "defaultValue": 7,
      "coins": [
-      3,
-      3
+      6,
+      6
      ],
      "onUse": [
       {
@@ -1738,31 +1878,11 @@
        "activeRound": 0,
        "stack": 2,
        "target": "EveryAlly"
-      }
-     ],
-     "onHit": [
+      },
       {
-       "buffKeyword": "Burst",
-       "activeRound": 0,
-       "stack": 1
-      }
-     ]
-    },
-    "2": {
-     "attributeType": "AMBER",
-     "atkType": "SLASH",
-     "defaultValue": 5,
-     "coins": [
-      2,
-      2,
-      2
-     ],
-     "onUse": [
-      {
-       "buffKeyword": "Protection",
-       "activeRound": 0,
-       "stack": 2,
-       "target": "EveryAlly"
+       "buffKeyword": "AttackDmgUp",
+       "activeRound": 1,
+       "stack": 2
       }
      ],
      "onHit": [
@@ -1773,12 +1893,42 @@
       }
      ]
     },
+    "2": {
+     "attributeType": "AMBER",
+     "atkType": "SLASH",
+     "defaultValue": 9,
+     "coins": [
+      5,
+      5,
+      5
+     ],
+     "onUse": [
+      {
+       "buffKeyword": "Protection",
+       "activeRound": 0,
+       "stack": 2,
+       "target": "EveryAlly"
+      },
+      {
+       "buffKeyword": "AttackDmgUp",
+       "activeRound": 1,
+       "stack": 2
+      }
+     ],
+     "onHit": [
+      {
+       "buffKeyword": "Burst",
+       "activeRound": 0,
+       "stack": 4
+      }
+     ]
+    },
     "3": {
      "attributeType": "AMBER",
      "atkType": "PENETRATE",
-     "defaultValue": 6,
+     "defaultValue": 10,
      "coins": [
-      4
+      7
      ],
      "onUse": [
       {
@@ -1792,27 +1942,37 @@
        "activeRound": 0,
        "stack": 3,
        "target": "EveryAlly"
+      },
+      {
+       "buffKeyword": "AttackDmgUp",
+       "activeRound": 1,
+       "stack": 3
       }
      ],
      "onHit": [
       {
        "buffKeyword": "Burst",
        "activeRound": 0,
-       "stack": 3
+       "stack": 6
       }
      ]
     },
     "defense": {
      "attributeType": "AMBER",
      "atkType": "SLASH",
-     "defaultValue": 4,
+     "defaultValue": 8,
      "coins": [
-      3
+      6
      ],
      "onUse": [
       {
        "buffKeyword": "Protection",
        "activeRound": 0,
+       "stack": 4
+      },
+      {
+       "buffKeyword": "AttackDmgUp",
+       "activeRound": 1,
        "stack": 2
       }
      ]
@@ -1836,45 +1996,27 @@
   },
   "netzach": {
    "identity": 10601,
-   "becomes": "Netzach: too tired to die: slow and very tough; 260 HP, Speed 2-6 - no body art, Hong Lu's own look",
+   "becomes": "Netzach: too tired to die: slow and very tough; BROKEN on purpose: x1.6 HP, +3/+4 Speed, half damage taken, harder hits, double statuses",
    "tested": false,
    "stats": {
-    "hp": 260,
+    "hp": 416,
     "speed": [
-     2,
-     6
-    ]
+     5,
+     10
+    ],
+    "resist": {
+     "SLASH": 0.5,
+     "PENETRATE": 0.5,
+     "HIT": 0.5
+    }
    },
    "moves": {
     "1": {
      "attributeType": "AMBER",
      "atkType": "HIT",
-     "defaultValue": 4,
+     "defaultValue": 8,
      "coins": [
-      3
-     ],
-     "onHit": [
-      {
-       "buffKeyword": "Vibration",
-       "activeRound": 0,
-       "stack": 1
-      }
-     ]
-    },
-    "2": {
-     "attributeType": "AMBER",
-     "atkType": "HIT",
-     "defaultValue": 5,
-     "coins": [
-      3,
-      3
-     ],
-     "onUse": [
-      {
-       "buffKeyword": "Protection",
-       "activeRound": 0,
-       "stack": 3
-      }
+      6
      ],
      "onHit": [
       {
@@ -1882,43 +2024,88 @@
        "activeRound": 0,
        "stack": 2
       }
+     ],
+     "onUse": [
+      {
+       "buffKeyword": "AttackDmgUp",
+       "activeRound": 1,
+       "stack": 2
+      }
      ]
     },
-    "3": {
+    "2": {
      "attributeType": "AMBER",
      "atkType": "HIT",
-     "defaultValue": 8,
+     "defaultValue": 9,
      "coins": [
-      3,
-      3
+      6,
+      6
      ],
      "onUse": [
       {
        "buffKeyword": "Protection",
        "activeRound": 0,
-       "stack": 4
+       "stack": 3
+      },
+      {
+       "buffKeyword": "AttackDmgUp",
+       "activeRound": 1,
+       "stack": 2
       }
      ],
      "onHit": [
       {
        "buffKeyword": "Vibration",
        "activeRound": 0,
-       "stack": 3
+       "stack": 4
       }
      ]
     },
-    "defense": {
+    "3": {
      "attributeType": "AMBER",
      "atkType": "HIT",
-     "defaultValue": 7,
+     "defaultValue": 12,
      "coins": [
-      3
+      6,
+      6
      ],
      "onUse": [
       {
        "buffKeyword": "Protection",
        "activeRound": 0,
        "stack": 4
+      },
+      {
+       "buffKeyword": "AttackDmgUp",
+       "activeRound": 1,
+       "stack": 3
+      }
+     ],
+     "onHit": [
+      {
+       "buffKeyword": "Vibration",
+       "activeRound": 0,
+       "stack": 6
+      }
+     ]
+    },
+    "defense": {
+     "attributeType": "AMBER",
+     "atkType": "HIT",
+     "defaultValue": 11,
+     "coins": [
+      6
+     ],
+     "onUse": [
+      {
+       "buffKeyword": "Protection",
+       "activeRound": 0,
+       "stack": 8
+      },
+      {
+       "buffKeyword": "AttackDmgUp",
+       "activeRound": 1,
+       "stack": 2
       }
      ]
     }
@@ -1941,27 +2128,37 @@
   },
   "tiphereth": {
    "identity": 10101,
-   "becomes": "Tiphereth: central command: Poise for the team; 210 HP, Speed 4-9 - no body art, Yi Sang's own look",
+   "becomes": "Tiphereth: central command: Poise for the team; BROKEN on purpose: x1.6 HP, +3/+4 Speed, half damage taken, harder hits, double statuses",
    "tested": false,
    "stats": {
-    "hp": 210,
+    "hp": 336,
     "speed": [
-     4,
-     9
-    ]
+     7,
+     13
+    ],
+    "resist": {
+     "SLASH": 0.5,
+     "PENETRATE": 0.5,
+     "HIT": 0.5
+    }
    },
    "moves": {
     "1": {
      "attributeType": "INDIGO",
      "atkType": "PENETRATE",
-     "defaultValue": 4,
+     "defaultValue": 8,
      "coins": [
-      3
+      6
      ],
      "onUse": [
       {
        "buffKeyword": "Breath",
        "activeRound": 0,
+       "stack": 2
+      },
+      {
+       "buffKeyword": "AttackDmgUp",
+       "activeRound": 1,
        "stack": 2
       }
      ],
@@ -1969,22 +2166,27 @@
       {
        "buffKeyword": "Laceration",
        "activeRound": 0,
-       "stack": 1
+       "stack": 2
       }
      ]
     },
     "2": {
      "attributeType": "INDIGO",
      "atkType": "PENETRATE",
-     "defaultValue": 5,
+     "defaultValue": 9,
      "coins": [
-      3,
-      3
+      6,
+      6
      ],
      "onUse": [
       {
        "buffKeyword": "Breath",
        "activeRound": 0,
+       "stack": 2
+      },
+      {
+       "buffKeyword": "AttackDmgUp",
+       "activeRound": 1,
        "stack": 2
       }
      ],
@@ -1992,23 +2194,23 @@
       {
        "buffKeyword": "Laceration",
        "activeRound": 0,
-       "stack": 2
+       "stack": 4
       },
       {
        "buffKeyword": "Burst",
        "activeRound": 0,
-       "stack": 1
+       "stack": 2
       }
      ]
     },
     "3": {
      "attributeType": "INDIGO",
      "atkType": "PENETRATE",
-     "defaultValue": 7,
+     "defaultValue": 11,
      "coins": [
-      2,
-      2,
-      2
+      5,
+      5,
+      5
      ],
      "onUse": [
       {
@@ -2021,27 +2223,37 @@
        "activeRound": 0,
        "stack": 2,
        "target": "EveryAlly"
+      },
+      {
+       "buffKeyword": "AttackDmgUp",
+       "activeRound": 1,
+       "stack": 3
       }
      ],
      "onHit": [
       {
        "buffKeyword": "Burst",
        "activeRound": 0,
-       "stack": 3
+       "stack": 6
       }
      ]
     },
     "defense": {
      "attributeType": "INDIGO",
      "atkType": "SLASH",
-     "defaultValue": 5,
+     "defaultValue": 9,
      "coins": [
-      3
+      6
      ],
      "onUse": [
       {
        "buffKeyword": "Protection",
        "activeRound": 0,
+       "stack": 4
+      },
+      {
+       "buffKeyword": "AttackDmgUp",
+       "activeRound": 1,
        "stack": 2
       }
      ]
@@ -2065,27 +2277,39 @@
   },
   "chesed": {
    "identity": 10201,
-   "becomes": "Chesed: welfare: shields for everyone; 230 HP, Speed 3-8 - no body art, Faust's own look",
+   "becomes": "Chesed: welfare: shields for everyone; BROKEN on purpose: x1.6 HP, +3/+4 Speed, half damage taken, harder hits, double statuses",
    "tested": false,
    "stats": {
-    "hp": 230,
+    "hp": 368,
     "speed": [
-     3,
-     8
-    ]
+     6,
+     12
+    ],
+    "resist": {
+     "SLASH": 0.5,
+     "PENETRATE": 0.5,
+     "HIT": 0.5
+    }
    },
    "moves": {
     "1": {
      "attributeType": "SHAMROCK",
      "atkType": "HIT",
-     "defaultValue": 4,
+     "defaultValue": 8,
      "coins": [
-      3
+      6
      ],
      "onHit": [
       {
        "buffKeyword": "Burst",
        "activeRound": 0,
+       "stack": 4
+      }
+     ],
+     "onUse": [
+      {
+       "buffKeyword": "AttackDmgUp",
+       "activeRound": 1,
        "stack": 2
       }
      ]
@@ -2093,10 +2317,10 @@
     "2": {
      "attributeType": "SHAMROCK",
      "atkType": "HIT",
-     "defaultValue": 5,
+     "defaultValue": 9,
      "coins": [
-      3,
-      3
+      6,
+      6
      ],
      "onUse": [
       {
@@ -2104,23 +2328,28 @@
        "activeRound": 0,
        "stack": 2,
        "target": "EveryAlly"
+      },
+      {
+       "buffKeyword": "AttackDmgUp",
+       "activeRound": 1,
+       "stack": 2
       }
      ],
      "onHit": [
       {
        "buffKeyword": "Burst",
        "activeRound": 0,
-       "stack": 2
+       "stack": 4
       }
      ]
     },
     "3": {
      "attributeType": "SHAMROCK",
      "atkType": "HIT",
-     "defaultValue": 7,
+     "defaultValue": 11,
      "coins": [
-      3,
-      3
+      6,
+      6
      ],
      "onUse": [
       {
@@ -2128,28 +2357,38 @@
        "activeRound": 0,
        "stack": 3,
        "target": "EveryAlly"
+      },
+      {
+       "buffKeyword": "AttackDmgUp",
+       "activeRound": 1,
+       "stack": 3
       }
      ],
      "onHit": [
       {
        "buffKeyword": "Burst",
        "activeRound": 0,
-       "stack": 3
+       "stack": 6
       }
      ]
     },
     "defense": {
      "attributeType": "SHAMROCK",
      "atkType": "HIT",
-     "defaultValue": 5,
+     "defaultValue": 9,
      "coins": [
-      3
+      6
      ],
      "onUse": [
       {
        "buffKeyword": "Protection",
        "activeRound": 0,
-       "stack": 3
+       "stack": 6
+      },
+      {
+       "buffKeyword": "AttackDmgUp",
+       "activeRound": 1,
+       "stack": 2
       }
      ]
     }
@@ -2172,71 +2411,36 @@
   },
   "hokma": {
    "identity": 11101,
-   "becomes": "Hokma: time: Poise and heavy Tremor; 250 HP, Speed 3-7 - no body art, Outis's own look",
+   "becomes": "Hokma: time: Poise and heavy Tremor; BROKEN on purpose: x1.6 HP, +3/+4 Speed, half damage taken, harder hits, double statuses",
    "tested": false,
    "stats": {
-    "hp": 250,
+    "hp": 400,
     "speed": [
-     3,
-     7
-    ]
+     6,
+     11
+    ],
+    "resist": {
+     "SLASH": 0.5,
+     "PENETRATE": 0.5,
+     "HIT": 0.5
+    }
    },
    "moves": {
     "1": {
      "attributeType": "AZURE",
      "atkType": "SLASH",
-     "defaultValue": 4,
-     "coins": [
-      2,
-      2,
-      2
-     ],
-     "onUse": [
-      {
-       "buffKeyword": "Breath",
-       "activeRound": 0,
-       "stack": 2
-      }
-     ],
-     "onHit": [
-      {
-       "buffKeyword": "Vibration",
-       "activeRound": 0,
-       "stack": 2
-      }
-     ]
-    },
-    "2": {
-     "attributeType": "AZURE",
-     "atkType": "SLASH",
-     "defaultValue": 6,
-     "coins": [
-      3,
-      3
-     ],
-     "onUse": [
-      {
-       "buffKeyword": "Breath",
-       "activeRound": 0,
-       "stack": 3
-      }
-     ],
-     "onHit": [
-      {
-       "buffKeyword": "Vibration",
-       "activeRound": 0,
-       "stack": 3
-      }
-     ]
-    },
-    "3": {
-     "attributeType": "AZURE",
-     "atkType": "SLASH",
      "defaultValue": 8,
      "coins": [
-      4
+      5,
+      5,
+      5
      ],
      "onUse": [
+      {
+       "buffKeyword": "Breath",
+       "activeRound": 0,
+       "stack": 2
+      },
       {
        "buffKeyword": "AttackDmgUp",
        "activeRound": 1,
@@ -2248,26 +2452,86 @@
        "buffKeyword": "Vibration",
        "activeRound": 0,
        "stack": 4
+      }
+     ]
+    },
+    "2": {
+     "attributeType": "AZURE",
+     "atkType": "SLASH",
+     "defaultValue": 10,
+     "coins": [
+      6,
+      6
+     ],
+     "onUse": [
+      {
+       "buffKeyword": "Breath",
+       "activeRound": 0,
+       "stack": 3
+      },
+      {
+       "buffKeyword": "AttackDmgUp",
+       "activeRound": 1,
+       "stack": 2
+      }
+     ],
+     "onHit": [
+      {
+       "buffKeyword": "Vibration",
+       "activeRound": 0,
+       "stack": 6
+      }
+     ]
+    },
+    "3": {
+     "attributeType": "AZURE",
+     "atkType": "SLASH",
+     "defaultValue": 12,
+     "coins": [
+      7
+     ],
+     "onUse": [
+      {
+       "buffKeyword": "AttackDmgUp",
+       "activeRound": 1,
+       "stack": 2
+      },
+      {
+       "buffKeyword": "AttackDmgUp",
+       "activeRound": 1,
+       "stack": 3
+      }
+     ],
+     "onHit": [
+      {
+       "buffKeyword": "Vibration",
+       "activeRound": 0,
+       "stack": 8
       },
       {
        "buffKeyword": "Burst",
        "activeRound": 0,
-       "stack": 2
+       "stack": 4
       }
      ]
     },
     "defense": {
      "attributeType": "AZURE",
      "atkType": "SLASH",
-     "defaultValue": 5,
+     "defaultValue": 9,
      "coins": [
-      3
+      6
      ],
      "onUse": [
       {
        "buffKeyword": "Protection",
        "activeRound": 0,
-       "stack": 3
+       "stack": 6
+      },
+      {
+       "buffKeyword": "AttackDmgUp",
+       "activeRound": 1,
+       "stack": 2
       }
      ]
     }
