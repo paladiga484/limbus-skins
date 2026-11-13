@@ -106,6 +106,28 @@ def wordings(data_dir, live):
     return out
 
 
+MUSIC = re.compile(r"[A-Za-z0-9_-]{1,60}\.(ogg|mp3|wav|flac)")
+
+
+def fight_music(data_dir, live):
+    """[(request, dungeon id, file name, path)] for the fights in live whose music is on this
+    machine (<data dir>/music/<file>: friend's own tracks, never built, shipped or downloaded)."""
+    out = []
+    for man in sorted(glob.glob(os.path.join(data_dir, "built", "*", "manifest.json"))):
+        m = _json(man)
+        mus = m.get("music")
+        if m.get("kind") != "fight" or not isinstance(mus, dict) or not set(m.get("skins") or []) & live:
+            continue
+        req, dungeon, name = mus.get("request"), mus.get("dungeon"), mus.get("file")
+        if not (isinstance(req, str) and req.isalnum() and isinstance(dungeon, int) and 0 < dungeon < 10 ** 9
+                and isinstance(name, str) and MUSIC.fullmatch(name)):
+            continue
+        path = os.path.join(data_dir, "music", name)
+        if os.path.isfile(path):
+            out.append((req, dungeon, name, path))
+    return out
+
+
 def allynames_file(entries):
     """allynames.txt: <id> TAB <folder's title> TAB <folder's name> TAB <its own title> (\\n for a line
     break) - AllyFacePatch swaps each of the game's words for the identity's own."""
@@ -292,6 +314,9 @@ def configure(folder, data_dir, on=True):
     words = wordings(data_dir, live) if on else {}
     _replace(os.path.join(folder, "allynames.txt"), allynames_file({i: w for i, w in words.items() if i in named_ids}))
     _sync(os.path.join(folder, "covers"), covers(data_dir, {i for i, _, _ in ours}, live))
+    music = fight_music(data_dir, live) if on else []
+    _replace(os.path.join(folder, "fights.txt"), "".join(f"{r}\t{d}\tmusic\\{n}\n" for r, d, n, _ in music))
+    _sync(os.path.join(folder, "music"), {n: p for _, _, n, p in music})
     from . import title
     _sync(os.path.join(folder, "title"), title.files(data_dir) if on else {})
     return True

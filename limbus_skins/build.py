@@ -513,7 +513,8 @@ def build(keys, game_dir, cache, data_dir, log=print, boss=(), static=True):
                 rels.append(_write(out, cache, locate_(app), raw))
                 notes.append(f"{spec.get('name', app)}: {n[0] if n else 'drawn'}")
             with open(os.path.join(out, "manifest.json"), "w", encoding="utf-8") as f:
-                json.dump({"format": FORMAT, "kind": "fight", "skins": [key], "files": rels, "notes": notes}, f, indent=1)
+                json.dump(dict({"format": FORMAT, "kind": "fight", "skins": [key], "files": rels, "notes": notes},
+                               **({"music": s["music"]} if s.get("music") else {})), f, indent=1)
             results[key] = (True, "; ".join([msg] + notes))
         except (repaint.RepaintError, RuntimeError, KeyError, OSError, ValueError) as e:
             shutil.rmtree(out, ignore_errors=True)

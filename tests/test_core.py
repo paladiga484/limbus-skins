@@ -2001,6 +2001,27 @@ class ClientPatch(unittest.TestCase):
         client.configure(self.client, self.data, on=False)
         self.assertEqual(self.read("client", "allynames.txt"), "")
 
+    def test_a_fights_music_goes_beside_the_patch_only_from_this_machine(self):
+        from limbus_skins import client
+        os.makedirs(os.path.join(self.data, "built", "twilight"))
+        with open(os.path.join(self.data, "built", "twilight", "manifest.json"), "w") as f:
+            json.dump({"kind": "fight", "skins": ["twilight"], "files": [],
+                       "music": {"request": "EnterExpDungeon", "dungeon": 18, "file": "twilight.ogg"}}, f)
+        os.makedirs(os.path.join(self.data, "built", "quiet"))
+        with open(os.path.join(self.data, "built", "quiet", "manifest.json"), "w") as f:
+            json.dump({"kind": "fight", "skins": ["quiet"], "files": [],
+                       "music": {"request": "EnterExpDungeon", "dungeon": 17, "file": "nobody-has-it.ogg"}}, f)
+        os.makedirs(os.path.join(self.data, "music"))
+        with open(os.path.join(self.data, "music", "twilight.ogg"), "wb") as f:
+            f.write(b"OggS song")
+        self.applied("twilight", "quiet")
+        client.configure(self.client, self.data)
+        self.assertEqual(self.read("client", "fights.txt"), "EnterExpDungeon\t18\tmusic\\twilight.ogg\n")
+        self.assertEqual(os.listdir(os.path.join(self.client, "music")), ["twilight.ogg"])
+        client.configure(self.client, self.data, on=False)
+        self.assertEqual(self.read("client", "fights.txt"), "")
+        self.assertEqual(os.listdir(os.path.join(self.client, "music")), [])
+
     def test_a_body_with_no_death_dies_as_its_sinner_while_its_skin_is_in_the_session(self):
         from limbus_skins import client
         with open(os.path.join(self.data, "built", "helpers", "manifest.json")) as f:

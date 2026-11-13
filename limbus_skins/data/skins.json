@@ -3565,6 +3565,11 @@
       }
      }
     }
+   },
+   "music": {
+    "request": "EnterExpDungeon",
+    "dungeon": 18,
+    "file": "twilight.ogg"
    }
   }
  }
