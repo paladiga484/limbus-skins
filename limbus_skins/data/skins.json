@@ -3386,44 +3386,52 @@
     "91007_KCorpAppearance": {
      "name": "Long Bird",
      "lor": {
-      "bundle": "char/char_131.pres",
-      "prefab": "EGO_LongBird",
+      "bundle": "lobotomy/긴새",
+      "prefab": "JudgementBird",
       "smear": [
-       "move",
-       "S1",
-       "S2",
-       "S3"
+       "move"
       ],
       "idle_time": 2.4,
       "map": {
        "idle": [
         "Default",
-        "Standing"
+        "Standing1",
+        "Standing2",
+        "Standing3",
+        "Standing4"
        ],
        "move": [
-        "Move"
+        "Walk1",
+        "Walk2",
+        "Walk3",
+        "Walk4"
        ],
        "gud": [
-        "Default"
+        "Seeing1"
        ],
        "miss": [
-        "Move"
+        "Walk2"
        ],
        "dmg": [
-        "Damaged"
+        "Seeing2"
        ],
        "dead": [
-        "Damaged"
+        "Seeing3"
        ],
        "S1": [
-        "Slash"
+        "Judgement1",
+        "Judgement2",
+        "Judgement3"
        ],
        "S2": [
-        "Hit",
-        "S1"
+        "Judgement3",
+        "Judgement4",
+        "Judgement5"
        ],
        "S3": [
-        "S2"
+        "Judgement4",
+        "Judgement5",
+        "Judgement6"
        ]
       }
      }
@@ -3522,28 +3530,30 @@
     "90088_Fishman_CruiseAppearance": {
      "name": "Small Bird",
      "lor": {
-      "bundle": "char/char_159.pres",
-      "prefab": "EGO_SmallBird",
+      "bundle": "lobotomy/smallbird",
+      "prefab": "PunishingBird",
       "smear": [
-       "move",
-       "S1",
-       "S2",
-       "S3"
+       "move"
       ],
-      "idle_time": 2.4,
+      "idle_time": 2.0,
       "map": {
        "idle": [
         "Default",
-        "Standing"
+        "Standing1",
+        "Standing2"
        ],
        "move": [
-        "Move"
+        "Fly1",
+        "Fly2",
+        "Fly3",
+        "Fly4",
+        "Fly5"
        ],
        "gud": [
-        "Evasion"
+        "Guard"
        ],
        "miss": [
-        "Evasion"
+        "Evade"
        ],
        "dmg": [
         "Damaged"
@@ -3552,15 +3562,20 @@
         "Damaged"
        ],
        "S1": [
-        "Slash",
-        "Hit"
+        "Peck_ahead1",
+        "Peck_ahead2",
+        "Peck_ahead3"
        ],
        "S2": [
-        "S1"
+        "Peck_up1",
+        "Peck_up2",
+        "Peck_up3"
        ],
        "S3": [
-        "S2",
-        "Hit"
+        "Peck_down1",
+        "Peck_down2",
+        "Peck_down3",
+        "Peck_ahead3"
        ]
       }
      }

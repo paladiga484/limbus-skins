@@ -1,0 +1,148 @@
+{
+ "bundle": "lobotomy/smallbird",
+ "head": null,
+ "poses": {
+  "Damaged": {
+   "file": "Damaged.png",
+   "pivot": [
+    0.488722,
+    0.0
+   ]
+  },
+  "Default": {
+   "file": "Default.png",
+   "pivot": [
+    0.488722,
+    0.0
+   ]
+  },
+  "Evade": {
+   "file": "Evade.png",
+   "pivot": [
+    0.454545,
+    -0.128617
+   ]
+  },
+  "Fly1": {
+   "file": "Fly1.png",
+   "pivot": [
+    0.464286,
+    -0.085911
+   ]
+  },
+  "Fly2": {
+   "file": "Fly2.png",
+   "pivot": [
+    0.445205,
+    -0.086806
+   ]
+  },
+  "Fly3": {
+   "file": "Fly3.png",
+   "pivot": [
+    0.454545,
+    -0.080128
+   ]
+  },
+  "Fly4": {
+   "file": "Fly4.png",
+   "pivot": [
+    0.477941,
+    -0.086505
+   ]
+  },
+  "Fly5": {
+   "file": "Fly5.png",
+   "pivot": [
+    0.469314,
+    -0.087719
+   ]
+  },
+  "Guard": {
+   "file": "Guard.png",
+   "pivot": [
+    0.464286,
+    0.0
+   ]
+  },
+  "Peck_ahead1": {
+   "file": "Peck_ahead1.png",
+   "pivot": [
+    0.671498,
+    0.0
+   ]
+  },
+  "Peck_ahead2": {
+   "file": "Peck_ahead2.png",
+   "pivot": [
+    0.734375,
+    0.0
+   ]
+  },
+  "Peck_ahead3": {
+   "file": "Peck_ahead3.png",
+   "pivot": [
+    0.78135,
+    0.0
+   ]
+  },
+  "Peck_down1": {
+   "file": "Peck_down1.png",
+   "pivot": [
+    0.6691,
+    0.006969
+   ]
+  },
+  "Peck_down2": {
+   "file": "Peck_down2.png",
+   "pivot": [
+    0.721311,
+    0.227642
+   ]
+  },
+  "Peck_down3": {
+   "file": "Peck_down3.png",
+   "pivot": [
+    0.759292,
+    0.388412
+   ]
+  },
+  "Peck_up1": {
+   "file": "Peck_up1.png",
+   "pivot": [
+    0.670702,
+    0.0
+   ]
+  },
+  "Peck_up2": {
+   "file": "Peck_up2.png",
+   "pivot": [
+    0.719008,
+    0.0
+   ]
+  },
+  "Peck_up3": {
+   "file": "Peck_up3.png",
+   "pivot": [
+    0.761404,
+    0.0
+   ]
+  },
+  "Standing1": {
+   "file": "Standing1.png",
+   "pivot": [
+    0.488722,
+    0.0
+   ]
+  },
+  "Standing2": {
+   "file": "Standing2.png",
+   "pivot": [
+    0.488722,
+    0.0
+   ]
+  }
+ },
+ "prefab": "PunishingBird",
+ "source": "Lobotomy Corporation resources.assets: the SmallBird prefab's parts (smallbird_body 2/_attack, _face1-3, _feet, _wing, _fly_1-5, smallbird_eat2-4) at its rig's positions; mirrored to face left"
+}
