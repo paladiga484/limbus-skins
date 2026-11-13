@@ -7,7 +7,9 @@
    "helper": 400015,
    "becomes": "Arayashiki Ryōshū (stage 9-49)",
    "tested": true,
-   "cover": "Araya_Twenties"
+   "cover": "Araya_Twenties",
+   "name": "Ryōshū",
+   "game_title": "Arayashiki"
   },
   "certain-sinclair": {
    "identity": 11001,
@@ -15,7 +17,9 @@
    "helper": 400013,
    "becomes": "A Certain Sinclair (Canto IX)",
    "tested": true,
-   "cover": "Sinclair_War1"
+   "cover": "Sinclair_War1",
+   "name": "Sinclair",
+   "game_title": "A Certain"
   },
   "queen-of-hatred": {
    "identity": 10312,
@@ -62,7 +66,9 @@
    "helper": 400040,
    "becomes": "Bamboo-hatted Kim",
    "tested": false,
-   "cover": "normal_KSG"
+   "cover": "normal_KSG",
+   "name": "Kim Satgat",
+   "game_title": "Bamboo-hatted"
   },
   "alyssa": {
    "identity": 10211,
@@ -85,7 +91,9 @@
    "helper": 400041,
    "becomes": "Pwie, the Crimson God",
    "tested": false,
-   "cover": "Buffet_Adult"
+   "cover": "Buffet_Adult",
+   "name": "Pwie",
+   "game_title": "The Crimson God"
   },
   "vergilius": {
    "identity": 10710,
@@ -103,7 +111,8 @@
    "head": "10110.json",
    "tested": false,
    "title": "The Funeral of the Dead Butterflies (Lobotomy Corp.) - Yi Sang",
-   "name": "The Funeral of the Dead Butterflies"
+   "name": "Yi Sang",
+   "game_title": "Funeral of the\nDead Butterflies"
   },
   "dongbaek-spicebush": {
    "identity": 10104,
@@ -117,7 +126,7 @@
     "S3": "Camellia_Awaken_3"
    },
    "tested": false,
-   "name": "Dongbaek (Bloomed)",
+   "name": "Dongbaek",
    "cover": "Dongback_EGO",
    "cover_face": [
     635,
@@ -140,7 +149,7 @@
     "S3": "Camellia_S5"
    },
    "tested": false,
-   "name": "Dongbaek (Sunshower)",
+   "name": "Dongbaek",
    "cover": "Dongback_fox2"
   },
   "ahab": {
@@ -153,7 +162,8 @@
    "cover_face": [
     190,
     270
-   ]
+   ],
+   "name": "Ahab"
   },
   "rien": {
    "identity": 10115,
@@ -169,7 +179,8 @@
    "becomes": "the Pinky Nursefather",
    "source": "1322_Pinky_FatherAppearance",
    "tested": false,
-   "cover": "PinkyFather_Branch"
+   "cover": "PinkyFather_Branch",
+   "name": "Pinky Nursefather"
   },
   "callisto": {
    "identity": 10614,
@@ -395,7 +406,9 @@
    "becomes": "the old Dead Rabbits Boss",
    "source": "91016_DeadRabbits_BossAppearance",
    "tested": false,
-   "cover": "Deadrabbits_Boss"
+   "cover": "Deadrabbits_Boss",
+   "name": "Dead Rabbits Boss",
+   "game_title": "The Old"
   },
   "old-gcorp-head": {
    "identity": 11103,
@@ -403,7 +416,9 @@
    "becomes": "the Old G Corp. Head Manager",
    "source": "91001_GCorp_Enhanced_BossAppearance",
    "tested": false,
-   "dash": "lunge"
+   "dash": "lunge",
+   "name": "Head Manager",
+   "game_title": "The Old\nG Corp."
   },
   "jun-gregor": {
    "identity": 11208,
@@ -434,7 +449,8 @@
    "tested": false,
    "mirror": false,
    "title": "Vergilius - as Wild Hunt Heathcliff",
-   "card": "vergilius"
+   "card": "vergilius",
+   "name": "Vergilius"
   },
   "kali": {
    "identity": 10410,
@@ -671,7 +687,9 @@
     ]
    },
    "title": "Kali, the Red Mist - as Red Eyes & Penitence Ryōshū",
-   "card": "kali"
+   "card": "kali",
+   "name": "Kali",
+   "game_title": "The Red Mist"
   },
   "binah": {
    "identity": 10901,
@@ -863,7 +881,9 @@
      "scale": 0.7
     },
     "idle_time": 2.4
-   }
+   },
+   "name": "Binah",
+   "game_title": "Floor of\nPhilosophy"
   },
   "baral": {
    "identity": 10801,
@@ -1042,7 +1062,9 @@
      "S3"
     ],
     "idle_time": 2.4
-   }
+   },
+   "name": "Baral",
+   "game_title": "The Claw"
   },
   "malkuth": {
    "identity": 10309,
@@ -1238,7 +1260,9 @@
     },
     "idle_time": 2.4
    },
-   "card": "malkuth"
+   "card": "malkuth",
+   "name": "Malkuth",
+   "game_title": "Floor of\nHistory"
   },
   "yesod": {
    "identity": 10501,
@@ -1425,7 +1449,9 @@
      "scale": 0.7
     },
     "idle_time": 2.4
-   }
+   },
+   "name": "Yesod",
+   "game_title": "Floor of\nTechnological Sciences"
   },
   "hod": {
    "identity": 11002,
@@ -1626,7 +1652,9 @@
      "scale": 0.7
     },
     "idle_time": 2.4
-   }
+   },
+   "name": "Hod",
+   "game_title": "Floor of\nLiterature"
   },
   "netzach": {
    "identity": 10601,
@@ -1811,7 +1839,9 @@
      "scale": 0.7
     },
     "idle_time": 2.4
-   }
+   },
+   "name": "Netzach",
+   "game_title": "Floor of\nArt"
   },
   "tiphereth": {
    "identity": 10101,
@@ -2014,7 +2044,9 @@
      "scale": 0.7
     },
     "idle_time": 2.4
-   }
+   },
+   "name": "Tiphereth",
+   "game_title": "Floor of\nNatural Sciences"
   },
   "chesed": {
    "identity": 10201,
@@ -2202,7 +2234,9 @@
      "scale": 0.7
     },
     "idle_time": 2.4
-   }
+   },
+   "name": "Chesed",
+   "game_title": "Floor of\nSocial Sciences"
   },
   "hokma": {
    "identity": 11110,
@@ -2402,7 +2436,9 @@
     },
     "idle_time": 2.4
    },
-   "card": "hokma"
+   "card": "hokma",
+   "name": "Hokma",
+   "game_title": "Floor of\nReligion"
   },
   "apocalypse-bird": {
    "identity": 10704,
@@ -2569,7 +2605,9 @@
     "defense": {
      "name": "Twilight"
     }
-   }
+   },
+   "name": "Apocalypse Bird",
+   "game_title": "The Black Forest::\nThree Birds as One"
   }
  },
  "bosses": {
@@ -2579,7 +2617,9 @@
    "source": "1327_MiddleFinger_fatherAppearance",
    "unit": 1327,
    "tested": false,
-   "card": "matthias"
+   "card": "matthias",
+   "name": "Matthias",
+   "game_title": "The Middle\nNursefather"
   },
   "roach-emperor": {
    "identity": 11203,
@@ -2787,8 +2827,9 @@
    "becomes": "Kali as an identity of her own (Ryōshū's slot), wearing what 10410 wears",
    "tested": false,
    "title": "Kali, an identity of her own - Ryōshū",
-   "name": "Kali, the Red Mist",
-   "dupe_of": "kali"
+   "name": "Kali",
+   "dupe_of": "kali",
+   "game_title": "The Red Mist"
   },
   "dulcinea-id": {
    "identity": 10999,
@@ -2815,8 +2856,9 @@
    "becomes": "Distorted Kim Satgat as an identity of his own (Meursault's slot): the boss's own body and whole moveset",
    "tested": false,
    "title": "Distorted Kim Satgat, the boss himself - an identity of his own - Meursault",
-   "name": "Distorted Kim Satgat",
-   "cover": "Angry_KSG"
+   "name": "Kim Satgat",
+   "cover": "Angry_KSG",
+   "game_title": "Distorted"
   },
   "vergilius-boss-id": {
    "identity": 10795,
@@ -2827,8 +2869,9 @@
    "folder": 10710,
    "title": "Vergilius, the Red Gaze - the boss himself, an identity of his own - Heathcliff",
    "tested": false,
-   "name": "Vergilius, the Red Gaze",
-   "cover": "Vergilius_Hurt"
+   "name": "Vergilius",
+   "cover": "Vergilius_Hurt",
+   "game_title": "The Red Gaze"
   },
   "greencliff-id": {
    "identity": 10794,
@@ -2853,14 +2896,15 @@
    "cover_art": "greencliff"
   },
   "baral-id": {
-   "identity": 10894,
+   "identity": 10892,
    "base": 10801,
    "becomes": "Baral as an identity of his own (Ishmael's slot), with Baral's kit, wearing what 10801 wears",
    "tested": false,
    "title": "Baral, an identity of his own - Ishmael",
    "name": "Baral",
    "dupe_of": "baral",
-   "cover_art": "baral"
+   "cover_art": "baral",
+   "game_title": "The Claw"
   },
   "binah-id": {
    "identity": 10993,
@@ -2870,7 +2914,8 @@
    "title": "Binah, an identity of her own - Rodion",
    "name": "Binah",
    "dupe_of": "binah",
-   "cover_art": "binah"
+   "cover_art": "binah",
+   "game_title": "Floor of\nPhilosophy"
   },
   "ayin-id": {
    "identity": 11293,
@@ -2889,17 +2934,19 @@
    "title": "Malkuth, an identity of their own - Don Quixote",
    "name": "Malkuth",
    "dupe_of": "malkuth",
-   "cover_art": "malkuth"
+   "cover_art": "malkuth",
+   "game_title": "Floor of\nHistory"
   },
   "yesod-id": {
-   "identity": 10593,
+   "identity": 10592,
    "base": 10501,
    "becomes": "Yesod as an identity of their own (Meursault's slot), with Yesod's kit, wearing what 10501 wears",
    "tested": false,
    "title": "Yesod, an identity of their own - Meursault",
    "name": "Yesod",
    "dupe_of": "yesod",
-   "cover_art": "yesod"
+   "cover_art": "yesod",
+   "game_title": "Floor of\nTechnological Sciences"
   },
   "hod-id": {
    "identity": 11093,
@@ -2909,7 +2956,8 @@
    "title": "Hod, an identity of their own - Sinclair",
    "name": "Hod",
    "dupe_of": "hod",
-   "cover_art": "hod"
+   "cover_art": "hod",
+   "game_title": "Floor of\nLiterature"
   },
   "netzach-id": {
    "identity": 10693,
@@ -2919,7 +2967,8 @@
    "title": "Netzach, an identity of their own - Hong Lu",
    "name": "Netzach",
    "dupe_of": "netzach",
-   "cover_art": "netzach"
+   "cover_art": "netzach",
+   "game_title": "Floor of\nArt"
   },
   "tiphereth-id": {
    "identity": 10193,
@@ -2929,7 +2978,8 @@
    "title": "Tiphereth, an identity of their own - Yi Sang",
    "name": "Tiphereth",
    "dupe_of": "tiphereth",
-   "cover_art": "tiphereth"
+   "cover_art": "tiphereth",
+   "game_title": "Floor of\nNatural Sciences"
   },
   "chesed-id": {
    "identity": 10293,
@@ -2939,7 +2989,8 @@
    "title": "Chesed, an identity of their own - Faust",
    "name": "Chesed",
    "dupe_of": "chesed",
-   "cover_art": "chesed"
+   "cover_art": "chesed",
+   "game_title": "Floor of\nSocial Sciences"
   },
   "hokma-id": {
    "identity": 11193,
@@ -2949,17 +3000,19 @@
    "title": "Hokma, an identity of their own - Outis",
    "name": "Hokma",
    "dupe_of": "hokma",
-   "cover_art": "hokma"
+   "cover_art": "hokma",
+   "game_title": "Floor of\nReligion"
   },
   "apocalypse-bird-id": {
-   "identity": 10796,
+   "identity": 10793,
    "base": 10704,
    "becomes": "Apocalypse Bird as an identity of its own (Heathcliff's slot), with its moves, wearing what 10704 wears",
    "tested": false,
    "title": "Apocalypse Bird, an identity of its own - Heathcliff",
    "name": "Apocalypse Bird",
    "dupe_of": "apocalypse-bird",
-   "cover_art": "apocalypse-bird"
+   "cover_art": "apocalypse-bird",
+   "game_title": "The Black Forest::\nThree Birds as One"
   }
  },
  "kits": {
@@ -3078,7 +3131,9 @@
      10
     ]
    },
-   "title": "Roland's pages (Library of Ruina) - Index Father Yi Sang"
+   "title": "Roland's pages (Library of Ruina) - Index Father Yi Sang",
+   "name": "Roland",
+   "game_title": "The Black Silence"
   },
   "ayin": {
    "identity": 11201,

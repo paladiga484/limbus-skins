@@ -243,6 +243,28 @@ class OneCopy(unittest.TestCase):
                 self.assertNotIn(body, bodies, (k, bodies.get(body)))
                 bodies[body] = k
 
+    def test_every_identity_of_our_own_has_an_id_no_other_has(self):
+        from limbus_skins.build import catalog
+        seen = {}
+        for k, s in sorted(catalog().items()):
+            if s["kind"] == "identity":
+                self.assertNotIn(s["identity"], seen, f"{k} and {seen.get(s['identity'])} share {s['identity']}")
+                seen[s["identity"]] = k
+
+    def test_a_name_is_a_characters_name_and_a_title_reads_like_the_games(self):
+        # friend, 2026-11-14: "fix the naming of the ids cuz most of them are broken" - the game shows
+        # an identity's title (two short lines, "The Pequod\nFirst Mate") and then the name ("Yi Sang")
+        from limbus_skins.build import NAME_KINDS, catalog, display_name
+        for k, s in sorted(catalog().items()):
+            if s["kind"] in NAME_KINDS or s["kind"] == "identity":
+                n = display_name(s, k)
+                self.assertTrue(0 < len(n) <= 20, f"{k}: {n!r}")
+                self.assertNotRegex(n, r", the |\bin (his|her|their)\b|\bbody\b|looks only", f"{k}: {n!r}")
+            t = s.get("game_title")
+            if t is not None:
+                lines = t.split("\n")
+                self.assertTrue(1 <= len(lines) <= 3 and all(0 < len(x) <= 29 for x in lines), f"{k}: {t!r}")
+
     def test_a_copy_must_name_a_skin_and_never_loop(self):
         from limbus_skins.build import check_copies
         check_copies(self.SK)
@@ -1610,6 +1632,26 @@ class CoverBuild(unittest.TestCase):
         self.assertEqual(len(out["b-id"][1]), 4)
         self.assertTrue(res["b-id"][0] and "cover: idle A_App" in res["b-id"][1], res)
 
+    def test_a_name_survives_a_build_of_other_skins_and_carries_its_folders_text(self):
+        from limbus_skins import build, game
+        skins = {"a": {"key": "a", "kind": "kit", "identity": 10101, "name": "Ace", "game_title": "The\nAce",
+                       "moves": {"1": {"coins": [1, 1]}}},
+                 "b": {"key": "b", "kind": "kit", "identity": 10101, "name": "Bee", "moves": {"1": {"coins": [1, 1]}}}}
+        text = {10101: {"id": 10101, "title": "LCB\nSinner", "name": "Yi Sang"}}
+        with tempfile.TemporaryDirectory() as data:
+            os.makedirs(os.path.join(data, "built"))
+            with open(os.path.join(data, "built", "names.json"), "w") as f:
+                json.dump({"names": [{"skin": "kept", "identity": 10204, "name": "Kromer"},
+                                     {"skin": "a", "identity": 10101, "name": "old"}]}, f)
+            with FakeGame(skins, {10101: {"id": 10101, "attributeList": [{"skillId": 1}], "defenseSkillIDList": [2]}}), \
+                    mock.patch.object(game, "names", return_value=text):
+                build.build(["a"], "game", "cache", data, log=lambda *a: None)
+            with open(os.path.join(data, "built", "names.json")) as f:
+                named = {e["skin"]: e for e in json.load(f)["names"]}
+        self.assertEqual(named["kept"]["name"], "Kromer")                 # not in this build: kept
+        self.assertEqual((named["a"]["name"], named["a"]["title"], named["a"]["folder_title"], named["a"]["folder_name"]),
+                         ("Ace", "The\nAce", "LCB\nSinner", "Yi Sang"))
+
     def test_a_cover_arts_own_background_goes_behind_it(self):
         from PIL import Image
         from limbus_skins import build, covers
@@ -1728,7 +1770,9 @@ class SkinPfps(unittest.TestCase):
         own.assert_not_called()
         self.assertEqual(results["rep"], (False, "audit: wrong"))
         self.assertIn("hel", out)
-        self.assertEqual(build.FORMAT, 28)                             # 28: the shared build records bodies with no death of their own
+        self.assertEqual(build.FORMAT, 29)                             # 28: the shared build records bodies with no death of their own
+        # 29: identities of our own moved off ids two of them shared (10593, 10894, 10796), and the
+        # builds word each named identity for the client patch (title, and the folder's own text)
 
     def test_the_pfp_is_framed_on_the_sprites_head_at_the_identitys_size(self):
         from PIL import Image
@@ -1937,6 +1981,25 @@ class ClientPatch(unittest.TestCase):
         self.assertEqual(self.read("client", "skilltext.txt"), "")
         self.assertEqual(self.read("client", "allies.txt"), "")          # no ally borrows a card once it's over
         self.assertEqual(os.listdir(os.path.join(self.client, "covers")), [])
+
+    def test_the_patch_gets_each_identitys_title_and_its_folders_own_text(self):
+        from limbus_skins import client
+        with open(os.path.join(self.data, "built", "helpers", "manifest.json")) as f:
+            man = json.load(f)
+        man["identities"][0].update(title="The Princess of\nLa Manchaland", folder_title="Thumb\nCapo", folder_name="Rodion")
+        with open(os.path.join(self.data, "built", "helpers", "manifest.json"), "w") as f:
+            json.dump(man, f)
+        with open(os.path.join(self.data, "built", "names.json"), "w") as f:
+            json.dump({"names": [{"skin": "greencliff", "identity": 10701, "name": "Greencliff", "title": "",
+                                  "folder_title": "LCB\nSinner", "folder_name": "Heathcliff"}]}, f)
+        self.applied("helpers", "greencliff")
+        client.configure(self.client, self.data)
+        self.assertEqual(self.read("client", "allynames.txt"),
+                         "10701\tLCB\\nSinner\tHeathcliff\t\n"
+                         "10999\tThumb\\nCapo\tRodion\tThe Princess of\\nLa Manchaland\n")
+        self.assertIn("10999\t10911\tDulcinea\n", self.read("client", "allies.txt"))   # unchanged for an older patch
+        client.configure(self.client, self.data, on=False)
+        self.assertEqual(self.read("client", "allynames.txt"), "")
 
     def test_a_body_with_no_death_dies_as_its_sinner_while_its_skin_is_in_the_session(self):
         from limbus_skins import client

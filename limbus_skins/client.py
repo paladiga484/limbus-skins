@@ -9,6 +9,9 @@ client patch, reads them from its own folder (the one with myosotis.ini, beside 
   allies.txt     each identity of our own: the identity whose card it shows, and its name; and
                  each identity a skin that's on has a pfp for, as itself with no name (its card
                  and name stay the game's)
+  allynames.txt  for each named one: how the game words the identity it is shown as (its title and
+                 its name), and its own title (empty: that identity's) - the patch puts ours in their
+                 place in whatever the game shows
   covers/        an ally's own card pictures (covers.py), and those skins' pfps:
                  <id>_normal<suffix>.dxt
   title/         the title screen's background and logo, when chosen (title.py)
@@ -79,6 +82,34 @@ def allies(data_dir):
             continue
         out.append((i, folder, str(e.get("name") or "")))
     return sorted(out)
+
+
+TEXT = ("folder_title", "folder_name", "title")
+
+
+def _wording(e):
+    """(folder title, folder name, title) from a manifest or names.json entry, or None without any."""
+    got = tuple(e.get(k) if isinstance(e.get(k), str) else "" for k in TEXT)
+    return got if any(got) else None
+
+
+def wordings(data_dir, live):
+    """{identity: (folder title, folder name, title)} for the named identities this session: the
+    helpers build's own ones and the skins in live that rename theirs (allynames.txt)."""
+    out = {}
+    for e in _json(os.path.join(data_dir, "built", "names.json")).get("names") or []:
+        if isinstance(e, dict) and e.get("skin") in live and isinstance(e.get("identity"), int) and _wording(e):
+            out[e["identity"]] = _wording(e)
+    for e in _manifest(data_dir, "helpers").get("identities") or []:
+        if isinstance(e, dict) and isinstance(e.get("id"), int) and _wording(e):
+            out[e["id"]] = _wording(e)
+    return out
+
+
+def allynames_file(entries):
+    """allynames.txt: <id> TAB <folder's title> TAB <folder's name> TAB <its own title> (\\n for a line
+    break) - AllyFacePatch swaps each of the game's words for the identity's own."""
+    return "".join(f"{i}\t" + "\t".join(_escape(x) for x in w) + "\n" for i, w in sorted(entries.items()))
 
 
 def session_skins(data_dir, done):
@@ -257,6 +288,9 @@ def configure(folder, data_dir, on=True):
     ours = [(i, folder, name or named.get(i, "")) for i, folder, name in ours]
     ours += [(i, i, n) for i, n in sorted(named.items()) if i not in {j for j, _, _ in ours}]
     _replace(os.path.join(folder, "allies.txt"), allies_file(sorted(ours)))
+    named_ids = {i for i, _, name in ours if name}
+    words = wordings(data_dir, live) if on else {}
+    _replace(os.path.join(folder, "allynames.txt"), allynames_file({i: w for i, w in words.items() if i in named_ids}))
     _sync(os.path.join(folder, "covers"), covers(data_dir, {i for i, _, _ in ours}, live))
     from . import title
     _sync(os.path.join(folder, "title"), title.files(data_dir) if on else {})

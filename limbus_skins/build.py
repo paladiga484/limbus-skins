@@ -16,7 +16,7 @@ from . import art, audit, bundle, cards, covers, game, helpers, lortext, repaint
 FORMS = ".forms"  # built/<skin>.forms: another body a skin turns into, swapped in apart from it
 CARD = ".card"    # built/<skin>.card: the identity's card pictures, when they aren't in its body's file
 COVER = ".cover"  # built/<ally>.cover: an identity of our own's own card pictures (covers.py), not swapped in
-FORMAT = 28      # bump when built skins change shape: older builds are rebuilt on apply
+FORMAT = 29      # bump when built skins change shape: older builds are rebuilt on apply
 
 
 def catalog():
@@ -57,6 +57,25 @@ def display_name(s, key):
     return s.get("name") or short_name(s.get("becomes") or s.get("title") or key)
 
 
+def game_text(game_dir):
+    """{identity: (title, name)} as the game words them (EN_Personalities): the client patch puts
+    an identity's own title and name where the game shows these. {} when they can't be read."""
+    try:
+        from . import game
+        return {i: (str(r.get("title") or ""), str(r.get("name") or ""))
+                for i, r in game.names(game_dir, "EN_Personalities").items() if isinstance(i, int)}
+    except (OSError, ValueError, TypeError):
+        return {}
+
+
+def name_entry(s, key, folder, text):
+    """What the client patch needs to name an identity: its name and title (the folder's own when
+    the skin has none: "game_title"), and how the game words the folder identity it is shown as."""
+    ft, fn = text.get(folder, ("", ""))
+    words = {"title": s.get("game_title") or "", "folder_title": ft, "folder_name": fn}
+    return dict({"name": display_name(s, key)}, **{k: v for k, v in words.items() if v})
+
+
 def short_name(text):
     """A skin's name as the game shows an identity's: its words up to a bracket, colon or dash."""
     name = re.split(r"[:;(]| - ", text)[0].strip()
@@ -80,7 +99,7 @@ def with_allies(skins):
         out[key] = dict(s, dupe_of=s.get("dupe_of") or k)
         a = {"key": k, "kind": "identity", "identity": s["ally"], "of": s["identity"], "folder": s["identity"],
              "becomes": f"{s.get('becomes') or key} - as an identity of its own", "tested": False}
-        a.update({f: s[f] for f in ("source", "helper", "script", "cover", "cover_face", "cover_zoom") if f in s})
+        a.update({f: s[f] for f in ("source", "helper", "script", "cover", "cover_face", "cover_zoom", "game_title") if f in s})
         unit, unlock = s.get("ally_unit", s.get("unit")), s.get("ally_unlock", s.get("unlock"))
         if unit is not None:
             a["unit"] = unit
@@ -172,6 +191,7 @@ def build(keys, game_dir, cache, data_dir, log=print, boss=(), static=True):
     built_root = os.path.join(data_dir, "built")
     os.makedirs(built_root, exist_ok=True)
     ids, helper_units = game.identities(game_dir, cache)
+    text = game_text(game_dir)                      # how the game words each identity's title and name
     results, boss_notes = {}, {}
 
     # helpers and boss skills: one combined static-data bundle
@@ -357,8 +377,8 @@ def build(keys, game_dir, cache, data_dir, log=print, boss=(), static=True):
                            "skills": boss_ok, "files": [rel], "green_skills": sorted(green),
                            "skill_texts": {str(i): t for i, t in sorted(texts.items())},
                            # the server grants these while they're built (Server/OwnIdentities.cs)
-                           "identities": [dict({"id": s["identity"], "base": s["base"], "folder": s.get("folder") or s["base"],
-                                                "name": display_name(s, s["key"])},
+                           "identities": [dict({"id": s["identity"], "base": s["base"], "folder": s.get("folder") or s["base"]},
+                                               **name_entry(s, s["key"], s.get("folder") or s["base"], text),
                                                **({"unlock": s["unlock"]} if s.get("unlock") else {}))
                                           for s in want_ids if s["key"] not in bad],
                            "deaths": {k: v for k, v in sorted(deaths.items()) if k not in bad}}, f, indent=1)
@@ -543,11 +563,18 @@ def build(keys, game_dir, cache, data_dir, log=print, boss=(), static=True):
         _pfps(keys, skins, results, ids, helper_units, set(boss), game_dir, cache, data_dir, built_root, log)
     # the name each skin's identity shows in game: the character it became, not the identity it
     # borrowed (Matthias, not "Ring Pointillist Student") - names.json, read by client.names
-    named = [{"skin": k, "identity": skins[k]["identity"], "name": display_name(skins[k], k)}
-             for k in keys if skins[k]["kind"] in NAME_KINDS and results.get(k, (False,))[0]]
+    # (a build of some skins keeps the names of the others it didn't build)
+    names_path = os.path.join(built_root, "names.json")
     try:
-        with open(os.path.join(built_root, "names.json"), "w", encoding="utf-8") as f:
-            json.dump({"format": FORMAT, "names": named}, f, indent=1, ensure_ascii=False)
+        with open(names_path, encoding="utf-8") as f:
+            kept = [e for e in json.load(f).get("names") or [] if isinstance(e, dict) and e.get("skin") not in keys]
+    except (OSError, ValueError, AttributeError):
+        kept = []
+    named = kept + [dict({"skin": k, "identity": skins[k]["identity"]}, **name_entry(skins[k], k, skins[k]["identity"], text))
+                    for k in keys if skins[k]["kind"] in NAME_KINDS and results.get(k, (False,))[0]]
+    try:
+        with open(names_path, "w", encoding="utf-8") as f:
+            json.dump({"format": FORMAT, "names": sorted(named, key=lambda e: str(e.get("skin")))}, f, indent=1, ensure_ascii=False)
     except OSError as e:
         log(f"  names: {e}")
     return results
