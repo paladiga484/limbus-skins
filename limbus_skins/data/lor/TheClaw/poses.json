@@ -1,0 +1,119 @@
+{
+ "bundle": "char/char_693.pres",
+ "head": null,
+ "poses": {
+  "Damaged": {
+   "file": "Damaged.png",
+   "pivot": [
+    0.657635,
+    0.001764
+   ]
+  },
+  "Default": {
+   "file": "Default.png",
+   "pivot": [
+    0.4375,
+    0.018739
+   ]
+  },
+  "Evade": {
+   "file": "Evade.png",
+   "pivot": [
+    0.716642,
+    -0.005226
+   ]
+  },
+  "Guard": {
+   "file": "Guard.png",
+   "pivot": [
+    0.693735,
+    0.018425
+   ]
+  },
+  "Move": {
+   "file": "Move.png",
+   "pivot": [
+    0.312048,
+    -0.06422
+   ]
+  },
+  "S1": {
+   "file": "S1.png",
+   "pivot": [
+    0.474878,
+    0.048059
+   ]
+  },
+  "S10_GreenSerum": {
+   "file": "S10_GreenSerum.png",
+   "pivot": [
+    0.427252,
+    0.018395
+   ]
+  },
+  "S14_AllSerum": {
+   "file": "S14_AllSerum.png",
+   "pivot": [
+    0.375796,
+    0.018425
+   ]
+  },
+  "S1_SlashUp": {
+   "file": "S1_SlashUp.png",
+   "pivot": [
+    0.474878,
+    0.048059
+   ]
+  },
+  "S2": {
+   "file": "S2.png",
+   "pivot": [
+    0.676522,
+    0.020833
+   ]
+  },
+  "S2_Pull": {
+   "file": "S2_Pull.png",
+   "pivot": [
+    0.676522,
+    0.020833
+   ]
+  },
+  "S3_ReadyCharge": {
+   "file": "S3_ReadyCharge.png",
+   "pivot": [
+    0.41555,
+    0.070994
+   ]
+  },
+  "S4_Charge": {
+   "file": "S4_Charge.png",
+   "pivot": [
+    0.480491,
+    -0.091533
+   ]
+  },
+  "S5_EndCarge": {
+   "file": "S5_EndCarge.png",
+   "pivot": [
+    0.64539,
+    0.078431
+   ]
+  },
+  "Slash": {
+   "file": "Slash.png",
+   "pivot": [
+    0.595777,
+    0.016563
+   ]
+  },
+  "Standing": {
+   "file": "Standing.png",
+   "pivot": [
+    0.4375,
+    0.018739
+   ]
+  }
+ },
+ "prefab": "TheClaw"
+}

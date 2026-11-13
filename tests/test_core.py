@@ -1489,6 +1489,19 @@ class Covers(unittest.TestCase):
         self.assertEqual(covers.file_name(10999, "_info"), "10999_normal_info.dxt")
         self.assertEqual(covers.file_name(10999, ""), "10999_normal.dxt")
 
+    def test_a_cutout_with_a_background_of_its_own_stands_on_it(self):
+        from PIL import Image
+        from limbus_skins import covers
+        art = Image.new("RGBA", (300, 900), (0, 0, 0, 0))
+        art.paste((240, 240, 240, 255), (100, 50, 200, 880))
+        stock = {"": Image.new("RGB", (192, 108), (0, 0, 200))}       # the borrowed identity's card: blue
+        bg = Image.new("RGBA", (64, 36), (200, 0, 0, 255))             # the character's own floor: red
+        for suffix, im in covers.pictures(art, stock, bg=bg).items():
+            r, g, b = im.getpixel((1, 1))                              # a corner, behind the figure
+            self.assertTrue(r > 100 and b < 60, (suffix, (r, g, b)))
+        r, g, b = covers.pictures(art, stock)[""].getpixel((1, 1))   # none of its own: the card's, dimmed
+        self.assertTrue(b > r, (r, g, b))
+
     def test_a_title_background_fills_the_screen_and_a_logo_keeps_its_alpha(self):
         import struct
         import texture2ddecoder
@@ -1596,6 +1609,25 @@ class CoverBuild(unittest.TestCase):
         self.assertEqual(out["b-id"][0]["from"], "idle A_App")      # its portrait isn't cached: the idle frame for all
         self.assertEqual(len(out["b-id"][1]), 4)
         self.assertTrue(res["b-id"][0] and "cover: idle A_App" in res["b-id"][1], res)
+
+    def test_a_cover_arts_own_background_goes_behind_it(self):
+        from PIL import Image
+        from limbus_skins import build, covers
+        skins = {"x-id": {"key": "x-id", "kind": "identity", "identity": 10193, "base": 10101, "cover_art": "x"}}
+        with tempfile.TemporaryDirectory() as data:
+            d = os.path.join(data, "art", "cards", "x")
+            os.makedirs(d)
+            fig = Image.new("RGBA", (100, 300), (0, 0, 0, 0))
+            fig.paste((250, 250, 250, 255), (30, 20, 70, 290))
+            fig.save(os.path.join(d, "normal.png"))
+            Image.new("RGB", (64, 36), (200, 0, 0)).save(os.path.join(d, "bg.png"))
+            with FakeGame(skins, {10101: {"id": 10101}}), \
+                    mock.patch.object(covers, "idle_frames", return_value={}), \
+                    mock.patch.object(covers, "stock_pictures", return_value={"": Image.new("RGB", (96, 54))}), \
+                    mock.patch.object(covers, "pictures", wraps=covers.pictures) as pics:
+                res = build.build(["x-id"], "game", "cache", data, log=lambda *a: None)
+        self.assertTrue(res["x-id"][0] and "cover: art x" in res["x-id"][1], res)
+        self.assertEqual(pics.call_args.kwargs.get("bg").getpixel((1, 1))[:3], (200, 0, 0))
 
     def test_the_pfp_role_alone_takes_the_idle_frame(self):
         from PIL import Image
@@ -1777,8 +1809,12 @@ class Cards(unittest.TestCase):
         self.assertEqual(card_identity(sk["dulcinea-id"]), 10911)            # its folder
         self.assertEqual(card_identity(sk["vergilius-id"]), 10710)           # its base
         self.assertEqual(card_identity(sk["matthias"]), 11109)               # its own identity
+        # malkuth and hokma: their identities' cards are in files of their own (p10309, p11110); the
+        # other Ruina bodies' cards share unitsprite_s1_0 with roach-emperor's, so only their -ids
+        # show their art (cover_art, through the client patch)
         self.assertEqual({k for k, s in sk.items() if s.get("card")},
-                         {"kali", "matthias", "roach-emperor", "distorted-hohenheim", "vergilius-wildhunt", "vergilius-id"})
+                         {"kali", "matthias", "roach-emperor", "distorted-hohenheim", "vergilius-wildhunt", "vergilius-id",
+                          "malkuth", "hokma"})
         # an ally has a cover of its own instead: the identity whose card it borrows keeps its own
         self.assertEqual((sk["dulcinea-id"]["cover"], sk["ahab-id"]["cover"]), ("Dolcinea", "Ahab_EGO"))
 
@@ -2357,38 +2393,28 @@ class Shipped(unittest.TestCase):
         from limbus_skins.build import catalog
         self.skins = catalog()
 
-    def test_gebura_builds_without_library_of_ruina(self):
+    def test_every_ruina_body_builds_without_library_of_ruina(self):
         from limbus_skins import lor
-        spec = self.skins["kali"]["lor"]
-        with mock.patch.object(lor.paths, "steam_roots", return_value=[]), \
-                mock.patch.object(lor, "poses", side_effect=AssertionError("read Library of Ruina")):
-            table = lor.source_table(spec)
-        self.assertEqual(set(table) - {"idle_time"}, set(spec["map"]))
-        self.assertTrue(all(table[k] for k in spec["map"]))
+        bodies = {k: s["lor"] for k, s in self.skins.items() if s.get("lor")}
+        self.assertTrue({"kali", "binah", "baral", "malkuth", "hokma", "apocalypse-bird"} <= set(bodies))
+        for key, spec in bodies.items():
+            with mock.patch.object(lor.paths, "steam_roots", return_value=[]), \
+                    mock.patch.object(lor, "poses", side_effect=AssertionError("read Library of Ruina")):
+                table = lor.source_table(spec)
+            self.assertEqual(set(table) - {"idle_time"}, set(spec["map"]), key)
+            self.assertTrue(all(table[k] for k in spec["map"]), key)
 
     def test_every_outside_input_ships(self):
         from limbus_skins import art, cards, lor
         with tempfile.TemporaryDirectory() as nobody:            # a player with no art of their own
             for key, s in self.skins.items():
-                if s.get("lor") and s["lor"].get("ship", True):
+                if s.get("lor"):
                     self.assertIsNotNone(lor.shipped_poses(s["lor"]["bundle"], s["lor"]["prefab"], s["lor"].get("head")), key)
                 for name in filter(None, (s.get("card"), s.get("cover_art"))):
                     folder = cards.art_dir(nobody, name)
                     self.assertTrue(os.path.isfile(os.path.join(folder, "normal.png")), f"{key}: {name}")
                     cards.load_art(folder)
             self.assertIsNotNone(art.head_art(nobody, "butterfly-yisang"))
-
-    def test_unshipped_ruina_bodies_stay_unshipped(self):
-        from limbus_skins import lor
-        mine = {k: s["lor"] for k, s in self.skins.items() if s.get("lor") and not s["lor"].get("ship", True)}
-        self.assertTrue(mine)
-        shipped = {p.name for p in lor._shipped_dir("").iterdir()}
-        for key, spec in mine.items():
-            self.assertNotIn(spec["prefab"], shipped, key)
-            with mock.patch.object(lor.paths, "steam_roots", return_value=[]), \
-                    mock.patch.object(lor, "shipped_poses", side_effect=AssertionError("looked for shipped poses")):
-                with self.assertRaisesRegex(lor.LorError, "Library of Ruina"):
-                    lor.source_table(spec)
 
     def test_the_players_own_art_comes_first(self):
         from PIL import Image
@@ -2406,7 +2432,8 @@ class Shipped(unittest.TestCase):
         book = lortext.shipped_book()
         self.assertIsNotNone(book)
         with mock.patch.object(lortext, "read_tables", side_effect=AssertionError("read Library of Ruina")):
-            for key in ("kali", "roland"):
+            for key in [k for k, s in self.skins.items()
+                        if lortext.uses_dice(s.get("moves")) or lortext.uses_lor(s.get("texts"))]:
                 s = self.skins[key]
                 moves = lortext.resolve_moves(s["moves"], book)
                 self.assertFalse(any("lor_dice" in m for m in moves.values()), key)

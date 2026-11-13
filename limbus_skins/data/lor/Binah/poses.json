@@ -1,0 +1,115 @@
+{
+ "bundle": "char/char_419.pres",
+ "head": {
+  "neck": "head",
+  "parts": [
+   "back hair",
+   "head",
+   "Front Hair",
+   "face",
+   "Front acce"
+  ],
+  "scale": 0.7
+ },
+ "poses": {
+  "Damaged": {
+   "file": "Damaged.png",
+   "pivot": [
+    0.279851,
+    0.095427
+   ]
+  },
+  "Default": {
+   "file": "Default.png",
+   "pivot": [
+    0.518395,
+    0.111354
+   ]
+  },
+  "Evade": {
+   "file": "Evade.png",
+   "pivot": [
+    0.409091,
+    0.108
+   ]
+  },
+  "Guard": {
+   "file": "Guard.png",
+   "pivot": [
+    0.544905,
+    0.112344
+   ]
+  },
+  "Move": {
+   "file": "Move.png",
+   "pivot": [
+    0.60177,
+    0.094538
+   ]
+  },
+  "Penetrate": {
+   "file": "Penetrate.png",
+   "pivot": [
+    0.741602,
+    0.098765
+   ]
+  },
+  "S1": {
+   "file": "S1.png",
+   "pivot": [
+    0.72314,
+    0.098765
+   ]
+  },
+  "S2": {
+   "file": "S2.png",
+   "pivot": [
+    0.899083,
+    0.085526
+   ]
+  },
+  "S3": {
+   "file": "S3.png",
+   "pivot": [
+    0.83922,
+    0.133871
+   ]
+  },
+  "S4": {
+   "file": "S4.png",
+   "pivot": [
+    0.624478,
+    0.064516
+   ]
+  },
+  "S5": {
+   "file": "S5.png",
+   "pivot": [
+    0.741602,
+    0.098765
+   ]
+  },
+  "Slash": {
+   "file": "Slash.png",
+   "pivot": [
+    0.83114,
+    0.079339
+   ]
+  },
+  "Special": {
+   "file": "Special.png",
+   "pivot": [
+    0.83922,
+    0.133871
+   ]
+  },
+  "Standing": {
+   "file": "Standing.png",
+   "pivot": [
+    0.518395,
+    0.111354
+   ]
+  }
+ },
+ "prefab": "Binah"
+}

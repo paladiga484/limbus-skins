@@ -6,8 +6,7 @@ its own transform. This assembles every pose into one image and hands repaint() 
 that look like Limbus sprites, so the identity's own body gets redrawn as that character.
 The poses a skin uses ship with limbus-skins (data/lor/<prefab>/, written once by ship() from a
 Library of Ruina install), so players don't need the game; a source with nothing shipped is read
-from the player's own Library of Ruina install. A skin whose "lor" says "ship": false is only ever
-read from the player's install: nothing of it ships.
+from the player's own Library of Ruina install.
 """
 import json
 import math
@@ -213,8 +212,7 @@ def shipped_poses(bundle, prefab, head):
 def source_table(spec, height=2.6):
     """repaint()'s source table from a skins.json "lor" entry: {"bundle", "prefab", "map":
     {kind: [motion, ...]}, "smear": [kind, ...], "sources": {name: {"bundle", "prefab"}},
-    "head": {...} (see poses), "idle_time": seconds per idle cycle, "ship": false - read from the
-    player's Library of Ruina only}.
+    "head": {...} (see poses), "idle_time": seconds per idle cycle}.
     A motion written "name:Motion" comes from that extra source (e.g. the character's E.G.O.
     form for one skill). Each source's pixels per unit make its standing pose `height` units
     tall from the feet up (times "scale"), so every form stands as tall as the identity it
@@ -231,8 +229,8 @@ def source_table(spec, height=2.6):
         if name not in loaded:
             bundle, prefab = sources[name]
             head = spec.get("head") if name == "" else None
-            got = shipped_poses(bundle, prefab, head) if spec.get("ship", True) else None
-            if got is None:                                # the player's own Library of Ruina
+            got = shipped_poses(bundle, prefab, head)          # shipped with limbus-skins
+            if got is None:
                 got = poses(bundle_path(bundle), prefab, head=head)
             if "Default" not in got:
                 raise LorError(f"{prefab} has no Default pose")

@@ -507,10 +507,10 @@ def build(keys, game_dir, cache, data_dir, log=print, boss=(), static=True):
             s, out = skins[k], os.path.join(built_root, k + COVER)
             try:
                 portrait, idle = found.get(s.get("cover")), idles.get(body_of[k])
-                face, zoom = s.get("cover_face"), s.get("cover_zoom")
+                face, zoom, bg = s.get("cover_face"), s.get("cover_zoom"), None
                 if s.get("cover_art"):                  # <data dir>/art/cards/<name>/, else the shipped one
                     mine = cards.load_art(cards.art_dir(data_dir, s["cover_art"]))
-                    portrait = mine["normal"]
+                    portrait, bg = mine["normal"], mine["bg"]
                     face = face or mine["spec"].get("face")
                     zoom = zoom if zoom is not None else mine["spec"].get("zoom")
                 if portrait is None and idle is None:
@@ -521,7 +521,7 @@ def build(keys, game_dir, cache, data_dir, log=print, boss=(), static=True):
                 files = []
                 art, face = (portrait, face) if portrait is not None else (idle, covers.sprite_face(idle))
                 for suffix, im in covers.pictures(art, stock, face, float(zoom if zoom is not None else 1.0) if portrait is not None else 1.0,
-                                                  pfp=idle).items():
+                                                  pfp=idle, bg=bg if portrait is not None else None).items():
                     files.append(covers.file_name(s["identity"], suffix))
                     with open(os.path.join(out, "pics", files[-1]), "wb") as f:
                         f.write(covers.dxt1_file(im))

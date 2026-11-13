@@ -1,0 +1,79 @@
+{
+ "bundle": "char/char_474.pres",
+ "head": {
+  "neck": "head",
+  "parts": [
+   "head",
+   "front hair",
+   "face",
+   "front acce"
+  ],
+  "scale": 0.7
+ },
+ "poses": {
+  "Damaged": {
+   "file": "Damaged.png",
+   "pivot": [
+    0.732639,
+    -0.009524
+   ]
+  },
+  "Default": {
+   "file": "Default.png",
+   "pivot": [
+    0.66055,
+    0.047035
+   ]
+  },
+  "Evade": {
+   "file": "Evade.png",
+   "pivot": [
+    0.707407,
+    -0.008734
+   ]
+  },
+  "Guard": {
+   "file": "Guard.png",
+   "pivot": [
+    0.662021,
+    -0.009639
+   ]
+  },
+  "Hit": {
+   "file": "Hit.png",
+   "pivot": [
+    0.314815,
+    -0.025707
+   ]
+  },
+  "Move": {
+   "file": "Move.png",
+   "pivot": [
+    0.346062,
+    -0.021077
+   ]
+  },
+  "Penetrate": {
+   "file": "Penetrate.png",
+   "pivot": [
+    0.721667,
+    -0.014528
+   ]
+  },
+  "Slash": {
+   "file": "Slash.png",
+   "pivot": [
+    0.501529,
+    0.029474
+   ]
+  },
+  "Standing": {
+   "file": "Standing.png",
+   "pivot": [
+    0.66055,
+    0.047035
+   ]
+  }
+ },
+ "prefab": "Hokma"
+}

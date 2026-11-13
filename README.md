@@ -17,12 +17,13 @@ Dress Limbus Company identities as the characters they mirror, on a **private se
   down to size) and her own pages - Level Slash, Upstanding Slash, Greater Split: Vertical,
   Retaliate - with their names, dice and Bleed, wrapped in Sancho's blood mist. Her poses and
   pages ship with limbus-skins: Library of Ruina isn't needed.
-- **Library of Ruina bodies from your own install:** Binah (the Arbiter Garion), Baral (the Claw),
-  Malkuth, Yesod, Hod, Netzach, Tiphereth, Chesed and Hokma fight in their Ruina bodies with
-  movesets of their own, and Apocalypse Bird - the three birds as one - fights on your side as a
-  boss: 640 HP, Small Beak, Long Arm, Big Eyes. None of their art ships with limbus-skins: it is
-  read from your Library of Ruina install through Steam, and without that game those skins say so
-  and the rest build as usual. Each is also an identity of its own (`binah-id`, ...).
+- **More of Library of Ruina:** Binah (the Arbiter Garion), Baral (the Claw), Malkuth, Yesod,
+  Hod, Netzach, Tiphereth, Chesed and Hokma fight in their Ruina bodies with movesets of their
+  own, and Apocalypse Bird - the three birds as one - fights on your side as a boss: 640 HP,
+  Small Beak, Long Arm, Big Eyes. Their poses, pages and card art ship with limbus-skins, as
+  Kali's do: Library of Ruina isn't needed. Each is also an identity of its own (`binah-id`, ...)
+  with the moves and the card art; an identity of our own fights in its sinner's body, so for the
+  Ruina body turn on the skin itself (`binah`, not `binah-id`).
 - **Boss skins:** the identity *becomes* the boss - the boss's own body from the game, with its
   own animations, effects and skills: Matthias (the Middle Nursefather) on the Ring Pointillist
   Student Outis, the Roach Emperor (his own swarm of roaches) on G Corp. Gregor, Distorted
@@ -51,9 +52,10 @@ Dress Limbus Company identities as the characters they mirror, on a **private se
   helper's own story fight (they end or stall it, or kill the user) are left out, and a helper
   without a defense skill keeps the identity's own.
 
-Everything is built on your machine from the game files you already have, plus the few pictures
-that ship with limbus-skins (Kali's poses and pages, the skins' card art, Butterfly Yi Sang's
-head). The tool never connects to the internet.
+Everything is built on your machine from the game files you already have, plus what ships with
+limbus-skins from Library of Ruina (the poses and pages of Kali, Binah, Baral, the Sephirah and
+Apocalypse Bird), the skins' card art and Butterfly Yi Sang's head - see Credits. The tool never
+connects to the internet.
 
 > **Private servers only.** Helper skins change skills. Any modified game file on the
 > official servers breaks the terms of service and can get your account banned. The tool asks
@@ -269,9 +271,32 @@ Its own files live in `~/.config/limbus-skins` and `~/.local/share/limbus-skins`
 
 ## Credits
 
-Limbus Company and all of its art belong to Project Moon. This is a fan project and is not
-affiliated with or endorsed by Project Moon. Reading and writing Unity files uses
-[UnityPy](https://github.com/K0lb3/UnityPy). Character counterparts follow the
-[Limbus Company Wiki](https://limbuscompany.wiki.gg).
+limbus-skins is a fan project. It isn't affiliated with or endorsed by Project Moon.
 
-MIT licence.
+**Project Moon** made Limbus Company, Library of Ruina and Lobotomy Corporation, and every
+character, body, pose, page, name and picture these skins show. limbus-skins builds them on your
+computer from your own copy of Limbus Company; these pieces of Project Moon's work ship with it,
+cut from their games and unchanged, for use with those games:
+
+- **Library of Ruina's combat poses** (`data/lor/`): Gebura (Kali, the Red Mist), Binah, Baral
+  (the Claw), Malkuth, Yesod, Hod, Netzach, Tiphereth, Chesed, Hokma and Apocalypse Bird.
+- **Library of Ruina's pages** (`data/lor/book.json`): the names, dice and abilities of Kali's,
+  Roland's, Binah's and Baral's pages, used as skills.
+- **Card art** (`data/art/cards/`): Binah, Baral, the Sephirah and Apocalypse Bird in their
+  Library of Ruina poses over that game's own floors (Baral over Binah's arena, Apocalypse Bird
+  over its page art); Kali from Library of Ruina, through the
+  [Library of Ruina Wiki](https://libraryofruina.wiki.gg)'s copies, over Gebura's floor; Matthias
+  and Vergilius through the [Limbus Company Wiki](https://limbuscompany.wiki.gg)'s copies; the
+  Roach Emperor and Distorted Hohenheim from Limbus Company's story portraits; Greencliff
+  (Heathcliff).
+- **Butterfly Yi Sang's head** (`data/art/heads/`): the Funeral of the Dead Butterflies.
+
+Character counterparts follow the [Limbus Company Wiki](https://limbuscompany.wiki.gg).
+
+**Software:** [UnityPy](https://github.com/K0lb3/UnityPy) (MIT) reads and writes the Unity
+files, with texture2ddecoder, etcpak and astc-encoder-py (MIT) for textures;
+[Pillow](https://python-pillow.github.io) (MIT-CMU) draws; Brotli (MIT) and python-lz4
+(BSD-3-Clause) unpack.
+
+limbus-skins' own code is under the MIT licence. The pieces above stay Project Moon's: the
+licence doesn't cover them.

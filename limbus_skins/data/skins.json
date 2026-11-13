@@ -862,8 +862,7 @@
      "neck": "head",
      "scale": 0.7
     },
-    "idle_time": 2.4,
-    "ship": false
+    "idle_time": 2.4
    }
   },
   "baral": {
@@ -1042,8 +1041,7 @@
      "S2",
      "S3"
     ],
-    "idle_time": 2.4,
-    "ship": false
+    "idle_time": 2.4
    }
   },
   "malkuth": {
@@ -1238,9 +1236,9 @@
      "neck": "head",
      "scale": 0.7
     },
-    "idle_time": 2.4,
-    "ship": false
-   }
+    "idle_time": 2.4
+   },
+   "card": "malkuth"
   },
   "yesod": {
    "identity": 10501,
@@ -1426,8 +1424,7 @@
      "neck": "head",
      "scale": 0.7
     },
-    "idle_time": 2.4,
-    "ship": false
+    "idle_time": 2.4
    }
   },
   "hod": {
@@ -1628,8 +1625,7 @@
      "neck": "head",
      "scale": 0.7
     },
-    "idle_time": 2.4,
-    "ship": false
+    "idle_time": 2.4
    }
   },
   "netzach": {
@@ -1814,8 +1810,7 @@
      "neck": "head",
      "scale": 0.7
     },
-    "idle_time": 2.4,
-    "ship": false
+    "idle_time": 2.4
    }
   },
   "tiphereth": {
@@ -2018,8 +2013,7 @@
      "neck": "head",
      "scale": 0.7
     },
-    "idle_time": 2.4,
-    "ship": false
+    "idle_time": 2.4
    }
   },
   "chesed": {
@@ -2207,8 +2201,7 @@
      "neck": "head",
      "scale": 0.7
     },
-    "idle_time": 2.4,
-    "ship": false
+    "idle_time": 2.4
    }
   },
   "hokma": {
@@ -2407,9 +2400,9 @@
      "neck": "head",
      "scale": 0.7
     },
-    "idle_time": 2.4,
-    "ship": false
-   }
+    "idle_time": 2.4
+   },
+   "card": "hokma"
   },
   "apocalypse-bird": {
    "identity": 10704,
@@ -2458,8 +2451,7 @@
      "S2",
      "S3"
     ],
-    "idle_time": 2.4,
-    "ship": false
+    "idle_time": 2.4
    },
    "stats": {
     "hp": 640,
@@ -2863,20 +2855,22 @@
   "baral-id": {
    "identity": 10894,
    "base": 10801,
-   "becomes": "Baral as an identity of his own (Ishmael's slot), with Baral's body and kit, wearing what 10801 wears",
+   "becomes": "Baral as an identity of his own (Ishmael's slot), with Baral's kit, wearing what 10801 wears",
    "tested": false,
    "title": "Baral, an identity of his own - Ishmael",
    "name": "Baral",
-   "dupe_of": "baral"
+   "dupe_of": "baral",
+   "cover_art": "baral"
   },
   "binah-id": {
    "identity": 10993,
    "base": 10901,
-   "becomes": "Binah as an identity of their own (Rodion's slot), with Binah's body and kit, wearing what 10901 wears",
+   "becomes": "Binah as an identity of their own (Rodion's slot), with Binah's kit, wearing what 10901 wears",
    "tested": false,
    "title": "Binah, an identity of their own - Rodion",
    "name": "Binah",
-   "dupe_of": "binah"
+   "dupe_of": "binah",
+   "cover_art": "binah"
   },
   "ayin-id": {
    "identity": 11293,
@@ -2890,74 +2884,82 @@
   "malkuth-id": {
    "identity": 10393,
    "base": 10309,
-   "becomes": "Malkuth as an identity of their own (Don Quixote's slot), with Malkuth's body and kit, wearing what 10309 wears",
+   "becomes": "Malkuth as an identity of their own (Don Quixote's slot), with Malkuth's kit, wearing what 10309 wears",
    "tested": false,
    "title": "Malkuth, an identity of their own - Don Quixote",
    "name": "Malkuth",
-   "dupe_of": "malkuth"
+   "dupe_of": "malkuth",
+   "cover_art": "malkuth"
   },
   "yesod-id": {
    "identity": 10593,
    "base": 10501,
-   "becomes": "Yesod as an identity of their own (Meursault's slot), with Yesod's body and kit, wearing what 10501 wears",
+   "becomes": "Yesod as an identity of their own (Meursault's slot), with Yesod's kit, wearing what 10501 wears",
    "tested": false,
    "title": "Yesod, an identity of their own - Meursault",
    "name": "Yesod",
-   "dupe_of": "yesod"
+   "dupe_of": "yesod",
+   "cover_art": "yesod"
   },
   "hod-id": {
    "identity": 11093,
    "base": 11002,
-   "becomes": "Hod as an identity of their own (Sinclair's slot), with Hod's body and kit, wearing what 11002 wears",
+   "becomes": "Hod as an identity of their own (Sinclair's slot), with Hod's kit, wearing what 11002 wears",
    "tested": false,
    "title": "Hod, an identity of their own - Sinclair",
    "name": "Hod",
-   "dupe_of": "hod"
+   "dupe_of": "hod",
+   "cover_art": "hod"
   },
   "netzach-id": {
    "identity": 10693,
    "base": 10601,
-   "becomes": "Netzach as an identity of their own (Hong Lu's slot), with Netzach's body and kit, wearing what 10601 wears",
+   "becomes": "Netzach as an identity of their own (Hong Lu's slot), with Netzach's kit, wearing what 10601 wears",
    "tested": false,
    "title": "Netzach, an identity of their own - Hong Lu",
    "name": "Netzach",
-   "dupe_of": "netzach"
+   "dupe_of": "netzach",
+   "cover_art": "netzach"
   },
   "tiphereth-id": {
    "identity": 10193,
    "base": 10101,
-   "becomes": "Tiphereth as an identity of their own (Yi Sang's slot), with Tiphereth's body and kit, wearing what 10101 wears",
+   "becomes": "Tiphereth as an identity of their own (Yi Sang's slot), with Tiphereth's kit, wearing what 10101 wears",
    "tested": false,
    "title": "Tiphereth, an identity of their own - Yi Sang",
    "name": "Tiphereth",
-   "dupe_of": "tiphereth"
+   "dupe_of": "tiphereth",
+   "cover_art": "tiphereth"
   },
   "chesed-id": {
    "identity": 10293,
    "base": 10201,
-   "becomes": "Chesed as an identity of their own (Faust's slot), with Chesed's body and kit, wearing what 10201 wears",
+   "becomes": "Chesed as an identity of their own (Faust's slot), with Chesed's kit, wearing what 10201 wears",
    "tested": false,
    "title": "Chesed, an identity of their own - Faust",
    "name": "Chesed",
-   "dupe_of": "chesed"
+   "dupe_of": "chesed",
+   "cover_art": "chesed"
   },
   "hokma-id": {
    "identity": 11193,
    "base": 11110,
-   "becomes": "Hokma as an identity of their own (Outis's slot), with Hokma's body and kit, wearing what 11110 wears",
+   "becomes": "Hokma as an identity of their own (Outis's slot), with Hokma's kit, wearing what 11110 wears",
    "tested": false,
    "title": "Hokma, an identity of their own - Outis",
    "name": "Hokma",
-   "dupe_of": "hokma"
+   "dupe_of": "hokma",
+   "cover_art": "hokma"
   },
   "apocalypse-bird-id": {
    "identity": 10796,
    "base": 10704,
-   "becomes": "Apocalypse Bird as an identity of its own (Heathcliff's slot), with its body and moves, wearing what 10704 wears",
+   "becomes": "Apocalypse Bird as an identity of its own (Heathcliff's slot), with its moves, wearing what 10704 wears",
    "tested": false,
    "title": "Apocalypse Bird, an identity of its own - Heathcliff",
    "name": "Apocalypse Bird",
-   "dupe_of": "apocalypse-bird"
+   "dupe_of": "apocalypse-bird",
+   "cover_art": "apocalypse-bird"
   }
  },
  "kits": {

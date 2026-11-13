@@ -1,0 +1,79 @@
+{
+ "bundle": "char/char_512.pres",
+ "head": {
+  "neck": "head",
+  "parts": [
+   "back hair",
+   "head",
+   "front hair",
+   "face"
+  ],
+  "scale": 0.7
+ },
+ "poses": {
+  "Damaged": {
+   "file": "Damaged.png",
+   "pivot": [
+    0.519878,
+    0.111607
+   ]
+  },
+  "Default": {
+   "file": "Default.png",
+   "pivot": [
+    0.677184,
+    0.017738
+   ]
+  },
+  "Evade": {
+   "file": "Evade.png",
+   "pivot": [
+    0.007126,
+    -0.011547
+   ]
+  },
+  "Guard": {
+   "file": "Guard.png",
+   "pivot": [
+    0.601093,
+    -0.011737
+   ]
+  },
+  "Hit": {
+   "file": "Hit.png",
+   "pivot": [
+    0.630435,
+    -0.006678
+   ]
+  },
+  "Move": {
+   "file": "Move.png",
+   "pivot": [
+    0.448357,
+    -0.007389
+   ]
+  },
+  "Penetrate": {
+   "file": "Penetrate.png",
+   "pivot": [
+    0.890909,
+    -0.00978
+   ]
+  },
+  "Slash": {
+   "file": "Slash.png",
+   "pivot": [
+    0.756098,
+    0.252788
+   ]
+  },
+  "Standing": {
+   "file": "Standing.png",
+   "pivot": [
+    0.677184,
+    0.017738
+   ]
+  }
+ },
+ "prefab": "Malkuth"
+}

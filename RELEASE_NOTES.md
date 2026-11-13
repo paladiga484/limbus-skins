@@ -2,14 +2,20 @@
 
 The Sephirah, Binah, Baral and Apocalypse Bird
 - **Binah, Baral and the Sephirah** (Malkuth, Yesod, Hod, Netzach, Tiphereth, Chesed, Hokma)
-  fight in their Library of Ruina bodies, each with a moveset of their own, on a sinner and as an
-  identity of their own (`binah-id`, `baral-id`, ...). Ayin never fights in Ruina: he has his
-  moves only (`ayin`, a kit).
-- **Apocalypse Bird** on N Corp. Kleinhammer Heathcliff (and `apocalypse-bird-id`): the three
-  birds as one, a boss on your side - 640 HP, Speed 8-13, half damage taken; Small Beak (Bleed),
-  Long Arm (Tremor), Big Eyes (Rupture), Twilight on defense.
-- None of their art ships: it is read from your own Library of Ruina install through Steam.
-  Without that game those skins say so and the rest build as usual.
+  fight in their Library of Ruina bodies, each with a moveset of their own. Ayin never fights in
+  Ruina: he has his moves only (`ayin`, a kit).
+- **Apocalypse Bird** on N Corp. Kleinhammer Heathcliff: the three birds as one, a boss on your
+  side - 640 HP, Speed 8-13, half damage taken; Small Beak (Bleed), Long Arm (Tremor), Big Eyes
+  (Rupture), Twilight on defense.
+- **They ship whole, like Kali:** their Ruina poses, Binah's and Baral's pages and their card art
+  come with limbus-skins. Library of Ruina isn't needed.
+- **Card art:** each in their Ruina pose on their own floor. Their identities of their own
+  (`binah-id`, `baral-id`, ...) show it on every card; Malkuth and Hokma redraw their sinner's
+  card too. (The other sinners' cards share one game file, which only one skin can redraw.)
+- An identity of our own fights in its sinner's body, as Kali's does: for the Ruina body, turn on
+  the skin itself (`binah`, not `binah-id`).
+- A cover's card art stands on its own background (its art folder's `bg.png`), as the card does.
+- **Credits** in the README: what ships is Project Moon's, and where each piece comes from.
 - Not seen in a fight yet: turn one off with `limbus-skins off <skin>` if it looks wrong.
 
 # limbus-skins 1.7.2
