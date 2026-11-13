@@ -24,9 +24,11 @@ def catalog():
         doc = json.load(f)
     skins = {}
     for kind, one in (("helpers", "helper"), ("repaints", "repaint"), ("tints", "tint"), ("identities", "identity"),
-                      ("bosses", "boss"), ("kits", "kit")):
+                      ("bosses", "boss"), ("kits", "kit"), ("fights", "fight")):
         for key, e in doc.get(kind, {}).items():
             skins[key] = dict(e, key=key, kind=one)
+            if one == "fight":
+                skins[key].setdefault("identity", 0)        # a stage, no identity of its own
     skins = with_allies(skins)
     check_copies(skins)
     return skins
@@ -113,10 +115,20 @@ def with_allies(skins):
     return out
 
 
+def fight_edits(fights):
+    """{table: {record id: {field: value}}} from the fights' "records" (record ids as JSON keys)."""
+    out = {}
+    for s in fights:
+        for table, recs in (s.get("records") or {}).items():
+            for i, fields in recs.items():
+                out.setdefault(table, {})[int(i)] = fields
+    return out
+
+
 def shares_static(skin):
     """Built into the one shared static-data file (helpers, boss skins, identities of our own, and
     kits: an identity's moves and text, its body left as it is - for a body mod's character)."""
-    return skin["kind"] in ("helper", "identity", "boss", "kit")
+    return skin["kind"] in ("helper", "identity", "boss", "kit", "fight")
 
 
 def boss_form(key, skin, boss=()):
@@ -198,8 +210,10 @@ def build(keys, game_dir, cache, data_dir, log=print, boss=(), static=True):
     want = [skins[k] for k in keys if static and skins[k]["kind"] == "helper"]
     want_ids = [skins[k] for k in keys if static and skins[k]["kind"] == "identity"]
     want_boss = [skins[k] for k in sorted(skill_edits(keys, skins, boss))] if static else []
+    want_fights = [skins[k] for k in keys if static and skins[k]["kind"] == "fight"]
+    record_edits = fight_edits(want_fights)
     forms = [s for s in want_boss if s["kind"] == "boss"]     # boss skins: nothing but the static file
-    if want or want_boss or want_ids:
+    if want or want_boss or want_ids or want_fights:
         swaps, skill_swaps, bad, boss_ok, kit_notes, green, passives, texts, stats = {}, {}, [], [], {}, set(), {}, {}, {}
         pers, skills, units = game.boss_data(cache)
         clones, folders, ruina = {}, {}, None
@@ -366,14 +380,15 @@ def build(keys, game_dir, cache, data_dir, log=print, boss=(), static=True):
             boss_ok.append(s["key"])
         out = os.path.join(built_root, "helpers")
         shutil.rmtree(out, ignore_errors=True)
-        if swaps or skill_swaps or clones or passives or texts or stats:
+        if swaps or skill_swaps or clones or passives or texts or stats or record_edits:
             static_path, _ = game.find_static(cache)
-            raw, done, _ = helpers.rewrite_static(static_path, swaps, skill_swaps, clones, passives, stats, folders)
+            raw, done, _ = helpers.rewrite_static(static_path, swaps, skill_swaps, clones, passives, stats, folders,
+                                                  record_edits)
             os.makedirs(out)
             rel = _write(out, cache, static_path, raw)
             with open(os.path.join(out, "manifest.json"), "w", encoding="utf-8") as f:
                 json.dump({"format": FORMAT, "kind": "helpers",
-                           "skins": [s["key"] for s in want + want_ids + forms if s["key"] not in bad],
+                           "skins": [s["key"] for s in want + want_ids + forms + want_fights if s["key"] not in bad],
                            "skills": boss_ok, "files": [rel], "green_skills": sorted(green),
                            "skill_texts": {str(i): t for i, t in sorted(texts.items())},
                            # the server grants these while they're built (Server/OwnIdentities.cs)
@@ -394,6 +409,9 @@ def build(keys, game_dir, cache, data_dir, log=print, boss=(), static=True):
                     if ok:                              # a body built before (as a repaint) is never used again
                         for folder in (s["key"], s["key"] + FORMS):
                             shutil.rmtree(os.path.join(built_root, folder), ignore_errors=True)
+            for s in want_fights:
+                results[s["key"]] = (True, "stage and enemies: " + ", ".join(
+                    f"{t} {', '.join(str(i) for i in ids)}" for t, ids in sorted((t, sorted(r)) for t, r in s.get("records", {}).items())))
             log(f"  helpers: {len(done)} identities restyled, {len(boss_ok)} with new skills")
         for s in want_boss:
             if s["kind"] == "kit":                      # nothing but the static file: its edits are its result
@@ -471,6 +489,36 @@ def build(keys, game_dir, cache, data_dir, log=print, boss=(), static=True):
                 shutil.rmtree(out + FORMS, ignore_errors=True)
                 results[key] = (False, str(e))
             log(f"  {'ok  ' if results[key][0] else 'FAIL'} {key}: {results[key][1]}")
+
+    # a fight's enemies' bodies, redrawn as its characters: built/<fight>/
+    for s in [skins[k] for k in keys if skins[k]["kind"] == "fight" and skins[k].get("bodies")]:
+        key, out = s["key"], os.path.join(built_root, s["key"])
+        ok, msg = results.get(key, (True, ""))
+        if not ok:
+            continue
+        try:
+            bodies_, have_ = game.body_index(game_dir, cache, os.path.join(data_dir, "bodies.json"), log=log)
+            locate_ = lambda b: have_[bodies_[b]] if bodies_.get(b) in have_ else (_ for _ in ()).throw(  # noqa: E731
+                repaint.RepaintError(f"{b} is not in the game's cache"))
+            shutil.rmtree(out, ignore_errors=True)
+            os.makedirs(out)
+            rels, notes = [], []
+            for app, spec in sorted(s["bodies"].items()):
+                # an enemy faces the sinners: the source as drawn (Ruina's face that way), not turned
+                raw, n = repaint.repaint(app, locate_, lor=spec.get("lor"), aura=spec.get("aura"),
+                                         mirror=spec.get("mirror", False))
+                findings = audit.body(locate_(app), raw, app)
+                if findings:
+                    raise repaint.RepaintError(f"audit of {app}: " + "; ".join(findings))
+                rels.append(_write(out, cache, locate_(app), raw))
+                notes.append(f"{spec.get('name', app)}: {n[0] if n else 'drawn'}")
+            with open(os.path.join(out, "manifest.json"), "w", encoding="utf-8") as f:
+                json.dump({"format": FORMAT, "kind": "fight", "skins": [key], "files": rels, "notes": notes}, f, indent=1)
+            results[key] = (True, "; ".join([msg] + notes))
+        except (repaint.RepaintError, RuntimeError, KeyError, OSError, ValueError) as e:
+            shutil.rmtree(out, ignore_errors=True)
+            results[key] = (False, f"bodies: {e}")
+        log(f"  {'ok  ' if results[key][0] else 'FAIL'} {key}: {results[key][1]}")
 
     # card pictures in a file of their own: built/<skin>.card
     if static:
@@ -690,6 +738,8 @@ def built_dirs(data_dir, keys, boss=()):
     cards_seen = set()                      # card files: one per game file (two skins may draw the same card)
     for k in keys:
         folders = ["helpers"] if k in skins and (shares_static(skins[k]) or boss_form(k, skins[k], boss)) else [k, k + FORMS]
+        if k in skins and skins[k]["kind"] == "fight":
+            folders.append(k)
         if k in edits and k in man.get("skills", []):
             folders.append("helpers")
         folders.append(k + CARD)

@@ -3282,5 +3282,290 @@
    },
    "title": "Ayin's kit - Gregor (11201)"
   }
+ },
+ "fights": {
+  "twilight": {
+   "title": "Twilight - the Apocalypse Bird (EXP Luxcavation, the last stage)",
+   "becomes": "EXP Luxcavation's last stage becomes the Black Forest: Big Bird, Small Bird and Long Bird, then the Apocalypse Bird",
+   "tested": false,
+   "records": {
+    "battle-exp-dungeon": {
+     "18": {
+      "waveList": [
+       {
+        "battleMapInfo": {
+         "mapName": "Cp10RPG_B1F_Grocery",
+         "mapSize": 34
+        },
+        "unitList": [
+         {
+          "unitID": 70070,
+          "unitCount": 1,
+          "unitLevel": 63
+         },
+         {
+          "unitID": 90088,
+          "unitCount": 1,
+          "unitLevel": 63
+         },
+         {
+          "unitID": 71007,
+          "unitCount": 1,
+          "unitLevel": 63
+         }
+        ],
+        "bgmList": [
+         "Battle_Cp10_Enemy_1"
+        ],
+        "enemyPositionID": 251,
+        "allyPositionID": 252
+       },
+       {
+        "battleMapInfo": {
+         "mapName": "Cp10RPG_B1F_Grocery",
+         "mapSize": 34
+        },
+        "unitList": [
+         {
+          "unitID": 91011,
+          "unitCount": 1,
+          "unitLevel": 63
+         }
+        ],
+        "bgmList": [
+         "Battle_Cp10_Enemy_1"
+        ],
+        "enemyPositionID": 251,
+        "allyPositionID": 252
+       }
+      ],
+      "stageScriptList": [],
+      "participantInfo": {
+       "min": 1,
+       "max": 7
+      }
+     }
+    },
+    "enemy": {
+     "71007": {
+      "hp": {
+       "defaultStat": 260,
+       "incrementByLevel": 5
+      },
+      "+passives": [
+       817402
+      ]
+     },
+     "91011": {
+      "hp": {
+       "defaultStat": 900,
+       "incrementByLevel": 20
+      }
+     },
+     "70070": {
+      "hp": {
+       "defaultStat": 300,
+       "incrementByLevel": 6
+      },
+      "+passives": [
+       817402
+      ]
+     },
+     "90088": {
+      "hp": {
+       "defaultStat": 260,
+       "incrementByLevel": 5
+      },
+      "+passives": [
+       817402
+      ]
+     }
+    }
+   },
+   "bodies": {
+    "91007_KCorpAppearance": {
+     "name": "Long Bird",
+     "lor": {
+      "bundle": "char/char_131.pres",
+      "prefab": "EGO_LongBird",
+      "smear": [
+       "move",
+       "S1",
+       "S2",
+       "S3"
+      ],
+      "idle_time": 2.4,
+      "map": {
+       "idle": [
+        "Default",
+        "Standing"
+       ],
+       "move": [
+        "Move"
+       ],
+       "gud": [
+        "Default"
+       ],
+       "miss": [
+        "Move"
+       ],
+       "dmg": [
+        "Damaged"
+       ],
+       "dead": [
+        "Damaged"
+       ],
+       "S1": [
+        "Slash"
+       ],
+       "S2": [
+        "Hit",
+        "S1"
+       ],
+       "S3": [
+        "S2"
+       ]
+      }
+     }
+    },
+    "91011_FishCreature_EliteAppearance": {
+     "name": "Apocalypse Bird",
+     "lor": {
+      "bundle": "char/char_115.pres",
+      "prefab": "Ego_ApocalypseBird",
+      "map": {
+       "idle": [
+        "Default"
+       ],
+       "move": [
+        "Move"
+       ],
+       "gud": [
+        "Guard"
+       ],
+       "miss": [
+        "Guard"
+       ],
+       "dmg": [
+        "Damaged"
+       ],
+       "dead": [
+        "Damaged"
+       ],
+       "S1": [
+        "Small_S2",
+        "Small_S3"
+       ],
+       "S2": [
+        "Slash",
+        "Long_S4"
+       ],
+       "S3": [
+        "Hit",
+        "Big_S1",
+        "S5"
+       ]
+      },
+      "smear": [
+       "move",
+       "S1",
+       "S2",
+       "S3"
+      ],
+      "idle_time": 2.4
+     }
+    },
+    "90070_TCorpAppearance": {
+     "name": "Big Bird",
+     "lor": {
+      "bundle": "char/char_11.pres",
+      "prefab": "BigBird",
+      "smear": [
+       "move",
+       "S1",
+       "S3"
+      ],
+      "idle_time": 2.4,
+      "map": {
+       "idle": [
+        "Default"
+       ],
+       "move": [
+        "Move"
+       ],
+       "gud": [
+        "Guard"
+       ],
+       "miss": [
+        "Guard"
+       ],
+       "dmg": [
+        "Damaged"
+       ],
+       "dead": [
+        "Sleep_S2"
+       ],
+       "S1": [
+        "AtkReady_Z",
+        "SpecialAtk_S1"
+       ],
+       "S2": [
+        "Charm_F"
+       ],
+       "S3": [
+        "AtkReady_Z",
+        "SpecialAtk_S1"
+       ]
+      }
+     }
+    },
+    "90088_Fishman_CruiseAppearance": {
+     "name": "Small Bird",
+     "lor": {
+      "bundle": "char/char_159.pres",
+      "prefab": "EGO_SmallBird",
+      "smear": [
+       "move",
+       "S1",
+       "S2",
+       "S3"
+      ],
+      "idle_time": 2.4,
+      "map": {
+       "idle": [
+        "Default",
+        "Standing"
+       ],
+       "move": [
+        "Move"
+       ],
+       "gud": [
+        "Evasion"
+       ],
+       "miss": [
+        "Evasion"
+       ],
+       "dmg": [
+        "Damaged"
+       ],
+       "dead": [
+        "Damaged"
+       ],
+       "S1": [
+        "Slash",
+        "Hit"
+       ],
+       "S2": [
+        "S1"
+       ],
+       "S3": [
+        "S2",
+        "Hit"
+       ]
+      }
+     }
+    }
+   }
+  }
  }
 }

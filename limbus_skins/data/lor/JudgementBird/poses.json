@@ -1,0 +1,134 @@
+{
+ "bundle": "lobotomy/긴새",
+ "head": null,
+ "poses": {
+  "Default": {
+   "file": "Default.png",
+   "pivot": [
+    0.7329,
+    0.020176
+   ]
+  },
+  "Judgement1": {
+   "file": "Judgement1.png",
+   "pivot": [
+    0.838756,
+    0.030295
+   ]
+  },
+  "Judgement2": {
+   "file": "Judgement2.png",
+   "pivot": [
+    0.840525,
+    0.030295
+   ]
+  },
+  "Judgement3": {
+   "file": "Judgement3.png",
+   "pivot": [
+    0.839701,
+    0.030295
+   ]
+  },
+  "Judgement4": {
+   "file": "Judgement4.png",
+   "pivot": [
+    0.839701,
+    0.030295
+   ]
+  },
+  "Judgement5": {
+   "file": "Judgement5.png",
+   "pivot": [
+    0.839701,
+    0.030295
+   ]
+  },
+  "Judgement6": {
+   "file": "Judgement6.png",
+   "pivot": [
+    0.833135,
+    0.023104
+   ]
+  },
+  "Seeing1": {
+   "file": "Seeing1.png",
+   "pivot": [
+    0.771274,
+    0.030883
+   ]
+  },
+  "Seeing2": {
+   "file": "Seeing2.png",
+   "pivot": [
+    0.751759,
+    0.028617
+   ]
+  },
+  "Seeing3": {
+   "file": "Seeing3.png",
+   "pivot": [
+    0.775337,
+    0.023918
+   ]
+  },
+  "Standing1": {
+   "file": "Standing1.png",
+   "pivot": [
+    0.7329,
+    0.020176
+   ]
+  },
+  "Standing2": {
+   "file": "Standing2.png",
+   "pivot": [
+    0.738579,
+    0.02928
+   ]
+  },
+  "Standing3": {
+   "file": "Standing3.png",
+   "pivot": [
+    0.744341,
+    0.038489
+   ]
+  },
+  "Standing4": {
+   "file": "Standing4.png",
+   "pivot": [
+    0.739535,
+    0.031113
+   ]
+  },
+  "Walk1": {
+   "file": "Walk1.png",
+   "pivot": [
+    0.693601,
+    0.077161
+   ]
+  },
+  "Walk2": {
+   "file": "Walk2.png",
+   "pivot": [
+    0.70564,
+    0.029335
+   ]
+  },
+  "Walk3": {
+   "file": "Walk3.png",
+   "pivot": [
+    0.787829,
+    0.018107
+   ]
+  },
+  "Walk4": {
+   "file": "Walk4.png",
+   "pivot": [
+    0.752909,
+    -0.005345
+   ]
+  }
+ },
+ "prefab": "JudgementBird",
+ "source": "Lobotomy Corporation resources.assets: 긴새.json (Spine 3.5), 긴새.atlas, 긴새 texture; mirrored to face left"
+}

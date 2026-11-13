@@ -435,15 +435,29 @@ def swap_passives(rec, battle, support):
     return out
 
 
+def set_fields(record, fields):
+    """record's fields set from fields, keeping each one's own encoding (some are stored as
+    Python-literal strings); "+passives": [ids] joins the unit's passiveSet.passiveIdList."""
+    for k, v in fields.items():
+        if k == "+passives":
+            ps = lit(record.get("passiveSet")) if record.get("passiveSet") else {}
+            ps = dict(ps, passiveIdList=list(ps.get("passiveIdList", [])) + [i for i in v if i not in ps.get("passiveIdList", [])])
+            record["passiveSet"] = str(ps) if isinstance(record.get("passiveSet"), str) else ps
+            continue
+        record[k] = str(v) if isinstance(record.get(k), str) and not isinstance(v, str) else v
+
+
 def rewrite_static(static_path, swaps, skill_swaps=None, clones=None, passive_swaps=None, stat_edits=None,
-                   folders=None):
+                   folders=None, record_edits=None):
     """Rewrite identity records (and skill records) in the static-data bundle.
     swaps = {identity id: helper record}; skill_swaps = {skill id: new record};
     clones = {new identity id: base id}: cloned after the swaps, so a clone wears the base's, and
     then a clone's own swaps, passives and stats go on it (a boss form of its own);
     passive_swaps = {identity id: {"battle": [passive ids], "support": [passive ids]}};
     stat_edits = {identity id: {"hp": base HP, "speed": [min, max]}} (edit_stats);
-    folders = {new identity id: identity whose card art it shows} (clone_record).
+    folders = {new identity id: identity whose card art it shows} (clone_record);
+    record_edits = {table: {record id: {field: value}}}: fields set on any table's records (a
+    fight's stage and enemies); "+passives" adds passive ids to a unit's passiveSet.
     Returns (bundle bytes, [identity ids changed], [skill ids changed])."""
     UnityPy = unitypy()
     env = UnityPy.load(static_path)
@@ -451,10 +465,15 @@ def rewrite_static(static_path, swaps, skill_swaps=None, clones=None, passive_sw
     clones = clones or {}
     passive_swaps = passive_swaps or {}
     stat_edits = stat_edits or {}
+    record_edits = record_edits or {}
     done, done_skills = set(), set()
 
     def edit(kind, doc, i, x):
         """Apply this record's edits in place; True when anything changed."""
+        mine = record_edits.get(kind, {}).get(x.get("id"))
+        if mine:
+            set_fields(x, mine)
+            return True
         if kind == "personality":
             h = swaps.get(x.get("id"))
             hit = False
@@ -498,7 +517,7 @@ def rewrite_static(static_path, swaps, skill_swaps=None, clones=None, passive_sw
         kind = path.split("/static-data/")[1].split("/")[0] if "/static-data/" in path else ""
         is_pers = kind == "personality"
         cloned = bool(clones) and (kind in IDENTITY_KEYS or kind.startswith("illust-pivots-"))
-        if not (is_pers or cloned or (skill_swaps and kind == "skill")
+        if not (is_pers or cloned or (skill_swaps and kind == "skill") or kind in record_edits
                 or (passive_swaps and kind == "personality-passive")):
             continue
         doc = _text(obj)
