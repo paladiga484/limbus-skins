@@ -2865,9 +2865,9 @@
   "binah-id": {
    "identity": 10993,
    "base": 10901,
-   "becomes": "Binah as an identity of their own (Rodion's slot), with Binah's kit, wearing what 10901 wears",
+   "becomes": "Binah as an identity of her own (Rodion's slot), with Binah's kit, wearing what 10901 wears",
    "tested": false,
-   "title": "Binah, an identity of their own - Rodion",
+   "title": "Binah, an identity of her own - Rodion",
    "name": "Binah",
    "dupe_of": "binah",
    "cover_art": "binah"
