@@ -1,3 +1,17 @@
+# limbus-skins 1.8.0
+
+The Sephirah, Binah, Baral and Apocalypse Bird
+- **Binah, Baral and the Sephirah** (Malkuth, Yesod, Hod, Netzach, Tiphereth, Chesed, Hokma)
+  fight in their Library of Ruina bodies, each with a moveset of their own, on a sinner and as an
+  identity of their own (`binah-id`, `baral-id`, ...). Ayin never fights in Ruina: he has his
+  moves only (`ayin`, a kit).
+- **Apocalypse Bird** on N Corp. Kleinhammer Heathcliff (and `apocalypse-bird-id`): the three
+  birds as one, a boss on your side - 640 HP, Speed 8-13, half damage taken; Small Beak (Bleed),
+  Long Arm (Tremor), Big Eyes (Rupture), Twilight on defense.
+- None of their art ships: it is read from your own Library of Ruina install through Steam.
+  Without that game those skins say so and the rest build as usual.
+- Not seen in a fight yet: turn one off with `limbus-skins off <skin>` if it looks wrong.
+
 # limbus-skins 1.7.2
 
 Gebura and Roland need nothing else

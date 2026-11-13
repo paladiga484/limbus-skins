@@ -17,6 +17,12 @@ Dress Limbus Company identities as the characters they mirror, on a **private se
   down to size) and her own pages - Level Slash, Upstanding Slash, Greater Split: Vertical,
   Retaliate - with their names, dice and Bleed, wrapped in Sancho's blood mist. Her poses and
   pages ship with limbus-skins: Library of Ruina isn't needed.
+- **Library of Ruina bodies from your own install:** Binah (the Arbiter Garion), Baral (the Claw),
+  Malkuth, Yesod, Hod, Netzach, Tiphereth, Chesed and Hokma fight in their Ruina bodies with
+  movesets of their own, and Apocalypse Bird - the three birds as one - fights on your side as a
+  boss: 640 HP, Small Beak, Long Arm, Big Eyes. None of their art ships with limbus-skins: it is
+  read from your Library of Ruina install through Steam, and without that game those skins say so
+  and the rest build as usual. Each is also an identity of its own (`binah-id`, ...).
 - **Boss skins:** the identity *becomes* the boss - the boss's own body from the game, with its
   own animations, effects and skills: Matthias (the Middle Nursefather) on the Ring Pointillist
   Student Outis, the Roach Emperor (his own swarm of roaches) on G Corp. Gregor, Distorted
@@ -179,6 +185,17 @@ Skins only show in battle. Menus, portraits and identity art stay as they are.
 | `priest` | Gregor 11210 | repaint | the Priest | not yet |
 | `distorted-hohenheim` | Gregor 11212 | boss | Distorted Hohenheim: his own body and skills | not yet |
 | `hohenheim` | Gregor 11214 | helper | Hohenheim | not yet |
+| `malkuth` | Don Quixote 10309 | repaint | Malkuth (Library of Ruina): her body, records and rules | not yet |
+| `chesed` | Faust 10201 | repaint | Chesed (Library of Ruina): his body and kit | not yet |
+| `tiphereth` | Yi Sang 10101 | repaint | Tiphereth (Library of Ruina): her body and kit | not yet |
+| `yesod` | Meursault 10501 | repaint | Yesod (Library of Ruina): Tremor and Protection | not yet |
+| `netzach` | Hong Lu 10601 | repaint | Netzach (Library of Ruina): his body and kit | not yet |
+| `apocalypse-bird` | Heathcliff 10704 | repaint | Apocalypse Bird (Library of Ruina): a boss on your side, 640 HP, Small Beak, Long Arm, Big Eyes | not yet |
+| `baral` | Ishmael 10801 | repaint | Baral, the Claw (Library of Ruina): his serums and pages | not yet |
+| `binah` | Rodion 10901 | repaint | Binah, the Arbiter Garion (Library of Ruina): her Degraded pages | not yet |
+| `hod` | Sinclair 11002 | repaint | Hod (Library of Ruina): her body and kit | not yet |
+| `hokma` | Outis 11110 | repaint | Hokma (Library of Ruina): time, Poise and Tremor | not yet |
+| `ayin` | Gregor 11201 | kit | Ayin's moves (he never fights in Ruina, so no body) | not yet |
 
 "Not yet" means it builds and its frames check out, but nobody has watched it in a fight yet.
 If one looks wrong or a fight freezes, turn it off with `limbus-skins off <skin>` and open an issue.

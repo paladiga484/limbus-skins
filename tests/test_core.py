@@ -2370,13 +2370,25 @@ class Shipped(unittest.TestCase):
         from limbus_skins import art, cards, lor
         with tempfile.TemporaryDirectory() as nobody:            # a player with no art of their own
             for key, s in self.skins.items():
-                if s.get("lor"):
+                if s.get("lor") and s["lor"].get("ship", True):
                     self.assertIsNotNone(lor.shipped_poses(s["lor"]["bundle"], s["lor"]["prefab"], s["lor"].get("head")), key)
                 for name in filter(None, (s.get("card"), s.get("cover_art"))):
                     folder = cards.art_dir(nobody, name)
                     self.assertTrue(os.path.isfile(os.path.join(folder, "normal.png")), f"{key}: {name}")
                     cards.load_art(folder)
             self.assertIsNotNone(art.head_art(nobody, "butterfly-yisang"))
+
+    def test_unshipped_ruina_bodies_stay_unshipped(self):
+        from limbus_skins import lor
+        mine = {k: s["lor"] for k, s in self.skins.items() if s.get("lor") and not s["lor"].get("ship", True)}
+        self.assertTrue(mine)
+        shipped = {p.name for p in lor._shipped_dir("").iterdir()}
+        for key, spec in mine.items():
+            self.assertNotIn(spec["prefab"], shipped, key)
+            with mock.patch.object(lor.paths, "steam_roots", return_value=[]), \
+                    mock.patch.object(lor, "shipped_poses", side_effect=AssertionError("looked for shipped poses")):
+                with self.assertRaisesRegex(lor.LorError, "Library of Ruina"):
+                    lor.source_table(spec)
 
     def test_the_players_own_art_comes_first(self):
         from PIL import Image
