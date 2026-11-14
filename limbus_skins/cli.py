@@ -114,11 +114,14 @@ def one_each(keys, skins):
     is among them, else the newest (last) named."""
     from .build import character
     pick = {}
+    own = {k for k in keys if skins.get(k, {}).get("own_body")}   # a body of its own: no copy of anyone
     for k in keys:
+        if k in own:
+            continue
         c = character(skins, k)
         if pick.get(c) != c:
             pick[c] = k
-    keep = set(pick.values())
+    keep = set(pick.values()) | own
     return [k for k in keys if k in keep]
 
 
