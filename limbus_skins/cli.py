@@ -375,9 +375,11 @@ def main(argv=None):
             # one skin per identity and one copy per character: the newest choice wins
             for k in one_each(keys, allskins):
                 c = character(allskins, k)
-                copies += [x for x in st["on"] if x != k and character(allskins, x) == c and x not in copies]
-                st["on"] = [x for x in st["on"] if skins[x]["identity"] != skins[k]["identity"]
-                            and character(allskins, x) != c] + [k]
+                # an identity with a body of its own is no copy of its character's skin, nor it of the identity
+                same = lambda x: (character(allskins, x) == c and not allskins[k].get("own_body")  # noqa: E731
+                                  and not allskins[x].get("own_body"))
+                copies += [x for x in st["on"] if x != k and same(x) and x not in copies]
+                st["on"] = [x for x in st["on"] if skins[x]["identity"] != skins[k]["identity"] and not same(x)] + [k]
             copies = [x for x in copies if x not in st["on"]]
         else:
             st["on"] = [x for x in st["on"] if x not in keys]

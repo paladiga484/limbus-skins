@@ -1,5 +1,7 @@
 """Core pieces that decide what the game reads: bundles, CRCs, sessions, selection."""
 import copy
+import contextlib
+import io
 import json
 import math
 import os
@@ -301,7 +303,9 @@ class OneCopy(unittest.TestCase):
             sk, now = catalog(), on()
             self.assertIn("starbuck-id", now)
             self.assertNotIn("starbuck", now)
-            self.assertEqual(len({character(sk, k) for k in now}), len(now))     # no character twice
+            shared = [k for k in now if not sk[k].get("own_body")]               # a body of its own is nobody's copy
+            self.assertEqual(len({character(sk, k) for k in shared}), len(shared))   # no character twice
+            self.assertTrue({"binah", "binah-id"} <= set(now))                   # ...so both stay on
             with open(state, "w") as f:                                          # as an older limbus-skins left it
                 json.dump({"on": ["sora", "sora-id", "ahab"]}, f)
             self.assertEqual(cli.main(["list"]), 0)
@@ -1987,6 +1991,17 @@ class OwnBodies(unittest.TestCase):
         x = {"id": 5, "a": 1}
         helpers.set_fields(x, {"appearance": "5_XAppearance"})
         self.assertEqual(x["appearance"], "5_XAppearance")
+
+
+class OwnBodyAndItsSkin(unittest.TestCase):
+    def test_turning_everything_on_keeps_a_character_and_its_identity_with_a_body_of_its_own(self):
+        from limbus_skins import cli
+        with tempfile.TemporaryDirectory() as d, mock.patch.dict(os.environ, {"XDG_CONFIG_HOME": d, "XDG_DATA_HOME": d, "APPDATA": d, "LOCALAPPDATA": d,
+                                                                                "LIMBUS_SKINS_PATCHLC": ""}), \
+                contextlib.redirect_stdout(io.StringIO()):
+            cli.main(["on", "binah", "binah-id", "kali", "kali-id"])
+            on = cli._state()[0]["on"]
+        self.assertEqual(sorted(on), ["binah", "binah-id", "kali", "kali-id"])
 
 
 class NewRecords(unittest.TestCase):
