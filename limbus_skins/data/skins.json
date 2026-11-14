@@ -2829,7 +2829,8 @@
    "title": "Kali, an identity of her own - Ryōshū",
    "name": "Kali",
    "dupe_of": "kali",
-   "game_title": "The Red Mist"
+   "game_title": "The Red Mist",
+   "own_body": true
   },
   "dulcinea-id": {
    "identity": 10999,
@@ -2904,7 +2905,8 @@
    "name": "Baral",
    "dupe_of": "baral",
    "cover_art": "baral",
-   "game_title": "The Claw"
+   "game_title": "The Claw",
+   "own_body": true
   },
   "binah-id": {
    "identity": 10993,
@@ -2936,7 +2938,8 @@
    "name": "Malkuth",
    "dupe_of": "malkuth",
    "cover_art": "malkuth",
-   "game_title": "Floor of\nHistory"
+   "game_title": "Floor of\nHistory",
+   "own_body": true
   },
   "yesod-id": {
    "identity": 10592,
@@ -2947,7 +2950,8 @@
    "name": "Yesod",
    "dupe_of": "yesod",
    "cover_art": "yesod",
-   "game_title": "Floor of\nTechnological Sciences"
+   "game_title": "Floor of\nTechnological Sciences",
+   "own_body": true
   },
   "hod-id": {
    "identity": 11093,
@@ -2958,7 +2962,8 @@
    "name": "Hod",
    "dupe_of": "hod",
    "cover_art": "hod",
-   "game_title": "Floor of\nLiterature"
+   "game_title": "Floor of\nLiterature",
+   "own_body": true
   },
   "netzach-id": {
    "identity": 10693,
@@ -2969,7 +2974,8 @@
    "name": "Netzach",
    "dupe_of": "netzach",
    "cover_art": "netzach",
-   "game_title": "Floor of\nArt"
+   "game_title": "Floor of\nArt",
+   "own_body": true
   },
   "tiphereth-id": {
    "identity": 10193,
@@ -2980,7 +2986,8 @@
    "name": "Tiphereth",
    "dupe_of": "tiphereth",
    "cover_art": "tiphereth",
-   "game_title": "Floor of\nNatural Sciences"
+   "game_title": "Floor of\nNatural Sciences",
+   "own_body": true
   },
   "chesed-id": {
    "identity": 10293,
@@ -2991,7 +2998,8 @@
    "name": "Chesed",
    "dupe_of": "chesed",
    "cover_art": "chesed",
-   "game_title": "Floor of\nSocial Sciences"
+   "game_title": "Floor of\nSocial Sciences",
+   "own_body": true
   },
   "hokma-id": {
    "identity": 11193,
@@ -3002,7 +3010,8 @@
    "name": "Hokma",
    "dupe_of": "hokma",
    "cover_art": "hokma",
-   "game_title": "Floor of\nReligion"
+   "game_title": "Floor of\nReligion",
+   "own_body": true
   },
   "apocalypse-bird-id": {
    "identity": 10793,
@@ -3013,7 +3022,8 @@
    "name": "Apocalypse Bird",
    "dupe_of": "apocalypse-bird",
    "cover_art": "apocalypse-bird",
-   "game_title": "The Black Forest::\nThree Birds as One"
+   "game_title": "The Black Forest::\nThree Birds as One",
+   "own_body": true
   }
  },
  "kits": {
