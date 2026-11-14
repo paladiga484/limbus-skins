@@ -3535,7 +3535,11 @@
    "music": {
     "request": "EnterExpDungeon",
     "dungeon": 18,
-    "file": "twilight.ogg"
+    "file": "twilight-1.ogg",
+    "second": {
+     "file": "twilight-2.ogg",
+     "at": 182000
+    }
    },
    "enemy_names": {
     "98801": "Big Bird",

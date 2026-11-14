@@ -110,8 +110,10 @@ MUSIC = re.compile(r"[A-Za-z0-9_-]{1,60}\.(ogg|mp3|wav|flac)")
 
 
 def fight_music(data_dir, live):
-    """[(request, dungeon id, file name, path)] for the fights in live whose music is on this
-    machine (<data dir>/music/<file>: friend's own tracks, never built, shipped or downloaded)."""
+    """[(request, dungeon id, file name, path, second)] for the fights in live whose music is on
+    this machine (<data dir>/music/<file>: friend's own tracks, never built, shipped or
+    downloaded). second: (file name, path, start in ms) of the track its second phase moves to,
+    or None when it has none (or that file isn't here)."""
     out = []
     for man in sorted(glob.glob(os.path.join(data_dir, "built", "*", "manifest.json"))):
         m = _json(man)
@@ -123,8 +125,15 @@ def fight_music(data_dir, live):
                 and isinstance(name, str) and MUSIC.fullmatch(name)):
             continue
         path = os.path.join(data_dir, "music", name)
-        if os.path.isfile(path):
-            out.append((req, dungeon, name, path))
+        if not os.path.isfile(path):
+            continue
+        second, sec = None, mus.get("second")
+        if isinstance(sec, dict) and isinstance(sec.get("file"), str) and MUSIC.fullmatch(sec["file"]) \
+                and isinstance(sec.get("at", 0), int) and 0 <= sec.get("at", 0) < 10 ** 8:
+            p2 = os.path.join(data_dir, "music", sec["file"])
+            if os.path.isfile(p2):
+                second = (sec["file"], p2, sec.get("at", 0))
+        out.append((req, dungeon, name, path, second))
     return out
 
 
@@ -379,8 +388,11 @@ def configure(folder, data_dir, on=True):
     _replace(os.path.join(folder, "allynames.txt"), allynames_file({i: w for i, w in words.items() if i in named_ids}))
     _sync(os.path.join(folder, "covers"), covers(data_dir, {i for i, _, _ in ours}, live))
     music = fight_music(data_dir, live) if on else []
-    _replace(os.path.join(folder, "fights.txt"), "".join(f"{r}\t{d}\tmusic\\{n}\n" for r, d, n, _ in music))
-    _sync(os.path.join(folder, "music"), {n: p for _, _, n, p in music})
+    _replace(os.path.join(folder, "fights.txt"),
+             "".join(f"{r}\t{d}\tmusic\\{n}" + (f"\tmusic\\{s2[0]}\t{s2[2]}" if s2 else "") + "\n" for r, d, n, _, s2 in music))
+    tracks = {n: p for _, _, n, p, _ in music}
+    tracks.update({s2[0]: s2[1] for *_, s2 in music if s2})
+    _sync(os.path.join(folder, "music"), tracks)
     story = fight_stories(data_dir, live) if on else []
     _replace(os.path.join(folder, "story.txt"), "".join(f"{w}\t{u}\tstory\\{n}\n" for w, u, n, _ in story))
     _sync(os.path.join(folder, "story"), {n: p for _, _, n, p in story})

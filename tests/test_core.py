@@ -2165,6 +2165,26 @@ class ClientPatch(unittest.TestCase):
         self.assertEqual(self.read("client", "fights.txt"), "")
         self.assertEqual(os.listdir(os.path.join(self.client, "music")), [])
 
+    def test_a_fight_with_a_second_phase_names_its_second_track(self):
+        from limbus_skins import client
+        os.makedirs(os.path.join(self.data, "built", "twilight"))
+        os.makedirs(os.path.join(self.data, "music"))
+        for name in ("twilight-1.ogg", "twilight-2.ogg"):
+            with open(os.path.join(self.data, "music", name), "wb") as f:
+                f.write(b"OggS")
+
+        def built(second):
+            with open(os.path.join(self.data, "built", "twilight", "manifest.json"), "w") as f:
+                json.dump({"kind": "fight", "skins": ["twilight"], "files": [],
+                           "music": {"request": "EnterExpDungeon", "dungeon": 18, "file": "twilight-1.ogg", "second": second}}, f)
+            self.applied("twilight")
+            client.configure(self.client, self.data)
+            return self.read("client", "fights.txt"), sorted(os.listdir(os.path.join(self.client, "music")))
+        self.assertEqual(built({"file": "twilight-2.ogg", "at": 182000}),
+                         ("EnterExpDungeon\t18\tmusic\\twilight-1.ogg\tmusic\\twilight-2.ogg\t182000\n", ["twilight-1.ogg", "twilight-2.ogg"]))
+        for bad in ({"file": "not-here.ogg", "at": 5}, {"file": "../x.ogg"}, {"file": "twilight-2.ogg", "at": "soon"}, "junk"):
+            self.assertEqual(built(bad), ("EnterExpDungeon\t18\tmusic\\twilight-1.ogg\n", ["twilight-1.ogg"]), bad)
+
     def test_a_fights_story_and_its_enemies_names_go_beside_the_patch(self):
         from limbus_skins import client
         story = os.path.join(self.data, "built", "twilight", "story")
