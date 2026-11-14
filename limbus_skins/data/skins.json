@@ -4265,7 +4265,11 @@
    "source": "1582_PhilipAppearance",
    "unit": 1582,
    "title": "Philip (Limbus) - Dawn Office Fixer",
-   "becomes": "Philip as Limbus Company draws them: the boss's own body and whole moveset, as an identity of their own"
+   "becomes": "Philip as Limbus Company draws them: the boss's own body and whole moveset, as an identity of their own",
+   "evolves": {
+    "appearance": "1587_Philip_AwakenAppearance",
+    "hp": 50
+   }
   },
   "yuna-limbus": {
    "identity": 10231,

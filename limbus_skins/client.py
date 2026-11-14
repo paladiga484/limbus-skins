@@ -327,6 +327,21 @@ def body_shifts(data_dir, live):
     return out
 
 
+def form_shifts(data_dir, live):
+    """["<from>><to>@<percent>"] for the live boss forms that become their boss's other body
+    mid-fight (the shared build's "shifts")."""
+    out = []
+    got = _manifest(data_dir, "helpers").get("shifts")
+    for sh in got if isinstance(got, list) else []:
+        if not isinstance(sh, dict) or sh.get("skin") not in live:
+            continue
+        frm, to, hp = sh.get("from"), sh.get("to"), sh.get("hp")
+        if isinstance(frm, str) and isinstance(to, str) and frm != to and APPEARANCE.fullmatch(frm) and APPEARANCE.fullmatch(to) \
+                and isinstance(hp, int) and 1 <= hp <= 99:
+            out.append(f"{frm}>{to}@{hp}")
+    return out
+
+
 def death_shifts(data_dir, skins):
     """["<from>><to>!"] for the skins given whose borrowed body has no death of its own (the shared
     build's "deaths"): at the killing blow the unit turns into its sinner's body, whose death plays."""
@@ -400,6 +415,7 @@ def configure(folder, data_dir, on=True):
     text = set_key(text, GREEN, ",".join(str(i) for i in (green_skills(data_dir) if "helpers" in done else [])))
     live_now = session_skins(data_dir, done)
     _replace(ini, set_key(text, SHIFT, ",".join(hp_shifts(data_dir, done) + body_shifts(data_dir, live_now)
+                                               + (form_shifts(data_dir, live_now) if "helpers" in done else [])
                                                + (death_shifts(data_dir, live_now) if "helpers" in done else []))))
     _replace(os.path.join(folder, "skilltext.txt"), skilltext_file(skill_texts(data_dir) if "helpers" in done else {}))
     _replace(os.path.join(folder, "newskills.txt"),

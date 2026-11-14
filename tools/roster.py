@@ -37,14 +37,14 @@ ROSTER = [
     ("pameli-ruina", "Pameli", "Wedge Office\nFixer", 4, "Pameli", None, ("AZURE", "INDIGO", "AZURE", "INDIGO"), None),
 ]
 # The same people as Limbus Company draws them (its own boss units): key, name, line, sinner
-# slot, the boss's body, its unit. Each wears the boss's own body and plays its whole moveset.
+# slot, the boss's body, its unit, the body it becomes below half HP (or None). Each wears the boss's own body and plays its whole moveset.
 LIMBUS = [
-    ("philip-limbus", "Philip", "Dawn Office\nFixer", 10, "1582_PhilipAppearance", 1582),
-    ("yuna-limbus", "Yuna", "Dawn Office\nFixer", 2, "1581_YunaAppearance", 1581),
-    ("salvador-limbus", "Salvador", "Dawn Office\nRepresentative", 12, "1580_SalvadorAppearance", 1580),
-    ("oscar-limbus", "Oscar", "Wedge Office\nRepresentative", 11, "1583_OscarAppearance", 1583),
-    ("pamela-limbus", "Pamela", "Wedge Office\nFixer", 3, "1585_PamelaAppearance", 1585),
-    ("pameli-limbus", "Pameli", "Wedge Office\nFixer", 4, "1584_PamelyAppearance", 1584),
+    ("philip-limbus", "Philip", "Dawn Office\nFixer", 10, "1582_PhilipAppearance", 1582, "1587_Philip_AwakenAppearance"),
+    ("yuna-limbus", "Yuna", "Dawn Office\nFixer", 2, "1581_YunaAppearance", 1581, None),
+    ("salvador-limbus", "Salvador", "Dawn Office\nRepresentative", 12, "1580_SalvadorAppearance", 1580, None),
+    ("oscar-limbus", "Oscar", "Wedge Office\nRepresentative", 11, "1583_OscarAppearance", 1583, None),
+    ("pamela-limbus", "Pamela", "Wedge Office\nFixer", 3, "1585_PamelaAppearance", 1585, None),
+    ("pameli-limbus", "Pameli", "Wedge Office\nFixer", 4, "1584_PamelyAppearance", 1584, None),
 ]
 FIRST_ID = 30                       # identities 1SS30 and up are the roster's
 # The identity a roster character is drawn on and copies its record from: the sinner's first,
@@ -193,14 +193,16 @@ def main():
         print(f"  {key}: {new} on {base}, {prefab}"
               + (f" -> {evolves[0]} below half HP" if entry.get("evolves") else "")
               + (f", pages {', '.join(str(m['lor_dice']) for m in moves.values())}" if moves else ", NO DECK FOUND: its base's skills"))
-    for key, name, line, sinner, body, unit in LIMBUS:
+    for key, name, line, sinner, body, unit, later in LIMBUS:
         base = helpers.ally_base(pers, 10001 + sinner * 100)     # one with no battle script of its own
         new = next(i for i in range(10000 + sinner * 100 + FIRST_ID, 10000 + sinner * 100 + 90) if i not in taken)
         taken.add(new)
         ids[key] = {"identity": new, "base": base, "roster": True, "tested": False, "name": name, "game_title": line,
                     "source": body, "unit": unit, "title": f"{name} (Limbus) - {line.replace(chr(10), ' ')}",
                     "becomes": f"{name} as Limbus Company draws them: the boss's own body and whole moveset, as an identity of their own"}
-        print(f"  {key}: {new} on {base}, the boss {body}")
+        if later:
+            ids[key]["evolves"] = {"appearance": later, "hp": 50}
+        print(f"  {key}: {new} on {base}, the boss {body}" + (f" -> {later} below half HP" if later else ""))
     indent = len(re.search(r"\n( +)\"", raw).group(1))
     with open(SKINS, "w", encoding="utf-8") as f:
         f.write(json.dumps(doc, indent=indent, ensure_ascii=False) + "\n")

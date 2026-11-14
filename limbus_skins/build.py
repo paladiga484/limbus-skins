@@ -323,6 +323,7 @@ def build(keys, game_dir, cache, data_dir, log=print, boss=(), static=True):
         swaps, skill_swaps, bad, boss_ok, kit_notes, green, passives, texts, stats = {}, {}, [], [], {}, set(), {}, {}, {}
         pers, skills, units = game.boss_data(cache)
         clones, folders, ruina = {}, {}, None
+        shifts = []                                 # boss forms that become the boss's other body mid-fight
         skill_maps, new_skills = {}, {}             # identities with skills of their own: {old: new}; {new: old}
         known_passives = []
 
@@ -412,6 +413,7 @@ def build(keys, game_dir, cache, data_dir, log=print, boss=(), static=True):
             # every edit of one skin lands together or not at all: half a boss (its skills on a
             # body that can't play them) would freeze the fight
             mine_skills, mine_texts, mine_green, said = {}, {}, set(), []
+            mine_shift = None
             mine_swap = mine_passives = mine_stats = worn = None
             try:
                 if s["kind"] == "identity":              # a new id: its base's record, under its own id
@@ -436,6 +438,18 @@ def build(keys, game_dir, cache, data_dir, log=print, boss=(), static=True):
                     ident = dict(ident, attributeList=attrs, defenseSkillIDList=guard)   # what's below acts on them
                     said.append(f"the boss's own body {unit['appearance']} and moveset (unit {unit['id']}: "
                                 + ", ".join(f"{a['skillId']}x{a['number']}" for a in attrs) + f"; defense {guard[0]})")
+                    ev = s.get("evolves") or {}
+                    if ev.get("appearance"):            # the boss's other body, below that share of its HP
+                        hp_ = ev.get("hp", 50)
+                        there = located(ev["appearance"])
+                        if not there or not isinstance(hp_, int) or not 1 <= hp_ <= 99:
+                            raise ValueError(f"evolves: {ev['appearance']} is not in the game's cache, or hp isn't a percent")
+                        later = repaint.body_motions(game.unitypy().load(there), ev["appearance"])
+                        cant = audit.record(ident, {**skills, **skill_swaps, **mine_skills}, later)
+                        if cant:                        # its moves must play on what it becomes
+                            raise ValueError(f"evolves: on {ev['appearance']}: " + "; ".join(cant))
+                        mine_shift = {"skin": s["key"], "from": unit["appearance"], "to": ev["appearance"], "hp": hp_}
+                        said.append(f"becomes {ev['appearance']} below {hp_}% HP")
                 if s.get("moves"):                          # each edit stacks on the ones before it
                     moves = lortext.resolve_moves(s["moves"], ruina)    # Ruina's dice, read from its install
                     mine_skills.update(helpers.move_skills(ident, skills, moves, base()))
@@ -487,6 +501,8 @@ def build(keys, game_dir, cache, data_dir, log=print, boss=(), static=True):
                 boss_notes[s["key"]] = f"skills unchanged ({e or 'no boss record'})"
                 log(f"  FAIL {s['key']}: its kit: {e or 'no boss record'} (its skills stay as they were)")
                 continue
+            if mine_shift:
+                shifts.append(mine_shift)
             skill_swaps.update(mine_skills)
             texts.update(mine_texts)
             for i_ in mine_texts:                       # a skill of our own with words of its own: not its base's text
@@ -520,6 +536,7 @@ def build(keys, game_dir, cache, data_dir, log=print, boss=(), static=True):
                            "skills": boss_ok, "files": [rel], "green_skills": sorted(green),
                            "skill_texts": {str(i): t for i, t in sorted(texts.items())},
                            "new_skills": {str(n_): o_ for n_, o_ in sorted(new_skills.items())},
+                           "shifts": [x_ for x_ in shifts if x_["skin"] not in bad],
                            # the server grants these while they're built (Server/OwnIdentities.cs)
                            "identities": [dict({"id": s["identity"], "base": s["base"], "folder": s.get("folder") or s["base"]},
                                                **name_entry(s, s["key"], s.get("folder") or s["base"], text),
