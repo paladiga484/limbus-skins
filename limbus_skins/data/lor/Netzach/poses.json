@@ -1,55 +1,47 @@
 {
  "bundle": "char/char_534.pres",
- "head": {
-  "neck": "head",
-  "parts": [
-   "head",
-   "front hair",
-   "face"
-  ],
-  "scale": 0.7
- },
+ "head": null,
  "poses": {
   "Damaged": {
    "file": "Damaged.png",
    "pivot": [
-    0.36,
+    0.414634,
     0.001992
    ]
   },
   "Default": {
    "file": "Default.png",
    "pivot": [
-    0.787293,
-    0.067164
+    0.721519,
+    0.062069
    ]
   },
   "Evade": {
    "file": "Evade.png",
    "pivot": [
-    0.5,
-    0.057143
+    0.454333,
+    0.052724
    ]
   },
   "Guard": {
    "file": "Guard.png",
    "pivot": [
     0.826558,
-    0.002049
+    0.001972
    ]
   },
   "Hit": {
    "file": "Hit.png",
    "pivot": [
-    0.384434,
+    0.418708,
     -0.005236
    ]
   },
   "Move": {
    "file": "Move.png",
    "pivot": [
-    0.454795,
-    -0.012739
+    0.487113,
+    -0.01165
    ]
   },
   "Penetrate": {
@@ -62,15 +54,15 @@
   "Slash": {
    "file": "Slash.png",
    "pivot": [
-    0.434211,
-    0.124555
+    0.480363,
+    0.115702
    ]
   },
   "Standing": {
    "file": "Standing.png",
    "pivot": [
-    0.787293,
-    0.067164
+    0.721519,
+    0.062069
    ]
   }
  },

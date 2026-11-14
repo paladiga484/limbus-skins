@@ -1,16 +1,6 @@
 {
  "bundle": "char/char_419.pres",
- "head": {
-  "neck": "head",
-  "parts": [
-   "back hair",
-   "head",
-   "Front Hair",
-   "face",
-   "Front acce"
-  ],
-  "scale": 0.7
- },
+ "head": null,
  "poses": {
   "Damaged": {
    "file": "Damaged.png",
@@ -23,7 +13,7 @@
    "file": "Default.png",
    "pivot": [
     0.518395,
-    0.111354
+    0.104508
    ]
   },
   "Evade": {
@@ -107,7 +97,7 @@
    "file": "Standing.png",
    "pivot": [
     0.518395,
-    0.111354
+    0.104508
    ]
   }
  },
