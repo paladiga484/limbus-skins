@@ -1524,6 +1524,19 @@ class Covers(unittest.TestCase):
         r, g, b = covers.pictures(art, stock)[""].getpixel((1, 1))   # none of its own: the card's, dimmed
         self.assertTrue(b > r, (r, g, b))
 
+    def test_the_pfp_frames_on_a_point_of_its_own(self):
+        # a card frames on the top of the head (chibi heads are big); a pfp on the face itself
+        from PIL import Image
+        from limbus_skins import covers
+        art = Image.new("RGBA", (300, 900), (0, 0, 0, 0))
+        art.paste((240, 240, 240, 255), (60, 40, 240, 880))         # the body
+        art.paste((255, 0, 0, 255), (110, 140, 190, 200))           # the eyes, well below the head's top
+        pics = covers.pictures(art, {"": Image.new("RGB", (192, 108))}, face=(150, 45), pfp_face=(150, 170))
+        r, g, b = pics["_profile"].getpixel((128, 128))
+        self.assertTrue(r > 200 and g < 60, (r, g, b))
+        r, g, b = covers.pictures(art, {"": Image.new("RGB", (192, 108))}, face=(150, 45))["_profile"].getpixel((128, 128))
+        self.assertFalse(r > 200 and g < 60, "without a point of its own the pfp frames on the card's")
+
     def test_a_title_background_fills_the_screen_and_a_logo_keeps_its_alpha(self):
         import struct
         import texture2ddecoder
@@ -1671,6 +1684,29 @@ class CoverBuild(unittest.TestCase):
         self.assertTrue(res["x-id"][0] and "cover: art x" in res["x-id"][1], res)
         self.assertEqual(pics.call_args.kwargs.get("bg").getpixel((1, 1))[:3], (200, 0, 0))
 
+    def test_an_identity_with_art_of_its_own_takes_its_pfp_from_the_art_not_the_body_it_wears(self):
+        # friend, 2026-11-14: "rework the already existing ids and their cards" - binah-id's pfp was
+        # LCB Rodion's face (the body it wears), under Binah's card art
+        from PIL import Image
+        from limbus_skins import build, covers
+        skins = {"x-id": {"key": "x-id", "kind": "identity", "identity": 10193, "base": 10101, "cover_art": "x"}}
+        stand = Image.new("RGBA", (120, 360), (0, 0, 0, 0))
+        stand.paste((0, 0, 255, 255), (30, 10, 90, 350))           # the sinner's body: blue
+        with tempfile.TemporaryDirectory() as data:
+            d = os.path.join(data, "art", "cards", "x")
+            os.makedirs(d)
+            fig = Image.new("RGBA", (100, 300), (0, 0, 0, 0))
+            fig.paste((250, 0, 0, 255), (30, 20, 70, 290))          # the character's art: red
+            fig.save(os.path.join(d, "normal.png"))
+            with FakeGame(skins, {10101: {"id": 10101, "appearance": "10101_X"}}), \
+                    mock.patch.object(covers, "idle_frames", return_value={"10101_X": stand}), \
+                    mock.patch.object(covers, "stock_pictures", return_value={"": Image.new("RGB", (96, 54))}), \
+                    mock.patch.object(covers, "pictures", wraps=covers.pictures) as pics:
+                res = build.build(["x-id"], "game", "cache", data, log=lambda *a: None)
+        self.assertTrue(res["x-id"][0], res)
+        self.assertIsNone(pics.call_args.kwargs.get("pfp"))           # the pfp comes from the art too
+        self.assertNotIn("idle", res["x-id"][1].split("cover:")[1])
+
     def test_the_pfp_role_alone_takes_the_idle_frame(self):
         from PIL import Image
         from limbus_skins import covers
@@ -1770,9 +1806,10 @@ class SkinPfps(unittest.TestCase):
         own.assert_not_called()
         self.assertEqual(results["rep"], (False, "audit: wrong"))
         self.assertIn("hel", out)
-        self.assertEqual(build.FORMAT, 29)                             # 28: the shared build records bodies with no death of their own
+        self.assertEqual(build.FORMAT, 30)                             # 28: the shared build records bodies with no death of their own
         # 29: identities of our own moved off ids two of them shared (10593, 10894, 10796), and the
         # builds word each named identity for the client patch (title, and the folder's own text)
+        # 30: an identity with art of its own takes its pfp from that art, not the sinner's body it wears
 
     def test_the_pfp_is_framed_on_the_sprites_head_at_the_identitys_size(self):
         from PIL import Image

@@ -7,7 +7,8 @@ skins.json "card": "<name>"; the art is the player's own, in <data dir>/art/card
   normal.png    the character: a cut-out on transparency, or a whole picture
   gacksung.png  for the uptie cards (else normal.png)
   bg.png        behind a cut-out (else the identity's own card, blurred and darkened)
-  card.json     optional: {"face": [x, y]} in normal.png's pixels, "gacksung_face" the same for
+  card.json     optional: {"face": [x, y]} in normal.png's pixels, "pfp_face"/"gacksung_pfp_face" where a
+                profile picture frames (else "face"), "gacksung_face" the same for
                 gacksung.png (else: the top of the cut-out), "zoom" / "gacksung_zoom" (below 1
                 shows more of the picture), "x": where the face sits across the wide cards
                 (0-1, default 0.62)
@@ -183,6 +184,8 @@ def apply(env, ident, art):
         stock = t.image
         own = variant == "normal" or art[variant] is art["normal"]   # an uptie card without a picture of its own: normal's
         face = spec.get("face") if own else spec.get("gacksung_face")
+        if role == "profile":                       # a pfp frames on the face itself, when the art says where
+            face = (spec.get("pfp_face") if own else spec.get("gacksung_pfp_face")) or face
         zoom = float(spec.get("zoom", 1.0) if own else spec.get("gacksung_zoom", 1.0))
         img = render(role, stock.size, art[variant], stock, art.get("bg"), face, float(spec.get("x", 0.62)), zoom)
         F = UnityPy.enums.TextureFormat

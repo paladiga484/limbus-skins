@@ -73,14 +73,15 @@ def body(texture, rects):
 SIZES = {"": (1920, 1080), "_info": (537, 827), "_profile": (256, 256), "_profile_support_personality": (197, 982)}
 
 
-def pictures(art, stock, face=None, zoom=1.0, pfp=None, bg=None):
+def pictures(art, stock, face=None, zoom=1.0, pfp=None, bg=None, pfp_face=None):
     """{suffix: picture} for every card role - the full card, info, profile (the pfp the game
     shows in lists) and support portrait: art framed as cards.render frames it, at the size of
     the identity's own picture for that role (else the game's usual size), over that picture
     blurred (else the full card's, else the art's own) - opaque, so DXT1 punches no holes. face: [x, y] in the
     art's pixels when the top of the figure isn't its head (a weapon or wings above it). pfp: a
     picture of its own for the profile (the body standing idle in a fight, idle_frames). bg: what a
-    cut-out stands on (an art folder's bg.png, as on the card itself), instead of that picture blurred."""
+    cut-out stands on (an art folder's bg.png, as on the card itself), instead of that picture blurred.
+    pfp_face: where the profile frames (the face itself; face is the top of the head, for the cards)."""
     out = {}
     for suffix, role in cards.ROLES.items():
         st = stock.get(suffix)
@@ -89,7 +90,8 @@ def pictures(art, stock, face=None, zoom=1.0, pfp=None, bg=None):
         if suffix == "_profile" and pfp is not None:
             out[suffix] = profile(pfp, stock, fallback=art)
         else:
-            out[suffix] = cards.render(role, size, art, behind, bg=bg, face=face, zoom=zoom).convert("RGB")
+            at = pfp_face if suffix == "_profile" and pfp_face else face
+            out[suffix] = cards.render(role, size, art, behind, bg=bg, face=at, zoom=zoom).convert("RGB")
     return out
 
 

@@ -16,7 +16,7 @@ from . import art, audit, bundle, cards, covers, game, helpers, lortext, repaint
 FORMS = ".forms"  # built/<skin>.forms: another body a skin turns into, swapped in apart from it
 CARD = ".card"    # built/<skin>.card: the identity's card pictures, when they aren't in its body's file
 COVER = ".cover"  # built/<ally>.cover: an identity of our own's own card pictures (covers.py), not swapped in
-FORMAT = 29      # bump when built skins change shape: older builds are rebuilt on apply
+FORMAT = 30      # bump when built skins change shape: older builds are rebuilt on apply
 
 
 def catalog():
@@ -576,11 +576,13 @@ def build(keys, game_dir, cache, data_dir, log=print, boss=(), static=True):
             s, out = skins[k], os.path.join(built_root, k + COVER)
             try:
                 portrait, idle = found.get(s.get("cover")), idles.get(body_of[k])
-                face, zoom, bg = s.get("cover_face"), s.get("cover_zoom"), None
+                face, zoom, bg, pfp_face = s.get("cover_face"), s.get("cover_zoom"), None, None
                 if s.get("cover_art"):                  # <data dir>/art/cards/<name>/, else the shipped one
                     mine = cards.load_art(cards.art_dir(data_dir, s["cover_art"]))
                     portrait, bg = mine["normal"], mine["bg"]
+                    idle = None                         # its pfp from its art: the body it wears is its sinner's
                     face = face or mine["spec"].get("face")
+                    pfp_face = mine["spec"].get("pfp_face")
                     zoom = zoom if zoom is not None else mine["spec"].get("zoom")
                 if portrait is None and idle is None:
                     raise covers.CoverError(f"no story portrait {s.get('cover')} nor idle frame of {body_of[k]} in the game's cache")
@@ -590,7 +592,8 @@ def build(keys, game_dir, cache, data_dir, log=print, boss=(), static=True):
                 files = []
                 art, face = (portrait, face) if portrait is not None else (idle, covers.sprite_face(idle))
                 for suffix, im in covers.pictures(art, stock, face, float(zoom if zoom is not None else 1.0) if portrait is not None else 1.0,
-                                                  pfp=idle, bg=bg if portrait is not None else None).items():
+                                                  pfp=idle, bg=bg if portrait is not None else None,
+                                                  pfp_face=pfp_face if portrait is not None else None).items():
                     files.append(covers.file_name(s["identity"], suffix))
                     with open(os.path.join(out, "pics", files[-1]), "wb") as f:
                         f.write(covers.dxt1_file(im))
