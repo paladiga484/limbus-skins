@@ -66,10 +66,14 @@ def own(raw, donor, appearance):
     if ab is None:
         raise OwnBodyError("no AssetBundle object in the body's bundle")
     t = ab.read_typetree()
-    mine = [(k, v) for k, v in t["m_Container"] if k.rsplit("/", 1)[-1].rsplit(".", 1)[0].lower() == donor.lower()]
+    by_id = {o.path_id: o for o in env.objects}
+    named = [(k, v) for k, v in t["m_Container"] if k.rsplit("/", 1)[-1].rsplit(".", 1)[0].lower() == donor.lower()]
+    # a prefab drawn by a skeleton lists its mesh under its own path too: the prefab is the GameObject
+    mine = [(k, v) for k, v in named if getattr(by_id.get(v["asset"]["m_PathID"]), "type", None) is not None
+            and by_id[v["asset"]["m_PathID"]].type.name == "GameObject"]
     if len(mine) != 1:
         raise OwnBodyError(f"{donor}: {len(mine)} prefabs of that name in its bundle")
-    t["m_Container"] = [(asset_path(appearance), mine[0][1])]
+    t["m_Container"] = [(asset_path(appearance), mine[0][1])] + [(asset_path(appearance), v) for _, v in named if v is not mine[0][1]]
     t["m_Name"] = appearance.lower() + ".bundle"
     if "m_AssetBundleName" in t:
         t["m_AssetBundleName"] = t["m_Name"]
@@ -102,12 +106,15 @@ def check(bundle, appearance, donor_cab=None):
     ab = next((o for o in env.objects if o.type.name == "AssetBundle"), None)
     t = ab.read_typetree() if ab is not None else {"m_Container": []}
     keys = [k for k, _ in t["m_Container"]]
-    if keys != [asset_path(appearance)]:
-        found.append(f"it offers {keys or 'nothing'}, not just {asset_path(appearance)}")
-    else:
-        root = next((o for o in env.objects if o.path_id == t["m_Container"][0][1]["asset"]["m_PathID"]), None)
-        if root is None or root.read_typetree().get("m_Name") != appearance:
-            found.append("its prefab isn't named for it")
+    by_id = {o.path_id: o for o in env.objects}
+    roots = [by_id[v["asset"]["m_PathID"]] for _, v in t["m_Container"]
+             if v["asset"]["m_PathID"] in by_id and by_id[v["asset"]["m_PathID"]].type.name == "GameObject"]
+    if not keys or set(keys) != {asset_path(appearance)}:
+        found.append(f"it offers {sorted(set(keys)) or 'nothing'}, not just {asset_path(appearance)}")
+    elif len(roots) != 1:
+        found.append(f"it offers {len(roots)} prefabs, not one")
+    elif roots[0].read_typetree().get("m_Name") != appearance:
+        found.append("its prefab isn't named for it")
     held = {n.rsplit("/", 1)[-1] for n in names}
     for o in env.objects:
         if o.type.name not in ("Texture2D", "AudioClip", "Mesh", "Texture2DArray", "Cubemap", "VideoClip"):
