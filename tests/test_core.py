@@ -303,9 +303,9 @@ class OneCopy(unittest.TestCase):
             sk, now = catalog(), on()
             self.assertIn("starbuck-id", now)
             self.assertNotIn("starbuck", now)
-            shared = [k for k in now if not sk[k].get("own_body")]               # a body of its own is nobody's copy
-            self.assertEqual(len({character(sk, k) for k in shared}), len(shared))   # no character twice
-            self.assertTrue({"binah", "binah-id"} <= set(now))                   # ...so both stay on
+            self.assertEqual(len({character(sk, k) for k in now}), len(now))     # no character twice
+            self.assertIn("binah-id", now)                                       # a whole identity of its own stands
+            self.assertNotIn("binah", now)                                       # for its character: Rodion stays Rodion
             with open(state, "w") as f:                                          # as an older limbus-skins left it
                 json.dump({"on": ["sora", "sora-id", "ahab"]}, f)
             self.assertEqual(cli.main(["list"]), 0)
@@ -1811,7 +1811,7 @@ class SkinPfps(unittest.TestCase):
         own.assert_not_called()
         self.assertEqual(results["rep"], (False, "audit: wrong"))
         self.assertIn("hel", out)
-        self.assertEqual(build.FORMAT, 31)                             # 31: a fight carries its story and its enemies of its own; 28: the shared build records bodies with no death of their own
+        self.assertEqual(build.FORMAT, 32)                             # 32: identities with skills of their own; 31: a fight carries its story and its enemies of its own; 28: the shared build records bodies with no death of their own
         # 29: identities of our own moved off ids two of them shared (10593, 10894, 10796), and the
         # builds word each named identity for the client patch (title, and the folder's own text)
         # 30: an identity with art of its own takes its pfp from that art, not the sinner's body it wears
@@ -1994,14 +1994,44 @@ class OwnBodies(unittest.TestCase):
 
 
 class OwnBodyAndItsSkin(unittest.TestCase):
-    def test_turning_everything_on_keeps_a_character_and_its_identity_with_a_body_of_its_own(self):
+    def test_an_identity_with_a_body_and_skills_of_its_own_stands_for_its_character(self):
         from limbus_skins import cli
         with tempfile.TemporaryDirectory() as d, mock.patch.dict(os.environ, {"XDG_CONFIG_HOME": d, "XDG_DATA_HOME": d, "APPDATA": d, "LOCALAPPDATA": d,
                                                                                 "LIMBUS_SKINS_PATCHLC": ""}), \
                 contextlib.redirect_stdout(io.StringIO()):
             cli.main(["on", "binah", "binah-id", "kali", "kali-id"])
             on = cli._state()[0]["on"]
-        self.assertEqual(sorted(on), ["binah", "binah-id", "kali", "kali-id"])
+        self.assertEqual(sorted(on), ["binah-id", "kali-id"])           # the sinners keep their own identities
+
+    def test_such_an_identity_carries_its_characters_kit_itself(self):
+        from limbus_skins import build
+        sk = build.catalog()
+        for key in ("binah-id", "kali-id", "chesed-id"):
+            self.assertTrue(sk[key]["own_body"] and sk[key]["own_skills"])
+            self.assertEqual(sk[key]["moves"], sk[build.character(sk, key)]["moves"])
+            self.assertEqual(sk[key]["identity"] // 100, sk[key]["base"] // 100)       # a new id in its sinner's range
+            self.assertNotEqual(sk[key]["identity"], sk[build.character(sk, key)]["identity"])
+
+    def test_its_skills_are_new_ids_copies_of_its_bases(self):
+        from limbus_skins import helpers
+        base = {"id": 10901, "attributeList": "[{'skillId': 1090101, 'number': 3}, {'skillId': 1090102, 'number': 2}, {'skillId': 1000001, 'number': 1}]",
+                "defenseSkillIDList": [1090104]}
+        ids = helpers.own_skill_ids(base, 10993, {1090101, 1090102, 1090104, 1000001})
+        self.assertEqual(ids, {1090101: 1099301, 1090102: 1099302, 1000001: 1099391, 1090104: 1099304})
+        with self.assertRaises(ValueError):
+            helpers.own_skill_ids(base, 10993, {1099302})
+        self.assertEqual(helpers.with_own_skills(base, ids),
+                         {"attributeList": [{"skillId": 1099301, "number": 3}, {"skillId": 1099302, "number": 2}, {"skillId": 1099391, "number": 1}],
+                          "defenseSkillIDList": [1099304]})
+        rec = {"id": 1090101, "skillData": [{"gaksungLevel": 1, "coinList": [{}]}, {"gaksungLevel": 3}]}
+        copy_ = helpers.own_skill(rec, 1099301)
+        self.assertEqual((copy_["id"], copy_["textID"], copy_["skillData"][0]["iconID"]), (1099301, 1090101, 1090101))
+        self.assertNotIn("textID", helpers.own_skill(rec, 1099301, own_text=True))
+        self.assertNotIn("iconID", rec["skillData"][0])                               # the base's record is untouched
+        self.assertEqual(helpers.own_skill(dict(rec, textID=5, skillData=[{"iconID": "x_4"}]), 7)["skillData"][0]["iconID"], "x_4")
+        skin = helpers.clone_record("skin", {"skinId": 10901, "skillDataList": [{"skillId": 1090101, "skillMotion": "S1"}]}, 10901, 10993,
+                                    skill_ids=ids)
+        self.assertEqual(skin, {"skinId": 10993, "skillDataList": [{"skillId": 1099301, "skillMotion": "S1"}]})
 
 
 class NewRecords(unittest.TestCase):

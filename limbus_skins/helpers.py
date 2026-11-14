@@ -374,7 +374,47 @@ IDENTITY_KEYS = {"personality": "id", "skin": "skinId", "personality-passive": "
                  "personality-voice": "personalityId", "personality-cg-thumbnail": "personalityId"}
 
 
-def clone_record(kind, rec, base, new, folder=None):
+def own_skill_ids(base_rec, new, have):
+    """{the base identity's skill id: a new id for identity `new`'s own copy of it}, the way the
+    game numbers skills (<identity><nn>): the base's own nn where the skill is the base's,
+    counted on from 91 for one it borrows. ValueError when a new id is taken (have: every skill id)."""
+    base = base_rec["id"]
+    old = [a["skillId"] for a in lit(base_rec.get("attributeList"))] + list(lit(base_rec.get("defenseSkillIDList")))
+    out, spare = {}, 91
+    for sid in old:
+        if sid in out:
+            continue
+        if sid // 100 == base:
+            out[sid] = new * 100 + sid % 100
+        else:
+            out[sid] = new * 100 + spare
+            spare += 1
+    taken = sorted(n for n in out.values() if n in have)
+    if taken or len(set(out.values())) != len(out):
+        raise ValueError(f"identity {new}'s own skill ids are taken: {taken or 'they collide'}")
+    return out
+
+
+def own_skill(rec, new, own_text=False):
+    """Skill record `rec` as skill `new`, a copy: it shows the old skill's icon, and - unless it
+    has words of its own - the old skill's text (the game's own "iconID" and "textID")."""
+    out = dict(copy.deepcopy(rec), id=new)
+    first = out["skillData"][0]
+    first.setdefault("iconID", rec["id"])
+    if own_text:
+        out.pop("textID", None)
+    else:
+        out.setdefault("textID", rec["id"])
+    return out
+
+
+def with_own_skills(rec, ids):
+    """Identity record fields naming skills, moved to its own skill ids ({old: new})."""
+    return {"attributeList": [dict(a, skillId=ids.get(a["skillId"], a["skillId"])) for a in lit(rec.get("attributeList"))],
+            "defenseSkillIDList": [ids.get(i, i) for i in lit(rec.get("defenseSkillIDList"))]}
+
+
+def clone_record(kind, rec, base, new, folder=None, skill_ids=None):
     """A copy of `rec` as identity `new`'s, if it is identity `base`'s in table `kind`; else None.
     The card thumbnail points at an art folder the new id has none of its own of: `folder` (an
     identity whose card it shows), else the base's."""
@@ -383,6 +423,9 @@ def clone_record(kind, rec, base, new, folder=None):
         if rec.get(key) != base:
             return None
         out = dict(copy.deepcopy(rec), **{key: new})
+        if kind == "skin" and skill_ids and out.get("skillDataList"):     # which motion each skill plays: its own skills'
+            moved = [dict(d, skillId=skill_ids.get(d.get("skillId"), d.get("skillId"))) for d in lit(out["skillDataList"])]
+            out["skillDataList"] = str(moved) if isinstance(out["skillDataList"], str) else moved
         if kind == "personality-cg-thumbnail" and (folder or not out.get("folderName")):
             out["folderName"] = str(folder or base)
         return out
@@ -391,7 +434,7 @@ def clone_record(kind, rec, base, new, folder=None):
     return None
 
 
-def add_clones(kind, records, clones, folders=None):
+def add_clones(kind, records, clones, folders=None, skill_maps=None):
     """records plus a clone of each base record for every {new id: base id} in `clones`
     (folders: {new id: the identity whose card art it shows}, see clone_record)."""
     out = list(records)
@@ -399,7 +442,8 @@ def add_clones(kind, records, clones, folders=None):
         folder = (folders or {}).get(new)
         if kind == "personality-cg-thumbnail" and folder:
             base = folder                           # the card it shows: that identity's record, whole
-        out += [c for c in (clone_record(kind, r, base, new, folder) for r in records) if c is not None]
+        out += [c for c in (clone_record(kind, r, base, new, folder, (skill_maps or {}).get(new)) for r in records)
+                if c is not None]
     return out
 
 
@@ -474,7 +518,7 @@ def set_fields(record, fields):
 
 
 def rewrite_static(static_path, swaps, skill_swaps=None, clones=None, passive_swaps=None, stat_edits=None,
-                   folders=None, record_edits=None):
+                   folders=None, record_edits=None, skill_maps=None):
     """Rewrite identity records (and skill records) in the static-data bundle.
     swaps = {identity id: helper record}; skill_swaps = {skill id: new record};
     clones = {new identity id: base id}: cloned after the swaps, so a clone wears the base's, and
@@ -484,7 +528,10 @@ def rewrite_static(static_path, swaps, skill_swaps=None, clones=None, passive_sw
     folders = {new identity id: identity whose card art it shows} (clone_record);
     record_edits = {table: {record id: {field: value}}}: fields set on any table's records (a
     fight's stage and enemies); "+passives" adds passive ids to a unit's passiveSet; "=clone":
-    base id makes the record a new one, a copy of that one (new_records).
+    base id makes the record a new one, a copy of that one (new_records); a new skill named in
+    skill_swaps is that record instead;
+    skill_maps = {new identity id: {base skill id: its own skill id}}: its skin record names its
+    own skills (clone_record).
     Returns (bundle bytes, [identity ids changed], [skill ids changed])."""
     UnityPy = unitypy()
     env = UnityPy.load(static_path)
@@ -556,12 +603,15 @@ def rewrite_static(static_path, swaps, skill_swaps=None, clones=None, passive_sw
             hit = edit(kind, doc, i, x) or hit
         more = new_records(kind, doc.get("list", []), record_edits.get(kind, {}))
         if more:
+            if kind == "skill":                     # a skill of our own, as built (its moves, its icon)
+                more = [skill_swaps.get(r["id"], r) for r in more]
+                done_skills.update(r["id"] for r in more if r["id"] in skill_swaps)
             doc["list"] = list(doc.get("list", [])) + more
             added.update((kind, r["id"]) for r in more)
             hit = True
         if cloned:
             old = len(doc.get("list", []))
-            grown = add_clones(kind, doc.get("list", []), clones, folders)
+            grown = add_clones(kind, doc.get("list", []), clones, folders, skill_maps)
             if len(grown) != old:
                 doc["list"] = grown
                 hit = True

@@ -71,6 +71,16 @@ def skill_texts(data_dir):
     return {k: v for k, v in texts.items() if k.isdigit() and len(k) <= 9 and isinstance(v, dict)}
 
 
+def new_skills(data_dir):
+    """{new skill id: the skill it is a copy of} from the helpers build: identities' own skills."""
+    got = _manifest(data_dir, "helpers").get("new_skills")
+    out = {}
+    for k, v in (got.items() if isinstance(got, dict) else []):
+        if str(k).isdigit() and len(str(k)) <= 9 and isinstance(v, int) and 0 < v < 10 ** 9 and int(k) != v and int(k) > 0:
+            out[int(k)] = v
+    return out
+
+
 def allies(data_dir):
     """[(id, folder, name)] for the identities of our own the helpers build adds: the identity
     whose card each shows (its base's when none is named), and its name in the game."""
@@ -375,6 +385,8 @@ def configure(folder, data_dir, on=True):
     _replace(ini, set_key(text, SHIFT, ",".join(hp_shifts(data_dir, done)
                                                + (death_shifts(data_dir, live_now) if "helpers" in done else []))))
     _replace(os.path.join(folder, "skilltext.txt"), skilltext_file(skill_texts(data_dir) if "helpers" in done else {}))
+    _replace(os.path.join(folder, "newskills.txt"),
+             "".join(f"{n}\t{o}\n" for n, o in sorted((new_skills(data_dir) if "helpers" in done else {}).items())))
     ours = allies(data_dir) if "helpers" in done else []
     live = session_skins(data_dir, done)
     ours += [p for p in pfps(data_dir, live) if p[0] not in {i for i, _, _ in ours}]

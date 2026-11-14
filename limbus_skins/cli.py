@@ -110,18 +110,17 @@ def select(words, skins):
 
 
 def one_each(keys, skins):
-    """keys with one copy of each character (build.character): the character's own skin when it
-    is among them, else the newest (last) named."""
+    """keys with one copy of each character (build.character): an identity with a body and
+    skills of its own when it is among them (it needs nothing of its character's skin), else the
+    character's own skin, else the newest (last) named."""
     from .build import character
     pick = {}
-    own = {k for k in keys if skins.get(k, {}).get("own_body")}   # a body of its own: no copy of anyone
     for k in keys:
-        if k in own:
-            continue
         c = character(skins, k)
-        if pick.get(c) != c:
+        whole = lambda x: bool(skins.get(x, {}).get("own_body") and skins[x].get("own_skills"))  # noqa: E731
+        if c not in pick or whole(k) or (not whole(pick[c]) and pick[c] != c):
             pick[c] = k
-    keep = set(pick.values()) | own
+    keep = set(pick.values())
     return [k for k in keys if k in keep]
 
 
@@ -375,11 +374,9 @@ def main(argv=None):
             # one skin per identity and one copy per character: the newest choice wins
             for k in one_each(keys, allskins):
                 c = character(allskins, k)
-                # an identity with a body of its own is no copy of its character's skin, nor it of the identity
-                same = lambda x: (character(allskins, x) == c and not allskins[k].get("own_body")  # noqa: E731
-                                  and not allskins[x].get("own_body"))
-                copies += [x for x in st["on"] if x != k and same(x) and x not in copies]
-                st["on"] = [x for x in st["on"] if skins[x]["identity"] != skins[k]["identity"] and not same(x)] + [k]
+                copies += [x for x in st["on"] if x != k and character(allskins, x) == c and x not in copies]
+                st["on"] = [x for x in st["on"] if skins[x]["identity"] != skins[k]["identity"]
+                            and character(allskins, x) != c] + [k]
             copies = [x for x in copies if x not in st["on"]]
         else:
             st["on"] = [x for x in st["on"] if x not in keys]

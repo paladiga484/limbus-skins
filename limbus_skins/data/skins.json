@@ -2761,7 +2761,8 @@
    "name": "Kali",
    "dupe_of": "kali",
    "game_title": "The Red Mist",
-   "own_body": true
+   "own_body": true,
+   "own_skills": true
   },
   "dulcinea-id": {
    "identity": 10999,
@@ -2837,7 +2838,8 @@
    "dupe_of": "baral",
    "cover_art": "baral",
    "game_title": "The Claw",
-   "own_body": true
+   "own_body": true,
+   "own_skills": true
   },
   "binah-id": {
    "identity": 10993,
@@ -2849,7 +2851,8 @@
    "dupe_of": "binah",
    "cover_art": "binah",
    "game_title": "Floor of\nPhilosophy",
-   "own_body": true
+   "own_body": true,
+   "own_skills": true
   },
   "ayin-id": {
    "identity": 11293,
@@ -2870,7 +2873,8 @@
    "dupe_of": "malkuth",
    "cover_art": "malkuth",
    "game_title": "Floor of\nHistory",
-   "own_body": true
+   "own_body": true,
+   "own_skills": true
   },
   "yesod-id": {
    "identity": 10592,
@@ -2882,7 +2886,8 @@
    "dupe_of": "yesod",
    "cover_art": "yesod",
    "game_title": "Floor of\nTechnological Sciences",
-   "own_body": true
+   "own_body": true,
+   "own_skills": true
   },
   "hod-id": {
    "identity": 11093,
@@ -2894,7 +2899,8 @@
    "dupe_of": "hod",
    "cover_art": "hod",
    "game_title": "Floor of\nLiterature",
-   "own_body": true
+   "own_body": true,
+   "own_skills": true
   },
   "netzach-id": {
    "identity": 10693,
@@ -2906,7 +2912,8 @@
    "dupe_of": "netzach",
    "cover_art": "netzach",
    "game_title": "Floor of\nArt",
-   "own_body": true
+   "own_body": true,
+   "own_skills": true
   },
   "tiphereth-id": {
    "identity": 10193,
@@ -2918,7 +2925,8 @@
    "dupe_of": "tiphereth",
    "cover_art": "tiphereth",
    "game_title": "Floor of\nNatural Sciences",
-   "own_body": true
+   "own_body": true,
+   "own_skills": true
   },
   "chesed-id": {
    "identity": 10293,
@@ -2930,7 +2938,8 @@
    "dupe_of": "chesed",
    "cover_art": "chesed",
    "game_title": "Floor of\nSocial Sciences",
-   "own_body": true
+   "own_body": true,
+   "own_skills": true
   },
   "hokma-id": {
    "identity": 11193,
@@ -2942,7 +2951,8 @@
    "dupe_of": "hokma",
    "cover_art": "hokma",
    "game_title": "Floor of\nReligion",
-   "own_body": true
+   "own_body": true,
+   "own_skills": true
   },
   "apocalypse-bird-id": {
    "identity": 10793,
@@ -2954,7 +2964,8 @@
    "dupe_of": "apocalypse-bird",
    "cover_art": "apocalypse-bird",
    "game_title": "The Black Forest::\nThree Birds as One",
-   "own_body": true
+   "own_body": true,
+   "own_skills": true
   }
  },
  "kits": {

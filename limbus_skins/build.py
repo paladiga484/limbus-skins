@@ -16,7 +16,7 @@ from . import art, audit, bundle, cards, covers, game, helpers, lortext, ownbody
 FORMS = ".forms"  # built/<skin>.forms: another body a skin turns into, swapped in apart from it
 CARD = ".card"    # built/<skin>.card: the identity's card pictures, when they aren't in its body's file
 COVER = ".cover"  # built/<ally>.cover: an identity of our own's own card pictures (covers.py), not swapped in
-FORMAT = 31      # bump when built skins change shape: older builds are rebuilt on apply
+FORMAT = 32      # bump when built skins change shape: older builds are rebuilt on apply
 
 
 def catalog():
@@ -29,7 +29,7 @@ def catalog():
             skins[key] = dict(e, key=key, kind=one)
             if one == "fight":
                 skins[key].setdefault("identity", 0)        # a stage, no identity of its own
-    skins = with_allies(skins)
+    skins = with_own_kits(with_allies(skins))
     check_copies(skins)
     return skins
 
@@ -112,6 +112,22 @@ def with_allies(skins):
         if s.get("ally_dupe_of"):
             a["dupe_of"] = s["ally_dupe_of"]
         out[k] = a
+    return out
+
+
+KIT = ("moves", "texts", "stats", "passives", "sins", "green_coins")
+
+
+def with_own_kits(skins):
+    """An identity with skills of its own ("own_skills") carries its character's kit itself: the
+    kit its character's skin writes onto a sinner's identity is written onto its own skills
+    instead, so it needs nothing of that skin's on."""
+    out = dict(skins)
+    for key, s in skins.items():
+        if s.get("own_skills") and s["kind"] == "identity":
+            src = skins[character(skins, key)]
+            if src is not s:
+                out[key] = dict({f: src[f] for f in KIT if f in src}, **s)
     return out
 
 
@@ -280,8 +296,8 @@ def build(keys, game_dir, cache, data_dir, log=print, boss=(), static=True):
     # bodies of their own, first: an identity whose body didn't build keeps its base's
     for s_ in [x for x in want_ids if x.get("own_body")]:
         try:
-            record_edits.setdefault("personality", {})[s_["identity"]] = {
-                "appearance": own_body(s_, skins, game_dir, cache, data_dir, built_root, log)}
+            name_ = own_body(s_, skins, game_dir, cache, data_dir, built_root, log)
+            record_edits.setdefault("personality", {}).setdefault(s_["identity"], {})["appearance"] = name_
         except (repaint.RepaintError, ownbody.OwnBodyError, RuntimeError, KeyError, OSError, ValueError) as e:
             shutil.rmtree(os.path.join(built_root, s_["key"] + BODY), ignore_errors=True)
             log(f"  FAIL {s_['key']}: its own body: {e} (it wears its base's)")
@@ -290,6 +306,7 @@ def build(keys, game_dir, cache, data_dir, log=print, boss=(), static=True):
         swaps, skill_swaps, bad, boss_ok, kit_notes, green, passives, texts, stats = {}, {}, [], [], {}, set(), {}, {}, {}
         pers, skills, units = game.boss_data(cache)
         clones, folders, ruina = {}, {}, None
+        skill_maps, new_skills = {}, {}             # identities with skills of their own: {old: new}; {new: old}
         known_passives = []
 
         def passive_ids():                          # every passive the game has, read once if needed
@@ -315,6 +332,16 @@ def build(keys, game_dir, cache, data_dir, log=print, boss=(), static=True):
                 if not s.get("base"):               # an ally: the record it copies is chosen now
                     s["base"] = helpers.ally_base(pers, s["of"])
                 helpers.check_new_ids(set(ids), {s["identity"]: s["base"]})
+                if s.get("own_skills"):             # its own copies of its base's skills
+                    ids_ = helpers.own_skill_ids(pers[s["base"]], s["identity"], set(skills) | set(new_skills))
+                    skill_maps[s["identity"]] = ids_
+                    for old_, new_ in ids_.items():
+                        skills[new_] = helpers.own_skill(skills[old_], new_)
+                        skill_swaps[new_] = skills[new_]
+                        new_skills[new_] = old_
+                        record_edits.setdefault("skill", {})[new_] = {helpers.CLONE: old_}
+                    record_edits.setdefault("personality", {}).setdefault(s["identity"], {}).update(
+                        helpers.with_own_skills(pers[s["base"]], ids_))
                 clones[s["identity"]] = s["base"]
                 if s.get("folder"):                 # the card art it shows: that identity's
                     folders[s["identity"]] = s["folder"]
@@ -374,6 +401,8 @@ def build(keys, game_dir, cache, data_dir, log=print, boss=(), static=True):
                     if s["identity"] not in clones:
                         continue                            # refused above (an id the game has, no base)
                     ident = dict(pers[s["base"]], id=s["identity"])
+                    if s["identity"] in skill_maps:     # what's below is written onto its own skills
+                        ident.update(helpers.with_own_skills(ident, skill_maps[s["identity"]]))
                 else:
                     ident = pers[s["identity"]]
                 base = lambda: {**skill_swaps, **mine_skills}  # noqa: E731 - edits stack on earlier ones
@@ -442,6 +471,10 @@ def build(keys, game_dir, cache, data_dir, log=print, boss=(), static=True):
                 continue
             skill_swaps.update(mine_skills)
             texts.update(mine_texts)
+            for i_ in mine_texts:                       # a skill of our own with words of its own: not its base's text
+                if i_ in new_skills:
+                    skill_swaps.setdefault(i_, skills[i_])
+                    skill_swaps[i_] = {k_: v_ for k_, v_ in skill_swaps[i_].items() if k_ != "textID"}
             green.update(mine_green)
             if mine_swap:
                 swaps[s["identity"]] = mine_swap
@@ -455,8 +488,12 @@ def build(keys, game_dir, cache, data_dir, log=print, boss=(), static=True):
         shutil.rmtree(out, ignore_errors=True)
         if swaps or skill_swaps or clones or passives or texts or stats or record_edits:
             static_path, _ = game.find_static(cache)
+            for i_ in [k_ for k_ in new_skills if k_ // 100 not in clones]:      # an identity refused: none of its skills
+                skill_swaps.pop(i_, None)
+                record_edits.get("skill", {}).pop(i_, None)
+                new_skills.pop(i_)
             raw, done, _ = helpers.rewrite_static(static_path, swaps, skill_swaps, clones, passives, stats, folders,
-                                                  record_edits)
+                                                  record_edits, {i_: m_ for i_, m_ in skill_maps.items() if i_ in clones})
             os.makedirs(out)
             rel = _write(out, cache, static_path, raw)
             with open(os.path.join(out, "manifest.json"), "w", encoding="utf-8") as f:
@@ -464,6 +501,7 @@ def build(keys, game_dir, cache, data_dir, log=print, boss=(), static=True):
                            "skins": [s["key"] for s in want + want_ids + forms + want_fights if s["key"] not in bad],
                            "skills": boss_ok, "files": [rel], "green_skills": sorted(green),
                            "skill_texts": {str(i): t for i, t in sorted(texts.items())},
+                           "new_skills": {str(n_): o_ for n_, o_ in sorted(new_skills.items())},
                            # the server grants these while they're built (Server/OwnIdentities.cs)
                            "identities": [dict({"id": s["identity"], "base": s["base"], "folder": s.get("folder") or s["base"]},
                                                **name_entry(s, s["key"], s.get("folder") or s["base"], text),
