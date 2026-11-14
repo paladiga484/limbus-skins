@@ -511,7 +511,8 @@
      "neck": "P voo",
      "scale": 0.7
     },
-    "idle_time": 2.4
+    "idle_time": 2.4,
+    "stands": 4.1
    },
    "tested": false,
    "moves": {
@@ -869,18 +870,8 @@
      "S2",
      "S3"
     ],
-    "head": {
-     "parts": [
-      "back hair",
-      "head",
-      "Front Hair",
-      "face",
-      "Front acce"
-     ],
-     "neck": "head",
-     "scale": 0.7
-    },
-    "idle_time": 2.4
+    "idle_time": 2.4,
+    "stands": 4.1
    },
    "name": "Binah",
    "game_title": "Floor of\nPhilosophy"
@@ -1061,7 +1052,8 @@
      "S2",
      "S3"
     ],
-    "idle_time": 2.4
+    "idle_time": 2.4,
+    "stands": 4.1
    },
    "name": "Baral",
    "game_title": "The Claw"
@@ -1248,17 +1240,8 @@
      "S2",
      "S3"
     ],
-    "head": {
-     "parts": [
-      "back hair",
-      "head",
-      "front hair",
-      "face"
-     ],
-     "neck": "head",
-     "scale": 0.7
-    },
-    "idle_time": 2.4
+    "idle_time": 2.4,
+    "stands": 4.1
    },
    "card": "malkuth",
    "name": "Malkuth",
@@ -1439,16 +1422,8 @@
      "S2",
      "S3"
     ],
-    "head": {
-     "parts": [
-      "head",
-      "front hair",
-      "face"
-     ],
-     "neck": "head",
-     "scale": 0.7
-    },
-    "idle_time": 2.4
+    "idle_time": 2.4,
+    "stands": 4.1
    },
    "name": "Yesod",
    "game_title": "Floor of\nTechnological Sciences"
@@ -1641,17 +1616,8 @@
      "S2",
      "S3"
     ],
-    "head": {
-     "parts": [
-      "back hair",
-      "head",
-      "front hair",
-      "face"
-     ],
-     "neck": "head",
-     "scale": 0.7
-    },
-    "idle_time": 2.4
+    "idle_time": 2.4,
+    "stands": 4.1
    },
    "name": "Hod",
    "game_title": "Floor of\nLiterature"
@@ -1829,16 +1795,8 @@
      "S2",
      "S3"
     ],
-    "head": {
-     "parts": [
-      "head",
-      "front hair",
-      "face"
-     ],
-     "neck": "head",
-     "scale": 0.7
-    },
-    "idle_time": 2.4
+    "idle_time": 2.4,
+    "stands": 4.1
    },
    "name": "Netzach",
    "game_title": "Floor of\nArt"
@@ -2033,17 +1991,8 @@
      "S2",
      "S3"
     ],
-    "head": {
-     "parts": [
-      "back hair",
-      "head",
-      "front hair",
-      "face"
-     ],
-     "neck": "head",
-     "scale": 0.7
-    },
-    "idle_time": 2.4
+    "idle_time": 2.4,
+    "stands": 4.1
    },
    "name": "Tiphereth",
    "game_title": "Floor of\nNatural Sciences"
@@ -2223,17 +2172,8 @@
      "S2",
      "S3"
     ],
-    "head": {
-     "parts": [
-      "back hair",
-      "head",
-      "front hair",
-      "face"
-     ],
-     "neck": "head",
-     "scale": 0.7
-    },
-    "idle_time": 2.4
+    "idle_time": 2.4,
+    "stands": 4.1
    },
    "name": "Chesed",
    "game_title": "Floor of\nSocial Sciences"
@@ -2424,17 +2364,8 @@
      "S2",
      "S3"
     ],
-    "head": {
-     "parts": [
-      "head",
-      "front hair",
-      "face",
-      "front acce"
-     ],
-     "neck": "head",
-     "scale": 0.7
-    },
-    "idle_time": 2.4
+    "idle_time": 2.4,
+    "stands": 4.1
    },
    "card": "hokma",
    "name": "Hokma",

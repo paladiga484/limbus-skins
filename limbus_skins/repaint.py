@@ -1162,7 +1162,11 @@ def repaint(target, locate, source=None, clips=None, mapping=None, head=None, mi
                                                         for x in borrowed)))
     if lor is not None and (lor.get("stands") or lor.get("anchors") or float(lor.get("scale", 1.0)) != 1.0):
         from . import lor as lormod
-        at = lor.get("anchors") or {}
+        at = dict(lor.get("anchors") or {})
+        if lor.get("stands"):                        # a height of its own: the points a sinner that tall has
+            tall = lormod.stands(lor, stands)        # (2.2 and 4.4 at 4.1), not the donor's - Don Quixote's
+            at.setdefault("center", round(tall * 2.2 / 4.1, 2))   # lance makes her "stand" 6.17
+            at.setdefault("height", round(tall * 4.4 / 4.1, 2))
         notes.append(set_anchors(tenv, tobjs, at.get("center"), at.get("height"),
                                  scale=lormod.stands(lor, stands) / stands if stands else 1.0))
     scale_note = "" if scale == 1 else f" (scaled {scale:.2f} to fit)"
