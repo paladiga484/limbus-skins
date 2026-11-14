@@ -59,6 +59,15 @@ def dxt5_file(img):
     return struct.pack("<4sHHHH4x", b"LSD5", w, h, sw, sh) + etcpak.compress_bc3(flipped.tobytes(), w, h)
 
 
+def rgba_file(img):
+    """A picture as plain RGBA ("LSR4": the same header, then 4 bytes a pixel, rows bottom-up) -
+    a full-screen story picture, whose dark washes DXT1's 16-bit colours would band."""
+    import struct
+    from PIL import Image
+    w, h = img.size
+    return struct.pack("<4sHHHH4x", b"LSR4", w, h, w, h) + img.convert("RGBA").transpose(Image.FLIP_TOP_BOTTOM).tobytes()
+
+
 def body(texture, rects):
     """The body cut from a portrait texture (PIL, top-down): the largest of its sprites' rects
     (x, y, w, h in Unity's bottom-up pixels). ValueError when it has none."""

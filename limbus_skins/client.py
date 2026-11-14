@@ -128,6 +128,43 @@ def fight_music(data_dir, live):
     return out
 
 
+STORY_FILE = re.compile(r"[a-z0-9-]{1,80}\.pic")
+
+
+def _fights(data_dir, live):
+    for man in sorted(glob.glob(os.path.join(data_dir, "built", "*", "manifest.json"))):
+        m = _json(man)
+        if m.get("kind") == "fight" and set(m.get("skins") or []) & live:
+            yield os.path.dirname(man), m
+
+
+def fight_stories(data_dir, live):
+    """[(when, enemy id, file name, path)] for the story pictures of the fights in live (built
+    into built/<fight>/story/), in the order they were written."""
+    out = []
+    for folder, m in _fights(data_dir, live):
+        for line in m.get("story") if isinstance(m.get("story"), list) else []:
+            when, unit, name = (line.get("when"), line.get("unit"), line.get("file")) if isinstance(line, dict) else (None,) * 3
+            if when not in ("start", "half", "one", "fuse") or not isinstance(unit, int) or not 0 <= unit < 10 ** 9 \
+                    or (unit > 0) != (when in ("half", "one")) or not isinstance(name, str) or not STORY_FILE.fullmatch(name):
+                continue
+            path = os.path.join(folder, "story", name)
+            if os.path.isfile(path):
+                out.append((when, unit, name, path))
+    return out
+
+
+def enemy_names(data_dir, live):
+    """{enemy id: name} for the enemies of their own the fights in live add."""
+    out = {}
+    for _, m in _fights(data_dir, live):
+        names_ = m.get("enemy_names")
+        for i, name in (names_.items() if isinstance(names_, dict) else []):
+            if str(i).isdigit() and 0 < int(i) < 10 ** 9 and isinstance(name, str) and name.strip():
+                out[int(i)] = " ".join(name.split())[:80]
+    return out
+
+
 BODY_NAME = re.compile(r"[A-Za-z0-9_]{1,96}")
 
 
@@ -344,6 +381,11 @@ def configure(folder, data_dir, on=True):
     music = fight_music(data_dir, live) if on else []
     _replace(os.path.join(folder, "fights.txt"), "".join(f"{r}\t{d}\tmusic\\{n}\n" for r, d, n, _ in music))
     _sync(os.path.join(folder, "music"), {n: p for _, _, n, p in music})
+    story = fight_stories(data_dir, live) if on else []
+    _replace(os.path.join(folder, "story.txt"), "".join(f"{w}\t{u}\tstory\\{n}\n" for w, u, n, _ in story))
+    _sync(os.path.join(folder, "story"), {n: p for _, _, n, p in story})
+    _replace(os.path.join(folder, "enemies.txt"),
+             "".join(f"{i}\t{n}\n" for i, n in sorted((enemy_names(data_dir, live) if on else {}).items())))
     bodies = own_bodies(data_dir, live) if on else []
     _replace(os.path.join(folder, "bodies.txt"), bodies_file(bodies))
     _sync(os.path.join(folder, "bodies"), {f: p for _, f, p, _ in bodies})

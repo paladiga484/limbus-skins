@@ -3241,17 +3241,17 @@
         },
         "unitList": [
          {
-          "unitID": 70070,
+          "unitID": 98801,
           "unitCount": 1,
           "unitLevel": 63
          },
          {
-          "unitID": 90088,
+          "unitID": 98802,
           "unitCount": 1,
           "unitLevel": 63
          },
          {
-          "unitID": 71007,
+          "unitID": 98803,
           "unitCount": 1,
           "unitLevel": 63
          }
@@ -3269,7 +3269,7 @@
         },
         "unitList": [
          {
-          "unitID": 91011,
+          "unitID": 98804,
           "unitCount": 1,
           "unitLevel": 63
          }
@@ -3289,22 +3289,8 @@
      }
     },
     "enemy": {
-     "71007": {
-      "hp": {
-       "defaultStat": 260,
-       "incrementByLevel": 5
-      },
-      "+passives": [
-       817402
-      ]
-     },
-     "91011": {
-      "hp": {
-       "defaultStat": 900,
-       "incrementByLevel": 20
-      }
-     },
-     "70070": {
+     "98801": {
+      "=clone": 70070,
       "hp": {
        "defaultStat": 300,
        "incrementByLevel": 6
@@ -3313,7 +3299,8 @@
        817402
       ]
      },
-     "90088": {
+     "98802": {
+      "=clone": 90088,
       "hp": {
        "defaultStat": 260,
        "incrementByLevel": 5
@@ -3321,6 +3308,23 @@
       "+passives": [
        817402
       ]
+     },
+     "98803": {
+      "=clone": 71007,
+      "hp": {
+       "defaultStat": 260,
+       "incrementByLevel": 5
+      },
+      "+passives": [
+       817402
+      ]
+     },
+     "98804": {
+      "=clone": 91011,
+      "hp": {
+       "defaultStat": 900,
+       "incrementByLevel": 20
+      }
      }
     }
    },
@@ -3532,7 +3536,57 @@
     "request": "EnterExpDungeon",
     "dungeon": 18,
     "file": "twilight.ogg"
-   }
+   },
+   "enemy_names": {
+    "98801": "Big Bird",
+    "98802": "Punishing Bird",
+    "98803": "Judgement Bird",
+    "98804": "Apocalypse Bird"
+   },
+   "story": [
+    {
+     "when": "start",
+     "picture": "forest"
+    },
+    {
+     "when": "half",
+     "unit": 98801,
+     "picture": "big"
+    },
+    {
+     "when": "half",
+     "unit": 98802,
+     "picture": "small"
+    },
+    {
+     "when": "half",
+     "unit": 98803,
+     "picture": "long"
+    },
+    {
+     "when": "one",
+     "unit": 98801,
+     "picture": "blinded"
+    },
+    {
+     "when": "one",
+     "unit": 98802,
+     "picture": "shut"
+    },
+    {
+     "when": "one",
+     "unit": 98803,
+     "picture": "lowered"
+    },
+    {
+     "when": "fuse",
+     "picture": "red"
+    },
+    {
+     "when": "fuse",
+     "picture": "monster"
+    }
+   ]
   }
  }
 }

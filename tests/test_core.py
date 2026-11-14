@@ -1,4 +1,5 @@
 """Core pieces that decide what the game reads: bundles, CRCs, sessions, selection."""
+import copy
 import json
 import math
 import os
@@ -1806,7 +1807,7 @@ class SkinPfps(unittest.TestCase):
         own.assert_not_called()
         self.assertEqual(results["rep"], (False, "audit: wrong"))
         self.assertIn("hel", out)
-        self.assertEqual(build.FORMAT, 30)                             # 28: the shared build records bodies with no death of their own
+        self.assertEqual(build.FORMAT, 31)                             # 31: a fight carries its story and its enemies of its own; 28: the shared build records bodies with no death of their own
         # 29: identities of our own moved off ids two of them shared (10593, 10894, 10796), and the
         # builds word each named identity for the client patch (title, and the folder's own text)
         # 30: an identity with art of its own takes its pfp from that art, not the sinner's body it wears
@@ -1988,6 +1989,55 @@ class OwnBodies(unittest.TestCase):
         self.assertEqual(x["appearance"], "5_XAppearance")
 
 
+class NewRecords(unittest.TestCase):
+    """helpers.new_records: a fight's enemies of its own, copies of the game's."""
+
+    RECS = [{"id": 70070, "appearance": "90070_TCorpAppearance", "hp": {"defaultStat": 67}, "passiveSet": {"passiveIdList": [1]}},
+            {"id": 90088, "appearance": "90088_Fishman_CruiseAppearance", "hp": "{'defaultStat': 55}", "passiveSet": "{'passiveIdList': [2]}"}]
+
+    def test_a_new_enemy_is_a_copy_of_its_base_with_its_edits_and_the_base_is_untouched(self):
+        from limbus_skins import helpers
+        recs = copy.deepcopy(self.RECS)
+        out = helpers.new_records("enemy", recs, {98801: {"=clone": 70070, "hp": {"defaultStat": 300}, "+passives": [817402]},
+                                                  70070: {"hp": {"defaultStat": 1}}})
+        self.assertEqual(out, [{"id": 98801, "appearance": "90070_TCorpAppearance", "hp": {"defaultStat": 300},
+                                "passiveSet": {"passiveIdList": [1, 817402]}}])
+        self.assertEqual(recs, self.RECS)
+
+    def test_a_field_kept_as_text_stays_text(self):
+        from limbus_skins import helpers
+        out = helpers.new_records("enemy", copy.deepcopy(self.RECS), {98802: {"=clone": 90088, "+passives": [817402]}})
+        self.assertEqual(out[0]["passiveSet"], "{'passiveIdList': [2, 817402]}")
+        self.assertEqual(out[0]["id"], 98802)
+
+    def test_a_base_kept_in_another_file_is_that_files_and_a_taken_id_is_refused(self):
+        from limbus_skins import helpers
+        self.assertEqual(helpers.new_records("enemy", copy.deepcopy(self.RECS), {98803: {"=clone": 71007}}), [])
+        with self.assertRaises(ValueError):
+            helpers.new_records("enemy", copy.deepcopy(self.RECS), {90088: {"=clone": 70070}})
+
+    def test_twilights_birds_are_enemies_of_their_own(self):
+        from limbus_skins import build
+        t = build.catalog()["twilight"]
+        new = {int(i): f for i, f in t["records"]["enemy"].items()}
+        self.assertTrue(all("=clone" in f for f in new.values()))       # no enemy of the game's is changed
+        staged = {u["unitID"] for w in t["records"]["battle-exp-dungeon"]["18"]["waveList"] for u in w["unitList"]}
+        self.assertEqual(staged, set(new))
+        cast = {l["unit"] for l in t["story"] if l["when"] in ("half", "one")}
+        self.assertEqual(cast, {i for i, f in new.items() if 817402 in f.get("+passives", [])})   # who can't die: who the story waits for
+        self.assertEqual(set(map(int, t["enemy_names"])), set(new))
+
+    def test_a_story_line_that_isnt_one_is_refused(self):
+        from limbus_skins import build
+        for line in ({"when": "later", "picture": "a"}, {"when": "half", "picture": "a"}, {"when": "start", "unit": 5, "picture": "a"},
+                     {"when": "start", "picture": "../a"}, {"when": "start", "picture": "no-such-picture"}):
+            with self.assertRaises(ValueError, msg=str(line)), tempfile.TemporaryDirectory() as tmp:
+                build.story_pictures({"key": "twilight", "story": [line]}, tmp)
+        with tempfile.TemporaryDirectory() as tmp:
+            self.assertEqual(build.story_pictures({"key": "twilight"}, tmp), [])
+            self.assertEqual(os.listdir(tmp), [])
+
+
 class ClientPatch(unittest.TestCase):
     """limbus_skins.client: the client patch's settings for what was swapped in."""
     INI = "[myosotis]\ntoken=my-save\nserver=http://127.0.0.1:3000/\nlog_level=1\n"
@@ -2099,6 +2149,35 @@ class ClientPatch(unittest.TestCase):
         client.configure(self.client, self.data, on=False)
         self.assertEqual(self.read("client", "fights.txt"), "")
         self.assertEqual(os.listdir(os.path.join(self.client, "music")), [])
+
+    def test_a_fights_story_and_its_enemies_names_go_beside_the_patch(self):
+        from limbus_skins import client
+        story = os.path.join(self.data, "built", "twilight", "story")
+        os.makedirs(story)
+        for name in ("twilight-forest.pic", "twilight-big.pic"):
+            with open(os.path.join(story, name), "wb") as f:
+                f.write(b"LSR4")
+        with open(os.path.join(self.data, "built", "twilight", "manifest.json"), "w") as f:
+            json.dump({"kind": "fight", "skins": ["twilight"], "files": [],
+                       "enemy_names": {"98801": "Big  Bird", "x": "Nobody", "98802": "", "98803": 5},
+                       "story": [{"when": "start", "unit": 0, "file": "twilight-forest.pic"},
+                                 {"when": "half", "unit": 98801, "file": "twilight-big.pic"},
+                                 {"when": "one", "unit": 98801, "file": "not-built.pic"},
+                                 {"when": "one", "unit": 0, "file": "twilight-big.pic"},
+                                 {"when": "fuse", "unit": 7, "file": "twilight-big.pic"},
+                                 {"when": "later", "unit": 0, "file": "twilight-big.pic"},
+                                 {"when": "half", "unit": 98801, "file": "..\\myosotis.ini"}, "junk"]}, f)
+        self.applied("twilight")
+        client.configure(self.client, self.data)
+        self.assertEqual(self.read("client", "story.txt"),
+                         "start\t0\tstory\\twilight-forest.pic\nhalf\t98801\tstory\\twilight-big.pic\n")
+        self.assertEqual(sorted(os.listdir(os.path.join(self.client, "story"))), ["twilight-big.pic", "twilight-forest.pic"])
+        self.assertEqual(self.read("client", "enemies.txt"), "98801\tBig Bird\n")
+        self.applied()                                   # the fight off: nothing of it stays
+        client.configure(self.client, self.data)
+        self.assertEqual(self.read("client", "story.txt"), "")
+        self.assertEqual(self.read("client", "enemies.txt"), "")
+        self.assertEqual(os.listdir(os.path.join(self.client, "story")), [])
 
     def test_a_body_with_no_death_dies_as_its_sinner_while_its_skin_is_in_the_session(self):
         from limbus_skins import client

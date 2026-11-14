@@ -435,10 +435,36 @@ def swap_passives(rec, battle, support):
     return out
 
 
+CLONE = "=clone"     # in a record's edits: this id is new, a copy of that record with the edits on it
+
+
+def new_records(kind, records, edits):
+    """The records a table's edits add: {new id: {"=clone": base id, field: value...}} -> copies
+    of the base records under their new ids, edited. A table is kept in several files: a base
+    that isn't among these records is another file's to copy. ValueError for an id the table
+    already has."""
+    by_id = {r.get("id"): r for r in records if isinstance(r, dict)}
+    out = []
+    for new, fields in sorted(edits.items()):
+        if CLONE not in fields:
+            continue
+        base = fields[CLONE]
+        if new in by_id:
+            raise ValueError(f"{kind} {new} already exists in this game version")
+        if base not in by_id:
+            continue
+        rec = dict(copy.deepcopy(by_id[base]), id=new)
+        set_fields(rec, fields)
+        out.append(rec)
+    return out
+
+
 def set_fields(record, fields):
     """record's fields set from fields, keeping each one's own encoding (some are stored as
     Python-literal strings); "+passives": [ids] joins the unit's passiveSet.passiveIdList."""
     for k, v in fields.items():
+        if k == CLONE:
+            continue
         if k == "+passives":
             ps = lit(record.get("passiveSet")) if record.get("passiveSet") else {}
             ps = dict(ps, passiveIdList=list(ps.get("passiveIdList", [])) + [i for i in v if i not in ps.get("passiveIdList", [])])
@@ -457,7 +483,8 @@ def rewrite_static(static_path, swaps, skill_swaps=None, clones=None, passive_sw
     stat_edits = {identity id: {"hp": base HP, "speed": [min, max]}} (edit_stats);
     folders = {new identity id: identity whose card art it shows} (clone_record);
     record_edits = {table: {record id: {field: value}}}: fields set on any table's records (a
-    fight's stage and enemies); "+passives" adds passive ids to a unit's passiveSet.
+    fight's stage and enemies); "+passives" adds passive ids to a unit's passiveSet; "=clone":
+    base id makes the record a new one, a copy of that one (new_records).
     Returns (bundle bytes, [identity ids changed], [skill ids changed])."""
     UnityPy = unitypy()
     env = UnityPy.load(static_path)
@@ -467,6 +494,7 @@ def rewrite_static(static_path, swaps, skill_swaps=None, clones=None, passive_sw
     stat_edits = stat_edits or {}
     record_edits = record_edits or {}
     done, done_skills = set(), set()
+    added = set()                                   # (table, new id): the records "=clone" made
 
     def edit(kind, doc, i, x):
         """Apply this record's edits in place; True when anything changed."""
@@ -526,6 +554,11 @@ def rewrite_static(static_path, swaps, skill_swaps=None, clones=None, passive_sw
         hit = False
         for i, x in enumerate(doc.get("list", [])):
             hit = edit(kind, doc, i, x) or hit
+        more = new_records(kind, doc.get("list", []), record_edits.get(kind, {}))
+        if more:
+            doc["list"] = list(doc.get("list", [])) + more
+            added.update((kind, r["id"]) for r in more)
+            hit = True
         if cloned:
             old = len(doc.get("list", []))
             grown = add_clones(kind, doc.get("list", []), clones, folders)
@@ -539,4 +572,8 @@ def rewrite_static(static_path, swaps, skill_swaps=None, clones=None, passive_sw
             ta = obj.read()
             ta.m_Script = json.dumps(doc, ensure_ascii=False, separators=(",", ":"))
             ta.save()
+    for kind, recs in sorted(record_edits.items()):
+        for new, fields in sorted(recs.items()):
+            if CLONE in fields and (kind, new) not in added:
+                raise ValueError(f"{kind} {fields[CLONE]} (to copy {new} from) isn't in this game version")
     return env.file.save(packer="none"), sorted(done), sorted(done_skills)

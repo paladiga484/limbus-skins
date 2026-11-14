@@ -16,7 +16,7 @@ from . import art, audit, bundle, cards, covers, game, helpers, lortext, ownbody
 FORMS = ".forms"  # built/<skin>.forms: another body a skin turns into, swapped in apart from it
 CARD = ".card"    # built/<skin>.card: the identity's card pictures, when they aren't in its body's file
 COVER = ".cover"  # built/<ally>.cover: an identity of our own's own card pictures (covers.py), not swapped in
-FORMAT = 30      # bump when built skins change shape: older builds are rebuilt on apply
+FORMAT = 31      # bump when built skins change shape: older builds are rebuilt on apply
 
 
 def catalog():
@@ -167,6 +167,37 @@ def _head(skin, data_dir):
         recipe["art"] = {"image_path": mine}
         recipe["width"] = recipe.get("own_width", recipe.get("width", 1.9))
     return recipe
+
+
+STORY_WHEN = ("start", "half", "one", "fuse")
+
+
+def story_pictures(s, out):
+    """A fight's story, ready for the client patch: each picture (limbus-skins' own
+    data/art/<fight>/<picture>.png) written into out/story/ as the patch reads it. Returns the
+    manifest's lines [{"when", "unit", "file"}]; ValueError for a line that isn't one."""
+    from PIL import Image
+    lines, written = [], set()
+    for line in s.get("story") or []:
+        when, unit, pic = line.get("when"), line.get("unit", 0), line.get("picture")
+        if when not in STORY_WHEN or not isinstance(unit, int) or (unit > 0) != (when in ("half", "one")) \
+                or not isinstance(pic, str) or not re.fullmatch(r"[a-z0-9-]{1,40}", pic):
+            raise ValueError(f"story line {line} isn't one (when, unit for half/one, picture)")
+        name = f"{s['key']}-{pic}.pic"
+        if name not in written:
+            src = resources.files("limbus_skins").joinpath(f"data/art/{s['key']}/{pic}.png")
+            if not src.is_file():
+                raise ValueError(f"story picture {pic}.png isn't in this copy of limbus-skins")
+            os.makedirs(os.path.join(out, "story"), exist_ok=True)
+            with src.open("rb") as f, Image.open(f) as img:
+                if max(img.size) > 4096:
+                    raise ValueError(f"story picture {pic}.png is larger than 4096 pixels")
+                data = covers.rgba_file(img)
+            with open(os.path.join(out, "story", name), "wb") as f:
+                f.write(data)
+            written.add(name)
+        lines.append({"when": when, "unit": unit, "file": name})
+    return lines
 
 
 def _write(out_dir, cache, stock_path, raw):
@@ -533,7 +564,7 @@ def build(keys, game_dir, cache, data_dir, log=print, boss=(), static=True):
             log(f"  {'ok  ' if results[key][0] else 'FAIL'} {key}: {results[key][1]}")
 
     # a fight's enemies' bodies, redrawn as its characters: built/<fight>/
-    for s in [skins[k] for k in keys if skins[k]["kind"] == "fight" and skins[k].get("bodies")]:
+    for s in [skins[k] for k in keys if skins[k]["kind"] == "fight" and (skins[k].get("bodies") or skins[k].get("story"))]:
         key, out = s["key"], os.path.join(built_root, s["key"])
         ok, msg = results.get(key, (True, ""))
         if not ok:
@@ -545,7 +576,7 @@ def build(keys, game_dir, cache, data_dir, log=print, boss=(), static=True):
             shutil.rmtree(out, ignore_errors=True)
             os.makedirs(out)
             rels, notes = [], []
-            for app, spec in sorted(s["bodies"].items()):
+            for app, spec in sorted((s.get("bodies") or {}).items()):
                 # which way its drawings face is the body's own to say (repaint.drawn_mirrored)
                 raw, n = repaint.repaint(app, locate_, lor=spec.get("lor"), aura=spec.get("aura"),
                                          mirror=spec.get("mirror"))
@@ -554,9 +585,14 @@ def build(keys, game_dir, cache, data_dir, log=print, boss=(), static=True):
                     raise repaint.RepaintError(f"audit of {app}: " + "; ".join(findings))
                 rels.append(_write(out, cache, locate_(app), raw))
                 notes.append(f"{spec.get('name', app)}: {n[0] if n else 'drawn'}")
+            story = story_pictures(s, out)
+            if story:
+                notes.append(f"story: {len(story)} moments, {len({l['file'] for l in story})} pictures")
             with open(os.path.join(out, "manifest.json"), "w", encoding="utf-8") as f:
                 json.dump(dict({"format": FORMAT, "kind": "fight", "skins": [key], "files": rels, "notes": notes},
-                               **({"music": s["music"]} if s.get("music") else {})), f, indent=1)
+                               **({"music": s["music"]} if s.get("music") else {}),
+                               **({"story": story} if story else {}),
+                               **({"enemy_names": s["enemy_names"]} if s.get("enemy_names") else {})), f, indent=1)
             results[key] = (True, "; ".join([msg] + notes))
         except (repaint.RepaintError, RuntimeError, KeyError, OSError, ValueError) as e:
             shutil.rmtree(out, ignore_errors=True)
