@@ -84,10 +84,32 @@ def own(raw, donor, appearance):
     g = root.read_typetree()
     g["m_Name"] = appearance
     root.save_typetree(g)
+    for o, t in _char_infos(env):
+        # an older body carries its identity's number ("10901"); the game then dresses it as that
+        # identity from its own files - the donor's stock look, over our drawings (seen in a
+        # fight: every body with a number showed its donor, every one without showed ours)
+        t["charInfo"]["appearanceID"] = ""
+        o.save_typetree(t)
     out = env.file.save(packer="lz4")
     found = check(out, appearance)
     if found:
         raise OwnBodyError(f"{appearance}: " + "; ".join(found))
+    return out
+
+
+def _char_infos(env):
+    """[(object, typetree)] of the bundle's CharacterAppearance components that name an identity."""
+    out = []
+    for o in env.objects:
+        if o.type.name != "MonoBehaviour":
+            continue
+        try:
+            t = o.read_typetree()
+        except Exception:
+            continue
+        info = t.get("charInfo") if isinstance(t, dict) else None
+        if isinstance(info, dict) and info.get("appearanceID"):
+            out.append((o, t))
     return out
 
 
@@ -115,6 +137,8 @@ def check(bundle, appearance, donor_cab=None):
         found.append(f"it offers {len(roots)} prefabs, not one")
     elif roots[0].read_typetree().get("m_Name") != appearance:
         found.append("its prefab isn't named for it")
+    if _char_infos(env):
+        found.append("a body in it still names the identity it was drawn on")
     held = {n.rsplit("/", 1)[-1] for n in names}
     for o in env.objects:
         if o.type.name not in ("Texture2D", "AudioClip", "Mesh", "Texture2DArray", "Cubemap", "VideoClip"):
