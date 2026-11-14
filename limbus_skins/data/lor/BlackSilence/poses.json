@@ -1,0 +1,21 @@
+{
+ "bundle": "char/char_686.pres",
+ "head": null,
+ "poses": {
+  "Default": {
+   "file": "Default.png",
+   "pivot": [
+    0.650273,
+    0.030019
+   ]
+  },
+  "Standing": {
+   "file": "Standing.png",
+   "pivot": [
+    0.650273,
+    0.030019
+   ]
+  }
+ },
+ "prefab": "BlackSilence"
+}

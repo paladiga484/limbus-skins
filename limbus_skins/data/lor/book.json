@@ -1,12 +1,27 @@
 {
  "abilities": {
+  "argaliaVibrateDown2": "[On Hit] Target loses 2 Vibration",
+  "argaliaVibrateUp3": "[On Hit] Target gains 3 Vibration",
   "binahShockwaveDice1": "",
   "binahShockwaveDice2": "[On Hit] Inflict 1 Feeble this Scene",
   "blackSilenceSpecial": "This page can be used after using all 9 Combat Pages of the Black Silence",
   "blackSilenceSpecialDice": "[On Clash Win] Destroy all of opponent's dice",
+  "bleeding1atk": "[On Hit] Inflict 1 Bleed next Scene",
   "bleeding2atk": "[On Hit] Inflict 2 Bleed next Scene",
   "bleeding3atk": "[On Hit] Inflict 3 Bleed next Scene",
+  "breakDmg2thisRoundHit": "[Combat Start] Deal 2 bonus Stagger damage on Blunt hits for this Scene",
+  "burn1atk": "[On Hit] Inflict 1 Burn",
+  "burn2atk": "[On Hit] Inflict 2 Burn",
+  "burn3atk": "[On Hit] Inflict 3 Burn",
+  "burnSpread": "[On Hit] If target has 4 or more Burn, inflict 1 Burn to all enemies",
+  "cardPowerDown2target": "[Start of Clash] Reduce Power of all target's dice by 2",
+  "clockEgoDice": "[On Clash Win] Destroy opponent's next die",
+  "damage2pw": "[On Clash Win] Deal 2 damage to opponent",
+  "damage5atk": "[On Hit] Deal 5 damage to target",
+  "drawCard": "[On Use] Draw 1 page",
+  "elenaMinionStrong": "All Speed dice of the character lose 3 Speed while this page is in use",
   "energy1": "[On Use] Restore 1 Light",
+  "energy1pw": "[On Clash Win] Restore 1 Light",
   "energy2": "[On Use] Restore 2 Light",
   "energy3AndDraw1": "[On Use] Restore 3 Light; draw 1 page",
   "fairy1atk": "[On Hit] Inflict 1 Fairy",
@@ -14,17 +29,407 @@
   "fixedCost": "The Cost of this page cannot be changed",
   "forbidCardAtk": "[On Hit] Increase Cost of target's pages whose original Cost is 4 or higher by 2 for the next Scene",
   "forbidReuseDice": "Target's current die cannot be recycled",
+  "gainNegative1": "[On Use] Gain 1 Negative Emotion Point",
   "immuneDestory": "This die cannot be destroyed",
   "kaliAreaDice": "[On Hit] Inflict 5 Bleed next Scene",
   "kaliNormalAttackH": "If 8 or more damage was dealt with this page, restore 2 Light and reduce the Cost of all other 'Level Slashes' by 1",
   "kaliNormalAttackJ": "If 8 or more damage was dealt with this page, draw 1 page and reduce the Cost of all other 'Upstanding Slashes' by 1",
   "kaliSuperAttack": "[On Hit] Destroy a Combat Page set on another random Speed die of the target.",
+  "liuUnique": "[On Use] All dice on this page gain +1 Power for every 2 Emotion Levels",
+  "otherAlly2protection2": "[On Use] Give 2 Protection to two random other allies next Scene",
+  "powerDouble": "Power affects this die x2",
+  "powerDown1target": "Reduce Power of target's current die by 1",
   "protection3friendThisRound": "[On Use] Give 3 Protection to all allies this Scene",
+  "recoverBreak3atk": "[On Hit] Recover 3 Stagger Resist",
   "recoverBreak5atk": "[On Hit] Recover 5 Stagger Resist",
   "recoverNextRound": "[Combat Start] Recover 50 HP at the start of next Scene",
+  "repeat3": "This die is rolled 3 times",
+  "repeat4": "This die is rolled 4 times",
+  "rolandDrawUtil": "The Cost of this page cannot be changed",
+  "shyaoDice1": "[On Hit] Inflict 2 Burn",
+  "slashUp2thisRound": "[Combat Start] Boost Slash dice Power by +2 for this Scene",
   "strength1atk": "[On Hit] Gain 1 Strength next Scene"
  },
  "cards": {
+  "403001": {
+   "cost": "3",
+   "dice": [
+    [
+     "Def",
+     "Guard",
+     "3",
+     "8",
+     ""
+    ],
+    [
+     "Atk",
+     "Slash",
+     "7",
+     "18",
+     "burn3atk"
+    ]
+   ],
+   "range": "Near",
+   "rarity": "Unique",
+   "script": "otherAlly2protection2"
+  },
+  "403003": {
+   "cost": "2",
+   "dice": [
+    [
+     "Atk",
+     "Hit",
+     "2",
+     "7",
+     ""
+    ],
+    [
+     "Def",
+     "Guard",
+     "3",
+     "5",
+     ""
+    ],
+    [
+     "Atk",
+     "Slash",
+     "2",
+     "6",
+     "burn2atk"
+    ]
+   ],
+   "range": "Near",
+   "rarity": "Rare",
+   "script": ""
+  },
+  "403004": {
+   "cost": "2",
+   "dice": [
+    [
+     "Atk",
+     "Penetrate",
+     "3",
+     "5",
+     "powerDown1target"
+    ],
+    [
+     "Atk",
+     "Penetrate",
+     "3",
+     "5",
+     "powerDown1target"
+    ],
+    [
+     "Def",
+     "Guard",
+     "2",
+     "4",
+     ""
+    ]
+   ],
+   "range": "Near",
+   "rarity": "Uncommon",
+   "script": ""
+  },
+  "403005": {
+   "cost": "2",
+   "dice": [
+    [
+     "Atk",
+     "Slash",
+     "1",
+     "6",
+     "burn1atk"
+    ],
+    [
+     "Atk",
+     "Slash",
+     "1",
+     "5",
+     "burn1atk"
+    ],
+    [
+     "Atk",
+     "Hit",
+     "2",
+     "7",
+     "burn1atk"
+    ]
+   ],
+   "range": "Near",
+   "rarity": "Common",
+   "script": ""
+  },
+  "403006": {
+   "cost": "0",
+   "dice": [
+    [
+     "Atk",
+     "Slash",
+     "1",
+     "6",
+     "burn1atk"
+    ],
+    [
+     "Def",
+     "Guard",
+     "3",
+     "4",
+     ""
+    ]
+   ],
+   "range": "Near",
+   "rarity": "Common",
+   "script": ""
+  },
+  "403007": {
+   "cost": "2",
+   "dice": [
+    [
+     "Atk",
+     "Penetrate",
+     "3",
+     "6",
+     "burn1atk"
+    ],
+    [
+     "Atk",
+     "Penetrate",
+     "3",
+     "7",
+     "burn1atk"
+    ]
+   ],
+   "range": "Near",
+   "rarity": "Uncommon",
+   "script": "gainNegative1"
+  },
+  "408001": {
+   "cost": "3",
+   "dice": [
+    [
+     "Atk",
+     "Penetrate",
+     "6",
+     "18",
+     "damage5atk"
+    ],
+    [
+     "Def",
+     "Guard",
+     "2",
+     "7",
+     ""
+    ]
+   ],
+   "range": "Near",
+   "rarity": "Rare",
+   "script": ""
+  },
+  "408002": {
+   "cost": "2",
+   "dice": [
+    [
+     "Atk",
+     "Penetrate",
+     "3",
+     "7",
+     ""
+    ],
+    [
+     "Atk",
+     "Penetrate",
+     "3",
+     "7",
+     ""
+    ]
+   ],
+   "range": "Near",
+   "rarity": "Uncommon",
+   "script": "drawCard"
+  },
+  "408003": {
+   "cost": "3",
+   "dice": [
+    [
+     "Atk",
+     "Penetrate",
+     "4",
+     "8",
+     "energy1pw"
+    ],
+    [
+     "Atk",
+     "Penetrate",
+     "4",
+     "8",
+     "energy1pw"
+    ]
+   ],
+   "range": "Near",
+   "rarity": "Rare",
+   "script": ""
+  },
+  "408004": {
+   "cost": "2",
+   "dice": [
+    [
+     "Atk",
+     "Slash",
+     "4",
+     "7",
+     "damage2pw"
+    ],
+    [
+     "Atk",
+     "Penetrate",
+     "3",
+     "5",
+     ""
+    ]
+   ],
+   "range": "Near",
+   "rarity": "Common",
+   "script": ""
+  },
+  "408005": {
+   "cost": "0",
+   "dice": [
+    [
+     "Def",
+     "Evasion",
+     "2",
+     "4",
+     ""
+    ],
+    [
+     "Atk",
+     "Penetrate",
+     "1",
+     "5",
+     ""
+    ],
+    [
+     "Atk",
+     "Penetrate",
+     "1",
+     "5",
+     ""
+    ]
+   ],
+   "range": "Near",
+   "rarity": "Uncommon",
+   "script": ""
+  },
+  "601001": {
+   "cost": "3",
+   "dice": [
+    [
+     "Def",
+     "Guard",
+     "4",
+     "8",
+     ""
+    ],
+    [
+     "Atk",
+     "Penetrate",
+     "5",
+     "9",
+     "burn2atk"
+    ],
+    [
+     "Atk",
+     "Slash",
+     "4",
+     "9",
+     "burn1atk"
+    ],
+    [
+     "Standby",
+     "Guard",
+     "3",
+     "7",
+     ""
+    ]
+   ],
+   "range": "Near",
+   "rarity": "Unique",
+   "script": "liuUnique"
+  },
+  "601007": {
+   "cost": "0",
+   "dice": [
+    [
+     "Atk",
+     "Penetrate",
+     "2",
+     "7",
+     ""
+    ],
+    [
+     "Atk",
+     "Penetrate",
+     "1",
+     "2",
+     ""
+    ]
+   ],
+   "range": "Near",
+   "rarity": "Common",
+   "script": "energy1"
+  },
+  "606001": {
+   "cost": "5",
+   "dice": [
+    [
+     "Atk",
+     "Slash",
+     "3",
+     "7",
+     "shyaoDice1"
+    ],
+    [
+     "Atk",
+     "Slash",
+     "8",
+     "20",
+     "shyaoDice1"
+    ]
+   ],
+   "range": "FarAreaEach",
+   "rarity": "Unique",
+   "script": ""
+  },
+  "606004": {
+   "cost": "3",
+   "dice": [
+    [
+     "Def",
+     "Evasion",
+     "5",
+     "9",
+     ""
+    ],
+    [
+     "Atk",
+     "Slash",
+     "6",
+     "9",
+     "burnSpread"
+    ],
+    [
+     "Atk",
+     "Hit",
+     "5",
+     "9",
+     "burnSpread"
+    ]
+   ],
+   "range": "Near",
+   "rarity": "Uncommon",
+   "script": ""
+  },
   "607001": {
    "cost": "6",
    "dice": [
@@ -201,6 +606,174 @@
    "rarity": "Uncommon",
    "script": "fairy3atkCard"
   },
+  "609001": {
+   "cost": "1",
+   "dice": [
+    [
+     "Atk",
+     "Slash",
+     "3",
+     "6",
+     ""
+    ],
+    [
+     "Atk",
+     "Slash",
+     "2",
+     "4",
+     ""
+    ]
+   ],
+   "range": "Near",
+   "rarity": "Common",
+   "script": "drawCard"
+  },
+  "609002": {
+   "cost": "3",
+   "dice": [
+    [
+     "Atk",
+     "Slash",
+     "5",
+     "15",
+     "powerDouble"
+    ],
+    [
+     "Standby",
+     "Slash",
+     "3",
+     "7",
+     ""
+    ]
+   ],
+   "range": "Near",
+   "rarity": "Rare",
+   "script": ""
+  },
+  "609003": {
+   "cost": "2",
+   "dice": [
+    [
+     "Atk",
+     "Slash",
+     "2",
+     "4",
+     "bleeding1atk"
+    ],
+    [
+     "Atk",
+     "Slash",
+     "2",
+     "4",
+     ""
+    ],
+    [
+     "Def",
+     "Evasion",
+     "4",
+     "8",
+     ""
+    ]
+   ],
+   "range": "Near",
+   "rarity": "Uncommon",
+   "script": "slashUp2thisRound"
+  },
+  "609008": {
+   "cost": "2",
+   "dice": [
+    [
+     "Def",
+     "Guard",
+     "2",
+     "6",
+     ""
+    ],
+    [
+     "Atk",
+     "Hit",
+     "5",
+     "7",
+     "recoverBreak3atk"
+    ],
+    [
+     "Atk",
+     "Hit",
+     "3",
+     "6",
+     ""
+    ]
+   ],
+   "range": "Near",
+   "rarity": "Common",
+   "script": "breakDmg2thisRoundHit"
+  },
+  "702001": {
+   "cost": "2",
+   "dice": [
+    [
+     "Atk",
+     "Penetrate",
+     "5",
+     "9",
+     ""
+    ],
+    [
+     "Atk",
+     "Penetrate",
+     "5",
+     "8",
+     ""
+    ]
+   ],
+   "range": "Near",
+   "rarity": "Uncommon",
+   "script": "cardPowerDown2target"
+  },
+  "702002": {
+   "cost": "4",
+   "dice": [
+    [
+     "Atk",
+     "Hit",
+     "14",
+     "24",
+     "clockEgoDice"
+    ],
+    [
+     "Def",
+     "Guard",
+     "5",
+     "8",
+     ""
+    ]
+   ],
+   "range": "Near",
+   "rarity": "Rare",
+   "script": ""
+  },
+  "702003": {
+   "cost": "0",
+   "dice": [
+    [
+     "Atk",
+     "Slash",
+     "4",
+     "8",
+     ""
+    ],
+    [
+     "Atk",
+     "Hit",
+     "3",
+     "8",
+     ""
+    ]
+   ],
+   "range": "Near",
+   "rarity": "Common",
+   "script": "rolandDrawUtil"
+  },
   "702004": {
    "cost": "1",
    "dice": [
@@ -325,6 +898,180 @@
    "rarity": "Unique",
    "script": "blackSilenceSpecial"
   },
+  "703001": {
+   "cost": "0",
+   "dice": [
+    [
+     "Atk",
+     "Slash",
+     "5",
+     "7",
+     "argaliaVibrateUp3"
+    ],
+    [
+     "Atk",
+     "Penetrate",
+     "5",
+     "8",
+     ""
+    ],
+    [
+     "Standby",
+     "Guard",
+     "3",
+     "6",
+     ""
+    ]
+   ],
+   "range": "Near",
+   "rarity": "Common",
+   "script": ""
+  },
+  "703002": {
+   "cost": "0",
+   "dice": [
+    [
+     "Def",
+     "Evasion",
+     "6",
+     "9",
+     ""
+    ],
+    [
+     "Atk",
+     "Penetrate",
+     "4",
+     "8",
+     "argaliaVibrateDown2"
+    ],
+    [
+     "Atk",
+     "Hit",
+     "5",
+     "9",
+     ""
+    ],
+    [
+     "Standby",
+     "Guard",
+     "3",
+     "6",
+     ""
+    ]
+   ],
+   "range": "Near",
+   "rarity": "Common",
+   "script": ""
+  },
+  "703021": {
+   "cost": "0",
+   "dice": [
+    [
+     "Atk",
+     "Slash",
+     "7",
+     "10",
+     "forbidReuseDice"
+    ],
+    [
+     "Atk",
+     "Penetrate",
+     "8",
+     "14",
+     "repeat3"
+    ],
+    [
+     "Atk",
+     "Slash",
+     "8",
+     "14",
+     "repeat4"
+    ],
+    [
+     "Atk",
+     "Hit",
+     "8",
+     "14",
+     "repeat4"
+    ],
+    [
+     "Def",
+     "Guard",
+     "8",
+     "16",
+     ""
+    ]
+   ],
+   "range": "Near",
+   "rarity": "Unique",
+   "script": ""
+  },
+  "703811": {
+   "cost": "0",
+   "dice": [
+    [
+     "Atk",
+     "Penetrate",
+     "7",
+     "10",
+     "burn2atk"
+    ],
+    [
+     "Atk",
+     "Slash",
+     "6",
+     "9",
+     "burn1atk"
+    ],
+    [
+     "Def",
+     "Guard",
+     "6",
+     "9",
+     ""
+    ]
+   ],
+   "range": "Near",
+   "rarity": "Common",
+   "script": ""
+  },
+  "703812": {
+   "cost": "0",
+   "dice": [
+    [
+     "Atk",
+     "Hit",
+     "10",
+     "16",
+     "burn1atk"
+    ],
+    [
+     "Def",
+     "Guard",
+     "5",
+     "8",
+     ""
+    ]
+   ],
+   "range": "Near",
+   "rarity": "Common",
+   "script": ""
+  },
+  "703814": {
+   "cost": "0",
+   "dice": [
+    [
+     "Atk",
+     "Hit",
+     "21",
+     "28",
+     ""
+    ]
+   ],
+   "range": "Near",
+   "rarity": "Unique",
+   "script": "elenaMinionStrong"
+  },
   "706001": {
    "cost": "2",
    "dice": [
@@ -408,6 +1155,66 @@
   }
  },
  "names": {
+  "403001": [
+   "Crack of Dawn",
+   ""
+  ],
+  "403003": [
+   "Butterfly Slash",
+   ""
+  ],
+  "403004": [
+   "Eject",
+   ""
+  ],
+  "403005": [
+   "Sunset Blade",
+   ""
+  ],
+  "403006": [
+   "Handle Request",
+   ""
+  ],
+  "403007": [
+   "Stigmatize",
+   ""
+  ],
+  "408001": [
+   "Transpierce",
+   ""
+  ],
+  "408002": [
+   "Sparking Spear",
+   ""
+  ],
+  "408003": [
+   "Collision",
+   ""
+  ],
+  "408004": [
+   "Speared Sweep",
+   ""
+  ],
+  "408005": [
+   "High-speed Stabbing",
+   ""
+  ],
+  "601001": [
+   "Emotional Turbulence",
+   ""
+  ],
+  "601007": [
+   "Frontal Assault",
+   ""
+  ],
+  "606001": [
+   "Raging Storm: Love",
+   ""
+  ],
+  "606004": [
+   "Fiery Waltz",
+   ""
+  ],
   "607001": [
    "Greater Split: Horizontal",
    ""
@@ -440,6 +1247,34 @@
    "Degraded Pillar",
    ""
   ],
+  "609001": [
+   "Serpent Sword Technique",
+   ""
+  ],
+  "609002": [
+   "Violet Blade",
+   ""
+  ],
+  "609003": [
+   "Snake Slit",
+   ""
+  ],
+  "609008": [
+   "Great Serpent’s Impact",
+   ""
+  ],
+  "702001": [
+   "Allas Workshop",
+   ""
+  ],
+  "702002": [
+   "Wheels Industry",
+   ""
+  ],
+  "702003": [
+   "Zelkova Workshop",
+   ""
+  ],
   "702004": [
    "Old Boys Workshop",
    ""
@@ -458,6 +1293,30 @@
   ],
   "702010": [
    "Furioso",
+   ""
+  ],
+  "703001": [
+   "Preludio",
+   ""
+  ],
+  "703002": [
+   "Assolo",
+   ""
+  ],
+  "703021": [
+   "Final Impromptu",
+   ""
+  ],
+  "703811": [
+   "Cross Blade",
+   ""
+  ],
+  "703812": [
+   "Shockwave",
+   ""
+  ],
+  "703814": [
+   "Rampageous Strike",
    ""
   ],
   "706001": [

@@ -1,0 +1,70 @@
+{
+ "bundle": "char/char_553.pres",
+ "head": null,
+ "poses": {
+  "Damaged": {
+   "file": "Damaged.png",
+   "pivot": [
+    0.740741,
+    0.004425
+   ]
+  },
+  "Default": {
+   "file": "Default.png",
+   "pivot": [
+    0.796791,
+    -0.010288
+   ]
+  },
+  "Evade": {
+   "file": "Evade.png",
+   "pivot": [
+    0.472973,
+    -0.004032
+   ]
+  },
+  "Guard": {
+   "file": "Guard.png",
+   "pivot": [
+    0.552036,
+    0.004255
+   ]
+  },
+  "Hit": {
+   "file": "Hit.png",
+   "pivot": [
+    0.247265,
+    0.004283
+   ]
+  },
+  "Move": {
+   "file": "Move.png",
+   "pivot": [
+    0.615542,
+    -0.010776
+   ]
+  },
+  "Penetrate": {
+   "file": "Penetrate.png",
+   "pivot": [
+    0.698438,
+    -0.013216
+   ]
+  },
+  "Slash": {
+   "file": "Slash.png",
+   "pivot": [
+    0.52669,
+    0.179673
+   ]
+  },
+  "Standing": {
+   "file": "Standing.png",
+   "pivot": [
+    0.796791,
+    -0.010288
+   ]
+  }
+ },
+ "prefab": "Philip"
+}

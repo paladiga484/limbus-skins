@@ -2966,6 +2966,1294 @@
    "game_title": "The Black Forest::\nThree Birds as One",
    "own_body": true,
    "own_skills": true
+  },
+  "roland-ruina": {
+   "identity": 10130,
+   "base": 10101,
+   "roster": true,
+   "tested": false,
+   "name": "Roland",
+   "game_title": "The Black\nSilence",
+   "title": "Roland (Ruina) - The Black Silence",
+   "becomes": "Roland of Library of Ruina as an identity of their own: own body, own skills, their Ruina pages as the kit",
+   "own_body": true,
+   "own_skills": true,
+   "lor": {
+    "bundle": "char/char_686.pres",
+    "prefab": "BlackSilence",
+    "map": {
+     "idle": [
+      "Default",
+      "Standing"
+     ],
+     "move": [
+      "Default"
+     ],
+     "gud": [
+      "Default"
+     ],
+     "miss": [
+      "Default"
+     ],
+     "dmg": [
+      "Default"
+     ],
+     "dead": [
+      "Default"
+     ],
+     "S1": [
+      "Default"
+     ],
+     "S2": [
+      "Default"
+     ],
+     "S3": [
+      "Default"
+     ]
+    },
+    "smear": [
+     "move",
+     "S1",
+     "S2",
+     "S3"
+    ],
+    "idle_time": 2.4,
+    "stands": 4.1
+   },
+   "moves": {
+    "1": {
+     "lor_dice": 702003,
+     "attributeType": "INDIGO",
+     "coins": [
+      0
+     ]
+    },
+    "2": {
+     "lor_dice": 702001,
+     "attributeType": "INDIGO",
+     "coins": [
+      0,
+      0
+     ]
+    },
+    "3": {
+     "lor_dice": 702002,
+     "attributeType": "VIOLET",
+     "coins": [
+      0,
+      0,
+      0
+     ]
+    },
+    "defense": {
+     "lor_dice": 702002,
+     "attributeType": "INDIGO",
+     "coins": [
+      0
+     ]
+    }
+   },
+   "texts": {
+    "1": {
+     "lor_card": 702003
+    },
+    "2": {
+     "lor_card": 702001
+    },
+    "3": {
+     "lor_card": 702002
+    },
+    "defense": {
+     "lor_card": 702002
+    }
+   }
+  },
+  "argalia-ruina": {
+   "identity": 10630,
+   "base": 10601,
+   "roster": true,
+   "tested": false,
+   "name": "Argalia",
+   "game_title": "The Blue\nReverberation",
+   "title": "Argalia (Ruina) - The Blue Reverberation",
+   "becomes": "Argalia of Library of Ruina as an identity of their own: own body, own skills, their Ruina pages as the kit",
+   "own_body": true,
+   "own_skills": true,
+   "lor": {
+    "bundle": "char/char_412.pres",
+    "prefab": "Argalia2",
+    "map": {
+     "idle": [
+      "Default",
+      "Standing"
+     ],
+     "move": [
+      "Move"
+     ],
+     "gud": [
+      "Guard"
+     ],
+     "miss": [
+      "Evade"
+     ],
+     "dmg": [
+      "Damaged"
+     ],
+     "dead": [
+      "Damaged"
+     ],
+     "S1": [
+      "Slash"
+     ],
+     "S2": [
+      "Penetrate",
+      "Hit"
+     ],
+     "S3": [
+      "Slash",
+      "Penetrate",
+      "Hit",
+      "S1",
+      "S2"
+     ]
+    },
+    "smear": [
+     "move",
+     "S1",
+     "S2",
+     "S3"
+    ],
+    "idle_time": 2.4,
+    "stands": 4.1
+   },
+   "moves": {
+    "1": {
+     "lor_dice": 703001,
+     "attributeType": "AZURE",
+     "coins": [
+      0
+     ]
+    },
+    "2": {
+     "lor_dice": 703002,
+     "attributeType": "AZURE",
+     "coins": [
+      0,
+      0
+     ]
+    },
+    "3": {
+     "lor_dice": 703021,
+     "attributeType": "INDIGO",
+     "coins": [
+      0,
+      0
+     ]
+    },
+    "defense": {
+     "lor_dice": 703002,
+     "attributeType": "AZURE",
+     "coins": [
+      0
+     ]
+    }
+   },
+   "texts": {
+    "1": {
+     "lor_card": 703001
+    },
+    "2": {
+     "lor_card": 703002
+    },
+    "3": {
+     "lor_card": 703021
+    },
+    "defense": {
+     "lor_card": 703002
+    }
+   },
+   "evolves": {
+    "lor": {
+     "bundle": "char/char_678.pres",
+     "prefab": "TwistedArgalia",
+     "map": {
+      "idle": [
+       "Default",
+       "Standing"
+      ],
+      "move": [
+       "Default"
+      ],
+      "gud": [
+       "Default"
+      ],
+      "miss": [
+       "Default"
+      ],
+      "dmg": [
+       "Default"
+      ],
+      "dead": [
+       "Default"
+      ],
+      "S1": [
+       "Default"
+      ],
+      "S2": [
+       "Default"
+      ],
+      "S3": [
+       "Default"
+      ]
+     },
+     "smear": [
+      "move",
+      "S1",
+      "S2",
+      "S3"
+     ],
+     "idle_time": 2.4,
+     "stands": 4.1
+    },
+    "hp": 50,
+    "word": "Distorted"
+   }
+  },
+  "iori-ruina": {
+   "identity": 10930,
+   "base": 10901,
+   "roster": true,
+   "tested": false,
+   "name": "Iori",
+   "game_title": "The Purple\nTear",
+   "title": "Iori (Ruina) - The Purple Tear",
+   "becomes": "Iori of Library of Ruina as an identity of their own: own body, own skills, their Ruina pages as the kit",
+   "own_body": true,
+   "own_skills": true,
+   "lor": {
+    "bundle": "char/char_603.pres",
+    "prefab": "ThePurpleTear",
+    "map": {
+     "idle": [
+      "Default",
+      "Standing"
+     ],
+     "move": [
+      "Move"
+     ],
+     "gud": [
+      "Guard"
+     ],
+     "miss": [
+      "Evade"
+     ],
+     "dmg": [
+      "Damaged"
+     ],
+     "dead": [
+      "Damaged"
+     ],
+     "S1": [
+      "Slash"
+     ],
+     "S2": [
+      "Penetrate",
+      "Hit"
+     ],
+     "S3": [
+      "Slash",
+      "Penetrate",
+      "Hit"
+     ]
+    },
+    "smear": [
+     "move",
+     "S1",
+     "S2",
+     "S3"
+    ],
+    "idle_time": 2.4,
+    "stands": 4.1
+   },
+   "moves": {
+    "1": {
+     "lor_dice": 609001,
+     "attributeType": "VIOLET",
+     "coins": [
+      0
+     ]
+    },
+    "2": {
+     "lor_dice": 609008,
+     "attributeType": "VIOLET",
+     "coins": [
+      0,
+      0
+     ]
+    },
+    "3": {
+     "lor_dice": 609002,
+     "attributeType": "VIOLET",
+     "coins": [
+      0,
+      0,
+      0,
+      0
+     ]
+    },
+    "defense": {
+     "lor_dice": 609003,
+     "attributeType": "VIOLET",
+     "coins": [
+      0
+     ]
+    }
+   },
+   "texts": {
+    "1": {
+     "lor_card": 609001
+    },
+    "2": {
+     "lor_card": 609008
+    },
+    "3": {
+     "lor_card": 609002
+    },
+    "defense": {
+     "lor_card": 609003
+    }
+   }
+  },
+  "vermilion-cross-ruina": {
+   "identity": 10730,
+   "base": 10701,
+   "roster": true,
+   "tested": false,
+   "name": "Vermilion Cross",
+   "game_title": "The Vermilion\nCross",
+   "title": "Vermilion Cross (Ruina) - The Vermilion Cross",
+   "becomes": "Vermilion Cross of Library of Ruina as an identity of their own: own body, own skills, their Ruina pages as the kit",
+   "own_body": true,
+   "own_skills": true,
+   "lor": {
+    "bundle": "char/char_545.pres",
+    "prefab": "OrangeCross",
+    "map": {
+     "idle": [
+      "Default"
+     ],
+     "move": [
+      "Move"
+     ],
+     "gud": [
+      "Guard"
+     ],
+     "miss": [
+      "Guard"
+     ],
+     "dmg": [
+      "Damaged"
+     ],
+     "dead": [
+      "Damaged"
+     ],
+     "S1": [
+      "Slash"
+     ],
+     "S2": [
+      "Hit"
+     ],
+     "S3": [
+      "Slash",
+      "Hit"
+     ]
+    },
+    "smear": [
+     "move",
+     "S1",
+     "S2",
+     "S3"
+    ],
+    "idle_time": 2.4,
+    "stands": 4.1
+   },
+   "moves": {
+    "1": {
+     "lor_dice": 703812,
+     "attributeType": "CRIMSON",
+     "coins": [
+      0
+     ]
+    },
+    "2": {
+     "lor_dice": 703811,
+     "attributeType": "SCARLET",
+     "coins": [
+      0,
+      0
+     ]
+    },
+    "3": {
+     "lor_dice": 703814,
+     "attributeType": "CRIMSON",
+     "coins": [
+      0,
+      0
+     ]
+    },
+    "defense": {
+     "lor_dice": 703811,
+     "attributeType": "SCARLET",
+     "coins": [
+      0
+     ]
+    }
+   },
+   "texts": {
+    "1": {
+     "lor_card": 703812
+    },
+    "2": {
+     "lor_card": 703811
+    },
+    "3": {
+     "lor_card": 703814
+    },
+    "defense": {
+     "lor_card": 703811
+    }
+   }
+  },
+  "xiao-ruina": {
+   "identity": 10830,
+   "base": 10801,
+   "roster": true,
+   "tested": false,
+   "name": "Xiao",
+   "game_title": "Iron Lotus",
+   "title": "Xiao (Ruina) - Iron Lotus",
+   "becomes": "Xiao of Library of Ruina as an identity of their own: own body, own skills, their Ruina pages as the kit",
+   "own_body": true,
+   "own_skills": true,
+   "lor": {
+    "bundle": "char/char_583.pres",
+    "prefab": "Shyao",
+    "map": {
+     "idle": [
+      "Default"
+     ],
+     "move": [
+      "Move"
+     ],
+     "gud": [
+      "Guard"
+     ],
+     "miss": [
+      "Evade"
+     ],
+     "dmg": [
+      "Damaged"
+     ],
+     "dead": [
+      "Damaged"
+     ],
+     "S1": [
+      "Slash"
+     ],
+     "S2": [
+      "Panetrate",
+      "Hit"
+     ],
+     "S3": [
+      "Slash",
+      "Panetrate",
+      "Hit",
+      "S1",
+      "S2"
+     ]
+    },
+    "smear": [
+     "move",
+     "S1",
+     "S2",
+     "S3"
+    ],
+    "idle_time": 2.4,
+    "stands": 4.1
+   },
+   "moves": {
+    "1": {
+     "lor_dice": 601007,
+     "attributeType": "CRIMSON",
+     "coins": [
+      0
+     ]
+    },
+    "2": {
+     "lor_dice": 606004,
+     "attributeType": "CRIMSON",
+     "coins": [
+      0
+     ]
+    },
+    "3": {
+     "lor_dice": 606001,
+     "attributeType": "SCARLET",
+     "coins": [
+      0
+     ]
+    },
+    "defense": {
+     "lor_dice": 601001,
+     "attributeType": "CRIMSON",
+     "coins": [
+      0
+     ]
+    }
+   },
+   "texts": {
+    "1": {
+     "lor_card": 601007
+    },
+    "2": {
+     "lor_card": 606004
+    },
+    "3": {
+     "lor_card": 606001
+    },
+    "defense": {
+     "lor_card": 601001
+    }
+   },
+   "evolves": {
+    "lor": {
+     "bundle": "char/char_618.pres",
+     "prefab": "XiaoEgo",
+     "map": {
+      "idle": [
+       "Default"
+      ],
+      "move": [
+       "Move"
+      ],
+      "gud": [
+       "Guard"
+      ],
+      "miss": [
+       "Evade"
+      ],
+      "dmg": [
+       "Damaged"
+      ],
+      "dead": [
+       "Damaged"
+      ],
+      "S1": [
+       "Slash"
+      ],
+      "S2": [
+       "Penetrate",
+       "Hit"
+      ],
+      "S3": [
+       "Slash",
+       "Penetrate",
+       "Hit",
+       "S1",
+       "S2"
+      ]
+     },
+     "smear": [
+      "move",
+      "S1",
+      "S2",
+      "S3"
+     ],
+     "idle_time": 2.4,
+     "stands": 4.1
+    },
+    "hp": 50,
+    "word": "Ego"
+   }
+  },
+  "philip-ruina": {
+   "identity": 11030,
+   "base": 11001,
+   "roster": true,
+   "tested": false,
+   "name": "Philip",
+   "game_title": "Dawn Office\nFixer",
+   "title": "Philip (Ruina) - Dawn Office Fixer",
+   "becomes": "Philip of Library of Ruina as an identity of their own: own body, own skills, their Ruina pages as the kit",
+   "own_body": true,
+   "own_skills": true,
+   "lor": {
+    "bundle": "char/char_553.pres",
+    "prefab": "Philip",
+    "map": {
+     "idle": [
+      "Default",
+      "Standing"
+     ],
+     "move": [
+      "Move"
+     ],
+     "gud": [
+      "Guard"
+     ],
+     "miss": [
+      "Evade"
+     ],
+     "dmg": [
+      "Damaged"
+     ],
+     "dead": [
+      "Damaged"
+     ],
+     "S1": [
+      "Slash"
+     ],
+     "S2": [
+      "Penetrate",
+      "Hit"
+     ],
+     "S3": [
+      "Slash",
+      "Penetrate",
+      "Hit"
+     ]
+    },
+    "smear": [
+     "move",
+     "S1",
+     "S2",
+     "S3"
+    ],
+    "idle_time": 2.4,
+    "stands": 4.1
+   },
+   "moves": {
+    "1": {
+     "lor_dice": 403006,
+     "attributeType": "CRIMSON",
+     "coins": [
+      0
+     ]
+    },
+    "2": {
+     "lor_dice": 403007,
+     "attributeType": "CRIMSON",
+     "coins": [
+      0,
+      0,
+      0
+     ]
+    },
+    "3": {
+     "lor_dice": 403005,
+     "attributeType": "AMBER",
+     "coins": [
+      0,
+      0,
+      0
+     ]
+    },
+    "defense": {
+     "lor_dice": 403006,
+     "attributeType": "CRIMSON",
+     "coins": [
+      0
+     ]
+    }
+   },
+   "texts": {
+    "1": {
+     "lor_card": 403006
+    },
+    "2": {
+     "lor_card": 403007
+    },
+    "3": {
+     "lor_card": 403005
+    },
+    "defense": {
+     "lor_card": 403006
+    }
+   },
+   "evolves": {
+    "lor": {
+     "bundle": "char/char_554.pres",
+     "prefab": "PhilipEgo",
+     "map": {
+      "idle": [
+       "Default",
+       "Standing"
+      ],
+      "move": [
+       "Move"
+      ],
+      "gud": [
+       "Guard"
+      ],
+      "miss": [
+       "Evade"
+      ],
+      "dmg": [
+       "Damaged"
+      ],
+      "dead": [
+       "Damaged"
+      ],
+      "S1": [
+       "Slash"
+      ],
+      "S2": [
+       "Penetrate",
+       "Hit"
+      ],
+      "S3": [
+       "Slash",
+       "Penetrate",
+       "Hit"
+      ]
+     },
+     "smear": [
+      "move",
+      "S1",
+      "S2",
+      "S3"
+     ],
+     "idle_time": 2.4,
+     "stands": 4.1
+    },
+    "hp": 50,
+    "word": "Ego"
+   }
+  },
+  "yuna-ruina": {
+   "identity": 10230,
+   "base": 10201,
+   "roster": true,
+   "tested": false,
+   "name": "Yuna",
+   "game_title": "Dawn Office\nFixer",
+   "title": "Yuna (Ruina) - Dawn Office Fixer",
+   "becomes": "Yuna of Library of Ruina as an identity of their own: own body, own skills, their Ruina pages as the kit",
+   "own_body": true,
+   "own_skills": true,
+   "lor": {
+    "bundle": "char/char_628.pres",
+    "prefab": "Yuna",
+    "map": {
+     "idle": [
+      "Default",
+      "Standing"
+     ],
+     "move": [
+      "Move"
+     ],
+     "gud": [
+      "Guard"
+     ],
+     "miss": [
+      "Evade"
+     ],
+     "dmg": [
+      "Damaged"
+     ],
+     "dead": [
+      "Damaged"
+     ],
+     "S1": [
+      "Slash"
+     ],
+     "S2": [
+      "Penetrate",
+      "Hit"
+     ],
+     "S3": [
+      "Slash",
+      "Penetrate",
+      "Hit"
+     ]
+    },
+    "smear": [
+     "move",
+     "S1",
+     "S2",
+     "S3"
+    ],
+    "idle_time": 2.4,
+    "stands": 4.1
+   },
+   "moves": {
+    "1": {
+     "lor_dice": 403006,
+     "attributeType": "AMBER",
+     "coins": [
+      0
+     ]
+    },
+    "2": {
+     "lor_dice": 403004,
+     "attributeType": "AMBER",
+     "coins": [
+      0,
+      0
+     ]
+    },
+    "3": {
+     "lor_dice": 403003,
+     "attributeType": "SHAMROCK",
+     "coins": [
+      0,
+      0
+     ]
+    },
+    "defense": {
+     "lor_dice": 403003,
+     "attributeType": "AMBER",
+     "coins": [
+      0
+     ]
+    }
+   },
+   "texts": {
+    "1": {
+     "lor_card": 403006
+    },
+    "2": {
+     "lor_card": 403004
+    },
+    "3": {
+     "lor_card": 403003
+    },
+    "defense": {
+     "lor_card": 403003
+    }
+   }
+  },
+  "salvador-ruina": {
+   "identity": 11230,
+   "base": 11201,
+   "roster": true,
+   "tested": false,
+   "name": "Salvador",
+   "game_title": "Dawn Office\nRepresentative",
+   "title": "Salvador (Ruina) - Dawn Office Representative",
+   "becomes": "Salvador of Library of Ruina as an identity of their own: own body, own skills, their Ruina pages as the kit",
+   "own_body": true,
+   "own_skills": true,
+   "lor": {
+    "bundle": "char/char_576.pres",
+    "prefab": "Salvador",
+    "map": {
+     "idle": [
+      "Default",
+      "Standing"
+     ],
+     "move": [
+      "Move"
+     ],
+     "gud": [
+      "Guard"
+     ],
+     "miss": [
+      "Evade"
+     ],
+     "dmg": [
+      "Damaged"
+     ],
+     "dead": [
+      "Damaged"
+     ],
+     "S1": [
+      "Slash"
+     ],
+     "S2": [
+      "Penetrate",
+      "Hit"
+     ],
+     "S3": [
+      "Slash",
+      "Penetrate",
+      "Hit"
+     ]
+    },
+    "smear": [
+     "move",
+     "S1",
+     "S2",
+     "S3"
+    ],
+    "idle_time": 2.4,
+    "stands": 4.1
+   },
+   "moves": {
+    "1": {
+     "lor_dice": 403006,
+     "attributeType": "CRIMSON",
+     "coins": [
+      0
+     ]
+    },
+    "2": {
+     "lor_dice": 403005,
+     "attributeType": "SCARLET",
+     "coins": [
+      0
+     ]
+    },
+    "3": {
+     "lor_dice": 403001,
+     "attributeType": "SCARLET",
+     "coins": [
+      0,
+      0
+     ]
+    },
+    "defense": {
+     "lor_dice": 403001,
+     "attributeType": "CRIMSON",
+     "coins": [
+      0
+     ]
+    }
+   },
+   "texts": {
+    "1": {
+     "lor_card": 403006
+    },
+    "2": {
+     "lor_card": 403005
+    },
+    "3": {
+     "lor_card": 403001
+    },
+    "defense": {
+     "lor_card": 403001
+    }
+   }
+  },
+  "oscar-ruina": {
+   "identity": 11130,
+   "base": 11110,
+   "roster": true,
+   "tested": false,
+   "name": "Oscar",
+   "game_title": "Wedge Office\nRepresentative",
+   "title": "Oscar (Ruina) - Wedge Office Representative",
+   "becomes": "Oscar of Library of Ruina as an identity of their own: own body, own skills, their Ruina pages as the kit",
+   "own_body": true,
+   "own_skills": true,
+   "lor": {
+    "bundle": "char/char_546.pres",
+    "prefab": "Oscar",
+    "map": {
+     "idle": [
+      "Default",
+      "Standing"
+     ],
+     "move": [
+      "Move"
+     ],
+     "gud": [
+      "Guard"
+     ],
+     "miss": [
+      "Evade"
+     ],
+     "dmg": [
+      "Damaged"
+     ],
+     "dead": [
+      "Damaged"
+     ],
+     "S1": [
+      "Slash"
+     ],
+     "S2": [
+      "Penetrate",
+      "Hit"
+     ],
+     "S3": [
+      "Slash",
+      "Penetrate",
+      "Hit"
+     ]
+    },
+    "smear": [
+     "move",
+     "S1",
+     "S2",
+     "S3"
+    ],
+    "idle_time": 2.4,
+    "stands": 4.1
+   },
+   "moves": {
+    "1": {
+     "lor_dice": 408005,
+     "attributeType": "INDIGO",
+     "coins": [
+      0,
+      0
+     ]
+    },
+    "2": {
+     "lor_dice": 408002,
+     "attributeType": "INDIGO",
+     "coins": [
+      0,
+      0
+     ]
+    },
+    "3": {
+     "lor_dice": 408001,
+     "attributeType": "AZURE",
+     "coins": [
+      0,
+      0,
+      0,
+      0
+     ]
+    },
+    "defense": {
+     "lor_dice": 408001,
+     "attributeType": "INDIGO",
+     "coins": [
+      0
+     ]
+    }
+   },
+   "texts": {
+    "1": {
+     "lor_card": 408005
+    },
+    "2": {
+     "lor_card": 408002
+    },
+    "3": {
+     "lor_card": 408001
+    },
+    "defense": {
+     "lor_card": 408001
+    }
+   }
+  },
+  "pamela-ruina": {
+   "identity": 10330,
+   "base": 10309,
+   "roster": true,
+   "tested": false,
+   "name": "Pamela",
+   "game_title": "Wedge Office\nFixer",
+   "title": "Pamela (Ruina) - Wedge Office Fixer",
+   "becomes": "Pamela of Library of Ruina as an identity of their own: own body, own skills, their Ruina pages as the kit",
+   "own_body": true,
+   "own_skills": true,
+   "lor": {
+    "bundle": "char/char_550.pres",
+    "prefab": "Pamela",
+    "map": {
+     "idle": [
+      "Default",
+      "Standing"
+     ],
+     "move": [
+      "Move"
+     ],
+     "gud": [
+      "Guard"
+     ],
+     "miss": [
+      "Evade"
+     ],
+     "dmg": [
+      "Damaged"
+     ],
+     "dead": [
+      "Damaged"
+     ],
+     "S1": [
+      "Slash"
+     ],
+     "S2": [
+      "Penetrate",
+      "Hit"
+     ],
+     "S3": [
+      "Slash",
+      "Penetrate",
+      "Hit"
+     ]
+    },
+    "smear": [
+     "move",
+     "S1",
+     "S2",
+     "S3"
+    ],
+    "idle_time": 2.4,
+    "stands": 4.1
+   },
+   "moves": {
+    "1": {
+     "lor_dice": 408005,
+     "attributeType": "INDIGO",
+     "coins": [
+      0,
+      0
+     ]
+    },
+    "2": {
+     "lor_dice": 408004,
+     "attributeType": "AZURE",
+     "coins": [
+      0,
+      0,
+      0
+     ]
+    },
+    "3": {
+     "lor_dice": 408003,
+     "attributeType": "INDIGO",
+     "coins": [
+      0,
+      0,
+      0,
+      0
+     ]
+    },
+    "defense": {
+     "lor_dice": 408005,
+     "attributeType": "AZURE",
+     "coins": [
+      0
+     ]
+    }
+   },
+   "texts": {
+    "1": {
+     "lor_card": 408005
+    },
+    "2": {
+     "lor_card": 408004
+    },
+    "3": {
+     "lor_card": 408003
+    },
+    "defense": {
+     "lor_card": 408005
+    }
+   }
+  },
+  "pameli-ruina": {
+   "identity": 10430,
+   "base": 10410,
+   "roster": true,
+   "tested": false,
+   "name": "Pameli",
+   "game_title": "Wedge Office\nFixer",
+   "title": "Pameli (Ruina) - Wedge Office Fixer",
+   "becomes": "Pameli of Library of Ruina as an identity of their own: own body, own skills, their Ruina pages as the kit",
+   "own_body": true,
+   "own_skills": true,
+   "lor": {
+    "bundle": "char/char_551.pres",
+    "prefab": "Pameli",
+    "map": {
+     "idle": [
+      "Default",
+      "Standing"
+     ],
+     "move": [
+      "Move"
+     ],
+     "gud": [
+      "Guard"
+     ],
+     "miss": [
+      "Evade"
+     ],
+     "dmg": [
+      "Damaged"
+     ],
+     "dead": [
+      "Damaged"
+     ],
+     "S1": [
+      "Slash"
+     ],
+     "S2": [
+      "Penetrate",
+      "Hit"
+     ],
+     "S3": [
+      "Slash",
+      "Penetrate",
+      "Hit"
+     ]
+    },
+    "smear": [
+     "move",
+     "S1",
+     "S2",
+     "S3"
+    ],
+    "idle_time": 2.4,
+    "stands": 4.1
+   },
+   "moves": {
+    "1": {
+     "lor_dice": 408005,
+     "attributeType": "AZURE",
+     "coins": [
+      0,
+      0
+     ]
+    },
+    "2": {
+     "lor_dice": 408004,
+     "attributeType": "INDIGO",
+     "coins": [
+      0,
+      0,
+      0
+     ]
+    },
+    "3": {
+     "lor_dice": 408003,
+     "attributeType": "AZURE",
+     "coins": [
+      0,
+      0,
+      0
+     ]
+    },
+    "defense": {
+     "lor_dice": 408005,
+     "attributeType": "INDIGO",
+     "coins": [
+      0,
+      0
+     ]
+    }
+   },
+   "texts": {
+    "1": {
+     "lor_card": 408005
+    },
+    "2": {
+     "lor_card": 408004
+    },
+    "3": {
+     "lor_card": 408003
+    },
+    "defense": {
+     "lor_card": 408005
+    }
+   }
   }
  },
  "kits": {

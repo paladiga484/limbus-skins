@@ -1,0 +1,70 @@
+{
+ "bundle": "char/char_576.pres",
+ "head": null,
+ "poses": {
+  "Damaged": {
+   "file": "Damaged.png",
+   "pivot": [
+    0.556675,
+    0.007519
+   ]
+  },
+  "Default": {
+   "file": "Default.png",
+   "pivot": [
+    0.585903,
+    0.008081
+   ]
+  },
+  "Evade": {
+   "file": "Evade.png",
+   "pivot": [
+    0.649789,
+    0.022
+   ]
+  },
+  "Guard": {
+   "file": "Guard.png",
+   "pivot": [
+    0.752089,
+    -0.010638
+   ]
+  },
+  "Hit": {
+   "file": "Hit.png",
+   "pivot": [
+    0.369811,
+    -0.01199
+   ]
+  },
+  "Move": {
+   "file": "Move.png",
+   "pivot": [
+    0.486998,
+    -0.016667
+   ]
+  },
+  "Penetrate": {
+   "file": "Penetrate.png",
+   "pivot": [
+    0.753555,
+    -0.009412
+   ]
+  },
+  "Slash": {
+   "file": "Slash.png",
+   "pivot": [
+    0.681716,
+    0.279635
+   ]
+  },
+  "Standing": {
+   "file": "Standing.png",
+   "pivot": [
+    0.585903,
+    0.008081
+   ]
+  }
+ },
+ "prefab": "Salvador"
+}

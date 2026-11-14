@@ -251,20 +251,37 @@ def own_body(s, skins, game_dir, cache, data_dir, built_root, log=print):
         return have[bodies[b]]
 
     donor = game.boss_data(cache)[0][s["base"]]["appearance"]
-    name = ownbody.appearance_name(s["identity"], s.get("name") or s["key"])
-    raw, notes = repaint.repaint(donor, locate, lor=src["lor"], aura=src.get("aura"))
-    findings = audit.body(locate(donor), raw, donor)
-    if findings:
-        raise repaint.RepaintError("audit: " + "; ".join(findings))
     out = os.path.join(built_root, s["key"] + BODY)
     shutil.rmtree(out, ignore_errors=True)
     os.makedirs(out)
-    with open(os.path.join(out, name + ".bundle"), "wb") as f:
-        f.write(ownbody.own(raw, donor, name))
+
+    def one(lor_spec, word):
+        name = ownbody.appearance_name(s["identity"], word)
+        raw, notes = repaint.repaint(donor, locate, lor=lor_spec, aura=src.get("aura"))
+        findings = audit.body(locate(donor), raw, donor)
+        if findings:
+            raise repaint.RepaintError("audit: " + "; ".join(findings))
+        with open(os.path.join(out, name + ".bundle"), "wb") as f:
+            f.write(ownbody.own(raw, donor, name))
+        return name, notes
+
+    word = s.get("name") or s["key"]
+    name, notes = one(src["lor"], word)
+    bodies_ = [{"appearance": name, "file": name + ".bundle", "fallback": donor}]
+    man = {"format": FORMAT, "kind": "body", "skins": [s["key"]], "notes": notes, "bodies": bodies_}
+    ev = s.get("evolves") or {}
+    if ev.get("lor"):                               # what it becomes mid-fight: a second body of its own
+        hp = ev.get("hp", 50)
+        if not isinstance(hp, int) or not 1 <= hp <= 99:
+            raise ValueError("evolves: hp must be a percent, 1-99")
+        later, more = one(ev["lor"], word + " " + (ev.get("word") or "Evolved"))
+        bodies_.append({"appearance": later, "file": later + ".bundle", "fallback": donor})
+        man["shift"] = {"from": name, "to": later, "hp": hp}
+        man["notes"] = notes + [f"below {hp}% HP: {later} ({more[0] if more else 'drawn'})"]
     with open(os.path.join(out, "manifest.json"), "w", encoding="utf-8") as f:
-        json.dump({"format": FORMAT, "kind": "body", "skins": [s["key"]], "notes": notes,
-                   "bodies": [{"appearance": name, "file": name + ".bundle", "fallback": donor}]}, f, indent=1)
-    log(f"  ok   {s['key']}: its own body {name} ({notes[0] if notes else 'drawn'})")
+        json.dump(man, f, indent=1)
+    log(f"  ok   {s['key']}: its own body {name} ({notes[0] if notes else 'drawn'})"
+        + (f", then {man['shift']['to']} below {man['shift']['hp']}% HP" if man.get("shift") else ""))
     return name
 
 
@@ -468,6 +485,7 @@ def build(keys, game_dir, cache, data_dir, log=print, boss=(), static=True):
                         clones.pop(s["identity"], None)
                         folders.pop(s["identity"], None)
                 boss_notes[s["key"]] = f"skills unchanged ({e or 'no boss record'})"
+                log(f"  FAIL {s['key']}: its kit: {e or 'no boss record'} (its skills stay as they were)")
                 continue
             skill_swaps.update(mine_skills)
             texts.update(mine_texts)

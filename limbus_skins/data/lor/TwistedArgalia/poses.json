@@ -1,0 +1,21 @@
+{
+ "bundle": "char/char_678.pres",
+ "head": null,
+ "poses": {
+  "Default": {
+   "file": "Default.png",
+   "pivot": [
+    0.262136,
+    0.110193
+   ]
+  },
+  "Standing": {
+   "file": "Standing.png",
+   "pivot": [
+    0.262136,
+    0.110193
+   ]
+  }
+ },
+ "prefab": "TwistedArgalia"
+}
