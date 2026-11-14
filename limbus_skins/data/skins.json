@@ -4254,6 +4254,78 @@
      "lor_card": 408005
     }
    }
+  },
+  "philip-limbus": {
+   "identity": 11031,
+   "base": 11001,
+   "roster": true,
+   "tested": false,
+   "name": "Philip",
+   "game_title": "Dawn Office\nFixer",
+   "source": "1582_PhilipAppearance",
+   "unit": 1582,
+   "title": "Philip (Limbus) - Dawn Office Fixer",
+   "becomes": "Philip as Limbus Company draws them: the boss's own body and whole moveset, as an identity of their own"
+  },
+  "yuna-limbus": {
+   "identity": 10231,
+   "base": 10201,
+   "roster": true,
+   "tested": false,
+   "name": "Yuna",
+   "game_title": "Dawn Office\nFixer",
+   "source": "1581_YunaAppearance",
+   "unit": 1581,
+   "title": "Yuna (Limbus) - Dawn Office Fixer",
+   "becomes": "Yuna as Limbus Company draws them: the boss's own body and whole moveset, as an identity of their own"
+  },
+  "salvador-limbus": {
+   "identity": 11231,
+   "base": 11201,
+   "roster": true,
+   "tested": false,
+   "name": "Salvador",
+   "game_title": "Dawn Office\nRepresentative",
+   "source": "1580_SalvadorAppearance",
+   "unit": 1580,
+   "title": "Salvador (Limbus) - Dawn Office Representative",
+   "becomes": "Salvador as Limbus Company draws them: the boss's own body and whole moveset, as an identity of their own"
+  },
+  "oscar-limbus": {
+   "identity": 11131,
+   "base": 11101,
+   "roster": true,
+   "tested": false,
+   "name": "Oscar",
+   "game_title": "Wedge Office\nRepresentative",
+   "source": "1583_OscarAppearance",
+   "unit": 1583,
+   "title": "Oscar (Limbus) - Wedge Office Representative",
+   "becomes": "Oscar as Limbus Company draws them: the boss's own body and whole moveset, as an identity of their own"
+  },
+  "pamela-limbus": {
+   "identity": 10331,
+   "base": 10301,
+   "roster": true,
+   "tested": false,
+   "name": "Pamela",
+   "game_title": "Wedge Office\nFixer",
+   "source": "1585_PamelaAppearance",
+   "unit": 1585,
+   "title": "Pamela (Limbus) - Wedge Office Fixer",
+   "becomes": "Pamela as Limbus Company draws them: the boss's own body and whole moveset, as an identity of their own"
+  },
+  "pameli-limbus": {
+   "identity": 10431,
+   "base": 10402,
+   "roster": true,
+   "tested": false,
+   "name": "Pameli",
+   "game_title": "Wedge Office\nFixer",
+   "source": "1584_PamelyAppearance",
+   "unit": 1584,
+   "title": "Pameli (Limbus) - Wedge Office Fixer",
+   "becomes": "Pameli as Limbus Company draws them: the boss's own body and whole moveset, as an identity of their own"
   }
  },
  "kits": {
