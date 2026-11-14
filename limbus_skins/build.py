@@ -11,7 +11,7 @@ import os
 import shutil
 from importlib import resources
 
-from . import art, audit, bundle, cards, covers, game, helpers, lortext, repaint, tint
+from . import art, audit, bundle, cards, covers, game, helpers, lortext, ownbody, repaint, tint
 
 FORMS = ".forms"  # built/<skin>.forms: another body a skin turns into, swapped in apart from it
 CARD = ".card"    # built/<skin>.card: the identity's card pictures, when they aren't in its body's file
@@ -187,6 +187,40 @@ def _write(out_dir, cache, stock_path, raw):
     return rel
 
 
+BODY = ".body"
+
+
+def own_body(s, skins, game_dir, cache, data_dir, built_root, log=print):
+    """Build identity s's own body (built/<key>.body): its character's Library of Ruina drawings
+    on its base's body, under its own appearance name (ownbody). Returns that name."""
+    src = skins[character(skins, s["key"])] if not s.get("lor") else s
+    if not src.get("lor"):
+        raise ValueError("a body of its own is drawn from Library of Ruina poses; its character has none")
+    bodies, have = game.body_index(game_dir, cache, os.path.join(data_dir, "bodies.json"), log=log)
+
+    def locate(b):
+        if bodies.get(b) not in have:
+            raise repaint.RepaintError(f"{b} is not in the game's cache")
+        return have[bodies[b]]
+
+    donor = game.boss_data(cache)[0][s["base"]]["appearance"]
+    name = ownbody.appearance_name(s["identity"], s.get("name") or s["key"])
+    raw, notes = repaint.repaint(donor, locate, lor=src["lor"], aura=src.get("aura"))
+    findings = audit.body(locate(donor), raw, donor)
+    if findings:
+        raise repaint.RepaintError("audit: " + "; ".join(findings))
+    out = os.path.join(built_root, s["key"] + BODY)
+    shutil.rmtree(out, ignore_errors=True)
+    os.makedirs(out)
+    with open(os.path.join(out, name + ".bundle"), "wb") as f:
+        f.write(ownbody.own(raw, donor, name))
+    with open(os.path.join(out, "manifest.json"), "w", encoding="utf-8") as f:
+        json.dump({"format": FORMAT, "kind": "body", "skins": [s["key"]], "notes": notes,
+                   "bodies": [{"appearance": name, "file": name + ".bundle", "fallback": donor}]}, f, indent=1)
+    log(f"  ok   {s['key']}: its own body {name} ({notes[0] if notes else 'drawn'})")
+    return name
+
+
 def skill_edits(keys, skins, boss=()):
     """The skins among keys whose records go into the static-data bundle: boss forms (boss skins,
     and repaints of a boss with boss on), and skins that recolor a skill's sin, rewrite its moves
@@ -212,6 +246,14 @@ def build(keys, game_dir, cache, data_dir, log=print, boss=(), static=True):
     want_boss = [skins[k] for k in sorted(skill_edits(keys, skins, boss))] if static else []
     want_fights = [skins[k] for k in keys if static and skins[k]["kind"] == "fight"]
     record_edits = fight_edits(want_fights)
+    # bodies of their own, first: an identity whose body didn't build keeps its base's
+    for s_ in [x for x in want_ids if x.get("own_body")]:
+        try:
+            record_edits.setdefault("personality", {})[s_["identity"]] = {
+                "appearance": own_body(s_, skins, game_dir, cache, data_dir, built_root, log)}
+        except (repaint.RepaintError, ownbody.OwnBodyError, RuntimeError, KeyError, OSError, ValueError) as e:
+            shutil.rmtree(os.path.join(built_root, s_["key"] + BODY), ignore_errors=True)
+            log(f"  FAIL {s_['key']}: its own body: {e} (it wears its base's)")
     forms = [s for s in want_boss if s["kind"] == "boss"]     # boss skins: nothing but the static file
     if want or want_boss or want_ids or want_fights:
         swaps, skill_swaps, bad, boss_ok, kit_notes, green, passives, texts, stats = {}, {}, [], [], {}, set(), {}, {}, {}
@@ -447,7 +489,7 @@ def build(keys, game_dir, cache, data_dir, log=print, boss=(), static=True):
                     raw, notes = repaint.repaint(
                         target, locate, source=None if s.get("self") else s.get("source"),
                         clips=s.get("clips"), mapping=s.get("map"),
-                        head=_head(s, data_dir), mirror=s.get("mirror", True), dash=s.get("dash"),
+                        head=_head(s, data_dir), mirror=s.get("mirror", None if s.get("lor") else True), dash=s.get("dash"),
                         forms=s.get("forms"), lor=s.get("lor"), aura=s.get("aura"))
                 if s.get("card"):                   # its card, where the card pictures share the body's file
                     try:
@@ -504,9 +546,9 @@ def build(keys, game_dir, cache, data_dir, log=print, boss=(), static=True):
             os.makedirs(out)
             rels, notes = [], []
             for app, spec in sorted(s["bodies"].items()):
-                # an enemy faces the sinners: the source as drawn (Ruina's face that way), not turned
+                # which way its drawings face is the body's own to say (repaint.drawn_mirrored)
                 raw, n = repaint.repaint(app, locate_, lor=spec.get("lor"), aura=spec.get("aura"),
-                                         mirror=spec.get("mirror", False))
+                                         mirror=spec.get("mirror"))
                 findings = audit.body(locate_(app), raw, app)
                 if findings:
                     raise repaint.RepaintError(f"audit of {app}: " + "; ".join(findings))

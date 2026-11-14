@@ -48,11 +48,12 @@ def _about(m, k, ax, ay):
     return (k * m[0], k * m[1], k * m[2], k * m[3], ax + k * (m[4] - ax), ay + k * (m[5] - ay))
 
 
-def poses(bundle, prefix, ppu=100, head=None):
+def poses(bundle, prefix, ppu=100, head=None, only=None):
     """{motion: (RGBA image, (pivot x, pivot y))} for every GameObject named <prefix>_<motion>.
     The pivot is the character's origin (its feet), as a fraction of the image, bottom-up.
     head = {"parts": [child names], "neck": child name, "scale": k} shrinks those parts about
-    the neck's centre: Library of Ruina draws big chibi heads that sit oddly on a sinner."""
+    the neck's centre: Library of Ruina draws big chibi heads that sit oddly on a sinner.
+    only: just these motions."""
     from PIL import Image
     env = unitypy().load(bundle)
     objs = {o.path_id: o for o in env.objects}
@@ -68,7 +69,7 @@ def poses(bundle, prefix, ppu=100, head=None):
         if not go["m_Name"].startswith(prefix + "_"):
             continue
         motion = go["m_Name"][len(prefix) + 1:]
-        if motion in out:
+        if motion in out or (only is not None and motion not in only):
             continue
         parts = []
 
@@ -209,15 +210,22 @@ def shipped_poses(bundle, prefab, head):
     return out
 
 
+def stands(spec, height=2.6):
+    """How tall, in units, a "lor" entry's character stands on a body that stood `height`:
+    its own "stands" when it names one (the Small Bird is small on any body), times "scale"."""
+    return float(spec.get("stands") or height) * float(spec.get("scale", 1.0))
+
+
 def source_table(spec, height=2.6):
     """repaint()'s source table from a skins.json "lor" entry: {"bundle", "prefab", "map":
     {kind: [motion, ...]}, "smear": [kind, ...], "sources": {name: {"bundle", "prefab"}},
-    "head": {...} (see poses), "idle_time": seconds per idle cycle}.
+    "head": {...} (see poses), "idle_time": seconds per idle cycle, "stands": units tall,
+    "scale": times that}.
     A motion written "name:Motion" comes from that extra source (e.g. the character's E.G.O.
-    form for one skill). Each source's pixels per unit make its standing pose `height` units
-    tall from the feet up (times "scale"), so every form stands as tall as the identity it
-    replaces."""
-    height *= float(spec.get("scale", 1.0))
+    form for one skill). Each source's pixels per unit make its standing pose stands() units
+    tall from the feet up, so every form stands as tall as the identity it replaces unless
+    the entry says how tall."""
+    height = stands(spec, height)
     sources = {"": (spec["bundle"], spec["prefab"])}
     sources.update({n: (v["bundle"], v["prefab"]) for n, v in spec.get("sources", {}).items()})
     loaded = {}

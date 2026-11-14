@@ -2909,13 +2909,14 @@
   "binah-id": {
    "identity": 10993,
    "base": 10901,
-   "becomes": "Binah as an identity of her own (Rodion's slot), with Binah's kit, wearing what 10901 wears",
+   "becomes": "Binah as an identity of her own (Rodion's slot), with Binah's kit and a body of her own",
    "tested": false,
    "title": "Binah, an identity of her own - Rodion",
    "name": "Binah",
    "dupe_of": "binah",
    "cover_art": "binah",
-   "game_title": "Floor of\nPhilosophy"
+   "game_title": "Floor of\nPhilosophy",
+   "own_body": true
   },
   "ayin-id": {
    "identity": 11293,
@@ -3577,6 +3578,11 @@
         "Peck_down3",
         "Peck_ahead3"
        ]
+      },
+      "stands": 1.1,
+      "anchors": {
+       "center": 0.55,
+       "height": 2.4
       }
      }
     }

@@ -471,9 +471,11 @@ def rewrite_static(static_path, swaps, skill_swaps=None, clones=None, passive_sw
     def edit(kind, doc, i, x):
         """Apply this record's edits in place; True when anything changed."""
         mine = record_edits.get(kind, {}).get(x.get("id"))
-        if mine:
+        if mine:                                    # its own fields first; its swaps and stats still go on
             set_fields(x, mine)
-            return True
+        return of_kind(kind, doc, i, x) or bool(mine)
+
+    def of_kind(kind, doc, i, x):
         if kind == "personality":
             h = swaps.get(x.get("id"))
             hit = False

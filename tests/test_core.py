@@ -1947,6 +1947,47 @@ class LibraryOfRuina(unittest.TestCase):
         self.assertEqual((s.m_PixelsToUnits, px, py), (100, 0.5, 0.0))
 
 
+class OwnBodies(unittest.TestCase):
+    def test_names_and_paths_are_what_the_client_patch_asks_for(self):
+        from limbus_skins import ownbody
+        self.assertEqual(ownbody.appearance_name(10993, "Binah"), "10993_BinahAppearance")
+        self.assertEqual(ownbody.appearance_name(10410, "the red mist"), "10410_TheRedMistAppearance")
+        self.assertEqual(ownbody.asset_path("10993_BinahAppearance"), "assets/myosotis/10993_binahappearance.prefab")
+        self.assertRegex(ownbody.cab_name("10993_BinahAppearance"), r"^CAB-[0-9a-f]{32}$")
+        self.assertNotEqual(ownbody.cab_name("a"), ownbody.cab_name("b"))
+        with self.assertRaises(ownbody.OwnBodyError):
+            ownbody.appearance_name(1, "!!!")
+
+    def test_the_session_lists_only_live_bodies_with_plain_names(self):
+        from limbus_skins import client
+        with tempfile.TemporaryDirectory() as d:
+            for key, bodies in (("a-id", [{"appearance": "1_AAppearance", "file": "1_AAppearance.bundle", "fallback": "10101_YiSang_BaseAppearance"}]),
+                                ("b-id", [{"appearance": "2_BAppearance", "file": "2_BAppearance.bundle"}]),
+                                ("c-id", [{"appearance": "../x", "file": "../x.bundle"}, {"appearance": "3_C", "file": "other.bundle"}])):
+                out = os.path.join(d, "built", key + ".body")
+                os.makedirs(out)
+                for b in bodies:
+                    if "/" not in b["file"]:
+                        open(os.path.join(out, b["file"]), "wb").close()
+                with open(os.path.join(out, "manifest.json"), "w") as f:
+                    json.dump({"kind": "body", "skins": [key], "bodies": bodies}, f)
+            got = client.own_bodies(d, {"a-id", "c-id"})
+            self.assertEqual([(a, f, fb) for a, f, _, fb in got], [("1_AAppearance", "1_AAppearance.bundle", "10101_YiSang_BaseAppearance")])
+            self.assertEqual(client.bodies_file(got), "1_AAppearance\tbodies\\1_AAppearance.bundle\t10101_YiSang_BaseAppearance\n")
+
+    def test_a_ruina_character_stands_as_tall_as_its_entry_says(self):
+        from limbus_skins import lor
+        self.assertEqual(lor.stands({}, 4.0), 4.0)
+        self.assertEqual(lor.stands({"scale": 0.5}, 4.0), 2.0)
+        self.assertEqual(lor.stands({"stands": 1.1}, 6.49), 1.1)
+
+    def test_a_records_own_fields_do_not_stop_its_other_edits(self):
+        from limbus_skins import helpers
+        x = {"id": 5, "a": 1}
+        helpers.set_fields(x, {"appearance": "5_XAppearance"})
+        self.assertEqual(x["appearance"], "5_XAppearance")
+
+
 class ClientPatch(unittest.TestCase):
     """limbus_skins.client: the client patch's settings for what was swapped in."""
     INI = "[myosotis]\ntoken=my-save\nserver=http://127.0.0.1:3000/\nlog_level=1\n"

@@ -128,6 +128,33 @@ def fight_music(data_dir, live):
     return out
 
 
+BODY_NAME = re.compile(r"[A-Za-z0-9_]{1,96}")
+
+
+def own_bodies(data_dir, live):
+    """[(appearance, file name, path, fallback)] for the bodies of their own (built/<skin>.body)
+    of the skins in live: the client patch loads each from <its folder>/bodies/."""
+    out = []
+    for man in sorted(glob.glob(os.path.join(data_dir, "built", "*.body", "manifest.json"))):
+        m = _json(man)
+        if m.get("kind") != "body" or not set(m.get("skins") or []) & live:
+            continue
+        for b in m.get("bodies") or []:
+            app, name, fb = (b.get("appearance"), b.get("file"), b.get("fallback") or "") if isinstance(b, dict) else (None,) * 3
+            if not (isinstance(app, str) and BODY_NAME.fullmatch(app) and name == app + ".bundle"
+                    and isinstance(fb, str) and (not fb or BODY_NAME.fullmatch(fb))):
+                continue
+            path = os.path.join(os.path.dirname(man), name)
+            if os.path.isfile(path):
+                out.append((app, name, path, fb))
+    return out
+
+
+def bodies_file(entries):
+    """bodies.txt: <appearance> TAB bodies\\<file> TAB <stock appearance to fall back on>."""
+    return "".join(f"{a}\tbodies\\{f}\t{fb}\n" for a, f, _, fb in entries)
+
+
 def allynames_file(entries):
     """allynames.txt: <id> TAB <folder's title> TAB <folder's name> TAB <its own title> (\\n for a line
     break) - AllyFacePatch swaps each of the game's words for the identity's own."""
@@ -317,6 +344,9 @@ def configure(folder, data_dir, on=True):
     music = fight_music(data_dir, live) if on else []
     _replace(os.path.join(folder, "fights.txt"), "".join(f"{r}\t{d}\tmusic\\{n}\n" for r, d, n, _ in music))
     _sync(os.path.join(folder, "music"), {n: p for _, _, n, p in music})
+    bodies = own_bodies(data_dir, live) if on else []
+    _replace(os.path.join(folder, "bodies.txt"), bodies_file(bodies))
+    _sync(os.path.join(folder, "bodies"), {f: p for _, f, p, _ in bodies})
     from . import title
     _sync(os.path.join(folder, "title"), title.files(data_dir) if on else {})
     return True

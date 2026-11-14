@@ -759,6 +759,74 @@ def standing_height(env, ids, fallback=2.6):
     return best or fallback
 
 
+def _hierarchy(env, ids):
+    """({transform id: its typetree}, {transform id: its GameObject's name}) for a body's objects."""
+    by = {o.path_id: o for o in env.objects}
+    trs = {o.path_id: o.read_typetree() for o in env.objects if o.type.name == "Transform" and o.path_id in ids}
+    names = {}
+    for i, t in trs.items():
+        go = by.get(t["m_GameObject"]["m_PathID"])
+        names[i] = go.read_typetree()["m_Name"] if go is not None else ""
+    return trs, names
+
+
+def drawn_mirrored(env, ids):
+    """Does the body draw its frames mirrored - a negative x scale on the way down to its
+    [SpRenderer], or that renderer's own flipX? The game stands every body facing right and
+    turns the enemies round itself, so a body that mirrors holds drawings that face left and
+    one that doesn't holds drawings that face right (the Twilight Small Bird came out flipped
+    on the one enemy body of four that doesn't). Its idle skeleton has to agree."""
+    trs, names = _hierarchy(env, ids)
+
+    def sign(i):
+        k = 1
+        while i in trs:
+            if trs[i]["m_LocalScale"]["x"] < 0:
+                k = -k
+            i = trs[i]["m_Father"]["m_PathID"]
+        return k
+
+    of_go = {t["m_GameObject"]["m_PathID"]: i for i, t in trs.items()}
+    frames = set()
+    for o in env.objects:
+        if o.type.name != "SpriteRenderer" or o.path_id not in ids:
+            continue
+        r = o.read_typetree()
+        i = of_go.get(r["m_GameObject"]["m_PathID"])
+        if i is not None and names[i] == "[SpRenderer]":
+            frames.add(-sign(i) if r.get("m_FlipX") else sign(i))
+    idle = {sign(i) for i, n in names.items() if n.startswith("Spine GameObject")}
+    if len(frames) > 1 or (frames and idle and idle != frames):
+        raise RepaintError("its frames and its idle skeleton face different ways - pick another body")
+    return (frames or idle or {1}) == {-1}
+
+
+ANCHORS = {"center": "[Transform]CharacterCenterPoint", "height": "[Transform]CharacterHeightPoint"}
+
+
+def set_anchors(env, ids, center=None, height=None, scale=None):
+    """Move the two points the game hangs a unit's UI on (its middle: hits and the targeting
+    line; above its head: skill slots and numbers) - to the heights given, in the body's own
+    units from its feet, or each by `scale` (a body redrawn smaller or taller than it stood).
+    Returns a note."""
+    trs, names = _hierarchy(env, ids)
+    by = {o.path_id: o for o in env.objects}
+    moved = []
+    for key, want in (("center", center), ("height", height)):
+        for i, n in names.items():
+            if n != ANCHORS[key]:
+                continue
+            t = trs[i]
+            y = float(want) if want is not None else t["m_LocalPosition"]["y"] * float(scale or 1.0)
+            if abs(y - t["m_LocalPosition"]["y"]) > 1e-6:
+                t["m_LocalPosition"]["y"] = y
+                by[i].save_typetree(t)
+            moved.append(f"{key} {y:.2f}")
+    if len(moved) != 2:
+        raise RepaintError("the body has no centre and height points to move")
+    return "UI points: " + ", ".join(moved)
+
+
 def _load_source(source, locate, clips, mapping, dash, notes):
     """(drawing table, special-motion table, idle rigs) of the character `source`."""
     UnityPy = unitypy()
@@ -778,13 +846,18 @@ def _load_source(source, locate, clips, mapping, dash, notes):
     return src, special, rigs
 
 
-def repaint(target, locate, source=None, clips=None, mapping=None, head=None, mirror=True, dash=None, forms=None,
+def repaint(target, locate, source=None, clips=None, mapping=None, head=None, mirror=None, dash=None, forms=None,
             lor=None, aura=None):
     """Repaint body `target` (from `source`'s drawings, or its own with a `head` recipe).
     forms = {another body of the identity: {"source", "clips", "map"}} draws that body
     (e.g. Wild Hunt mounted) from its own source. locate(body name) -> path of the cached
     bundle holding it. Returns (bundle bytes, notes). The bytes still need bundle.forge()
-    to carry the stock CRC. aura: see aura.py."""
+    to carry the stock CRC. aura: see aura.py.
+    mirror: turn the source's drawings round. None decides it: a Library of Ruina source
+    (they face left) is turned exactly when the body holds drawings that face right
+    (drawn_mirrored); another identity's drawings are turned, as they always were.
+    A Ruina source's "stands"/"scale" also move the body's UI points ("anchors": {"center",
+    "height"} says where; else they move in proportion)."""
     notes = []
     UnityPy = unitypy()
     from PIL import Image
@@ -810,6 +883,8 @@ def repaint(target, locate, source=None, clips=None, mapping=None, head=None, mi
         raise RepaintError(f"{target} draws its moves in layers of parts; a repaint would leave them "
                            "round the new drawings - pick another identity")
     stands = standing_height(tenv, tobjs)                # before its sprites are redrawn
+    if mirror is None:
+        mirror = not drawn_mirrored(tenv, tobjs) if lor is not None else True
     if lor is not None:
         from . import lor as lormod
         try:
@@ -1085,6 +1160,11 @@ def repaint(target, locate, source=None, clips=None, mapping=None, head=None, mi
         names_ = {"move": "dash", "miss": "evade", "gud": "guard", "dmg": "hit", "dead": "death", "idle": "idle"}
         notes.append("source has no " + ", ".join(sorted(f"{names_.get(x.split('->')[0], x)} (uses its {names_.get(x.split('->')[1])})"
                                                         for x in borrowed)))
+    if lor is not None and (lor.get("stands") or lor.get("anchors") or float(lor.get("scale", 1.0)) != 1.0):
+        from . import lor as lormod
+        at = lor.get("anchors") or {}
+        notes.append(set_anchors(tenv, tobjs, at.get("center"), at.get("height"),
+                                 scale=lormod.stands(lor, stands) / stands if stands else 1.0))
     scale_note = "" if scale == 1 else f" (scaled {scale:.2f} to fit)"
     notes.insert(0, f"{len(plan)} frames from {len(rendered)} drawings{scale_note}")
     return tenv.file.save(packer="none"), notes
