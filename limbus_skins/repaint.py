@@ -1158,6 +1158,13 @@ def repaint(target, locate, source=None, clips=None, mapping=None, head=None, mi
                     raise RepaintError(f"{target}: its idle skeleton {sp['name']} couldn't be redrawn ({e})") from None
                 notes.append(f"idle {sp['name']} left as it is: {e}")
 
+    if lor is not None:                                  # whatever the body can stand idle as is the character now
+        for root in troots:
+            for sp in spine.body_spines(tenv, root):
+                slots = json.loads(spine.text_of(sp["skeleton"])).get("slots", [])
+                if not any(sl.get("name") == spine.SLOT for sl in slots):
+                    raise RepaintError(f"{target}: its idle skeleton {sp['name']} is still the game's own")
+
     if borrowed:
         names_ = {"move": "dash", "miss": "evade", "gud": "guard", "dmg": "hit", "dead": "death", "idle": "idle"}
         notes.append("source has no " + ", ".join(sorted(f"{names_.get(x.split('->')[0], x)} (uses its {names_.get(x.split('->')[1])})"
