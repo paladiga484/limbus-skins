@@ -1318,9 +1318,16 @@ def inv(m):
     return (ia, ib, ic, id_, -(ia * tx + ib * ty), -(ic * tx + id_ * ty))
 
 
-def body_spines(env, root_id):
+def body_spines(env, root_id, flagged=False):
     """For the body prefab rooted at root_id: [{skeleton, atlas, pages: {page name:
-    Texture2D reader}, scale, skin, to_skel (sprite-renderer space -> skeleton units)}]."""
+    Texture2D reader}, scale, skin, to_skel (sprite-renderer space -> skeleton units)}] - the
+    skeletons the body stands idle as (its CharacterAppearance's _spineSkins).
+    The game shows a body's first skeleton whenever it stands idle (ChangeMotion's Idle branch
+    asks only whether there is one with skeleton data), whether or not any of its motions is
+    marked isSpineAnim: the sinners' first identities mark none, and a repaint that went by the
+    mark left their idle the sinner's own (seen in fights: every body drawn on one stood as its
+    sinner). flagged=True keeps to the mark, for a *source's* rigs, so what older skins borrow
+    stays as it was."""
     objs = {o.path_id: o for o in env.objects}
     tt = lambda pid: objs[pid].read_typetree()  # noqa: E731
     parent = {}
@@ -1345,7 +1352,9 @@ def body_spines(env, root_id):
             t = o.read_typetree()
             if "motionList" in t:
                 app = t
-    if app is None or not any(m.get("isSpineAnim") for m in app["motionList"]):
+    if app is None or not app.get("_spineSkins"):
+        return []
+    if flagged and not any(m.get("isSpineAnim") for m in app["motionList"]):
         return []
     sr = tt(app["sprenderer_charactermotion"]["m_PathID"])
     m_sr = go_matrix(sr["m_GameObject"]["m_PathID"])

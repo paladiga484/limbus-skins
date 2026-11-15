@@ -832,7 +832,7 @@ def _load_source(source, locate, clips, mapping, dash, notes):
     UnityPy = unitypy()
     senv = UnityPy.load(locate(source))
     sobjs, sroots = prefab_objects(senv, source)
-    rigs = spine.body_spines(senv, sroots[0])                # the character's own idle rig, if it has one
+    rigs = spine.body_spines(senv, sroots[0], flagged=True)  # the character's own idle rig, if it has one
     smain = main_clips(senv, sroots[0])
     src = source_table(senv, sobjs, clips, mapping or {}, main=smain)
     special = special_table(senv, smain or sobjs, clips)
@@ -1154,6 +1154,8 @@ def repaint(target, locate, source=None, clips=None, mapping=None, head=None, mi
                 else:
                     notes.append(f"idle {sp['name']} left as it is")
             except spine.SpineError as e:
+                if lor is not None:                      # standing idle as the sinner, it is no Ruina body
+                    raise RepaintError(f"{target}: its idle skeleton {sp['name']} couldn't be redrawn ({e})") from None
                 notes.append(f"idle {sp['name']} left as it is: {e}")
 
     if borrowed:

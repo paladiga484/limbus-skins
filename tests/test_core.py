@@ -929,6 +929,69 @@ class Frames(unittest.TestCase):
         self.assertEqual([x.n for x in fx], ["skill1_2_e"])
 
 
+class IdleSkeletons(unittest.TestCase):
+    """spine.body_spines: the skeletons a body stands idle as."""
+
+    class Obj:
+        def __init__(self, pid, kind, tree, name=""):
+            self.path_id, self.type, self.tree, self.name = pid, type("T", (), {"name": kind})(), tree, name
+
+        def read_typetree(self):
+            return self.tree
+
+        def read(self):
+            return type("R", (), {"m_Name": self.name})()
+
+    def body(self, marked):
+        """A body as the game ships one: a sprite renderer for its moves, and under a pivot a
+        skeleton it stands idle as. `marked`: whether its Idle motion says isSpineAnim - newer
+        identities do, the sinners' first ones don't."""
+        ref = lambda i: {"m_FileID": 0, "m_PathID": i}  # noqa: E731
+        still = {"m_LocalPosition": {"x": 0, "y": 0, "z": 0}, "m_LocalRotation": {"x": 0, "y": 0, "z": 0, "w": 1},
+                 "m_LocalScale": {"x": 1, "y": 1, "z": 1}}
+        O = self.Obj
+        objs = [
+            O(1, "GameObject", {"m_Component": [{"component": ref(2)}, {"component": ref(3)}]}),
+            O(2, "Transform", dict(still, m_Children=[ref(6), ref(8)])),
+            O(3, "MonoBehaviour", {"motionList": [{"_motiondetail": 18, "isSpineAnim": int(marked)}, {"_motiondetail": 7, "isSpineAnim": 0}],
+                                   "_spineSkins": [ref(9), {"m_FileID": 0, "m_PathID": 0}], "sprenderer_charactermotion": ref(4)}),
+            O(4, "SpriteRenderer", {"m_GameObject": ref(5), "m_FlipX": 0, "m_FlipY": 0}),
+            O(5, "GameObject", {"m_Component": [{"component": ref(6)}, {"component": ref(4)}]}),
+            O(6, "Transform", dict(still, m_Children=[])),
+            O(7, "GameObject", {"m_Component": [{"component": ref(8)}, {"component": ref(9)}, {"component": ref(10)}]}),
+            O(8, "Transform", dict(still, m_Children=[])),
+            O(9, "MonoBehaviour", {"m_GameObject": ref(7), "_spine_Animation": ref(10)}),
+            O(10, "MonoBehaviour", {"m_GameObject": ref(7), "skeletonDataAsset": ref(11), "initialSkinName": "", "_animationName": "idle",
+                                    "timeScale": 1.0}),
+            O(11, "MonoBehaviour", {"m_Name": "skeleton_SkeletonData", "atlasAssets": [ref(12)], "scale": 0.5, "skeletonJSON": ref(15)}),
+            O(12, "MonoBehaviour", {"materials": [ref(13)], "atlasFile": ref(16)}),
+            O(13, "Material", {"m_SavedProperties": {"m_TexEnvs": [("_MainTex", {"m_Texture": ref(14)})],
+                                                     "m_Floats": [("_StraightAlphaInput", 0.0)]}}),
+            O(14, "Texture2D", {}, "09_rodion"),
+            O(15, "TextAsset", {}, "skeleton"),
+            O(16, "TextAsset", {}, "skeleton.atlas"),
+        ]
+        return type("Env", (), {"objects": objs})()
+
+    def test_a_body_stands_idle_as_its_skeleton_whether_or_not_a_motion_is_marked(self):
+        from limbus_skins import spine
+        for marked in (True, False):                    # the game asks only whether there is a skeleton
+            rigs = spine.body_spines(self.body(marked), 1)
+            self.assertEqual([(r["name"], r["animation"], sorted(r["textures"]), r["pma"]) for r in rigs],
+                             [("skeleton_SkeletonData", "idle", ["09_rodion"], True)], marked)
+
+    def test_a_sources_rig_still_goes_by_the_mark(self):
+        from limbus_skins import spine
+        self.assertEqual(len(spine.body_spines(self.body(True), 1, flagged=True)), 1)
+        self.assertEqual(spine.body_spines(self.body(False), 1, flagged=True), [])     # what older skins borrowed stays as it was
+
+    def test_a_body_with_no_skeleton_has_none(self):
+        from limbus_skins import spine
+        env = self.body(False)
+        env.objects[2].tree["_spineSkins"] = []
+        self.assertEqual(spine.body_spines(env, 1), [])
+
+
 class NoNetwork(unittest.TestCase):
     def test_commands_that_need_no_game_touch_no_network(self):
         real = socket.socket
