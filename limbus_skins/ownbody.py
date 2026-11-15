@@ -85,9 +85,9 @@ def own(raw, donor, appearance):
     g["m_Name"] = appearance
     root.save_typetree(g)
     for o, t in _char_infos(env):
-        # an older body carries its identity's number ("10901"); the game then dresses it as that
-        # identity from its own files - the donor's stock look, over our drawings (seen in a
-        # fight: every body with a number showed its donor, every one without showed ours)
+        # an older body carries its identity's number ("10901"), a newer one none; the game writes
+        # the unit's own appearance name there once the body is initialised either way. Ours
+        # carry none, like the newer ones, so nothing read before then names the donor.
         t["charInfo"]["appearanceID"] = ""
         o.save_typetree(t)
     out = env.file.save(packer="lz4")

@@ -4602,7 +4602,7 @@
  },
  "fights": {
   "twilight": {
-   "title": "Twilight - the Apocalypse Bird (EXP Luxcavation, the last stage)",
+   "title": "Twilight - the Apocalypse Bird (EXP Luxcavation, the last stage's own tab, every day)",
    "becomes": "EXP Luxcavation's last stage becomes the Black Forest: Big Bird, Small Bird and Long Bird, then the Apocalypse Bird",
    "tested": false,
    "records": {
@@ -4700,6 +4700,20 @@
        "defaultStat": 900,
        "incrementByLevel": 20
       }
+     }
+    },
+    "exp-dungeon": {
+     "18": {
+      "daysofweek": [
+       "MON",
+       "TUE",
+       "WED",
+       "THU",
+       "FRI",
+       "SAT",
+       "SUN"
+      ],
+      "uiConfig.tabLabel": "TWI\nLIGHT"
      }
     }
    },

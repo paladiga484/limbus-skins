@@ -505,9 +505,19 @@ def new_records(kind, records, edits):
 
 def set_fields(record, fields):
     """record's fields set from fields, keeping each one's own encoding (some are stored as
-    Python-literal strings); "+passives": [ids] joins the unit's passiveSet.passiveIdList."""
+    Python-literal strings); "+passives": [ids] joins the unit's passiveSet.passiveIdList;
+    "a.b": value sets b inside the record's a, the rest of a as it is (ValueError when the record
+    has no such a to set it in)."""
     for k, v in fields.items():
         if k == CLONE:
+            continue
+        if "." in k:
+            head, tail = k.split(".", 1)
+            inner = lit(record.get(head)) if record.get(head) else None
+            if not isinstance(inner, dict) or "." in tail:
+                raise ValueError(f"{k}: the record has no {head} to set {tail} in")
+            inner = dict(inner, **{tail: v})
+            record[head] = str(inner) if isinstance(record.get(head), str) else inner
             continue
         if k == "+passives":
             ps = lit(record.get("passiveSet")) if record.get("passiveSet") else {}

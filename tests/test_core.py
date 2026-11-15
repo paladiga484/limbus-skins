@@ -2118,6 +2118,28 @@ class NewRecords(unittest.TestCase):
         self.assertEqual(out[0]["passiveSet"], "{'passiveIdList': [2, 817402]}")
         self.assertEqual(out[0]["id"], 98802)
 
+    def test_a_field_inside_a_field_is_set_and_the_rest_of_it_kept(self):
+        from limbus_skins import helpers
+        rec = {"id": 18, "daysofweek": ["FRI", "SAT", "SUN"], "uiConfig": {"tabLabel": "FRI\nSAT", "title": "mainui_exp_dungeon_18_title"}}
+        helpers.set_fields(rec, {"daysofweek": ["MON", "SUN"], "uiConfig.tabLabel": "TWI\nLIGHT"})
+        self.assertEqual(rec, {"id": 18, "daysofweek": ["MON", "SUN"],
+                               "uiConfig": {"tabLabel": "TWI\nLIGHT", "title": "mainui_exp_dungeon_18_title"}})
+        text = {"id": 1, "uiConfig": "{'tabLabel': 'FRI', 'title': 't'}"}            # kept as text: stays text
+        helpers.set_fields(text, {"uiConfig.tabLabel": "X"})
+        self.assertEqual(text["uiConfig"], "{'tabLabel': 'X', 'title': 't'}")
+        for bad in ({"nothing.tabLabel": "X"}, {"id.x": 1}, {"uiConfig.a.b": 1}):
+            with self.assertRaises(ValueError, msg=str(bad)):
+                helpers.set_fields({"id": 1, "uiConfig": {"tabLabel": "FRI"}}, bad)
+
+    def test_twilight_is_open_every_day(self):
+        from limbus_skins import build
+        t = build.catalog()["twilight"]
+        stage = next(iter(t["records"]["battle-exp-dungeon"]))
+        self.assertEqual(set(t["records"]["exp-dungeon"]), {stage})                  # the stage it rewrites, no other
+        self.assertEqual(sorted(t["records"]["exp-dungeon"][stage]["daysofweek"]),
+                         sorted(["MON", "TUE", "WED", "THU", "FRI", "SAT", "SUN"]))  # the game opens it FRI, SAT, SUN only
+        self.assertEqual(t["music"]["dungeon"], int(stage))
+
     def test_a_base_kept_in_another_file_is_that_files_and_a_taken_id_is_refused(self):
         from limbus_skins import helpers
         self.assertEqual(helpers.new_records("enemy", copy.deepcopy(self.RECS), {98803: {"=clone": 71007}}), [])
