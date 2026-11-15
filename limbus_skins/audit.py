@@ -151,7 +151,7 @@ def static(built_file, man, skins, game_dir, cache, data_dir):
     motions, out = {}, []
     for key in sorted(set(man.get("skins", []) + man.get("skills", []))):
         s = skins.get(key)
-        if not s:
+        if not s or s["kind"] == "fight":           # a fight is a stage and its enemies: no identity
             continue
         rec = pers.get(s["identity"])
         if rec is None:
@@ -193,6 +193,14 @@ def built(keys, game_dir, cache, data_dir, boss=()):
                 with open(os.path.join(os.path.dirname(root), label[:-len(b.FORMS)], "manifest.json"), encoding="utf-8") as f:
                     target = (json.load(f).get("shift") or {}).get("to")
                 found += body(stock, mine, target) if target else ["its skin's manifest names no body to turn into"]
+            elif skins[label]["kind"] == "fight":   # a fight's enemies: each file against the bodies of its it holds
+                from . import repaint
+                held = set(repaint.bundle_assets(game.unitypy().load(stock)))
+                theirs = sorted(a for a in skins[label].get("bodies") or {} if a in held)
+                if not theirs:
+                    found.append("a file that holds none of the fight's bodies")
+                for a in theirs:
+                    found += body(stock, mine, a)
             else:
                 found += body(stock, mine, ids.get(skins[label]["identity"], {}).get("appearance"))
         out[label] = found
