@@ -90,59 +90,11 @@ def own(raw, donor, appearance):
         # fight: every body with a number showed its donor, every one without showed ours)
         t["charInfo"]["appearanceID"] = ""
         o.save_typetree(t)
-    _own_atlases(env, appearance)
     out = env.file.save(packer="lz4")
     found = check(out, appearance)
     if found:
         raise OwnBodyError(f"{appearance}: " + "; ".join(found))
     return out
-
-
-def _salt(appearance):
-    return int(hashlib.md5(("limbus-skins atlas " + appearance).encode()).hexdigest()[:8], 16)
-
-
-def _own_atlases(env, appearance):
-    """Every sprite atlas in the bundle, and every sprite packed in one, under tags and keys of
-    their own. Unity binds a packed sprite to a loaded atlas by the atlas's tag and the sprite's
-    key; the donor's own bundle - in memory whenever its sinner's first identities are, which is
-    always - holds atlases with the same tags and keys, and the sprites took their pictures from
-    those: the donor's look on our body (seen in a fight: every body drawn on a sinner's first
-    bundle showed the sinner, every other showed ours)."""
-    salt = _salt(appearance)
-
-    def key(k):
-        guid = dict(k[0])
-        guid["data[0]"] = (guid["data[0]"] ^ salt) & 0xFFFFFFFF
-        return (guid, k[1])
-
-    def tag(t):
-        return f"{t}@{appearance}"
-    for o in env.objects:
-        if o.type.name == "SpriteAtlas":
-            t = o.read_typetree()
-            t["m_Tag"], t["m_Name"] = tag(t["m_Tag"]), tag(t["m_Name"])
-            t["m_RenderDataMap"] = [(key(k), v) for k, v in t["m_RenderDataMap"]]
-            o.save_typetree(t)
-        elif o.type.name == "Sprite":
-            t = o.read_typetree()
-            if not t.get("m_AtlasTags") and not (t.get("m_SpriteAtlas") or {}).get("m_PathID"):
-                continue
-            t["m_AtlasTags"] = [tag(x) for x in t.get("m_AtlasTags") or []]
-            t["m_RenderDataKey"] = key(t["m_RenderDataKey"])
-            o.save_typetree(t)
-
-
-def _foreign_atlases(env, appearance):
-    """How many atlases and packed sprites in the bundle still go by the donor's tags."""
-    n = 0
-    for o in env.objects:
-        if o.type.name == "SpriteAtlas":
-            n += not o.read_typetree()["m_Tag"].endswith("@" + appearance)
-        elif o.type.name == "Sprite":
-            t = o.read_typetree()
-            n += any(not x.endswith("@" + appearance) for x in t.get("m_AtlasTags") or [])
-    return n
 
 
 def _char_infos(env):
@@ -187,9 +139,6 @@ def check(bundle, appearance, donor_cab=None):
         found.append("its prefab isn't named for it")
     if _char_infos(env):
         found.append("a body in it still names the identity it was drawn on")
-    left = _foreign_atlases(env, appearance)
-    if left:
-        found.append(f"{left} sprite atlases or packed sprites still go by the donor's tags")
     held = {n.rsplit("/", 1)[-1] for n in names}
     for o in env.objects:
         if o.type.name not in ("Texture2D", "AudioClip", "Mesh", "Texture2DArray", "Cubemap", "VideoClip"):
