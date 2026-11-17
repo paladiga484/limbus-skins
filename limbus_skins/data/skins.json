@@ -100,7 +100,8 @@
    "helper": 400012,
    "becomes": "Vergilius (his own body and skills)",
    "tested": false,
-   "script": true
+   "script": true,
+   "dupe_of": "vergilius-boss-id"
   }
  },
  "repaints": {
@@ -450,7 +451,8 @@
    "mirror": false,
    "title": "Vergilius - as Wild Hunt Heathcliff",
    "card": "vergilius",
-   "name": "Vergilius"
+   "name": "Vergilius",
+   "dupe_of": "vergilius-boss-id"
   },
   "kali": {
    "identity": 10410,
