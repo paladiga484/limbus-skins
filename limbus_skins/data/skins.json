@@ -2579,12 +2579,12 @@
  "tints": {
   "greencliff": {
    "identity": 10701,
-   "becomes": "Greencliff (all green), the best ID ever, a stickman below his head; S3 \"The Greenest Hunt\" turns him into a green Wild Hunt (half HP does too)",
+   "becomes": "Greencliff: Heathcliff in a dirty green, a green mist drifting round him; S3 \"The Greenest Hunt\" turns him into a green Wild Hunt",
    "tint": {
-    "hue": 88,
-    "saturation": 0.72,
-    "lightness": 0.33,
-    "highlight": 165
+    "hue": 84,
+    "saturation": 0.5,
+    "lightness": 0.3,
+    "highlight": 150
    },
    "tested": false,
    "sins": {
@@ -2733,22 +2733,6 @@
     "support": [
      1060321
     ]
-   },
-   "stick": {
-    "head": 0.25,
-    "width": 0.024,
-    "color": [
-     236,
-     236,
-     230
-    ],
-    "lower": [
-     22,
-     22,
-     26
-    ],
-    "hip": 0.42,
-    "cut": true
    },
    "texts": {
     "3": {
@@ -5843,9 +5827,21 @@
    "title": "Floor Manager (Limbus) - Grand Magasin 3F",
    "becomes": "Floor Manager as Limbus Company draws them: the boss's own body and whole moveset, as an identity of their own"
   },
-  "warden-limbus": {
+  "chaplain-limbus": {
    "identity": 10530,
    "base": 10501,
+   "roster": true,
+   "tested": false,
+   "name": "The Chaplain",
+   "game_title": "Grand Magasin",
+   "source": "1487_Warder_3pAppearance",
+   "unit": 1487,
+   "title": "The Chaplain (Limbus) - Grand Magasin",
+   "becomes": "The Chaplain as Limbus Company draws them: the boss's own body and whole moveset, as an identity of their own"
+  },
+  "warden-limbus": {
+   "identity": 10232,
+   "base": 10201,
    "roster": true,
    "tested": false,
    "name": "The Warden",

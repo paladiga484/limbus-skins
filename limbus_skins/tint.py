@@ -143,7 +143,22 @@ def tint(target, locate, spec, stick=None, aura=None):
     if not done:
         raise RepaintError(f"{target}: no textures to recolor")
     notes = shared + [f"{done} texture(s) recolored"]
-    if stick or aura:
+    if aura and not stick:
+        # the body as it is, its idle skeleton too: the aura drifts round it as parts of the skeleton
+        from . import aura as auramod, repaint
+        env = UnityPy.load(env.file.save(packer="none"))     # read back what was just written
+        ids, roots = prefab_objects(env, target, forms=True)
+        ids -= share.foreign(env, target)
+        tall = repaint.standing_height(env, ids)
+        for spec_ in aura if isinstance(aura, list) else [aura]:
+            try:
+                pictures = auramod.textures(spec_, locate)
+            except auramod.AuraError as e:
+                notes.append(f"no aura ({e})")
+                continue
+            for sp in spine.body_spines(env, prefab_objects(env, target)[1][0]):
+                notes.append(repaint._spine_aura(sp, pictures, spec_, tall))
+    elif stick or aura:
         # the body stands idle as its skeleton, not its frames: with only the frames recolored and
         # drawn as a stick figure, he stood idle full-size. The idle becomes those frames (and the
         # aura drifts through them).
