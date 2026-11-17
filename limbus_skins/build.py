@@ -592,7 +592,7 @@ def build(keys, game_dir, cache, data_dir, log=print, boss=(), static=True):
                     pers_all = game.boss_data(cache)[0]
                 shift = shift_rule(s, ids, (pers_all or {}).get(s["identity"]))
                 if s["kind"] == "tint":
-                    raw, notes = tint.tint(target, locate, s["tint"], stick=s.get("stick"))
+                    raw, notes = tint.tint(target, locate, s["tint"], stick=s.get("stick"), aura=s.get("aura"))
                 else:
                     raw, notes = repaint.repaint(
                         target, locate, source=None if s.get("self") else s.get("source"),

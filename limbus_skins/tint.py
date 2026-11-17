@@ -20,8 +20,8 @@ def colorize(img, spec, pma=False):
     if pma:                                       # lightness of the straight colour
         light = ImageMath.lambda_eval(
             lambda e: e["convert"](e["min"](e["l"] * 255 / e["max"](e["a"], 1), 255), "L"), l=light, a=a)
-    mid = tuple(int(c * 255) for c in colorsys.hls_to_rgb(spec["hue"] / 360, 0.42, spec.get("saturation", 0.75)))
-    hi = tuple(min(255, c + 200) for c in mid)
+    mid = tuple(int(c * 255) for c in colorsys.hls_to_rgb(spec["hue"] / 360, spec.get("lightness", 0.42), spec.get("saturation", 0.75)))
+    hi = tuple(min(255, c + spec.get("highlight", 200)) for c in mid)
     out = ImageOps.colorize(light, black=(0, 0, 0), mid=mid, white=hi).split()
     if pma:
         out = [ImageChops.multiply(c, a) for c in out]
@@ -102,7 +102,7 @@ def stick_pages(env, ids, spec):
     return images
 
 
-def tint(target, locate, spec, stick=None):
+def tint(target, locate, spec, stick=None, aura=None):
     """Recolor every texture body `target` loads (its frames first drawn as a stick figure when
     `stick` is given: see stick.py). Returns (bundle bytes, notes); the bytes still need
     bundle.forge() to carry the stock CRC."""
@@ -138,6 +138,28 @@ def tint(target, locate, spec, stick=None):
     if not done:
         raise RepaintError(f"{target}: no textures to recolor")
     notes = shared + [f"{done} texture(s) recolored"]
+    if stick or aura:
+        # the body stands idle as its skeleton, not its frames: with only the frames recolored and
+        # drawn as a stick figure, he stood idle full-size. The idle becomes those frames (and the
+        # aura drifts through them).
+        from . import repaint
+        env = UnityPy.load(env.file.save(packer="none"))     # read back what was just written
+        ids, roots = prefab_objects(env, target, forms=True)
+        ids -= share.foreign(env, target)
+        idle = []
+        for name, (sprites, _) in repaint.clip_frames(env, ids).items():
+            if name.endswith("Default") or name.lower().endswith("idle"):
+                idle += [x for x in sprites if x.path_id not in {y.path_id for y in idle}]
+        if not idle:
+            raise RepaintError(f"{target}: no idle frames to stand the idle skeleton as")
+        rendered = {x.path_id: repaint.render(x) for x in idle}
+        src = {"idle": idle, "idle_time": 2.4}
+        if aura:
+            repaint._bake_aura(aura if isinstance(aura, list) else [aura], locate, src, rendered, notes)
+        main_root = prefab_objects(env, target)[1][0]
+        for sp in spine.body_spines(env, main_root):
+            notes.append(repaint._spine_frames(sp, src, rendered))
+
     if sticks:
         notes.append(f"a stick figure below the head on {len(sticks)} page(s)")
     return env.file.save(packer="none"), notes
