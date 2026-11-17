@@ -522,6 +522,10 @@ def build(keys, game_dir, cache, data_dir, log=print, boss=(), static=True):
         shutil.rmtree(out, ignore_errors=True)
         if swaps or skill_swaps or clones or passives or texts or stats or record_edits:
             static_path, _ = game.find_static(cache)
+            for i_, h_ in swaps.items():               # what a unit is dealt is its skin's list: make it the kit's
+                attrs_ = [{"skillId": a["skillId"]} for a in helpers.lit(h_.get("attributeList"))]
+                record_edits.setdefault("skin", {}).setdefault(i_, {})["skillDataList"] = helpers.skin_skills(
+                    attrs_, helpers.lit(h_.get("defenseSkillIDList")), {**skills, **skill_swaps})
             for i_ in [k_ for k_ in new_skills if k_ // 100 not in clones]:      # an identity refused: none of its skills
                 skill_swaps.pop(i_, None)
                 record_edits.get("skill", {}).pop(i_, None)

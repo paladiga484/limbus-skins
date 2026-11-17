@@ -2796,9 +2796,9 @@
   "vergilius-boss-id": {
    "identity": 10795,
    "of": 10710,
-   "becomes": "Vergilius, the Red Gaze himself: the boss's own body and whole moveset, as an identity of his own",
-   "source": "9999_VergiliusAppearance",
-   "unit": 9999,
+   "becomes": "Vergilius as an identity of his own: his support unit's own body and whole kit",
+   "source": "400012_VergiliusAppearance",
+   "unit": 400012,
    "folder": 10710,
    "title": "Vergilius, the Red Gaze - the boss himself, an identity of his own - Heathcliff",
    "tested": false,

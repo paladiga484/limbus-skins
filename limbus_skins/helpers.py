@@ -374,6 +374,21 @@ IDENTITY_KEYS = {"personality": "id", "skin": "skinId", "personality-passive": "
                  "personality-voice": "personalityId", "personality-cg-thumbnail": "personalityId"}
 
 
+def skin_skills(attrs, guard, skills):
+    """An identity's skin record's skillDataList for these skills: the game deals a unit its
+    skills from its skin's list, not from the identity record's - a kit written only into the
+    identity record never reaches the fight (Vergilius dealt nothing but his counter)."""
+    out, seen = [], set()
+    for sid in [a["skillId"] for a in attrs] + list(guard):
+        if sid in seen or sid not in skills:
+            continue
+        seen.add(sid)
+        first = skills[sid]["skillData"][0]
+        out.append({"skillId": sid, "actionScript": first.get("actionScript", "") or "",
+                    "skillMotion": first.get("skillMotion") or "S1", "defType": first.get("defType") or "ATTACK"})
+    return out
+
+
 def own_skill_ids(base_rec, new, have):
     """{the base identity's skill id: a new id for identity `new`'s own copy of it}, the way the
     game numbers skills (<identity><nn>): the base's own nn where the skill is the base's,
@@ -555,7 +570,7 @@ def rewrite_static(static_path, swaps, skill_swaps=None, clones=None, passive_sw
 
     def edit(kind, doc, i, x):
         """Apply this record's edits in place; True when anything changed."""
-        mine = record_edits.get(kind, {}).get(x.get("id"))
+        mine = record_edits.get(kind, {}).get(x.get("id", x.get(IDENTITY_KEYS.get(kind, "id"))))
         if mine:                                    # its own fields first; its swaps and stats still go on
             set_fields(x, mine)
         return of_kind(kind, doc, i, x) or bool(mine)
