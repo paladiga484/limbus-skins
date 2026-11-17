@@ -157,11 +157,13 @@ def _component(grid, seeds):
     return got
 
 
-def stickify(img, head_px, width_px, color=(60, 60, 60), skip_px=None):
+def stickify(img, head_px, width_px, color=(60, 60, 60), skip_px=None, lower=None, hip=0.5):
     """img (RGBA) as a stick man: its head - the top head_px rows of its figure, counted from the
     top of its thickest part when skip_px is given, and only what is joined to the head there -
     kept as drawn, everything else redrawn as straight sticks width_px thick. Same size; a
-    picture with nothing in it comes back as it was."""
+    picture with nothing in it comes back as it was. lower: the colour of whatever is below the
+    hip (`hip` of the way from the neck to the feet) - a white shirt over black trousers - each
+    stick piece by its middle; None: every stick `color`."""
     from PIL import Image, ImageDraw
     img = img.convert("RGBA")
     alpha = img.getchannel("A")
@@ -216,15 +218,20 @@ def stickify(img, head_px, width_px, color=(60, 60, 60), skip_px=None):
 
     draw = ImageDraw.Draw(out)
     fill = tuple(color[:3]) + (255,)
+    below_fill = tuple(lower[:3]) + (255,) if lower else fill
+    hip_y = neck + hip * (bottom - neck)
+
+    def paint(y):
+        return below_fill if y > hip_y else fill
     r = max(1.0, width_px / 2)
     joints, sticks = [], limbs(thin(body), max(3, SPUR * lh))
     for path in sticks:
         pts = [at(p) for p in straighten(path)]
-        if len(pts) > 1:
-            draw.line(pts, fill=fill, width=max(1, round(width_px)))
+        for a, b in zip(pts, pts[1:]):                  # each piece in the colour of where it lies
+            draw.line([a, b], fill=paint((a[1] + b[1]) / 2), width=max(1, round(width_px)))
         joints += [pts[0], pts[-1]] + pts[1:-1]
     for cx, cy in joints:                               # round joints and ends
-        draw.ellipse([cx - r, cy - r, cx + r, cy + r], fill=fill)
+        draw.ellipse([cx - r, cy - r, cx + r, cy + r], fill=paint(cy))
     # a neck from the bottom of the head to the nearest stick below it (not a bat held above it)
     if head:
         hx = sum(x for x, _ in head) / len(head)

@@ -2581,10 +2581,10 @@
    "identity": 10701,
    "becomes": "Greencliff (all green), the best ID ever, a stickman below his head; S3 \"The Greenest Hunt\" turns him into a green Wild Hunt (half HP does too)",
    "tint": {
-    "hue": 82,
-    "saturation": 0.62,
-    "lightness": 0.24,
-    "highlight": 120
+    "hue": 88,
+    "saturation": 0.72,
+    "lightness": 0.33,
+    "highlight": 165
    },
    "tested": false,
    "sins": {
@@ -2736,7 +2736,18 @@
    },
    "stick": {
     "head": 0.25,
-    "width": 0.012
+    "width": 0.012,
+    "color": [
+     236,
+     236,
+     230
+    ],
+    "lower": [
+     22,
+     22,
+     26
+    ],
+    "hip": 0.42
    },
    "texts": {
     "3": {

@@ -74,13 +74,15 @@ def _crop(img, rect):
     return (x, img.height - y - h, x + w, img.height - y)       # Unity rects are bottom-up
 
 
-def stick_pages(env, ids, spec):
+def stick_pages(env, ids, spec, prepare=None):
     """{page path_id: new picture} with every body frame on it drawn as a stick figure below its
     head (stick.py). Head and stroke sizes come from the idle frame's height."""
     from . import stick
     rects = _frame_rects(env, ids)
     pages = {o.path_id: o for o in env.objects if o.type.name == "Texture2D" and o.path_id in rects}
     images = {pid: o.read().image.convert("RGBA") for pid, o in pages.items()}
+    if prepare:                                   # e.g. recoloured first, so the sticks keep their own colours
+        images = {pid: prepare(pid, img) for pid, img in images.items()}
     stand = 0
     for pid, items in rects.items():
         for kind, rect, turn in items:
@@ -92,13 +94,14 @@ def stick_pages(env, ids, spec):
         raise ValueError("stick: the body has no idle frame to measure")
     head, width = spec.get("head", 0.45) * stand, max(2.0, spec.get("width", 0.035) * stand)
     color = tuple(spec.get("color", (60, 60, 60)))
+    lower = tuple(spec["lower"]) if spec.get("lower") else None
     skip = spec.get("skip", 0.12) * stand
     for pid, items in rects.items():
         img = images[pid]
         for _, rect, turn in items:
             box = _crop(img, rect)
             upright = _turn(img.crop(box), turn)
-            img.paste(_turn(stick.stickify(upright, head, width, color, skip), turn), box[:2])
+            img.paste(_turn(stick.stickify(upright, head, width, color, skip, lower, spec.get("hip", 0.5)), turn), box[:2])
     return images
 
 
@@ -122,8 +125,8 @@ def tint(target, locate, spec, stick=None, aura=None):
                 pma[tex.path_id] = bool(rig["pma"])
     sticks = {}
     if stick:
-        try:
-            sticks = stick_pages(env, ids, stick)
+        try:                                       # recoloured first: the sticks keep their own colours
+            sticks = stick_pages(env, ids, stick, prepare=lambda pid, img: colorize(img, spec, pma.get(pid, False)))
         except ValueError as e:
             raise RepaintError(f"{target}: {e}")
     done = 0
@@ -131,7 +134,7 @@ def tint(target, locate, spec, stick=None, aura=None):
         if o.type.name != "Texture2D" or o.path_id not in ids:
             continue
         d = o.read()
-        d.set_image(colorize(sticks.get(o.path_id) or d.image, spec, pma.get(o.path_id, False)),
+        d.set_image(sticks[o.path_id] if o.path_id in sticks else colorize(d.image, spec, pma.get(o.path_id, False)),
                     target_format=UnityPy.enums.TextureFormat.RGBA32)
         d.save()
         done += 1
