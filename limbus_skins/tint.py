@@ -81,6 +81,7 @@ def stick_pages(env, ids, spec, prepare=None):
     rects = _frame_rects(env, ids)
     pages = {o.path_id: o for o in env.objects if o.type.name == "Texture2D" and o.path_id in rects}
     images = {pid: o.read().image.convert("RGBA") for pid, o in pages.items()}
+    stock = dict(images) if spec.get("cut") else {}   # the stock drawing the sticks are cut from
     if prepare:                                   # e.g. recoloured first, so the sticks keep their own colours
         images = {pid: prepare(pid, img) for pid, img in images.items()}
     stand = 0
@@ -101,7 +102,8 @@ def stick_pages(env, ids, spec, prepare=None):
         for _, rect, turn in items:
             box = _crop(img, rect)
             upright = _turn(img.crop(box), turn)
-            img.paste(_turn(stick.stickify(upright, head, width, color, skip, lower, spec.get("hip", 0.5)), turn), box[:2])
+            art = _turn(stock[pid].crop(box), turn) if pid in stock else None
+            img.paste(_turn(stick.stickify(upright, head, width, color, skip, lower, spec.get("hip", 0.5), art), turn), box[:2])
     return images
 
 

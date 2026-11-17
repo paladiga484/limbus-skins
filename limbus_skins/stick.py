@@ -157,13 +157,16 @@ def _component(grid, seeds):
     return got
 
 
-def stickify(img, head_px, width_px, color=(60, 60, 60), skip_px=None, lower=None, hip=0.5):
+def stickify(img, head_px, width_px, color=(60, 60, 60), skip_px=None, lower=None, hip=0.5, art=None):
     """img (RGBA) as a stick man: its head - the top head_px rows of its figure, counted from the
     top of its thickest part when skip_px is given, and only what is joined to the head there -
     kept as drawn, everything else redrawn as straight sticks width_px thick. Same size; a
     picture with nothing in it comes back as it was. lower: the colour of whatever is below the
     hip (`hip` of the way from the neck to the feet) - a white shirt over black trousers - each
-    stick piece by its middle; None: every stick `color`."""
+    stick piece by its middle; None: every stick `color`. art: the picture the sticks are cut
+    from - the body's own drawing (unrecoloured, the same size as img): each stick shows the
+    stock body under it, his coat and shirt and trousers whittled down to a stick man; only
+    where a stick strays off the drawing does its plain colour show."""
     from PIL import Image, ImageDraw
     img = img.convert("RGBA")
     alpha = img.getchannel("A")
@@ -241,4 +244,12 @@ def stickify(img, head_px, width_px, color=(60, 60, 60), skip_px=None, lower=Non
             near = min(below, key=lambda p: (p[0] - hx) ** 2 + (p[1] - hy) ** 2)
             draw.line([at((hx, hy)), at(near)], fill=fill, width=max(1, round(width_px)))
             draw.ellipse([at(near)[0] - r, at(near)[1] - r, at(near)[0] + r, at(near)[1] + r], fill=fill)
+    if art is not None:                                 # the sticks cut from the stock body itself
+        from PIL import ImageChops
+        art = art.convert("RGBA")
+        sticks_mask = out.getchannel("A").point(lambda v: 255 if v else 0)
+        sticks_mask = ImageChops.subtract(sticks_mask, mask)        # not the head: it stays as it is
+        solid = art.getchannel("A").point(lambda v: 255 if v > 90 else 0)
+        cut = ImageChops.multiply(sticks_mask, solid)
+        out.paste(art, (0, 0), cut)
     return out
