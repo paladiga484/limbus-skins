@@ -45,6 +45,17 @@ LIMBUS = [
     ("oscar-limbus", "Oscar", "Wedge Office\nRepresentative", 11, "1583_OscarAppearance", 1583, None),
     ("pamela-limbus", "Pamela", "Wedge Office\nFixer", 3, "1585_PamelaAppearance", 1585, None),
     ("pameli-limbus", "Pameli", "Wedge Office\nFixer", 4, "1584_PamelyAppearance", 1584, None),
+    # Canto X: the Grand Magasin's own (each a one-body boss of its floor)
+    ("jeanne-limbus", "Jeanne Sartre", "The Sartorial\nTailor", 10, "1522_JeanneAppearance", 1522, None),
+    ("brand-manager-limbus", "Brand Manager", "Le Noir", 11, "1506_5F_LeNoir_CaptainAppearance", 1506, None),
+    ("gustave-limbus", "Gustave", "Le Noir Sales\nAssociate", 8, "1465_LaNoirContemporaryAppearance", 1465, None),
+    ("floor-manager-limbus", "Floor Manager", "Grand Magasin\n3F", 3, "1481_3F_BossAppearance", 1481, None),
+    ("warden-limbus", "The Warden", "Grand Magasin", 5, "1485_WarderAppearance", 1485, None),
+    ("annette-limbus", "Annette", "The\nAlterationist", 9, "1495_3F_ScissorsAppearance", 1495, None),
+    ("needle-king-limbus", "King of Needleworks", "Grand Magasin\nB2", 6, "1496_B2_Needle_KingAppearance", 1496, None),
+    ("sous-chef-limbus", "Sous Chef", "Grand Magasin\nB1", 7, "1474_B1SabsalPuppetAppearance", 1474, None),
+    ("crimson-god-limbus", "The Crimson God", "Adulthood", 1, "1517_Buffet_PerfectAppearance", 1517, None),
+    ("overseer-limbus", "The Overseer", "Grand Magasin\nB3", 12, "1488_B3_ControllerAppearance", 1488, None),
 ]
 # The Sephirah fight with their floor's own pages from Library of Ruina's Realizations (the
 # abnormalities of that floor): identity key, the floor's page prefix, sins for skills 1-3 and defense.
