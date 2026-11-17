@@ -18,6 +18,7 @@
   "clockEgoDice": "[On Clash Win] Destroy opponent's next die",
   "damage2pw": "[On Clash Win] Deal 2 damage to opponent",
   "damage5atk": "[On Hit] Deal 5 damage to target",
+  "disarm1atk": "[On Hit] Inflict 1 Disarm next Scene",
   "drawCard": "[On Use] Draw 1 page",
   "elenaMinionStrong": "All Speed dice of the character lose 3 Speed while this page is in use",
   "energy1": "[On Use] Restore 1 Light",
@@ -46,9 +47,12 @@
   "repeat3": "This die is rolled 3 times",
   "repeat4": "This die is rolled 4 times",
   "rolandDrawUtil": "The Cost of this page cannot be changed",
+  "sealTargetAtk": "[On Hit] Seal a Speed die of target for the next Scene",
   "shyaoDice1": "[On Hit] Inflict 2 Burn",
   "slashUp2thisRound": "[Combat Start] Boost Slash dice Power by +2 for this Scene",
-  "strength1atk": "[On Hit] Gain 1 Strength next Scene"
+  "strength1atk": "[On Hit] Gain 1 Strength next Scene",
+  "vulnerable4atk": "[On Hit] Inflict 4 Fragile next Scene",
+  "weak1atk": "[On Hit] Inflict 1 Feeble next Scene"
  },
  "cards": {
   "403001": {
@@ -1152,6 +1156,656 @@
    "range": "Near",
    "rarity": "Unique",
    "script": "recoverNextRound"
+  },
+  "9901101": {
+   "cost": "4",
+   "dice": [
+    [
+     "Atk",
+     "Slash",
+     "60",
+     "60",
+     "final_scorchedgirl_fourthfire"
+    ]
+   ],
+   "range": "FarArea",
+   "rarity": "Unique",
+   "script": "final_scorchedgirl_fourthfire_self"
+  },
+  "9901103": {
+   "cost": "1",
+   "dice": [
+    [
+     "Def",
+     "Evasion",
+     "1",
+     "8",
+     ""
+    ],
+    [
+     "Def",
+     "Evasion",
+     "1",
+     "6",
+     ""
+    ],
+    [
+     "Atk",
+     "Penetrate",
+     "2",
+     "5",
+     "burn1atk"
+    ]
+   ],
+   "range": "Near",
+   "rarity": "Uncommon",
+   "script": ""
+  },
+  "9901202": {
+   "cost": "0",
+   "dice": [
+    [
+     "Atk",
+     "Hit",
+     "3",
+     "5",
+     "disarm1atk"
+    ],
+    [
+     "Def",
+     "Guard",
+     "2",
+     "4",
+     ""
+    ],
+    [
+     "Def",
+     "Guard",
+     "2",
+     "4",
+     ""
+    ]
+   ],
+   "range": "Near",
+   "rarity": "Unique",
+   "script": ""
+  },
+  "9902202": {
+   "cost": "0",
+   "dice": [
+    [
+     "Def",
+     "Evasion",
+     "2",
+     "5",
+     ""
+    ],
+    [
+     "Def",
+     "Evasion",
+     "2",
+     "5",
+     ""
+    ],
+    [
+     "Def",
+     "Evasion",
+     "2",
+     "5",
+     ""
+    ]
+   ],
+   "range": "Near",
+   "rarity": "Uncommon",
+   "script": "yesod_final_helper_rest"
+  },
+  "9902301": {
+   "cost": "0",
+   "dice": [
+    [
+     "Def",
+     "Guard",
+     "2",
+     "6",
+     "yesod_final_singing_lastpoweruppl"
+    ],
+    [
+     "Def",
+     "Guard",
+     "2",
+     "6",
+     "yesod_final_singing_lastpoweruppl"
+    ],
+    [
+     "Atk",
+     "Slash",
+     "3",
+     "4",
+     "bleeding1atk"
+    ]
+   ],
+   "range": "Near",
+   "rarity": "Uncommon",
+   "script": ""
+  },
+  "9902507": {
+   "cost": "6",
+   "dice": [
+    [
+     "Atk",
+     "Penetrate",
+     "50",
+     "50",
+     ""
+    ]
+   ],
+   "range": "FarArea",
+   "rarity": "Uncommon",
+   "script": "yesod_final_freischutz_bullet7"
+  },
+  "9902510": {
+   "cost": "1",
+   "dice": [
+    [
+     "Atk",
+     "Penetrate",
+     "5",
+     "9",
+     "yesod_final_freischutz_faratk"
+    ]
+   ],
+   "range": "Far",
+   "rarity": "Uncommon",
+   "script": "yesod_final_freischutz_bullet1"
+  },
+  "9903101": {
+   "cost": "0",
+   "dice": [
+    [
+     "Def",
+     "Guard",
+     "2",
+     "20",
+     "hod_final_shylooktoday_1"
+    ],
+    [
+     "Def",
+     "Guard",
+     "2",
+     "20",
+     "hod_final_shylooktoday_1"
+    ]
+   ],
+   "range": "Near",
+   "rarity": "Uncommon",
+   "script": ""
+  },
+  "9903105": {
+   "cost": "0",
+   "dice": [
+    [
+     "Atk",
+     "Hit",
+     "2",
+     "20",
+     "hod_final_shylooktoday_5"
+    ],
+    [
+     "Atk",
+     "Hit",
+     "2",
+     "20",
+     ""
+    ],
+    [
+     "Atk",
+     "Hit",
+     "2",
+     "20",
+     ""
+    ]
+   ],
+   "range": "Near",
+   "rarity": "Uncommon",
+   "script": ""
+  },
+  "9903512": {
+   "cost": "0",
+   "dice": [
+    [
+     "Def",
+     "Guard",
+     "3",
+     "6",
+     ""
+    ],
+    [
+     "Def",
+     "Guard",
+     "3",
+     "5",
+     ""
+    ],
+    [
+     "Atk",
+     "Hit",
+     "2",
+     "5",
+     ""
+    ]
+   ],
+   "range": "Near",
+   "rarity": "Uncommon",
+   "script": ""
+  },
+  "9903513": {
+   "cost": "2",
+   "dice": [
+    [
+     "Atk",
+     "Hit",
+     "3",
+     "7",
+     "weak1atk"
+    ],
+    [
+     "Atk",
+     "Hit",
+     "3",
+     "8",
+     "weak1atk"
+    ],
+    [
+     "Atk",
+     "Hit",
+     "3",
+     "7",
+     ""
+    ]
+   ],
+   "range": "Near",
+   "rarity": "Uncommon",
+   "script": ""
+  },
+  "9904103": {
+   "cost": "0",
+   "dice": [
+    [
+     "Def",
+     "Guard",
+     "6",
+     "8",
+     ""
+    ],
+    [
+     "Atk",
+     "Penetrate",
+     "6",
+     "8",
+     "final_netzach_universe1"
+    ]
+   ],
+   "range": "Near",
+   "rarity": "Uncommon",
+   "script": ""
+  },
+  "9904305": {
+   "cost": "3",
+   "dice": [
+    [
+     "Atk",
+     "Slash",
+     "1",
+     "10",
+     ""
+    ],
+    [
+     "Atk",
+     "Penetrate",
+     "1",
+     "10",
+     ""
+    ],
+    [
+     "Atk",
+     "Slash",
+     "1",
+     "10",
+     ""
+    ]
+   ],
+   "range": "Near",
+   "rarity": "Rare",
+   "script": "final_netzach_porccubus_pleasure"
+  },
+  "9904411": {
+   "cost": "0",
+   "dice": [
+    [
+     "Atk",
+     "Slash",
+     "3",
+     "8",
+     "alriune_debuf1atk_final"
+    ],
+    [
+     "Atk",
+     "Penetrate",
+     "3",
+     "7",
+     "alriune_debuf1atk_final"
+    ],
+    [
+     "Atk",
+     "Slash",
+     "3",
+     "6",
+     "alriune_debuf1atk_final"
+    ]
+   ],
+   "range": "Near",
+   "rarity": "Common",
+   "script": ""
+  },
+  "9904414": {
+   "cost": "0",
+   "dice": [
+    [
+     "Atk",
+     "Penetrate",
+     "1",
+     "1",
+     ""
+    ],
+    [
+     "Def",
+     "Guard",
+     "5",
+     "5",
+     ""
+    ],
+    [
+     "Def",
+     "Guard",
+     "5",
+     "5",
+     ""
+    ]
+   ],
+   "range": "Far",
+   "rarity": "Common",
+   "script": "alriune_attackerbuf_final"
+  },
+  "9905102": {
+   "cost": "0",
+   "dice": [
+    [
+     "Atk",
+     "Penetrate",
+     "5",
+     "10",
+     ""
+    ],
+    [
+     "Def",
+     "Guard",
+     "6",
+     "8",
+     ""
+    ],
+    [
+     "Def",
+     "Guard",
+     "6",
+     "8",
+     ""
+    ]
+   ],
+   "range": "Far",
+   "rarity": "Uncommon",
+   "script": ""
+  },
+  "9905432": {
+   "cost": "1",
+   "dice": [
+    [
+     "Def",
+     "Evasion",
+     "2",
+     "7",
+     ""
+    ],
+    [
+     "Atk",
+     "Hit",
+     "2",
+     "5",
+     ""
+    ],
+    [
+     "Def",
+     "Evasion",
+     "2",
+     "7",
+     ""
+    ]
+   ],
+   "range": "Near",
+   "rarity": "Common",
+   "script": ""
+  },
+  "9905612": {
+   "cost": "0",
+   "dice": [
+    [
+     "Atk",
+     "Penetrate",
+     "4",
+     "8",
+     ""
+    ],
+    [
+     "Def",
+     "Guard",
+     "6",
+     "8",
+     ""
+    ],
+    [
+     "Def",
+     "Guard",
+     "6",
+     "8",
+     ""
+    ]
+   ],
+   "range": "Far",
+   "rarity": "Uncommon",
+   "script": ""
+  },
+  "9905615": {
+   "cost": "10",
+   "dice": [
+    [
+     "Atk",
+     "Hit",
+     "15",
+     "15",
+     ""
+    ]
+   ],
+   "range": "FarArea",
+   "rarity": "Unique",
+   "script": ""
+  },
+  "9907112": {
+   "cost": "1",
+   "dice": [
+    [
+     "Def",
+     "Evasion",
+     "2",
+     "5",
+     ""
+    ],
+    [
+     "Atk",
+     "Slash",
+     "3",
+     "6",
+     "scarecrow_roland_atk"
+    ],
+    [
+     "Atk",
+     "Slash",
+     "3",
+     "6",
+     "scarecrow_roland_atk"
+    ]
+   ],
+   "range": "Near",
+   "rarity": "Rare",
+   "script": ""
+  },
+  "9907514": {
+   "cost": "3",
+   "dice": [
+    [
+     "Atk",
+     "Hit",
+     "4",
+     "8",
+     "wizard_breakdmg8"
+    ],
+    [
+     "Atk",
+     "Hit",
+     "4",
+     "8",
+     "wizard_breakdmg8"
+    ],
+    [
+     "Atk",
+     "Hit",
+     "4",
+     "8",
+     "wizard_breakdmg8"
+    ]
+   ],
+   "range": "Far",
+   "rarity": "Rare",
+   "script": ""
+  },
+  "9907516": {
+   "cost": "0",
+   "dice": [
+    [
+     "Atk",
+     "Hit",
+     "15",
+     "15",
+     "wizard_bleeding6areaatk"
+    ]
+   ],
+   "range": "FarArea",
+   "rarity": "Unique",
+   "script": ""
+  },
+  "9907622": {
+   "cost": "0",
+   "dice": [
+    [
+     "Atk",
+     "Hit",
+     "1",
+     "1",
+     "wizard_scarecrow_return_lumberjack"
+    ]
+   ],
+   "range": "Near",
+   "rarity": "Unique",
+   "script": ""
+  },
+  "9909116": {
+   "cost": "0",
+   "dice": [
+    [
+     "Atk",
+     "Penetrate",
+     "1",
+     "1",
+     ""
+    ]
+   ],
+   "range": "Far",
+   "rarity": "Common",
+   "script": "WhiteNight_Bless"
+  },
+  "9909121": {
+   "cost": "2",
+   "dice": [
+    [
+     "Def",
+     "Guard",
+     "4",
+     "8",
+     ""
+    ],
+    [
+     "Atk",
+     "Slash",
+     "6",
+     "12",
+     "vulnerable4atk"
+    ]
+   ],
+   "range": "Near",
+   "rarity": "Uncommon",
+   "script": ""
+  },
+  "9909123": {
+   "cost": "3",
+   "dice": [
+    [
+     "Atk",
+     "Hit",
+     "7",
+     "10",
+     "WhiteNight_DestroyNextDiceAtk"
+    ],
+    [
+     "Atk",
+     "Slash",
+     "6",
+     "9",
+     "sealTargetAtk"
+    ]
+   ],
+   "range": "Near",
+   "rarity": "Rare",
+   "script": ""
+  },
+  "9909154": {
+   "cost": "1",
+   "dice": [
+    [
+     "Atk",
+     "Penetrate",
+     "4",
+     "7",
+     "WhiteNight_Power2Debuf"
+    ],
+    [
+     "Atk",
+     "Penetrate",
+     "4",
+     "7",
+     "WhiteNight_Power2Debuf"
+    ]
+   ],
+   "range": "Near",
+   "rarity": "Uncommon",
+   "script": ""
   }
  },
  "names": {
@@ -1333,6 +1987,114 @@
   ],
   "706006": [
    "Serum K",
+   ""
+  ],
+  "9901101": [
+   "Fourth Match Flame",
+   ""
+  ],
+  "9901103": [
+   "Crumbled Hope",
+   ""
+  ],
+  "9901202": [
+   "Timid Endearment",
+   ""
+  ],
+  "9902202": [
+   "Rest Mk2",
+   "[On Use] Gain 1 Strength and Endurance next Scene"
+  ],
+  "9902301": [
+   "Grind",
+   ""
+  ],
+  "9902507": [
+   "Bullet of Despair",
+   "Targets self; deals 100 damage"
+  ],
+  "9902510": [
+   "Magic Bullet",
+   ""
+  ],
+  "9903101": [
+   "Joyous Face",
+   "Rolls minimum value if current expression is the happiest"
+  ],
+  "9903105": [
+   "Angry Face",
+   "Rolls minimum value if current expression is angry"
+  ],
+  "9903512": [
+   "Curl Up",
+   ""
+  ],
+  "9903513": [
+   "Vomit",
+   ""
+  ],
+  "9904103": [
+   "Penetration of the Boundary",
+   ""
+  ],
+  "9904305": [
+   "Pleasure",
+   "At the start of the Scene, restore 1 Light. If the character takes a hit when three or more copies of this page are in hand, take 20 damage and exhaust all copies of Pleasure."
+  ],
+  "9904411": [
+   "Full Bloom",
+   ""
+  ],
+  "9904414": [
+   "Winter’s Inception",
+   "[On Use] Give Laurel Wreath next Scene"
+  ],
+  "9905102": [
+   "With Love!",
+   ""
+  ],
+  "9905432": [
+   "Crunch",
+   ""
+  ],
+  "9905612": [
+   "With Love!",
+   ""
+  ],
+  "9905615": [
+   "Arcana Slave!",
+   ""
+  ],
+  "9907112": [
+   "Bumper Crop",
+   ""
+  ],
+  "9907514": [
+   "Behave Yourself, Will You?",
+   ""
+  ],
+  "9907516": [
+   "That’s Not It!",
+   ""
+  ],
+  "9907622": [
+   "Find Your Warmth!",
+   "[On Hit] Restore the target with the Warm-hearted Woodsman's status to their true form"
+  ],
+  "9909116": [
+   "Baptism",
+   "[On Use] Recover HP and Stagger Resist of target by 10; give 1 Strength, Endurance, and Haste to target next Scene"
+  ],
+  "9909121": [
+   "Thou art His Son",
+   ""
+  ],
+  "9909123": [
+   "Wilt thou that We Command Fire?",
+   ""
+  ],
+  "9909154": [
+   "Let Thy Light Lead Me",
    ""
   ]
  },

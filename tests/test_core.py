@@ -2071,8 +2071,14 @@ class OwnBodyAndItsSkin(unittest.TestCase):
         sk = build.catalog()
         for key in ("binah-id", "kali-id", "chesed-id"):
             self.assertTrue(sk[key]["own_body"] and sk[key]["own_skills"])
+        for key in ("binah-id", "kali-id"):                                   # no kit of its own: its character's
             self.assertEqual(sk[key]["moves"], sk[build.character(sk, key)]["moves"])
+        own = sk["chesed-id"]["moves"]                                         # a kit of its own wins: its floor's pages
+        self.assertTrue(all("lor_dice" in m for m in own.values()) and own != sk[build.character(sk, "chesed-id")]["moves"])
+        self.assertTrue(all(m.get("onHit") or m.get("onUse") for m in own.values()))   # every skill does something
+        for key in ("binah-id", "kali-id", "chesed-id"):
             self.assertEqual(sk[key]["identity"] // 100, sk[key]["base"] // 100)       # a new id in its sinner's range
+        for key in ("binah-id", "kali-id", "chesed-id"):
             self.assertNotEqual(sk[key]["identity"], sk[build.character(sk, key)]["identity"])
 
     def test_its_skills_are_new_ids_copies_of_its_bases(self):

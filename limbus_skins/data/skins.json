@@ -2906,7 +2906,127 @@
    "cover_art": "malkuth",
    "game_title": "Floor of\nHistory",
    "own_body": true,
-   "own_skills": true
+   "own_skills": true,
+   "moves": {
+    "1": {
+     "lor_dice": 9901202,
+     "attributeType": "CRIMSON",
+     "coins": [
+      0,
+      0
+     ],
+     "onHit": [
+      {
+       "buffKeyword": "AttackDmgDown",
+       "stack": 1,
+       "activeRound": 1,
+       "coins": [
+        1
+       ]
+      },
+      {
+       "buffKeyword": "Combustion",
+       "stack": 2,
+       "activeRound": 0,
+       "coins": [
+        1,
+        2
+       ],
+       "turn": 1
+      }
+     ]
+    },
+    "2": {
+     "lor_dice": 9901103,
+     "attributeType": "SCARLET",
+     "coins": [
+      0,
+      0,
+      0
+     ],
+     "onHit": [
+      {
+       "buffKeyword": "Combustion",
+       "stack": 1,
+       "activeRound": 0,
+       "turn": 1,
+       "coins": [
+        1
+       ]
+      },
+      {
+       "buffKeyword": "Laceration",
+       "stack": 3,
+       "activeRound": 0,
+       "coins": [
+        1,
+        2,
+        3
+       ],
+       "turn": 2
+      }
+     ]
+    },
+    "3": {
+     "lor_dice": 9901101,
+     "attributeType": "CRIMSON",
+     "coins": [
+      0,
+      0,
+      0,
+      0
+     ],
+     "onUse": [
+      {
+       "buffKeyword": "AttackDmgUp",
+       "stack": 2,
+       "activeRound": 0
+      }
+     ],
+     "onHit": [
+      {
+       "buffKeyword": "Combustion",
+       "stack": 5,
+       "activeRound": 0,
+       "coins": [
+        1,
+        2,
+        3,
+        4
+       ],
+       "turn": 3
+      }
+     ]
+    },
+    "defense": {
+     "lor_dice": 9901103,
+     "attributeType": "AMBER",
+     "coins": [
+      0
+     ],
+     "onUse": [
+      {
+       "buffKeyword": "Protection",
+       "stack": 2,
+       "activeRound": 0
+      }
+     ]
+    }
+   },
+   "texts": {
+    "1": {
+     "lor_card": 9901202
+    },
+    "2": {
+     "lor_card": 9901103
+    },
+    "3": {
+     "lor_card": 9901101
+    },
+    "defense": {
+     "lor_card": 9901103
+    }
+   }
   },
   "yesod-id": {
    "identity": 10592,
@@ -2919,7 +3039,114 @@
    "cover_art": "yesod",
    "game_title": "Floor of\nTechnological Sciences",
    "own_body": true,
-   "own_skills": true
+   "own_skills": true,
+   "moves": {
+    "1": {
+     "lor_dice": 9902301,
+     "attributeType": "VIOLET",
+     "coins": [
+      0,
+      0
+     ],
+     "onHit": [
+      {
+       "buffKeyword": "Laceration",
+       "stack": 1,
+       "activeRound": 0,
+       "turn": 1,
+       "coins": [
+        1
+       ]
+      },
+      {
+       "buffKeyword": "Vibration",
+       "stack": 2,
+       "activeRound": 0,
+       "coins": [
+        1,
+        2
+       ],
+       "turn": 1
+      }
+     ]
+    },
+    "2": {
+     "lor_dice": 9902510,
+     "attributeType": "INDIGO",
+     "coins": [
+      0
+     ],
+     "onHit": [
+      {
+       "buffKeyword": "Charge",
+       "stack": 3,
+       "activeRound": 0,
+       "coins": [
+        1
+       ]
+      }
+     ]
+    },
+    "3": {
+     "lor_dice": 9902507,
+     "attributeType": "VIOLET",
+     "coins": [
+      0,
+      0,
+      0,
+      0
+     ],
+     "onUse": [
+      {
+       "buffKeyword": "AttackDmgUp",
+       "stack": 2,
+       "activeRound": 0
+      }
+     ],
+     "onHit": [
+      {
+       "buffKeyword": "Vibration",
+       "stack": 5,
+       "activeRound": 0,
+       "coins": [
+        1,
+        2,
+        3,
+        4
+       ],
+       "turn": 3
+      }
+     ]
+    },
+    "defense": {
+     "lor_dice": 9902202,
+     "attributeType": "INDIGO",
+     "coins": [
+      0
+     ],
+     "onUse": [
+      {
+       "buffKeyword": "Protection",
+       "stack": 2,
+       "activeRound": 0
+      }
+     ]
+    }
+   },
+   "texts": {
+    "1": {
+     "lor_card": 9902301
+    },
+    "2": {
+     "lor_card": 9902510
+    },
+    "3": {
+     "lor_card": 9902507
+    },
+    "defense": {
+     "lor_card": 9902202
+    }
+   }
   },
   "hod-id": {
    "identity": 11093,
@@ -2932,7 +3159,120 @@
    "cover_art": "hod",
    "game_title": "Floor of\nLiterature",
    "own_body": true,
-   "own_skills": true
+   "own_skills": true,
+   "moves": {
+    "1": {
+     "lor_dice": 9903512,
+     "attributeType": "AMBER",
+     "coins": [
+      0,
+      0
+     ],
+     "onHit": [
+      {
+       "buffKeyword": "Burst",
+       "stack": 2,
+       "activeRound": 0,
+       "coins": [
+        1,
+        2
+       ],
+       "turn": 1
+      }
+     ]
+    },
+    "2": {
+     "lor_dice": 9903105,
+     "attributeType": "SHAMROCK",
+     "coins": [
+      0,
+      0,
+      0
+     ],
+     "onHit": [
+      {
+       "buffKeyword": "Breath",
+       "stack": 3,
+       "activeRound": 0,
+       "coins": [
+        1,
+        2,
+        3
+       ],
+       "turn": 2
+      }
+     ]
+    },
+    "3": {
+     "lor_dice": 9903513,
+     "attributeType": "AMBER",
+     "coins": [
+      0
+     ],
+     "onUse": [
+      {
+       "buffKeyword": "AttackDmgUp",
+       "stack": 2,
+       "activeRound": 0
+      }
+     ],
+     "onHit": [
+      {
+       "buffKeyword": "AttackDmgDown",
+       "stack": 1,
+       "activeRound": 1,
+       "coins": [
+        1
+       ]
+      },
+      {
+       "buffKeyword": "AttackDmgDown",
+       "stack": 1,
+       "activeRound": 1,
+       "coins": [
+        1
+       ]
+      },
+      {
+       "buffKeyword": "Burst",
+       "stack": 5,
+       "activeRound": 0,
+       "coins": [
+        1
+       ],
+       "turn": 3
+      }
+     ]
+    },
+    "defense": {
+     "lor_dice": 9903101,
+     "attributeType": "SHAMROCK",
+     "coins": [
+      0
+     ],
+     "onUse": [
+      {
+       "buffKeyword": "Protection",
+       "stack": 2,
+       "activeRound": 0
+      }
+     ]
+    }
+   },
+   "texts": {
+    "1": {
+     "lor_card": 9903512
+    },
+    "2": {
+     "lor_card": 9903105
+    },
+    "3": {
+     "lor_card": 9903513
+    },
+    "defense": {
+     "lor_card": 9903101
+    }
+   }
   },
   "netzach-id": {
    "identity": 10693,
@@ -2945,7 +3285,101 @@
    "cover_art": "netzach",
    "game_title": "Floor of\nArt",
    "own_body": true,
-   "own_skills": true
+   "own_skills": true,
+   "moves": {
+    "1": {
+     "lor_dice": 9904414,
+     "attributeType": "AZURE",
+     "coins": [
+      0
+     ],
+     "onHit": [
+      {
+       "buffKeyword": "Sinking",
+       "stack": 2,
+       "activeRound": 0,
+       "coins": [
+        1
+       ],
+       "turn": 1
+      }
+     ]
+    },
+    "2": {
+     "lor_dice": 9904411,
+     "attributeType": "AZURE",
+     "coins": [
+      0,
+      0
+     ],
+     "onHit": [
+      {
+       "buffKeyword": "Sinking",
+       "stack": 3,
+       "activeRound": 0,
+       "coins": [
+        1,
+        2
+       ],
+       "turn": 2
+      }
+     ]
+    },
+    "3": {
+     "lor_dice": 9904305,
+     "attributeType": "INDIGO",
+     "coins": [
+      0,
+      0
+     ],
+     "onUse": [
+      {
+       "buffKeyword": "AttackDmgUp",
+       "stack": 2,
+       "activeRound": 0
+      }
+     ],
+     "onHit": [
+      {
+       "buffKeyword": "Charge",
+       "stack": 5,
+       "activeRound": 0,
+       "coins": [
+        1,
+        2
+       ]
+      }
+     ]
+    },
+    "defense": {
+     "lor_dice": 9904103,
+     "attributeType": "AZURE",
+     "coins": [
+      0
+     ],
+     "onUse": [
+      {
+       "buffKeyword": "Protection",
+       "stack": 2,
+       "activeRound": 0
+      }
+     ]
+    }
+   },
+   "texts": {
+    "1": {
+     "lor_card": 9904414
+    },
+    "2": {
+     "lor_card": 9904411
+    },
+    "3": {
+     "lor_card": 9904305
+    },
+    "defense": {
+     "lor_card": 9904103
+    }
+   }
   },
   "tiphereth-id": {
    "identity": 10193,
@@ -2958,7 +3392,104 @@
    "cover_art": "tiphereth",
    "game_title": "Floor of\nNatural Sciences",
    "own_body": true,
-   "own_skills": true
+   "own_skills": true,
+   "moves": {
+    "1": {
+     "lor_dice": 9905612,
+     "attributeType": "SCARLET",
+     "coins": [
+      0
+     ],
+     "onHit": [
+      {
+       "buffKeyword": "Laceration",
+       "stack": 2,
+       "activeRound": 0,
+       "coins": [
+        1
+       ],
+       "turn": 1
+      }
+     ]
+    },
+    "2": {
+     "lor_dice": 9905432,
+     "attributeType": "CRIMSON",
+     "coins": [
+      0,
+      0
+     ],
+     "onHit": [
+      {
+       "buffKeyword": "Combustion",
+       "stack": 3,
+       "activeRound": 0,
+       "coins": [
+        1,
+        2
+       ],
+       "turn": 2
+      }
+     ]
+    },
+    "3": {
+     "lor_dice": 9905615,
+     "attributeType": "SCARLET",
+     "coins": [
+      0,
+      0,
+      0
+     ],
+     "onUse": [
+      {
+       "buffKeyword": "AttackDmgUp",
+       "stack": 2,
+       "activeRound": 0
+      }
+     ],
+     "onHit": [
+      {
+       "buffKeyword": "Laceration",
+       "stack": 5,
+       "activeRound": 0,
+       "coins": [
+        1,
+        2,
+        3
+       ],
+       "turn": 3
+      }
+     ]
+    },
+    "defense": {
+     "lor_dice": 9905102,
+     "attributeType": "INDIGO",
+     "coins": [
+      0
+     ],
+     "onUse": [
+      {
+       "buffKeyword": "Protection",
+       "stack": 2,
+       "activeRound": 0
+      }
+     ]
+    }
+   },
+   "texts": {
+    "1": {
+     "lor_card": 9905612
+    },
+    "2": {
+     "lor_card": 9905432
+    },
+    "3": {
+     "lor_card": 9905615
+    },
+    "defense": {
+     "lor_card": 9905102
+    }
+   }
   },
   "chesed-id": {
    "identity": 10293,
@@ -2971,7 +3502,102 @@
    "cover_art": "chesed",
    "game_title": "Floor of\nSocial Sciences",
    "own_body": true,
-   "own_skills": true
+   "own_skills": true,
+   "moves": {
+    "1": {
+     "lor_dice": 9907622,
+     "attributeType": "SHAMROCK",
+     "coins": [
+      0
+     ],
+     "onHit": [
+      {
+       "buffKeyword": "Breath",
+       "stack": 2,
+       "activeRound": 0,
+       "coins": [
+        1
+       ],
+       "turn": 1
+      }
+     ]
+    },
+    "2": {
+     "lor_dice": 9907516,
+     "attributeType": "SHAMROCK",
+     "coins": [
+      0,
+      0
+     ],
+     "onHit": [
+      {
+       "buffKeyword": "Breath",
+       "stack": 3,
+       "activeRound": 0,
+       "coins": [
+        1,
+        2
+       ],
+       "turn": 2
+      }
+     ]
+    },
+    "3": {
+     "lor_dice": 9907514,
+     "attributeType": "AZURE",
+     "coins": [
+      0,
+      0
+     ],
+     "onUse": [
+      {
+       "buffKeyword": "AttackDmgUp",
+       "stack": 2,
+       "activeRound": 0
+      }
+     ],
+     "onHit": [
+      {
+       "buffKeyword": "Sinking",
+       "stack": 5,
+       "activeRound": 0,
+       "coins": [
+        1,
+        2
+       ],
+       "turn": 3
+      }
+     ]
+    },
+    "defense": {
+     "lor_dice": 9907112,
+     "attributeType": "SHAMROCK",
+     "coins": [
+      0
+     ],
+     "onUse": [
+      {
+       "buffKeyword": "Protection",
+       "stack": 2,
+       "activeRound": 0
+      }
+     ]
+    }
+   },
+   "texts": {
+    "1": {
+     "lor_card": 9907622
+    },
+    "2": {
+     "lor_card": 9907516
+    },
+    "3": {
+     "lor_card": 9907514
+    },
+    "defense": {
+     "lor_card": 9907112
+    }
+   }
   },
   "hokma-id": {
    "identity": 11193,
@@ -2984,7 +3610,106 @@
    "cover_art": "hokma",
    "game_title": "Floor of\nReligion",
    "own_body": true,
-   "own_skills": true
+   "own_skills": true,
+   "moves": {
+    "1": {
+     "lor_dice": 9909116,
+     "attributeType": "INDIGO",
+     "coins": [
+      0,
+      0
+     ],
+     "onHit": [
+      {
+       "buffKeyword": "Charge",
+       "stack": 2,
+       "activeRound": 0,
+       "coins": [
+        1,
+        2
+       ]
+      }
+     ]
+    },
+    "2": {
+     "lor_dice": 9909154,
+     "attributeType": "VIOLET",
+     "coins": [
+      0,
+      0
+     ],
+     "onHit": [
+      {
+       "buffKeyword": "Vibration",
+       "stack": 3,
+       "activeRound": 0,
+       "coins": [
+        1,
+        2
+       ],
+       "turn": 2
+      }
+     ]
+    },
+    "3": {
+     "lor_dice": 9909123,
+     "attributeType": "INDIGO",
+     "coins": [
+      0,
+      0,
+      0,
+      0
+     ],
+     "onUse": [
+      {
+       "buffKeyword": "AttackDmgUp",
+       "stack": 2,
+       "activeRound": 0
+      }
+     ],
+     "onHit": [
+      {
+       "buffKeyword": "Charge",
+       "stack": 5,
+       "activeRound": 0,
+       "coins": [
+        1,
+        2,
+        3,
+        4
+       ]
+      }
+     ]
+    },
+    "defense": {
+     "lor_dice": 9909121,
+     "attributeType": "VIOLET",
+     "coins": [
+      0
+     ],
+     "onUse": [
+      {
+       "buffKeyword": "Protection",
+       "stack": 2,
+       "activeRound": 0
+      }
+     ]
+    }
+   },
+   "texts": {
+    "1": {
+     "lor_card": 9909116
+    },
+    "2": {
+     "lor_card": 9909154
+    },
+    "3": {
+     "lor_card": 9909123
+    },
+    "defense": {
+     "lor_card": 9909121
+    }
+   }
   },
   "apocalypse-bird-id": {
    "identity": 10793,
@@ -3058,6 +3783,16 @@
      "attributeType": "INDIGO",
      "coins": [
       0
+     ],
+     "onHit": [
+      {
+       "buffKeyword": "Charge",
+       "stack": 2,
+       "activeRound": 0,
+       "coins": [
+        1
+       ]
+      }
      ]
     },
     "2": {
@@ -3066,6 +3801,17 @@
      "coins": [
       0,
       0
+     ],
+     "onHit": [
+      {
+       "buffKeyword": "Charge",
+       "stack": 3,
+       "activeRound": 0,
+       "coins": [
+        1,
+        2
+       ]
+      }
      ]
     },
     "3": {
@@ -3075,6 +3821,26 @@
       0,
       0,
       0
+     ],
+     "onUse": [
+      {
+       "buffKeyword": "AttackDmgUp",
+       "stack": 2,
+       "activeRound": 0
+      }
+     ],
+     "onHit": [
+      {
+       "buffKeyword": "Vibration",
+       "stack": 5,
+       "activeRound": 0,
+       "coins": [
+        1,
+        2,
+        3
+       ],
+       "turn": 3
+      }
      ]
     },
     "defense": {
@@ -3082,6 +3848,13 @@
      "attributeType": "INDIGO",
      "coins": [
       0
+     ],
+     "onUse": [
+      {
+       "buffKeyword": "Protection",
+       "stack": 2,
+       "activeRound": 0
+      }
      ]
     }
    },
@@ -3164,6 +3937,26 @@
      "attributeType": "AZURE",
      "coins": [
       0
+     ],
+     "onHit": [
+      {
+       "buffKeyword": "Vibration",
+       "stack": 3,
+       "activeRound": 0,
+       "turn": 1,
+       "coins": [
+        1
+       ]
+      },
+      {
+       "buffKeyword": "Sinking",
+       "stack": 2,
+       "activeRound": 0,
+       "coins": [
+        1
+       ],
+       "turn": 1
+      }
      ]
     },
     "2": {
@@ -3172,6 +3965,18 @@
      "coins": [
       0,
       0
+     ],
+     "onHit": [
+      {
+       "buffKeyword": "Sinking",
+       "stack": 3,
+       "activeRound": 0,
+       "coins": [
+        1,
+        2
+       ],
+       "turn": 2
+      }
      ]
     },
     "3": {
@@ -3180,6 +3985,24 @@
      "coins": [
       0,
       0
+     ],
+     "onUse": [
+      {
+       "buffKeyword": "AttackDmgUp",
+       "stack": 2,
+       "activeRound": 0
+      }
+     ],
+     "onHit": [
+      {
+       "buffKeyword": "Charge",
+       "stack": 5,
+       "activeRound": 0,
+       "coins": [
+        1,
+        2
+       ]
+      }
      ]
     },
     "defense": {
@@ -3187,6 +4010,13 @@
      "attributeType": "AZURE",
      "coins": [
       0
+     ],
+     "onUse": [
+      {
+       "buffKeyword": "Protection",
+       "stack": 2,
+       "activeRound": 0
+      }
      ]
     }
    },
@@ -3313,6 +4143,17 @@
      "attributeType": "VIOLET",
      "coins": [
       0
+     ],
+     "onHit": [
+      {
+       "buffKeyword": "Vibration",
+       "stack": 2,
+       "activeRound": 0,
+       "coins": [
+        1
+       ],
+       "turn": 1
+      }
      ]
     },
     "2": {
@@ -3321,6 +4162,18 @@
      "coins": [
       0,
       0
+     ],
+     "onHit": [
+      {
+       "buffKeyword": "Vibration",
+       "stack": 3,
+       "activeRound": 0,
+       "coins": [
+        1,
+        2
+       ],
+       "turn": 2
+      }
      ]
     },
     "3": {
@@ -3331,6 +4184,27 @@
       0,
       0,
       0
+     ],
+     "onUse": [
+      {
+       "buffKeyword": "AttackDmgUp",
+       "stack": 2,
+       "activeRound": 0
+      }
+     ],
+     "onHit": [
+      {
+       "buffKeyword": "Vibration",
+       "stack": 5,
+       "activeRound": 0,
+       "coins": [
+        1,
+        2,
+        3,
+        4
+       ],
+       "turn": 3
+      }
      ]
     },
     "defense": {
@@ -3338,6 +4212,13 @@
      "attributeType": "VIOLET",
      "coins": [
       0
+     ],
+     "onUse": [
+      {
+       "buffKeyword": "Protection",
+       "stack": 2,
+       "activeRound": 0
+      }
      ]
     }
    },
@@ -3415,6 +4296,17 @@
      "attributeType": "CRIMSON",
      "coins": [
       0
+     ],
+     "onHit": [
+      {
+       "buffKeyword": "Combustion",
+       "stack": 1,
+       "activeRound": 0,
+       "turn": 1,
+       "coins": [
+        1
+       ]
+      }
      ]
     },
     "2": {
@@ -3423,6 +4315,36 @@
      "coins": [
       0,
       0
+     ],
+     "onHit": [
+      {
+       "buffKeyword": "Combustion",
+       "stack": 2,
+       "activeRound": 0,
+       "turn": 1,
+       "coins": [
+        1
+       ]
+      },
+      {
+       "buffKeyword": "Combustion",
+       "stack": 1,
+       "activeRound": 0,
+       "turn": 1,
+       "coins": [
+        2
+       ]
+      },
+      {
+       "buffKeyword": "Laceration",
+       "stack": 3,
+       "activeRound": 0,
+       "coins": [
+        1,
+        2
+       ],
+       "turn": 2
+      }
      ]
     },
     "3": {
@@ -3431,6 +4353,25 @@
      "coins": [
       0,
       0
+     ],
+     "onUse": [
+      {
+       "buffKeyword": "AttackDmgUp",
+       "stack": 2,
+       "activeRound": 0
+      }
+     ],
+     "onHit": [
+      {
+       "buffKeyword": "Combustion",
+       "stack": 5,
+       "activeRound": 0,
+       "coins": [
+        1,
+        2
+       ],
+       "turn": 3
+      }
      ]
     },
     "defense": {
@@ -3438,6 +4379,13 @@
      "attributeType": "SCARLET",
      "coins": [
       0
+     ],
+     "onUse": [
+      {
+       "buffKeyword": "Protection",
+       "stack": 2,
+       "activeRound": 0
+      }
      ]
     }
    },
@@ -3519,6 +4467,17 @@
      "attributeType": "CRIMSON",
      "coins": [
       0
+     ],
+     "onHit": [
+      {
+       "buffKeyword": "Combustion",
+       "stack": 2,
+       "activeRound": 0,
+       "coins": [
+        1
+       ],
+       "turn": 1
+      }
      ]
     },
     "2": {
@@ -3526,6 +4485,26 @@
      "attributeType": "CRIMSON",
      "coins": [
       0
+     ],
+     "onHit": [
+      {
+       "buffKeyword": "Combustion",
+       "stack": 1,
+       "activeRound": 0,
+       "turn": 1,
+       "coins": [
+        1
+       ]
+      },
+      {
+       "buffKeyword": "Combustion",
+       "stack": 1,
+       "activeRound": 0,
+       "turn": 1,
+       "coins": [
+        1
+       ]
+      }
      ]
     },
     "3": {
@@ -3533,6 +4512,42 @@
      "attributeType": "SCARLET",
      "coins": [
       0
+     ],
+     "onUse": [
+      {
+       "buffKeyword": "AttackDmgUp",
+       "stack": 2,
+       "activeRound": 0
+      }
+     ],
+     "onHit": [
+      {
+       "buffKeyword": "Combustion",
+       "stack": 2,
+       "activeRound": 0,
+       "turn": 1,
+       "coins": [
+        1
+       ]
+      },
+      {
+       "buffKeyword": "Combustion",
+       "stack": 2,
+       "activeRound": 0,
+       "turn": 1,
+       "coins": [
+        1
+       ]
+      },
+      {
+       "buffKeyword": "Laceration",
+       "stack": 5,
+       "activeRound": 0,
+       "coins": [
+        1
+       ],
+       "turn": 3
+      }
      ]
     },
     "defense": {
@@ -3540,6 +4555,13 @@
      "attributeType": "CRIMSON",
      "coins": [
       0
+     ],
+     "onUse": [
+      {
+       "buffKeyword": "Protection",
+       "stack": 2,
+       "activeRound": 0
+      }
      ]
     }
    },
@@ -3670,6 +4692,17 @@
      "attributeType": "CRIMSON",
      "coins": [
       0
+     ],
+     "onHit": [
+      {
+       "buffKeyword": "Combustion",
+       "stack": 1,
+       "activeRound": 0,
+       "turn": 1,
+       "coins": [
+        1
+       ]
+      }
      ]
     },
     "2": {
@@ -3679,6 +4712,26 @@
       0,
       0,
       0
+     ],
+     "onHit": [
+      {
+       "buffKeyword": "Combustion",
+       "stack": 1,
+       "activeRound": 0,
+       "turn": 1,
+       "coins": [
+        1
+       ]
+      },
+      {
+       "buffKeyword": "Combustion",
+       "stack": 1,
+       "activeRound": 0,
+       "turn": 1,
+       "coins": [
+        2
+       ]
+      }
      ]
     },
     "3": {
@@ -3688,6 +4741,53 @@
       0,
       0,
       0
+     ],
+     "onUse": [
+      {
+       "buffKeyword": "AttackDmgUp",
+       "stack": 2,
+       "activeRound": 0
+      }
+     ],
+     "onHit": [
+      {
+       "buffKeyword": "Combustion",
+       "stack": 1,
+       "activeRound": 0,
+       "turn": 1,
+       "coins": [
+        1
+       ]
+      },
+      {
+       "buffKeyword": "Combustion",
+       "stack": 1,
+       "activeRound": 0,
+       "turn": 1,
+       "coins": [
+        2
+       ]
+      },
+      {
+       "buffKeyword": "Combustion",
+       "stack": 1,
+       "activeRound": 0,
+       "turn": 1,
+       "coins": [
+        3
+       ]
+      },
+      {
+       "buffKeyword": "Burst",
+       "stack": 5,
+       "activeRound": 0,
+       "coins": [
+        1,
+        2,
+        3
+       ],
+       "turn": 3
+      }
      ]
     },
     "defense": {
@@ -3695,6 +4795,13 @@
      "attributeType": "CRIMSON",
      "coins": [
       0
+     ],
+     "onUse": [
+      {
+       "buffKeyword": "Protection",
+       "stack": 2,
+       "activeRound": 0
+      }
      ]
     }
    },
@@ -3824,6 +4931,26 @@
      "attributeType": "AMBER",
      "coins": [
       0
+     ],
+     "onHit": [
+      {
+       "buffKeyword": "Combustion",
+       "stack": 1,
+       "activeRound": 0,
+       "turn": 1,
+       "coins": [
+        1
+       ]
+      },
+      {
+       "buffKeyword": "Burst",
+       "stack": 2,
+       "activeRound": 0,
+       "coins": [
+        1
+       ],
+       "turn": 1
+      }
      ]
     },
     "2": {
@@ -3832,6 +4959,18 @@
      "coins": [
       0,
       0
+     ],
+     "onHit": [
+      {
+       "buffKeyword": "Burst",
+       "stack": 3,
+       "activeRound": 0,
+       "coins": [
+        1,
+        2
+       ],
+       "turn": 2
+      }
      ]
     },
     "3": {
@@ -3840,6 +4979,34 @@
      "coins": [
       0,
       0
+     ],
+     "onUse": [
+      {
+       "buffKeyword": "AttackDmgUp",
+       "stack": 2,
+       "activeRound": 0
+      }
+     ],
+     "onHit": [
+      {
+       "buffKeyword": "Combustion",
+       "stack": 2,
+       "activeRound": 0,
+       "turn": 1,
+       "coins": [
+        2
+       ]
+      },
+      {
+       "buffKeyword": "Breath",
+       "stack": 5,
+       "activeRound": 0,
+       "coins": [
+        1,
+        2
+       ],
+       "turn": 3
+      }
      ]
     },
     "defense": {
@@ -3847,6 +5014,13 @@
      "attributeType": "AMBER",
      "coins": [
       0
+     ],
+     "onUse": [
+      {
+       "buffKeyword": "Protection",
+       "stack": 2,
+       "activeRound": 0
+      }
      ]
     }
    },
@@ -3927,6 +5101,17 @@
      "attributeType": "CRIMSON",
      "coins": [
       0
+     ],
+     "onHit": [
+      {
+       "buffKeyword": "Combustion",
+       "stack": 1,
+       "activeRound": 0,
+       "turn": 1,
+       "coins": [
+        1
+       ]
+      }
      ]
     },
     "2": {
@@ -3934,6 +5119,44 @@
      "attributeType": "SCARLET",
      "coins": [
       0
+     ],
+     "onHit": [
+      {
+       "buffKeyword": "Combustion",
+       "stack": 1,
+       "activeRound": 0,
+       "turn": 1,
+       "coins": [
+        1
+       ]
+      },
+      {
+       "buffKeyword": "Combustion",
+       "stack": 1,
+       "activeRound": 0,
+       "turn": 1,
+       "coins": [
+        1
+       ]
+      },
+      {
+       "buffKeyword": "Combustion",
+       "stack": 1,
+       "activeRound": 0,
+       "turn": 1,
+       "coins": [
+        1
+       ]
+      },
+      {
+       "buffKeyword": "Laceration",
+       "stack": 3,
+       "activeRound": 0,
+       "coins": [
+        1
+       ],
+       "turn": 2
+      }
      ]
     },
     "3": {
@@ -3942,6 +5165,39 @@
      "coins": [
       0,
       0
+     ],
+     "onUse": [
+      {
+       "buffKeyword": "Protection",
+       "stack": 2,
+       "activeRound": 1
+      },
+      {
+       "buffKeyword": "AttackDmgUp",
+       "stack": 2,
+       "activeRound": 0
+      }
+     ],
+     "onHit": [
+      {
+       "buffKeyword": "Combustion",
+       "stack": 3,
+       "activeRound": 0,
+       "turn": 1,
+       "coins": [
+        1
+       ]
+      },
+      {
+       "buffKeyword": "Laceration",
+       "stack": 5,
+       "activeRound": 0,
+       "coins": [
+        1,
+        2
+       ],
+       "turn": 3
+      }
      ]
     },
     "defense": {
@@ -3949,6 +5205,18 @@
      "attributeType": "CRIMSON",
      "coins": [
       0
+     ],
+     "onUse": [
+      {
+       "buffKeyword": "Protection",
+       "stack": 2,
+       "activeRound": 1
+      },
+      {
+       "buffKeyword": "Protection",
+       "stack": 2,
+       "activeRound": 0
+      }
      ]
     }
    },
@@ -4030,6 +5298,17 @@
      "coins": [
       0,
       0
+     ],
+     "onHit": [
+      {
+       "buffKeyword": "Charge",
+       "stack": 2,
+       "activeRound": 0,
+       "coins": [
+        1,
+        2
+       ]
+      }
      ]
     },
     "2": {
@@ -4038,6 +5317,17 @@
      "coins": [
       0,
       0
+     ],
+     "onHit": [
+      {
+       "buffKeyword": "Charge",
+       "stack": 3,
+       "activeRound": 0,
+       "coins": [
+        1,
+        2
+       ]
+      }
      ]
     },
     "3": {
@@ -4048,6 +5338,27 @@
       0,
       0,
       0
+     ],
+     "onUse": [
+      {
+       "buffKeyword": "AttackDmgUp",
+       "stack": 2,
+       "activeRound": 0
+      }
+     ],
+     "onHit": [
+      {
+       "buffKeyword": "Sinking",
+       "stack": 5,
+       "activeRound": 0,
+       "coins": [
+        1,
+        2,
+        3,
+        4
+       ],
+       "turn": 3
+      }
      ]
     },
     "defense": {
@@ -4055,6 +5366,13 @@
      "attributeType": "INDIGO",
      "coins": [
       0
+     ],
+     "onUse": [
+      {
+       "buffKeyword": "Protection",
+       "stack": 2,
+       "activeRound": 0
+      }
      ]
     }
    },
@@ -4136,6 +5454,17 @@
      "coins": [
       0,
       0
+     ],
+     "onHit": [
+      {
+       "buffKeyword": "Charge",
+       "stack": 2,
+       "activeRound": 0,
+       "coins": [
+        1,
+        2
+       ]
+      }
      ]
     },
     "2": {
@@ -4145,6 +5474,19 @@
       0,
       0,
       0
+     ],
+     "onHit": [
+      {
+       "buffKeyword": "Sinking",
+       "stack": 3,
+       "activeRound": 0,
+       "coins": [
+        1,
+        2,
+        3
+       ],
+       "turn": 2
+      }
      ]
     },
     "3": {
@@ -4155,6 +5497,26 @@
       0,
       0,
       0
+     ],
+     "onUse": [
+      {
+       "buffKeyword": "AttackDmgUp",
+       "stack": 2,
+       "activeRound": 0
+      }
+     ],
+     "onHit": [
+      {
+       "buffKeyword": "Charge",
+       "stack": 5,
+       "activeRound": 0,
+       "coins": [
+        1,
+        2,
+        3,
+        4
+       ]
+      }
      ]
     },
     "defense": {
@@ -4162,6 +5524,13 @@
      "attributeType": "AZURE",
      "coins": [
       0
+     ],
+     "onUse": [
+      {
+       "buffKeyword": "Protection",
+       "stack": 2,
+       "activeRound": 0
+      }
      ]
     }
    },
@@ -4243,6 +5612,18 @@
      "coins": [
       0,
       0
+     ],
+     "onHit": [
+      {
+       "buffKeyword": "Sinking",
+       "stack": 2,
+       "activeRound": 0,
+       "coins": [
+        1,
+        2
+       ],
+       "turn": 1
+      }
      ]
     },
     "2": {
@@ -4252,6 +5633,18 @@
       0,
       0,
       0
+     ],
+     "onHit": [
+      {
+       "buffKeyword": "Charge",
+       "stack": 3,
+       "activeRound": 0,
+       "coins": [
+        1,
+        2,
+        3
+       ]
+      }
      ]
     },
     "3": {
@@ -4261,6 +5654,26 @@
       0,
       0,
       0
+     ],
+     "onUse": [
+      {
+       "buffKeyword": "AttackDmgUp",
+       "stack": 2,
+       "activeRound": 0
+      }
+     ],
+     "onHit": [
+      {
+       "buffKeyword": "Sinking",
+       "stack": 5,
+       "activeRound": 0,
+       "coins": [
+        1,
+        2,
+        3
+       ],
+       "turn": 3
+      }
      ]
     },
     "defense": {
@@ -4269,6 +5682,13 @@
      "coins": [
       0,
       0
+     ],
+     "onUse": [
+      {
+       "buffKeyword": "Protection",
+       "stack": 2,
+       "activeRound": 0
+      }
      ]
     }
    },
