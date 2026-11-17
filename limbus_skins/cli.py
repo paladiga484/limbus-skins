@@ -406,6 +406,14 @@ def main(argv=None):
         from . import title
         logo = "--logo" in args
         pics = [a for a in args if not a.startswith("--")]
+        if "--intro" in args:
+            if "--off" in args:
+                for f in title.INTRO:
+                    title._remove(os.path.join(title.folder(data), f))
+                print("intro: the game's own opening again")
+            elif pics:
+                print(f"intro: {pics[0]} over the game's opening logo, from the next start ({title.save_intro(pics[0], data)})")
+            return 0
         if "--off" in args:
             title.clear(data, logo)
             print(("logo" if logo else "background") + ": the game's own again, from the next start")
