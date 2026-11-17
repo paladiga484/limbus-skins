@@ -81,6 +81,7 @@ def clear(data_dir, logo=False):
         open(os.path.join(folder(data_dir), OFF), "wb").close()
 
 
+INTRO_OFF = "intro-off"         # the game's own opening: the package's intro stays away too
 INTRO = ("intro-glow.pic", "intro-rays.pic", "intro-disc.pic", "intro-text.pic", "intro-layout.txt")
 
 
@@ -184,5 +185,5 @@ def save_intro(picture, data_dir):
 
 def files(data_dir):
     """{file name: path} of the title pictures chosen (and OFF, when the game's own was)."""
-    return {f: os.path.join(folder(data_dir), f) for f in (BACKGROUND, LOGO, OFF) + INTRO
+    return {f: os.path.join(folder(data_dir), f) for f in (BACKGROUND, LOGO, OFF, INTRO_OFF) + INTRO
             if os.path.isfile(os.path.join(folder(data_dir), f))}

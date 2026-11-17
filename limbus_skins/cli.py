@@ -410,7 +410,9 @@ def main(argv=None):
             if "--off" in args:
                 for f in title.INTRO:
                     title._remove(os.path.join(title.folder(data), f))
-                print("intro: the game's own opening again")
+                os.makedirs(title.folder(data), exist_ok=True)
+                open(os.path.join(title.folder(data), title.INTRO_OFF), "wb").close()
+                print("intro: the game's own opening again (the package's intro too)")
             elif pics:
                 print(f"intro: {pics[0]} over the game's opening logo, from the next start ({title.save_intro(pics[0], data)})")
             return 0
