@@ -1,0 +1,29 @@
+[build-system]
+requires = ["setuptools>=64"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "limbus-skins"
+dynamic = ["version"]
+description = "Dress Limbus Company identities as the characters they mirror (private servers)"
+readme = "README.md"
+license = {text = "MIT"}
+requires-python = ">=3.10"
+dependencies = [
+    "UnityPy==1.25.4",
+    "Pillow>=13.0.0",      # 12.x and older: 40+ decoder advisories (GHSA, fixed in 13.0.0)
+    "brotli>=1.2.1",       # UnityPy's; 1.2.0 and older have two advisories
+    "lz4>=4",
+]
+
+[project.scripts]
+limbus-skins = "limbus_skins.cli:main"
+
+[tool.setuptools]
+packages = ["limbus_skins"]
+
+[tool.setuptools.dynamic]
+version = {attr = "limbus_skins.__version__"}
+
+[tool.setuptools.package-data]
+limbus_skins = ["data/*.json", "data/heads/*.json", "data/lor/*.json", "data/lor/*/*", "data/art/cards/*/*", "data/art/heads/*.png", "data/art/twilight/*.png"]

@@ -1,0 +1,49 @@
+{
+ "bundle": "char/char_545.pres",
+ "head": null,
+ "poses": {
+  "Damaged": {
+   "file": "Damaged.png",
+   "pivot": [
+    0.399792,
+    -0.005982
+   ]
+  },
+  "Default": {
+   "file": "Default.png",
+   "pivot": [
+    0.392405,
+    0.030612
+   ]
+  },
+  "Guard": {
+   "file": "Guard.png",
+   "pivot": [
+    0.770115,
+    0.104866
+   ]
+  },
+  "Hit": {
+   "file": "Hit.png",
+   "pivot": [
+    0.226667,
+    0.012085
+   ]
+  },
+  "Move": {
+   "file": "Move.png",
+   "pivot": [
+    0.471963,
+    0.002959
+   ]
+  },
+  "Slash": {
+   "file": "Slash.png",
+   "pivot": [
+    0.858984,
+    0.298411
+   ]
+  }
+ },
+ "prefab": "OrangeCross"
+}

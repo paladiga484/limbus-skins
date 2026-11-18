@@ -1,0 +1,190 @@
+{
+ "bundle": "lobotomy/nothingthere2",
+ "head": null,
+ "poses": {
+  "Dead1": {
+   "file": "Dead1.png",
+   "pivot": [
+    0.288207,
+    0.0
+   ]
+  },
+  "Dead2": {
+   "file": "Dead2.png",
+   "pivot": [
+    0.474749,
+    0.0
+   ]
+  },
+  "Dead3": {
+   "file": "Dead3.png",
+   "pivot": [
+    0.446441,
+    0.0
+   ]
+  },
+  "Default": {
+   "file": "Default.png",
+   "pivot": [
+    0.469897,
+    0.0
+   ]
+  },
+  "Grab1": {
+   "file": "Grab1.png",
+   "pivot": [
+    0.498177,
+    0.0
+   ]
+  },
+  "Grab2": {
+   "file": "Grab2.png",
+   "pivot": [
+    0.530547,
+    0.0
+   ]
+  },
+  "Grab3": {
+   "file": "Grab3.png",
+   "pivot": [
+    0.495974,
+    0.0
+   ]
+  },
+  "Grab4": {
+   "file": "Grab4.png",
+   "pivot": [
+    0.393069,
+    0.0
+   ]
+  },
+  "Hook1": {
+   "file": "Hook1.png",
+   "pivot": [
+    0.483269,
+    0.0
+   ]
+  },
+  "Hook2": {
+   "file": "Hook2.png",
+   "pivot": [
+    0.440248,
+    0.0
+   ]
+  },
+  "Hook3": {
+   "file": "Hook3.png",
+   "pivot": [
+    0.366524,
+    0.0
+   ]
+  },
+  "Hook4": {
+   "file": "Hook4.png",
+   "pivot": [
+    0.354606,
+    0.0
+   ]
+  },
+  "Move1": {
+   "file": "Move1.png",
+   "pivot": [
+    0.497052,
+    0.0
+   ]
+  },
+  "Move2": {
+   "file": "Move2.png",
+   "pivot": [
+    0.371362,
+    0.0
+   ]
+  },
+  "Move3": {
+   "file": "Move3.png",
+   "pivot": [
+    0.443408,
+    0.0
+   ]
+  },
+  "Move4": {
+   "file": "Move4.png",
+   "pivot": [
+    0.353065,
+    0.0
+   ]
+  },
+  "Standing1": {
+   "file": "Standing1.png",
+   "pivot": [
+    0.469897,
+    0.0
+   ]
+  },
+  "Standing2": {
+   "file": "Standing2.png",
+   "pivot": [
+    0.452683,
+    0.0
+   ]
+  },
+  "Standing3": {
+   "file": "Standing3.png",
+   "pivot": [
+    0.429823,
+    0.0
+   ]
+  },
+  "Standing4": {
+   "file": "Standing4.png",
+   "pivot": [
+    0.44836,
+    0.0
+   ]
+  },
+  "Swing1": {
+   "file": "Swing1.png",
+   "pivot": [
+    0.427369,
+    0.0
+   ]
+  },
+  "Swing2": {
+   "file": "Swing2.png",
+   "pivot": [
+    0.224314,
+    0.0
+   ]
+  },
+  "Swing3": {
+   "file": "Swing3.png",
+   "pivot": [
+    0.100223,
+    0.0
+   ]
+  },
+  "Swing4": {
+   "file": "Swing4.png",
+   "pivot": [
+    0.095971,
+    0.0
+   ]
+  },
+  "Swing5": {
+   "file": "Swing5.png",
+   "pivot": [
+    0.672781,
+    0.0
+   ]
+  },
+  "Swing6": {
+   "file": "Swing6.png",
+   "pivot": [
+    0.52627,
+    0.0
+   ]
+  }
+ },
+ "prefab": "NothingThere2",
+ "source": "Lobotomy Corporation resources.assets: Nothing There's last form (skinned meshes), posed by its own clips; mirrored to face left"
+}

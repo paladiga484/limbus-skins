@@ -1,0 +1,120 @@
+{
+ "bundle": "lobotomy/apostle",
+ "head": null,
+ "poses": {
+  "Charge1": {
+   "file": "Charge1.png",
+   "pivot": [
+    0.850013,
+    0.0
+   ]
+  },
+  "Charge2": {
+   "file": "Charge2.png",
+   "pivot": [
+    0.729862,
+    0.0
+   ]
+  },
+  "Charge3": {
+   "file": "Charge3.png",
+   "pivot": [
+    0.757855,
+    0.0
+   ]
+  },
+  "Dead1": {
+   "file": "Dead1.png",
+   "pivot": [
+    0.491096,
+    0.0
+   ]
+  },
+  "Dead2": {
+   "file": "Dead2.png",
+   "pivot": [
+    0.331268,
+    0.0
+   ]
+  },
+  "Dead3": {
+   "file": "Dead3.png",
+   "pivot": [
+    0.401884,
+    0.0
+   ]
+  },
+  "Default": {
+   "file": "Default.png",
+   "pivot": [
+    0.740886,
+    0.0
+   ]
+  },
+  "Move1": {
+   "file": "Move1.png",
+   "pivot": [
+    0.590807,
+    0.0
+   ]
+  },
+  "Move2": {
+   "file": "Move2.png",
+   "pivot": [
+    0.854174,
+    0.0
+   ]
+  },
+  "Move3": {
+   "file": "Move3.png",
+   "pivot": [
+    0.854053,
+    0.0
+   ]
+  },
+  "Range1": {
+   "file": "Range1.png",
+   "pivot": [
+    0.809367,
+    0.0
+   ]
+  },
+  "Range2": {
+   "file": "Range2.png",
+   "pivot": [
+    0.789012,
+    0.0
+   ]
+  },
+  "Range3": {
+   "file": "Range3.png",
+   "pivot": [
+    0.788593,
+    0.0
+   ]
+  },
+  "Standing1": {
+   "file": "Standing1.png",
+   "pivot": [
+    0.740886,
+    0.0
+   ]
+  },
+  "Standing2": {
+   "file": "Standing2.png",
+   "pivot": [
+    0.733111,
+    0.0
+   ]
+  },
+  "Standing3": {
+   "file": "Standing3.png",
+   "pivot": [
+    0.614561,
+    0.0
+   ]
+  }
+ },
+ "prefab": "Apostle",
+ "source": "Lobotomy Corporation resources.assets: WhiteNight's apostle (DeathAngelApostleAnim), posed by its own clips; mirrored to face left"
+}

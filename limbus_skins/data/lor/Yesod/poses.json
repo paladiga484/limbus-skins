@@ -1,0 +1,70 @@
+{
+ "bundle": "char/char_624.pres",
+ "head": null,
+ "poses": {
+  "Damaged": {
+   "file": "Damaged.png",
+   "pivot": [
+    0.685466,
+    -0.002315
+   ]
+  },
+  "Default": {
+   "file": "Default.png",
+   "pivot": [
+    0.312865,
+    -0.01002
+   ]
+  },
+  "Evade": {
+   "file": "Evade.png",
+   "pivot": [
+    0.441683,
+    0.066362
+   ]
+  },
+  "Guard": {
+   "file": "Guard.png",
+   "pivot": [
+    0.638436,
+    -0.008264
+   ]
+  },
+  "Hit": {
+   "file": "Hit.png",
+   "pivot": [
+    0.407563,
+    -0.005671
+   ]
+  },
+  "Move": {
+   "file": "Move.png",
+   "pivot": [
+    0.814898,
+    0.041037
+   ]
+  },
+  "Penetrate": {
+   "file": "Penetrate.png",
+   "pivot": [
+    0.920368,
+    0.00489
+   ]
+  },
+  "Slash": {
+   "file": "Slash.png",
+   "pivot": [
+    0.777027,
+    0.223077
+   ]
+  },
+  "Standing": {
+   "file": "Standing.png",
+   "pivot": [
+    0.312865,
+    -0.01002
+   ]
+  }
+ },
+ "prefab": "Yesod"
+}

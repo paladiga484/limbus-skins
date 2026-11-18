@@ -1,0 +1,77 @@
+{
+ "bundle": "char/char_583.pres",
+ "head": null,
+ "poses": {
+  "Damaged": {
+   "file": "Damaged.png",
+   "pivot": [
+    0.718391,
+    0.15937
+   ]
+  },
+  "Default": {
+   "file": "Default.png",
+   "pivot": [
+    0.798103,
+    0.082631
+   ]
+  },
+  "Evade": {
+   "file": "Evade.png",
+   "pivot": [
+    0.741895,
+    -0.042146
+   ]
+  },
+  "Guard": {
+   "file": "Guard.png",
+   "pivot": [
+    0.504967,
+    -0.010736
+   ]
+  },
+  "Hit": {
+   "file": "Hit.png",
+   "pivot": [
+    0.3407,
+    -0.00381
+   ]
+  },
+  "Move": {
+   "file": "Move.png",
+   "pivot": [
+    0.647712,
+    0.229199
+   ]
+  },
+  "Panetrate": {
+   "file": "Panetrate.png",
+   "pivot": [
+    0.484039,
+    0.034623
+   ]
+  },
+  "S1": {
+   "file": "S1.png",
+   "pivot": [
+    0.456709,
+    0.242326
+   ]
+  },
+  "S2": {
+   "file": "S2.png",
+   "pivot": [
+    0.567219,
+    0.164542
+   ]
+  },
+  "Slash": {
+   "file": "Slash.png",
+   "pivot": [
+    0.620112,
+    0.254854
+   ]
+  }
+ },
+ "prefab": "Shyao"
+}

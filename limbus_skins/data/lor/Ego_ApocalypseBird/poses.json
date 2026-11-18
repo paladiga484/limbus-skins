@@ -1,0 +1,84 @@
+{
+ "bundle": "char/char_115.pres",
+ "head": null,
+ "poses": {
+  "Big_S1": {
+   "file": "Big_S1.png",
+   "pivot": [
+    0.352468,
+    -0.054755
+   ]
+  },
+  "Damaged": {
+   "file": "Damaged.png",
+   "pivot": [
+    0.523048,
+    0.055659
+   ]
+  },
+  "Default": {
+   "file": "Default.png",
+   "pivot": [
+    0.50785,
+    0.075435
+   ]
+  },
+  "Guard": {
+   "file": "Guard.png",
+   "pivot": [
+    0.445545,
+    0.063725
+   ]
+  },
+  "Hit": {
+   "file": "Hit.png",
+   "pivot": [
+    0.552351,
+    0.013997
+   ]
+  },
+  "Long_S4": {
+   "file": "Long_S4.png",
+   "pivot": [
+    0.496713,
+    0.065494
+   ]
+  },
+  "Move": {
+   "file": "Move.png",
+   "pivot": [
+    0.3039,
+    -0.335544
+   ]
+  },
+  "S5": {
+   "file": "S5.png",
+   "pivot": [
+    0.395934,
+    -0.054755
+   ]
+  },
+  "Slash": {
+   "file": "Slash.png",
+   "pivot": [
+    0.527344,
+    -0.056639
+   ]
+  },
+  "Small_S2": {
+   "file": "Small_S2.png",
+   "pivot": [
+    0.425377,
+    -0.083333
+   ]
+  },
+  "Small_S3": {
+   "file": "Small_S3.png",
+   "pivot": [
+    0.372267,
+    0.035833
+   ]
+  }
+ },
+ "prefab": "Ego_ApocalypseBird"
+}

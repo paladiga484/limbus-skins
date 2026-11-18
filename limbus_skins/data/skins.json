@@ -1,0 +1,8031 @@
+{
+ "_note": "Every skin this tool can build. helpers: the identity takes a story helper unit's body and skills (changes skills: private servers only). repaints: the identity keeps its own body and skills and is redrawn as another character. tints: the identity keeps its own body and drawings, recolored. bosses: the identity becomes a boss - the boss's own body and skills (needs the Limbus Private Server's client patch, build 6). identities: a new identity of our own, cloned from a base (with \"source\"/\"unit\": a boss's own body and skills - an ally). kits: an identity's moves and text only, for a body mod's character. \"card\": the identity's ID card pictures drawn from the player's own card art (<data dir>/art/cards/<name>/), while the skin is on. \"unlock\": waits for the private server's Black Forest. \"dupe_of\": the same character in the same body as that skin - one copy is on at a time (a skin with an \"ally\" is one with it; \"ally_dupe_of\" names the ally's own copy). Nothing here is game art; everything is built from your own installed game.",
+ "helpers": {
+  "arayashiki-ryoshu": {
+   "identity": 10401,
+   "ally": 10498,
+   "helper": 400015,
+   "becomes": "Arayashiki Ryōshū (stage 9-49)",
+   "tested": true,
+   "cover": "Araya_Twenties",
+   "name": "Ryōshū",
+   "game_title": "Arayashiki"
+  },
+  "certain-sinclair": {
+   "identity": 11001,
+   "ally": 11098,
+   "helper": 400013,
+   "becomes": "A Certain Sinclair (Canto IX)",
+   "tested": true,
+   "cover": "Sinclair_War1",
+   "name": "Sinclair",
+   "game_title": "A Certain"
+  },
+  "queen-of-hatred": {
+   "identity": 10312,
+   "ally": 10398,
+   "helper": 400003,
+   "becomes": "Queen of Hatred (Walpurgis Night 6)",
+   "tested": true,
+   "title": "The Queen of Hatred (Walpurgis Night) - Don Quixote"
+  },
+  "lin-daiyu": {
+   "identity": 10413,
+   "ally": 10497,
+   "helper": 400002,
+   "becomes": "Lin Daiyu",
+   "tested": false,
+   "cover": "Daiyu_Hurt"
+  },
+  "jia-xichun": {
+   "identity": 10812,
+   "ally": 10898,
+   "helper": 400005,
+   "becomes": "Jia Xichun",
+   "tested": false,
+   "cover": "Xichun_final"
+  },
+  "aeng-du": {
+   "identity": 10815,
+   "ally": 10897,
+   "helper": 400038,
+   "becomes": "Aeng-du",
+   "tested": false
+  },
+  "kira": {
+   "identity": 10814,
+   "ally": 10896,
+   "helper": 400037,
+   "becomes": "Kira",
+   "tested": false,
+   "cover": "NewKira2"
+  },
+  "bamboo-hatted-kim": {
+   "identity": 10508,
+   "ally": 10598,
+   "helper": 400040,
+   "becomes": "Bamboo-hatted Kim",
+   "tested": false,
+   "cover": "normal_KSG",
+   "name": "Kim Satgat",
+   "game_title": "Bamboo-hatted"
+  },
+  "alyssa": {
+   "identity": 10211,
+   "ally": 10298,
+   "helper": 400007,
+   "becomes": "Alyssa",
+   "tested": false
+  },
+  "hohenheim": {
+   "identity": 11214,
+   "ally": 11298,
+   "helper": 400008,
+   "becomes": "Hohenheim",
+   "tested": false,
+   "cover": "Hohenheim2"
+  },
+  "pwie": {
+   "identity": 11016,
+   "ally": 11097,
+   "helper": 400041,
+   "becomes": "Pwie, the Crimson God",
+   "tested": false,
+   "cover": "Buffet_Adult",
+   "name": "Pwie",
+   "game_title": "The Crimson God"
+  },
+  "vergilius": {
+   "identity": 10710,
+   "helper": 400012,
+   "becomes": "Vergilius (his own body and skills)",
+   "tested": false,
+   "script": true,
+   "dupe_of": "vergilius-boss-id"
+  }
+ },
+ "repaints": {
+  "butterfly-yisang": {
+   "identity": 10110,
+   "becomes": "the Funeral of the Dead Butterflies' head",
+   "self": true,
+   "head": "10110.json",
+   "tested": false,
+   "title": "The Funeral of the Dead Butterflies (Lobotomy Corp.) - Yi Sang",
+   "name": "Yi Sang",
+   "game_title": "Funeral of the\nDead Butterflies"
+  },
+  "dongbaek-spicebush": {
+   "identity": 10104,
+   "ally": 10198,
+   "becomes": "Dongbaek (bloomed)",
+   "source": "8044_Camellia_AwakenAppearance",
+   "clips": "Camellia_Awaken",
+   "map": {
+    "S1": "Camellia_Awaken_1",
+    "S2": "Camellia_Awaken_2",
+    "S3": "Camellia_Awaken_3"
+   },
+   "tested": false,
+   "name": "Dongbaek",
+   "cover": "Dongback_EGO",
+   "cover_face": [
+    635,
+    255
+   ]
+  },
+  "dongbaek-sunshower": {
+   "identity": 10705,
+   "ally": 10798,
+   "becomes": "Dongbaek (Sunshower)",
+   "source": "8043_CamelliaAppearance",
+   "map": {
+    "idle": "Camellia_Default",
+    "move": "Camellia_Move",
+    "gud": "Camellia_Guard",
+    "miss": "Camellia_Evade",
+    "dmg": "Camellia_Damaged",
+    "S1": "Camellia_S1S2",
+    "S2": "Camellia_S3S4",
+    "S3": "Camellia_S5"
+   },
+   "tested": false,
+   "name": "Dongbaek",
+   "cover": "Dongback_fox2"
+  },
+  "ahab": {
+   "identity": 10808,
+   "ally": 10895,
+   "becomes": "Captain Ahab",
+   "source": "8105_AhabAppearance",
+   "tested": false,
+   "cover": "Ahab_EGO",
+   "cover_face": [
+    190,
+    270
+   ],
+   "name": "Ahab"
+  },
+  "rien": {
+   "identity": 10115,
+   "ally": 10197,
+   "becomes": "Rien",
+   "source": "1347_Index_fatherAppearance",
+   "tested": false,
+   "cover": "IndexFather_3"
+  },
+  "pinky-nursefather": {
+   "identity": 10415,
+   "ally": 10496,
+   "becomes": "the Pinky Nursefather",
+   "source": "1322_Pinky_FatherAppearance",
+   "tested": false,
+   "cover": "PinkyFather_Branch",
+   "name": "Pinky Nursefather"
+  },
+  "callisto": {
+   "identity": 10614,
+   "ally": 10698,
+   "becomes": "Callisto",
+   "source": "1331_RingFinger_FatherAppearance",
+   "tested": false,
+   "cover": "RingFather_2",
+   "cover_face": [
+    600,
+    200
+   ]
+  },
+  "valencina": {
+   "identity": 10916,
+   "ally": 10998,
+   "becomes": "Valencina",
+   "source": "1314_Thumb_FatherAppearance",
+   "tested": false,
+   "cover": "ThumbFather_Blood"
+  },
+  "lei-heng": {
+   "identity": 10512,
+   "ally": 10597,
+   "becomes": "Lei Heng",
+   "source": "1145_Thumb_LeiHengAppearance",
+   "tested": false,
+   "cover": "LeiHeng_Hurt2"
+  },
+  "cassetti": {
+   "identity": 10513,
+   "ally": 10596,
+   "becomes": "Cassetti",
+   "source": "8350_CassetteAppearance",
+   "tested": false,
+   "cover": "CassettiBF",
+   "cover_face": [
+    510,
+    300
+   ]
+  },
+  "dulcinea": {
+   "identity": 10911,
+   "becomes": "Dulcinea",
+   "source": "8381_Dulcinea_BossAppearance",
+   "tested": false,
+   "dupe_of": "dulcinea-id"
+  },
+  "barber": {
+   "identity": 11111,
+   "ally": 11198,
+   "becomes": "the Barber (bloodfiend)",
+   "source": "8375A_Barber_Blood_RoseAppearance",
+   "tested": false,
+   "cover": "Barber",
+   "cover_face": [
+    400,
+    340
+   ]
+  },
+  "priest": {
+   "identity": 11210,
+   "ally": 11297,
+   "becomes": "the Priest",
+   "source": "8378_Priest_BossAppearance",
+   "tested": false,
+   "cover": "10Priest",
+   "cover_face": [
+    930,
+    440
+   ]
+  },
+  "kromer": {
+   "identity": 10204,
+   "ally": 10297,
+   "becomes": "Kromer",
+   "source": "8029_CromerAppearance",
+   "tested": false,
+   "cover": "CromerMonster"
+  },
+  "lucio": {
+   "identity": 10716,
+   "ally": 10797,
+   "becomes": "Lucio",
+   "source": "1306_Thumb_DiscipleAppearance",
+   "tested": false,
+   "cover": "ThumbChild"
+  },
+  "linamovible": {
+   "identity": 10816,
+   "ally": 10894,
+   "becomes": "L'Inamovible",
+   "source": "1466_LaRougeHighdomesticAppearance",
+   "tested": false,
+   "map": {
+    "idle": "LaRougeHighdomestic_Default",
+    "dmg": "LaRougeHighdomestic_Damaged",
+    "move": "LaRougeHighdomestic_Move",
+    "S1": "LaRougeHighdomestic_S1",
+    "S2": "LaRougeHighdomestic_S2",
+    "S3": "LaRougeHighdomestic_S3"
+   },
+   "dash": "lunge"
+  },
+  "rufo": {
+   "identity": 10915,
+   "ally": 10997,
+   "becomes": "Rufo",
+   "source": "1423_RingFinger_FauvismeDocent_Wolf2pAppearance",
+   "tested": false,
+   "cover": "Rufo2"
+  },
+  "albina": {
+   "identity": 10215,
+   "ally": 10296,
+   "becomes": "Albina",
+   "source": "1319_RingFinger_DiscipleAppearance",
+   "tested": false,
+   "cover": "RingChild_1",
+   "cover_face": [
+    312,
+    510
+   ]
+  },
+  "sora": {
+   "identity": 10314,
+   "ally": 10397,
+   "becomes": "Sora",
+   "source": "1325_Index_Disciple_NormalAppearance",
+   "tested": false,
+   "cover": "IndexChild_3"
+  },
+  "jun-ishmael": {
+   "identity": 10811,
+   "ally": 10893,
+   "becomes": "Jun",
+   "source": "91013_Kurokumo_MiddleBossAppearance",
+   "tested": false,
+   "cover": "Kuro_Jyun"
+  },
+  "werner": {
+   "identity": 11012,
+   "ally": 11096,
+   "becomes": "Werner",
+   "source": "91020_MiddleFinger_MiddleBroAppearance",
+   "tested": false,
+   "cover": "Werner_Hurt"
+  },
+  "camille": {
+   "identity": 10511,
+   "ally": 10595,
+   "becomes": "Camille",
+   "source": "8371_Cinq_CamilleAppearance",
+   "tested": false,
+   "cover": "Camille_rose"
+  },
+  "jia-qiu": {
+   "identity": 10613,
+   "ally": 10697,
+   "becomes": "Jia Qiu",
+   "source": "1137_JiaqiuAppearance",
+   "tested": false,
+   "cover": "Qiu"
+  },
+  "starbuck": {
+   "identity": 10107,
+   "ally": 10196,
+   "becomes": "Starbuck",
+   "source": "8104_StarbuckAppearance",
+   "tested": false,
+   "cover": "Starbuck"
+  },
+  "queequeg": {
+   "identity": 10707,
+   "ally": 10796,
+   "becomes": "Queequeg",
+   "source": "8103_QueequegAppearance",
+   "tested": false,
+   "cover": "Queequeg_Mask"
+  },
+  "nelly": {
+   "identity": 10408,
+   "ally": 10495,
+   "becomes": "Nelly",
+   "source": "8171_NellyAppearance",
+   "tested": false,
+   "cover": "Nellie_Hurt"
+  },
+  "josephine": {
+   "identity": 11108,
+   "ally": 11197,
+   "becomes": "Josephine",
+   "source": "91014_JosephineAppearance",
+   "tested": false,
+   "cover": "Josephine"
+  },
+  "guido": {
+   "identity": 10504,
+   "ally": 10594,
+   "becomes": "Guido",
+   "source": "91005_NCorpAppearance",
+   "tested": false,
+   "cover": "Guido_blood"
+  },
+  "niko": {
+   "identity": 10905,
+   "ally": 10996,
+   "becomes": "Niko",
+   "source": "91008_TroubleshooterAppearance",
+   "tested": false,
+   "cover": "Niko"
+  },
+  "aida": {
+   "identity": 11004,
+   "ally": 11095,
+   "becomes": "Aida",
+   "source": "91004_EyedAppearance",
+   "tested": false
+  },
+  "dead-rabbits-boss": {
+   "identity": 10509,
+   "ally": 10593,
+   "becomes": "the old Dead Rabbits Boss",
+   "source": "91016_DeadRabbits_BossAppearance",
+   "tested": false,
+   "cover": "Deadrabbits_Boss",
+   "name": "Dead Rabbits Boss",
+   "game_title": "The Old"
+  },
+  "old-gcorp-head": {
+   "identity": 11103,
+   "ally": 11196,
+   "becomes": "the Old G Corp. Head Manager",
+   "source": "91001_GCorp_Enhanced_BossAppearance",
+   "tested": false,
+   "dash": "lunge",
+   "name": "Head Manager",
+   "game_title": "The Old\nG Corp."
+  },
+  "jun-gregor": {
+   "identity": 11208,
+   "ally": 11296,
+   "becomes": "Jun",
+   "source": "91013_Kurokumo_MiddleBossAppearance",
+   "tested": false,
+   "cover": "Kuro_Jyun_Clock",
+   "ally_dupe_of": "jun-ishmael-id"
+  },
+  "sasha": {
+   "identity": 10210,
+   "ally": 10295,
+   "becomes": "Sasha",
+   "source": "91018_CyborgFixer_Blood_SwordAppearance",
+   "tested": false
+  },
+  "vergilius-wildhunt": {
+   "identity": 10710,
+   "becomes": "Vergilius, looks only (E.G.O. Vergilius when mounted)",
+   "source": "400012_VergiliusAppearance",
+   "unit": 400012,
+   "forms": {
+    "10710_Heathclif_WHunt_RideAppearance": {
+     "source": "400012_Vergilius_EgoAppearance"
+    }
+   },
+   "tested": false,
+   "mirror": false,
+   "title": "Vergilius - as Wild Hunt Heathcliff",
+   "card": "vergilius",
+   "name": "Vergilius",
+   "dupe_of": "vergilius-boss-id"
+  },
+  "kali": {
+   "identity": 10410,
+   "becomes": "Kali, the Red Mist (Library of Ruina): Wrath with green coins; her own pages at their own dice; 250 HP, Speed 6-10",
+   "lor": {
+    "bundle": "char/char_490.pres",
+    "prefab": "Kali",
+    "map": {
+     "idle": [
+      "Default",
+      "Standing"
+     ],
+     "move": [
+      "Move"
+     ],
+     "gud": [
+      "Guard"
+     ],
+     "miss": [
+      "Evade"
+     ],
+     "dmg": [
+      "Damaged"
+     ],
+     "dead": [
+      "Damaged"
+     ],
+     "S1": [
+      "Slash",
+      "Penetrate",
+      "Slash2"
+     ],
+     "S2": [
+      "Hit",
+      "A2",
+      "Hit2"
+     ],
+     "S3": [
+      "A1",
+      "A3",
+      "Penetrate",
+      "A5"
+     ]
+    },
+    "smear": [
+     "move",
+     "S1",
+     "S2",
+     "S3"
+    ],
+    "head": {
+     "parts": [
+      "back hair",
+      "head",
+      "front hair",
+      "face"
+     ],
+     "neck": "P voo",
+     "scale": 0.7
+    },
+    "idle_time": 2.4,
+    "stands": 5.0
+   },
+   "tested": false,
+   "moves": {
+    "1": {
+     "lor_dice": 607005,
+     "attributeType": "CRIMSON",
+     "coins": [
+      0,
+      0
+     ],
+     "onHit": {
+      "buffKeyword": "Laceration",
+      "stack": 3,
+      "activeRound": 1
+     },
+     "onUse": [
+      {
+       "buffKeyword": "Agility",
+       "activeRound": 1,
+       "stack": 2
+      }
+     ]
+    },
+    "2": {
+     "lor_dice": 607003,
+     "attributeType": "CRIMSON",
+     "coins": [
+      0,
+      0,
+      0
+     ],
+     "onUse": [
+      {
+       "buffKeyword": "Protection",
+       "activeRound": 0,
+       "stack": 3
+      }
+     ]
+    },
+    "3": {
+     "lor_dice": 607002,
+     "attributeType": "CRIMSON",
+     "coins": [
+      0,
+      0,
+      0
+     ],
+     "onUse": [
+      {
+       "buffKeyword": "Agility",
+       "activeRound": 1,
+       "stack": 3
+      },
+      {
+       "buffKeyword": "AttackDmgUp",
+       "activeRound": 1,
+       "stack": 3
+      }
+     ]
+    },
+    "4": {
+     "lor_dice": 607001,
+     "attributeType": "CRIMSON",
+     "coins": [
+      0,
+      0,
+      0
+     ],
+     "onHit": {
+      "buffKeyword": "Laceration",
+      "stack": 5,
+      "activeRound": 1,
+      "coins": [
+       1
+      ]
+     }
+    },
+    "defense": {
+     "attributeType": "CRIMSON",
+     "atkType": "SLASH",
+     "defaultValue": 5,
+     "coins": [
+      2,
+      2
+     ],
+     "onUse": [
+      {
+       "buffKeyword": "Protection",
+       "activeRound": 0,
+       "stack": 3
+      }
+     ]
+    }
+   },
+   "aura": [
+    {
+     "from": "1079_Sancho_BerserkAppearance",
+     "textures": [
+      "Fx_T_Shape_Aura_02",
+      "Fx_T_Shape_Splash_01_2x2"
+     ],
+     "split": {
+      "Fx_T_Shape_Splash_01_2x2": [
+       2,
+       2
+      ]
+     },
+     "style": "mist",
+     "count": 4,
+     "size": 0.16,
+     "color": [
+      205,
+      18,
+      28
+     ],
+     "alpha": 1.0,
+     "soft": [
+      "Fx_T_Shape_Aura_02"
+     ]
+    },
+    {
+     "from": "10401_Ryoshu_BaseAppearance",
+     "style": "strike",
+     "kinds": [
+      "S1",
+      "S2",
+      "S3"
+     ],
+     "sprites": [
+      "3",
+      "5",
+      "skill2_4_e",
+      "skill2_7_e",
+      "skill3_8_e",
+      "skill3_12_e"
+     ],
+     "size": 0.8,
+     "alpha": 0.9
+    }
+   ],
+   "passives": {
+    "battle": [
+     1030301,
+     1090101
+    ],
+    "support": [
+     1030321
+    ]
+   },
+   "texts": {
+    "1": {
+     "lor_card": 607005
+    },
+    "2": {
+     "lor_card": 607003
+    },
+    "3": {
+     "lor_card": 607002
+    },
+    "4": {
+     "lor_card": 607001
+    },
+    "defense": {
+     "lor_passive": 250222
+    }
+   },
+   "green_coins": true,
+   "stats": {
+    "hp": 250,
+    "speed": [
+     6,
+     10
+    ]
+   },
+   "title": "Kali, the Red Mist - as Red Eyes & Penitence Ryōshū",
+   "card": "kali",
+   "name": "Kali",
+   "game_title": "The Red Mist"
+  },
+  "binah": {
+   "identity": 10901,
+   "becomes": "Binah in her Library of Ruina body: her Degraded pages (Library of Ruina) at their own dice: Fairy, Pillar, Shockwave, Lock on defense; BROKEN on purpose: x1.6 HP, +3/+4 Speed, half damage taken, harder hits, double statuses",
+   "tested": false,
+   "stats": {
+    "hp": 416,
+    "speed": [
+     7,
+     12
+    ],
+    "resist": {
+     "SLASH": 0.5,
+     "PENETRATE": 0.5,
+     "HIT": 0.5
+    }
+   },
+   "moves": {
+    "1": {
+     "lor_dice": 607202,
+     "attributeType": "VIOLET",
+     "coins": [
+      0
+     ],
+     "onHit": [
+      {
+       "buffKeyword": "Vibration",
+       "activeRound": 0,
+       "stack": 4
+      }
+     ],
+     "onUse": [
+      {
+       "buffKeyword": "AttackDmgUp",
+       "activeRound": 1,
+       "stack": 2
+      }
+     ]
+    },
+    "2": {
+     "lor_dice": 607204,
+     "attributeType": "INDIGO",
+     "coins": [
+      0,
+      0
+     ],
+     "onHit": [
+      {
+       "buffKeyword": "Vibration",
+       "activeRound": 0,
+       "stack": 6
+      },
+      {
+       "buffKeyword": "Laceration",
+       "activeRound": 0,
+       "stack": 4
+      }
+     ],
+     "onUse": [
+      {
+       "buffKeyword": "AttackDmgUp",
+       "activeRound": 1,
+       "stack": 2
+      }
+     ]
+    },
+    "3": {
+     "lor_dice": 607203,
+     "attributeType": "INDIGO",
+     "coins": [
+      0,
+      0,
+      0,
+      0
+     ],
+     "onUse": [
+      {
+       "buffKeyword": "AttackDmgUp",
+       "activeRound": 1,
+       "stack": 2
+      },
+      {
+       "buffKeyword": "AttackDmgUp",
+       "activeRound": 1,
+       "stack": 3
+      }
+     ],
+     "onHit": [
+      {
+       "buffKeyword": "Vibration",
+       "activeRound": 0,
+       "stack": 6
+      },
+      {
+       "buffKeyword": "Burst",
+       "activeRound": 0,
+       "stack": 6
+      }
+     ]
+    },
+    "defense": {
+     "lor_dice": 607201,
+     "attributeType": "VIOLET",
+     "coins": [
+      0
+     ],
+     "onUse": [
+      {
+       "buffKeyword": "Protection",
+       "activeRound": 0,
+       "stack": 6
+      },
+      {
+       "buffKeyword": "AttackDmgUp",
+       "activeRound": 1,
+       "stack": 2
+      }
+     ]
+    }
+   },
+   "texts": {
+    "1": {
+     "lor_card": 607202
+    },
+    "2": {
+     "lor_card": 607204
+    },
+    "3": {
+     "lor_card": 607203
+    },
+    "defense": {
+     "lor_card": 607201
+    }
+   },
+   "title": "Binah, the Arbiter Garion (Library of Ruina) - Rodion (10901)",
+   "lor": {
+    "bundle": "char/char_419.pres",
+    "prefab": "Binah",
+    "map": {
+     "idle": [
+      "Default",
+      "Standing"
+     ],
+     "move": [
+      "Move"
+     ],
+     "gud": [
+      "Guard"
+     ],
+     "miss": [
+      "Evade"
+     ],
+     "dmg": [
+      "Damaged"
+     ],
+     "dead": [
+      "Damaged"
+     ],
+     "S1": [
+      "Slash",
+      "S1"
+     ],
+     "S2": [
+      "Penetrate",
+      "S2",
+      "S3"
+     ],
+     "S3": [
+      "S4",
+      "S5",
+      "Special"
+     ]
+    },
+    "smear": [
+     "move",
+     "S1",
+     "S2",
+     "S3"
+    ],
+    "idle_time": 2.4,
+    "stands": 5.0
+   },
+   "name": "Binah",
+   "game_title": "Floor of\nPhilosophy"
+  },
+  "baral": {
+   "identity": 10801,
+   "becomes": "Baral, the Claw, in his Library of Ruina body: his pages on LCB Ishmael, at their own dice (Trail, Serum R, Serum W, Serum K on defense); BROKEN on purpose: x1.6 HP, +3/+4 Speed, half damage taken, harder hits, double statuses",
+   "tested": false,
+   "stats": {
+    "hp": 352,
+    "speed": [
+     8,
+     13
+    ],
+    "resist": {
+     "SLASH": 0.5,
+     "PENETRATE": 0.5,
+     "HIT": 0.5
+    }
+   },
+   "moves": {
+    "1": {
+     "lor_dice": 706001,
+     "attributeType": "CRIMSON",
+     "coins": [
+      0
+     ],
+     "onHit": [
+      {
+       "buffKeyword": "Laceration",
+       "activeRound": 0,
+       "stack": 4
+      }
+     ],
+     "onUse": [
+      {
+       "buffKeyword": "AttackDmgUp",
+       "activeRound": 1,
+       "stack": 2
+      }
+     ]
+    },
+    "2": {
+     "lor_dice": 706003,
+     "attributeType": "SHAMROCK",
+     "coins": [
+      0
+     ],
+     "onUse": [
+      {
+       "buffKeyword": "Agility",
+       "activeRound": 1,
+       "stack": 2
+      },
+      {
+       "buffKeyword": "AttackDmgUp",
+       "activeRound": 1,
+       "stack": 1
+      },
+      {
+       "buffKeyword": "AttackDmgUp",
+       "activeRound": 1,
+       "stack": 2
+      }
+     ],
+     "onHit": [
+      {
+       "buffKeyword": "Vibration",
+       "activeRound": 0,
+       "stack": 4
+      }
+     ]
+    },
+    "3": {
+     "lor_dice": 706004,
+     "attributeType": "AZURE",
+     "coins": [
+      0
+     ],
+     "onHit": [
+      {
+       "buffKeyword": "Laceration",
+       "activeRound": 0,
+       "stack": 6
+      },
+      {
+       "buffKeyword": "Vibration",
+       "activeRound": 0,
+       "stack": 6
+      }
+     ],
+     "onUse": [
+      {
+       "buffKeyword": "AttackDmgUp",
+       "activeRound": 1,
+       "stack": 3
+      }
+     ]
+    },
+    "defense": {
+     "lor_dice": 706006,
+     "attributeType": "SHAMROCK",
+     "coins": [
+      0
+     ],
+     "onUse": [
+      {
+       "buffKeyword": "Protection",
+       "activeRound": 0,
+       "stack": 6
+      },
+      {
+       "buffKeyword": "AttackDmgUp",
+       "activeRound": 1,
+       "stack": 2
+      }
+     ]
+    }
+   },
+   "texts": {
+    "1": {
+     "lor_card": 706001
+    },
+    "2": {
+     "lor_card": 706003
+    },
+    "3": {
+     "lor_card": 706004
+    },
+    "defense": {
+     "lor_card": 706006
+    }
+   },
+   "title": "Baral, the Claw (Library of Ruina) - LCB Ishmael",
+   "lor": {
+    "bundle": "char/char_693.pres",
+    "prefab": "TheClaw",
+    "map": {
+     "idle": [
+      "Default",
+      "Standing"
+     ],
+     "move": [
+      "Move"
+     ],
+     "gud": [
+      "Guard"
+     ],
+     "miss": [
+      "Evade"
+     ],
+     "dmg": [
+      "Damaged"
+     ],
+     "dead": [
+      "Damaged"
+     ],
+     "S1": [
+      "S1_SlashUp",
+      "S1",
+      "Slash"
+     ],
+     "S2": [
+      "S2_Pull",
+      "S2",
+      "S10_GreenSerum"
+     ],
+     "S3": [
+      "S3_ReadyCharge",
+      "S4_Charge",
+      "S5_EndCarge",
+      "S14_AllSerum"
+     ]
+    },
+    "smear": [
+     "move",
+     "S1",
+     "S2",
+     "S3"
+    ],
+    "idle_time": 2.4,
+    "stands": 5.0
+   },
+   "name": "Baral",
+   "game_title": "The Claw"
+  },
+  "malkuth": {
+   "identity": 10309,
+   "becomes": "Malkuth in their Library of Ruina body: always busy: Haste and Bleed; BROKEN on purpose: x1.6 HP, +3/+4 Speed, half damage taken, harder hits, double statuses",
+   "tested": false,
+   "stats": {
+    "hp": 320,
+    "speed": [
+     9,
+     14
+    ],
+    "resist": {
+     "SLASH": 0.5,
+     "PENETRATE": 0.5,
+     "HIT": 0.5
+    }
+   },
+   "moves": {
+    "1": {
+     "attributeType": "SCARLET",
+     "atkType": "SLASH",
+     "defaultValue": 8,
+     "coins": [
+      6,
+      6
+     ],
+     "onUse": [
+      {
+       "buffKeyword": "Agility",
+       "activeRound": 1,
+       "stack": 2
+      },
+      {
+       "buffKeyword": "AttackDmgUp",
+       "activeRound": 1,
+       "stack": 2
+      }
+     ],
+     "onHit": [
+      {
+       "buffKeyword": "Laceration",
+       "activeRound": 0,
+       "stack": 2
+      }
+     ]
+    },
+    "2": {
+     "attributeType": "SCARLET",
+     "atkType": "PENETRATE",
+     "defaultValue": 9,
+     "coins": [
+      6,
+      6,
+      6
+     ],
+     "onUse": [
+      {
+       "buffKeyword": "Agility",
+       "activeRound": 1,
+       "stack": 2
+      },
+      {
+       "buffKeyword": "AttackDmgUp",
+       "activeRound": 1,
+       "stack": 2
+      }
+     ],
+     "onHit": [
+      {
+       "buffKeyword": "Laceration",
+       "activeRound": 0,
+       "stack": 4
+      }
+     ]
+    },
+    "3": {
+     "attributeType": "SCARLET",
+     "atkType": "PENETRATE",
+     "defaultValue": 11,
+     "coins": [
+      5,
+      5,
+      5,
+      5
+     ],
+     "onUse": [
+      {
+       "buffKeyword": "AttackDmgUp",
+       "activeRound": 1,
+       "stack": 2
+      },
+      {
+       "buffKeyword": "AttackDmgUp",
+       "activeRound": 1,
+       "stack": 3
+      }
+     ],
+     "onHit": [
+      {
+       "buffKeyword": "Laceration",
+       "activeRound": 0,
+       "stack": 6
+      }
+     ]
+    },
+    "defense": {
+     "attributeType": "SCARLET",
+     "atkType": "SLASH",
+     "defaultValue": 9,
+     "coins": [
+      6
+     ],
+     "onUse": [
+      {
+       "buffKeyword": "Protection",
+       "activeRound": 0,
+       "stack": 4
+      },
+      {
+       "buffKeyword": "AttackDmgUp",
+       "activeRound": 1,
+       "stack": 2
+      }
+     ]
+    }
+   },
+   "texts": {
+    "1": {
+     "name": "Busy Hands"
+    },
+    "2": {
+     "name": "Overtime"
+    },
+    "3": {
+     "name": "Full Effort!"
+    },
+    "defense": {
+     "name": "Clipboard Block"
+    }
+   },
+   "title": "Malkuth (Library of Ruina) - T Corp. Class 3 Collection Staff Don Quixote (10309)",
+   "lor": {
+    "bundle": "char/char_512.pres",
+    "prefab": "Malkuth",
+    "map": {
+     "idle": [
+      "Default",
+      "Standing"
+     ],
+     "move": [
+      "Move"
+     ],
+     "gud": [
+      "Guard"
+     ],
+     "miss": [
+      "Evade"
+     ],
+     "dmg": [
+      "Damaged"
+     ],
+     "dead": [
+      "Damaged"
+     ],
+     "S1": [
+      "Slash"
+     ],
+     "S2": [
+      "Penetrate",
+      "Hit"
+     ],
+     "S3": [
+      "Slash",
+      "Penetrate",
+      "Hit"
+     ]
+    },
+    "smear": [
+     "move",
+     "S1",
+     "S2",
+     "S3"
+    ],
+    "idle_time": 2.4,
+    "stands": 5.0
+   },
+   "card": "malkuth",
+   "name": "Malkuth",
+   "game_title": "Floor of\nHistory"
+  },
+  "yesod": {
+   "identity": 10501,
+   "becomes": "Yesod in their Library of Ruina body: rules and records: Tremor and Protection; BROKEN on purpose: x1.6 HP, +3/+4 Speed, half damage taken, harder hits, double statuses",
+   "tested": false,
+   "stats": {
+    "hp": 384,
+    "speed": [
+     6,
+     11
+    ],
+    "resist": {
+     "SLASH": 0.5,
+     "PENETRATE": 0.5,
+     "HIT": 0.5
+    }
+   },
+   "moves": {
+    "1": {
+     "attributeType": "AZURE",
+     "atkType": "HIT",
+     "defaultValue": 8,
+     "coins": [
+      6,
+      6
+     ],
+     "onHit": [
+      {
+       "buffKeyword": "Vibration",
+       "activeRound": 0,
+       "stack": 4
+      }
+     ],
+     "onUse": [
+      {
+       "buffKeyword": "AttackDmgUp",
+       "activeRound": 1,
+       "stack": 2
+      }
+     ]
+    },
+    "2": {
+     "attributeType": "AZURE",
+     "atkType": "HIT",
+     "defaultValue": 9,
+     "coins": [
+      6
+     ],
+     "onUse": [
+      {
+       "buffKeyword": "Protection",
+       "activeRound": 0,
+       "stack": 2
+      },
+      {
+       "buffKeyword": "AttackDmgUp",
+       "activeRound": 1,
+       "stack": 2
+      }
+     ],
+     "onHit": [
+      {
+       "buffKeyword": "Vibration",
+       "activeRound": 0,
+       "stack": 6
+      }
+     ]
+    },
+    "3": {
+     "attributeType": "AZURE",
+     "atkType": "HIT",
+     "defaultValue": 12,
+     "coins": [
+      5,
+      5,
+      5,
+      5
+     ],
+     "onUse": [
+      {
+       "buffKeyword": "AttackDmgUp",
+       "activeRound": 1,
+       "stack": 1
+      },
+      {
+       "buffKeyword": "AttackDmgUp",
+       "activeRound": 1,
+       "stack": 3
+      }
+     ],
+     "onHit": [
+      {
+       "buffKeyword": "Vibration",
+       "activeRound": 0,
+       "stack": 8
+      }
+     ]
+    },
+    "defense": {
+     "attributeType": "AZURE",
+     "atkType": "HIT",
+     "defaultValue": 10,
+     "coins": [
+      6
+     ],
+     "onUse": [
+      {
+       "buffKeyword": "Protection",
+       "activeRound": 0,
+       "stack": 6
+      },
+      {
+       "buffKeyword": "AttackDmgUp",
+       "activeRound": 1,
+       "stack": 2
+      }
+     ]
+    }
+   },
+   "texts": {
+    "1": {
+     "name": "Report"
+    },
+    "2": {
+     "name": "Regulation"
+    },
+    "3": {
+     "name": "Final Correction"
+    },
+    "defense": {
+     "name": "By the Book"
+    }
+   },
+   "title": "Yesod (Library of Ruina) - Meursault (10501)",
+   "lor": {
+    "bundle": "char/char_624.pres",
+    "prefab": "Yesod",
+    "map": {
+     "idle": [
+      "Default",
+      "Standing"
+     ],
+     "move": [
+      "Move"
+     ],
+     "gud": [
+      "Guard"
+     ],
+     "miss": [
+      "Evade"
+     ],
+     "dmg": [
+      "Damaged"
+     ],
+     "dead": [
+      "Damaged"
+     ],
+     "S1": [
+      "Slash"
+     ],
+     "S2": [
+      "Penetrate",
+      "Hit"
+     ],
+     "S3": [
+      "Slash",
+      "Penetrate",
+      "Hit"
+     ]
+    },
+    "smear": [
+     "move",
+     "S1",
+     "S2",
+     "S3"
+    ],
+    "idle_time": 2.4,
+    "stands": 5.0
+   },
+   "name": "Yesod",
+   "game_title": "Floor of\nTechnological Sciences"
+  },
+  "hod": {
+   "identity": 11002,
+   "becomes": "Hod in their Library of Ruina body: training: buffs the whole team; BROKEN on purpose: x1.6 HP, +3/+4 Speed, half damage taken, harder hits, double statuses",
+   "tested": false,
+   "stats": {
+    "hp": 304,
+    "speed": [
+     7,
+     12
+    ],
+    "resist": {
+     "SLASH": 0.5,
+     "PENETRATE": 0.5,
+     "HIT": 0.5
+    }
+   },
+   "moves": {
+    "1": {
+     "attributeType": "AMBER",
+     "atkType": "SLASH",
+     "defaultValue": 7,
+     "coins": [
+      6,
+      6
+     ],
+     "onUse": [
+      {
+       "buffKeyword": "Breath",
+       "activeRound": 0,
+       "stack": 2,
+       "target": "EveryAlly"
+      },
+      {
+       "buffKeyword": "AttackDmgUp",
+       "activeRound": 1,
+       "stack": 2
+      }
+     ],
+     "onHit": [
+      {
+       "buffKeyword": "Burst",
+       "activeRound": 0,
+       "stack": 2
+      }
+     ]
+    },
+    "2": {
+     "attributeType": "AMBER",
+     "atkType": "SLASH",
+     "defaultValue": 9,
+     "coins": [
+      5,
+      5,
+      5
+     ],
+     "onUse": [
+      {
+       "buffKeyword": "Protection",
+       "activeRound": 0,
+       "stack": 2,
+       "target": "EveryAlly"
+      },
+      {
+       "buffKeyword": "AttackDmgUp",
+       "activeRound": 1,
+       "stack": 2
+      }
+     ],
+     "onHit": [
+      {
+       "buffKeyword": "Burst",
+       "activeRound": 0,
+       "stack": 4
+      }
+     ]
+    },
+    "3": {
+     "attributeType": "AMBER",
+     "atkType": "PENETRATE",
+     "defaultValue": 10,
+     "coins": [
+      7
+     ],
+     "onUse": [
+      {
+       "buffKeyword": "AttackDmgUp",
+       "activeRound": 1,
+       "stack": 1,
+       "target": "EveryAlly"
+      },
+      {
+       "buffKeyword": "Breath",
+       "activeRound": 0,
+       "stack": 3,
+       "target": "EveryAlly"
+      },
+      {
+       "buffKeyword": "AttackDmgUp",
+       "activeRound": 1,
+       "stack": 3
+      }
+     ],
+     "onHit": [
+      {
+       "buffKeyword": "Burst",
+       "activeRound": 0,
+       "stack": 6
+      }
+     ]
+    },
+    "defense": {
+     "attributeType": "AMBER",
+     "atkType": "SLASH",
+     "defaultValue": 8,
+     "coins": [
+      6
+     ],
+     "onUse": [
+      {
+       "buffKeyword": "Protection",
+       "activeRound": 0,
+       "stack": 4
+      },
+      {
+       "buffKeyword": "AttackDmgUp",
+       "activeRound": 1,
+       "stack": 2
+      }
+     ]
+    }
+   },
+   "texts": {
+    "1": {
+     "name": "Gentle Push"
+    },
+    "2": {
+     "name": "Lesson Plan"
+    },
+    "3": {
+     "name": "Everyone Grows"
+    },
+    "defense": {
+     "name": "I'll Try My Best"
+    }
+   },
+   "title": "Hod (Library of Ruina) - Sinclair (11002)",
+   "lor": {
+    "bundle": "char/char_472.pres",
+    "prefab": "Hod",
+    "map": {
+     "idle": [
+      "Default",
+      "Standing"
+     ],
+     "move": [
+      "Move"
+     ],
+     "gud": [
+      "Guard"
+     ],
+     "miss": [
+      "Evade"
+     ],
+     "dmg": [
+      "Damaged"
+     ],
+     "dead": [
+      "Damaged"
+     ],
+     "S1": [
+      "Slash"
+     ],
+     "S2": [
+      "Penetrate",
+      "Hit"
+     ],
+     "S3": [
+      "Slash",
+      "Penetrate",
+      "Hit"
+     ]
+    },
+    "smear": [
+     "move",
+     "S1",
+     "S2",
+     "S3"
+    ],
+    "idle_time": 2.4,
+    "stands": 5.0
+   },
+   "name": "Hod",
+   "game_title": "Floor of\nLiterature"
+  },
+  "netzach": {
+   "identity": 10601,
+   "becomes": "Netzach in their Library of Ruina body: too tired to die: slow and very tough; BROKEN on purpose: x1.6 HP, +3/+4 Speed, half damage taken, harder hits, double statuses",
+   "tested": false,
+   "stats": {
+    "hp": 416,
+    "speed": [
+     5,
+     10
+    ],
+    "resist": {
+     "SLASH": 0.5,
+     "PENETRATE": 0.5,
+     "HIT": 0.5
+    }
+   },
+   "moves": {
+    "1": {
+     "attributeType": "AMBER",
+     "atkType": "HIT",
+     "defaultValue": 8,
+     "coins": [
+      6
+     ],
+     "onHit": [
+      {
+       "buffKeyword": "Vibration",
+       "activeRound": 0,
+       "stack": 2
+      }
+     ],
+     "onUse": [
+      {
+       "buffKeyword": "AttackDmgUp",
+       "activeRound": 1,
+       "stack": 2
+      }
+     ]
+    },
+    "2": {
+     "attributeType": "AMBER",
+     "atkType": "HIT",
+     "defaultValue": 9,
+     "coins": [
+      6,
+      6
+     ],
+     "onUse": [
+      {
+       "buffKeyword": "Protection",
+       "activeRound": 0,
+       "stack": 3
+      },
+      {
+       "buffKeyword": "AttackDmgUp",
+       "activeRound": 1,
+       "stack": 2
+      }
+     ],
+     "onHit": [
+      {
+       "buffKeyword": "Vibration",
+       "activeRound": 0,
+       "stack": 4
+      }
+     ]
+    },
+    "3": {
+     "attributeType": "AMBER",
+     "atkType": "HIT",
+     "defaultValue": 12,
+     "coins": [
+      6,
+      6
+     ],
+     "onUse": [
+      {
+       "buffKeyword": "Protection",
+       "activeRound": 0,
+       "stack": 4
+      },
+      {
+       "buffKeyword": "AttackDmgUp",
+       "activeRound": 1,
+       "stack": 3
+      }
+     ],
+     "onHit": [
+      {
+       "buffKeyword": "Vibration",
+       "activeRound": 0,
+       "stack": 6
+      }
+     ]
+    },
+    "defense": {
+     "attributeType": "AMBER",
+     "atkType": "HIT",
+     "defaultValue": 11,
+     "coins": [
+      6
+     ],
+     "onUse": [
+      {
+       "buffKeyword": "Protection",
+       "activeRound": 0,
+       "stack": 8
+      },
+      {
+       "buffKeyword": "AttackDmgUp",
+       "activeRound": 1,
+       "stack": 2
+      }
+     ]
+    }
+   },
+   "texts": {
+    "1": {
+     "name": "Half-hearted Swing"
+    },
+    "2": {
+     "name": "Bottoms Up"
+    },
+    "3": {
+     "name": "Wake Me When It's Over"
+    },
+    "defense": {
+     "name": "Can't Be Bothered"
+    }
+   },
+   "title": "Netzach (Library of Ruina) - Hong Lu (10601)",
+   "lor": {
+    "bundle": "char/char_534.pres",
+    "prefab": "Netzach",
+    "map": {
+     "idle": [
+      "Default",
+      "Standing"
+     ],
+     "move": [
+      "Move"
+     ],
+     "gud": [
+      "Guard"
+     ],
+     "miss": [
+      "Evade"
+     ],
+     "dmg": [
+      "Damaged"
+     ],
+     "dead": [
+      "Damaged"
+     ],
+     "S1": [
+      "Slash"
+     ],
+     "S2": [
+      "Penetrate",
+      "Hit"
+     ],
+     "S3": [
+      "Slash",
+      "Penetrate",
+      "Hit"
+     ]
+    },
+    "smear": [
+     "move",
+     "S1",
+     "S2",
+     "S3"
+    ],
+    "idle_time": 2.4,
+    "stands": 5.0
+   },
+   "name": "Netzach",
+   "game_title": "Floor of\nArt"
+  },
+  "tiphereth": {
+   "identity": 10101,
+   "becomes": "Tiphereth in their Library of Ruina body: central command: Poise for the team; BROKEN on purpose: x1.6 HP, +3/+4 Speed, half damage taken, harder hits, double statuses",
+   "tested": false,
+   "stats": {
+    "hp": 336,
+    "speed": [
+     7,
+     13
+    ],
+    "resist": {
+     "SLASH": 0.5,
+     "PENETRATE": 0.5,
+     "HIT": 0.5
+    }
+   },
+   "moves": {
+    "1": {
+     "attributeType": "INDIGO",
+     "atkType": "PENETRATE",
+     "defaultValue": 8,
+     "coins": [
+      6
+     ],
+     "onUse": [
+      {
+       "buffKeyword": "Breath",
+       "activeRound": 0,
+       "stack": 2
+      },
+      {
+       "buffKeyword": "AttackDmgUp",
+       "activeRound": 1,
+       "stack": 2
+      }
+     ],
+     "onHit": [
+      {
+       "buffKeyword": "Laceration",
+       "activeRound": 0,
+       "stack": 2
+      }
+     ]
+    },
+    "2": {
+     "attributeType": "INDIGO",
+     "atkType": "PENETRATE",
+     "defaultValue": 9,
+     "coins": [
+      6,
+      6
+     ],
+     "onUse": [
+      {
+       "buffKeyword": "Breath",
+       "activeRound": 0,
+       "stack": 2
+      },
+      {
+       "buffKeyword": "AttackDmgUp",
+       "activeRound": 1,
+       "stack": 2
+      }
+     ],
+     "onHit": [
+      {
+       "buffKeyword": "Laceration",
+       "activeRound": 0,
+       "stack": 4
+      },
+      {
+       "buffKeyword": "Burst",
+       "activeRound": 0,
+       "stack": 2
+      }
+     ]
+    },
+    "3": {
+     "attributeType": "INDIGO",
+     "atkType": "PENETRATE",
+     "defaultValue": 11,
+     "coins": [
+      5,
+      5,
+      5
+     ],
+     "onUse": [
+      {
+       "buffKeyword": "AttackDmgUp",
+       "activeRound": 1,
+       "stack": 2
+      },
+      {
+       "buffKeyword": "Breath",
+       "activeRound": 0,
+       "stack": 2,
+       "target": "EveryAlly"
+      },
+      {
+       "buffKeyword": "AttackDmgUp",
+       "activeRound": 1,
+       "stack": 3
+      }
+     ],
+     "onHit": [
+      {
+       "buffKeyword": "Burst",
+       "activeRound": 0,
+       "stack": 6
+      }
+     ]
+    },
+    "defense": {
+     "attributeType": "INDIGO",
+     "atkType": "SLASH",
+     "defaultValue": 9,
+     "coins": [
+      6
+     ],
+     "onUse": [
+      {
+       "buffKeyword": "Protection",
+       "activeRound": 0,
+       "stack": 4
+      },
+      {
+       "buffKeyword": "AttackDmgUp",
+       "activeRound": 1,
+       "stack": 2
+      }
+     ]
+    }
+   },
+   "texts": {
+    "1": {
+     "name": "Dispatch"
+    },
+    "2": {
+     "name": "Two Halves"
+    },
+    "3": {
+     "name": "Central Order"
+    },
+    "defense": {
+     "name": "Stand Together"
+    }
+   },
+   "title": "Tiphereth (Library of Ruina) - Yi Sang (10101)",
+   "lor": {
+    "bundle": "char/char_606.pres",
+    "prefab": "Tiphereth",
+    "map": {
+     "idle": [
+      "Default",
+      "Standing"
+     ],
+     "move": [
+      "Move"
+     ],
+     "gud": [
+      "Guard"
+     ],
+     "miss": [
+      "Evade"
+     ],
+     "dmg": [
+      "Damaged"
+     ],
+     "dead": [
+      "Damaged"
+     ],
+     "S1": [
+      "Slash"
+     ],
+     "S2": [
+      "Penetrate",
+      "Hit"
+     ],
+     "S3": [
+      "Slash",
+      "Penetrate",
+      "Hit"
+     ]
+    },
+    "smear": [
+     "move",
+     "S1",
+     "S2",
+     "S3"
+    ],
+    "idle_time": 2.4,
+    "stands": 5.0
+   },
+   "name": "Tiphereth",
+   "game_title": "Floor of\nNatural Sciences"
+  },
+  "chesed": {
+   "identity": 10201,
+   "becomes": "Chesed in their Library of Ruina body: welfare: shields for everyone; BROKEN on purpose: x1.6 HP, +3/+4 Speed, half damage taken, harder hits, double statuses",
+   "tested": false,
+   "stats": {
+    "hp": 368,
+    "speed": [
+     6,
+     12
+    ],
+    "resist": {
+     "SLASH": 0.5,
+     "PENETRATE": 0.5,
+     "HIT": 0.5
+    }
+   },
+   "moves": {
+    "1": {
+     "attributeType": "SHAMROCK",
+     "atkType": "HIT",
+     "defaultValue": 8,
+     "coins": [
+      6
+     ],
+     "onHit": [
+      {
+       "buffKeyword": "Burst",
+       "activeRound": 0,
+       "stack": 4
+      }
+     ],
+     "onUse": [
+      {
+       "buffKeyword": "AttackDmgUp",
+       "activeRound": 1,
+       "stack": 2
+      }
+     ]
+    },
+    "2": {
+     "attributeType": "SHAMROCK",
+     "atkType": "HIT",
+     "defaultValue": 9,
+     "coins": [
+      6,
+      6
+     ],
+     "onUse": [
+      {
+       "buffKeyword": "Protection",
+       "activeRound": 0,
+       "stack": 2,
+       "target": "EveryAlly"
+      },
+      {
+       "buffKeyword": "AttackDmgUp",
+       "activeRound": 1,
+       "stack": 2
+      }
+     ],
+     "onHit": [
+      {
+       "buffKeyword": "Burst",
+       "activeRound": 0,
+       "stack": 4
+      }
+     ]
+    },
+    "3": {
+     "attributeType": "SHAMROCK",
+     "atkType": "HIT",
+     "defaultValue": 11,
+     "coins": [
+      6,
+      6
+     ],
+     "onUse": [
+      {
+       "buffKeyword": "Protection",
+       "activeRound": 0,
+       "stack": 3,
+       "target": "EveryAlly"
+      },
+      {
+       "buffKeyword": "AttackDmgUp",
+       "activeRound": 1,
+       "stack": 3
+      }
+     ],
+     "onHit": [
+      {
+       "buffKeyword": "Burst",
+       "activeRound": 0,
+       "stack": 6
+      }
+     ]
+    },
+    "defense": {
+     "attributeType": "SHAMROCK",
+     "atkType": "HIT",
+     "defaultValue": 9,
+     "coins": [
+      6
+     ],
+     "onUse": [
+      {
+       "buffKeyword": "Protection",
+       "activeRound": 0,
+       "stack": 6
+      },
+      {
+       "buffKeyword": "AttackDmgUp",
+       "activeRound": 1,
+       "stack": 2
+      }
+     ]
+    }
+   },
+   "texts": {
+    "1": {
+     "name": "Bitter Brew"
+    },
+    "2": {
+     "name": "Steady Care"
+    },
+    "3": {
+     "name": "Last Cup"
+    },
+    "defense": {
+     "name": "Calm Shoulder"
+    }
+   },
+   "title": "Chesed (Library of Ruina) - Faust (10201)",
+   "lor": {
+    "bundle": "char/char_432.pres",
+    "prefab": "Chesed",
+    "map": {
+     "idle": [
+      "Default",
+      "Standing"
+     ],
+     "move": [
+      "Move"
+     ],
+     "gud": [
+      "Guard"
+     ],
+     "miss": [
+      "Evade"
+     ],
+     "dmg": [
+      "Damaged"
+     ],
+     "dead": [
+      "Damaged"
+     ],
+     "S1": [
+      "Slash"
+     ],
+     "S2": [
+      "Penetrate",
+      "Hit"
+     ],
+     "S3": [
+      "Slash",
+      "Penetrate",
+      "Hit"
+     ]
+    },
+    "smear": [
+     "move",
+     "S1",
+     "S2",
+     "S3"
+    ],
+    "idle_time": 2.4,
+    "stands": 5.0
+   },
+   "name": "Chesed",
+   "game_title": "Floor of\nSocial Sciences"
+  },
+  "hokma": {
+   "identity": 11110,
+   "becomes": "Hokma in their Library of Ruina body: time: Poise and heavy Tremor; BROKEN on purpose: x1.6 HP, +3/+4 Speed, half damage taken, harder hits, double statuses",
+   "tested": false,
+   "stats": {
+    "hp": 400,
+    "speed": [
+     6,
+     11
+    ],
+    "resist": {
+     "SLASH": 0.5,
+     "PENETRATE": 0.5,
+     "HIT": 0.5
+    }
+   },
+   "moves": {
+    "1": {
+     "attributeType": "AZURE",
+     "atkType": "SLASH",
+     "defaultValue": 8,
+     "coins": [
+      5,
+      5
+     ],
+     "onUse": [
+      {
+       "buffKeyword": "Breath",
+       "activeRound": 0,
+       "stack": 2
+      },
+      {
+       "buffKeyword": "AttackDmgUp",
+       "activeRound": 1,
+       "stack": 2
+      }
+     ],
+     "onHit": [
+      {
+       "buffKeyword": "Vibration",
+       "activeRound": 0,
+       "stack": 4
+      }
+     ]
+    },
+    "2": {
+     "attributeType": "AZURE",
+     "atkType": "SLASH",
+     "defaultValue": 10,
+     "coins": [
+      6,
+      6
+     ],
+     "onUse": [
+      {
+       "buffKeyword": "Breath",
+       "activeRound": 0,
+       "stack": 3
+      },
+      {
+       "buffKeyword": "AttackDmgUp",
+       "activeRound": 1,
+       "stack": 2
+      }
+     ],
+     "onHit": [
+      {
+       "buffKeyword": "Vibration",
+       "activeRound": 0,
+       "stack": 6
+      }
+     ]
+    },
+    "3": {
+     "attributeType": "AZURE",
+     "atkType": "SLASH",
+     "defaultValue": 12,
+     "coins": [
+      7,
+      7,
+      7,
+      7
+     ],
+     "onUse": [
+      {
+       "buffKeyword": "AttackDmgUp",
+       "activeRound": 1,
+       "stack": 2
+      },
+      {
+       "buffKeyword": "AttackDmgUp",
+       "activeRound": 1,
+       "stack": 3
+      }
+     ],
+     "onHit": [
+      {
+       "buffKeyword": "Vibration",
+       "activeRound": 0,
+       "stack": 8
+      },
+      {
+       "buffKeyword": "Burst",
+       "activeRound": 0,
+       "stack": 4
+      }
+     ]
+    },
+    "defense": {
+     "attributeType": "AZURE",
+     "atkType": "SLASH",
+     "defaultValue": 9,
+     "coins": [
+      6
+     ],
+     "onUse": [
+      {
+       "buffKeyword": "Protection",
+       "activeRound": 0,
+       "stack": 6
+      },
+      {
+       "buffKeyword": "AttackDmgUp",
+       "activeRound": 1,
+       "stack": 2
+      }
+     ]
+    }
+   },
+   "texts": {
+    "1": {
+     "name": "Ticking Hand"
+    },
+    "2": {
+     "name": "Lost Hours"
+    },
+    "3": {
+     "name": "Old Man's Patience"
+    },
+    "defense": {
+     "name": "Measured Step"
+    }
+   },
+   "title": "Hokma (Library of Ruina) - W Corp. L3 Cleanup Captain Outis (11110)",
+   "lor": {
+    "bundle": "char/char_474.pres",
+    "prefab": "Hokma",
+    "map": {
+     "idle": [
+      "Default",
+      "Standing"
+     ],
+     "move": [
+      "Move"
+     ],
+     "gud": [
+      "Guard"
+     ],
+     "miss": [
+      "Evade"
+     ],
+     "dmg": [
+      "Damaged"
+     ],
+     "dead": [
+      "Damaged"
+     ],
+     "S1": [
+      "Slash"
+     ],
+     "S2": [
+      "Penetrate",
+      "Hit"
+     ],
+     "S3": [
+      "Slash",
+      "Penetrate",
+      "Hit"
+     ]
+    },
+    "smear": [
+     "move",
+     "S1",
+     "S2",
+     "S3"
+    ],
+    "idle_time": 2.4,
+    "stands": 5.0
+   },
+   "card": "hokma",
+   "name": "Hokma",
+   "game_title": "Floor of\nReligion"
+  },
+  "apocalypse-bird": {
+   "identity": 10704,
+   "title": "Apocalypse Bird (Library of Ruina) - N Corp. Kleinhammer Heathcliff (10704)",
+   "becomes": "Apocalypse Bird, the three birds as one (Library of Ruina's E.G.O. body, drawn big): Small Beak, Long Arm, Big Eyes and the Twilight guard; a boss on your side, BROKEN on purpose: 640 HP, Speed 8-13, half damage taken",
+   "tested": false,
+   "lor": {
+    "bundle": "char/char_115.pres",
+    "prefab": "Ego_ApocalypseBird",
+    "map": {
+     "idle": [
+      "Default"
+     ],
+     "move": [
+      "Move"
+     ],
+     "gud": [
+      "Guard"
+     ],
+     "miss": [
+      "Guard"
+     ],
+     "dmg": [
+      "Damaged"
+     ],
+     "dead": [
+      "Damaged"
+     ],
+     "S1": [
+      "Small_S2",
+      "Small_S3"
+     ],
+     "S2": [
+      "Slash",
+      "Long_S4"
+     ],
+     "S3": [
+      "Hit",
+      "Big_S1",
+      "S5"
+     ]
+    },
+    "smear": [
+     "move",
+     "S1",
+     "S2",
+     "S3"
+    ],
+    "idle_time": 2.4
+   },
+   "stats": {
+    "hp": 640,
+    "speed": [
+     8,
+     13
+    ],
+    "resist": {
+     "SLASH": 0.5,
+     "PENETRATE": 0.5,
+     "HIT": 0.5
+    }
+   },
+   "moves": {
+    "1": {
+     "attributeType": "CRIMSON",
+     "atkType": "PENETRATE",
+     "defaultValue": 7,
+     "coins": [
+      6,
+      6
+     ],
+     "onHit": [
+      {
+       "buffKeyword": "Laceration",
+       "activeRound": 0,
+       "stack": 5
+      }
+     ],
+     "onUse": [
+      {
+       "buffKeyword": "AttackDmgUp",
+       "activeRound": 1,
+       "stack": 2
+      }
+     ]
+    },
+    "2": {
+     "attributeType": "INDIGO",
+     "atkType": "SLASH",
+     "defaultValue": 9,
+     "coins": [
+      6
+     ],
+     "onHit": [
+      {
+       "buffKeyword": "Vibration",
+       "activeRound": 0,
+       "stack": 6
+      }
+     ],
+     "onUse": [
+      {
+       "buffKeyword": "AttackDmgUp",
+       "activeRound": 1,
+       "stack": 3
+      }
+     ]
+    },
+    "3": {
+     "attributeType": "AMBER",
+     "atkType": "HIT",
+     "defaultValue": 12,
+     "coins": [
+      6,
+      6,
+      6
+     ],
+     "onHit": [
+      {
+       "buffKeyword": "Burst",
+       "activeRound": 0,
+       "stack": 8
+      }
+     ],
+     "onUse": [
+      {
+       "buffKeyword": "AttackDmgUp",
+       "activeRound": 1,
+       "stack": 4
+      },
+      {
+       "buffKeyword": "Agility",
+       "activeRound": 1,
+       "stack": 3
+      }
+     ]
+    },
+    "defense": {
+     "attributeType": "INDIGO",
+     "atkType": "HIT",
+     "defaultValue": 10,
+     "coins": [
+      6
+     ],
+     "onUse": [
+      {
+       "buffKeyword": "Protection",
+       "activeRound": 0,
+       "stack": 6
+      }
+     ]
+    }
+   },
+   "texts": {
+    "1": {
+     "name": "Small Beak"
+    },
+    "2": {
+     "name": "Long Arm"
+    },
+    "3": {
+     "name": "Big Eyes"
+    },
+    "defense": {
+     "name": "Twilight"
+    }
+   },
+   "name": "Apocalypse Bird",
+   "game_title": "The Black Forest::\nThree Birds as One"
+  }
+ },
+ "bosses": {
+  "matthias": {
+   "identity": 11109,
+   "becomes": "the Middle Nursefather Matthias - his own boss body and skills (on the Ring Pointillist Student: Outis's Middle Nursefather has a battle script of its own)",
+   "source": "1327_MiddleFinger_fatherAppearance",
+   "unit": 1327,
+   "tested": false,
+   "card": "matthias",
+   "name": "Matthias",
+   "game_title": "The Middle\nNursefather"
+  },
+  "roach-emperor": {
+   "identity": 11203,
+   "becomes": "the Roach Emperor - his own boss body, swarm and skills; every skill Gluttony",
+   "source": "1339_Gregor_EmperorAppearance",
+   "unit": 1339,
+   "tested": false,
+   "sins": {
+    "all": "SHAMROCK"
+   },
+   "card": "roach-emperor",
+   "title": "The Roach Emperor, the boss himself - Gregor"
+  },
+  "distorted-hohenheim": {
+   "identity": 11212,
+   "becomes": "Distorted Hohenheim - his own boss body and skills",
+   "source": "1082_Distorted_HohenheimAppearance",
+   "unit": 1082,
+   "tested": false,
+   "card": "distorted-hohenheim",
+   "title": "Distorted Hohenheim, the boss himself - Gregor"
+  }
+ },
+ "tints": {
+  "greencliff": {
+   "identity": 10701,
+   "becomes": "Greencliff: Heathcliff in a dirty green, a green mist drifting round him; S3 \"The Greenest Hunt\" turns him into a green Wild Hunt",
+   "tint": {
+    "hue": 84,
+    "saturation": 0.5,
+    "lightness": 0.3,
+    "highlight": 150
+   },
+   "tested": false,
+   "sins": {
+    "all": "SHAMROCK"
+   },
+   "shift": {
+    "to": 10710,
+    "hp": 50,
+    "skill": "3"
+   },
+   "stats": {
+    "hp": 200,
+    "speed": [
+     6,
+     10
+    ]
+   },
+   "moves": {
+    "1": {
+     "attributeType": "SHAMROCK",
+     "atkType": "HIT",
+     "defaultValue": 100,
+     "coins": [
+      30
+     ],
+     "onUse": [
+      {
+       "buffKeyword": "Agility",
+       "activeRound": 1,
+       "stack": 2
+      },
+      {
+       "buffKeyword": "Breath",
+       "activeRound": 0,
+       "stack": 3
+      }
+     ],
+     "onHit": [
+      {
+       "buffKeyword": "Burst",
+       "activeRound": 0,
+       "stack": 2,
+       "turn": 1
+      }
+     ]
+    },
+    "2": {
+     "attributeType": "SHAMROCK",
+     "atkType": "HIT",
+     "defaultValue": 120,
+     "coins": [
+      30,
+      30
+     ],
+     "onUse": [
+      {
+       "buffKeyword": "Protection",
+       "activeRound": 0,
+       "stack": 2
+      },
+      {
+       "buffKeyword": "Breath",
+       "activeRound": 0,
+       "stack": 0,
+       "turn": 2
+      }
+     ],
+     "onHit": [
+      {
+       "buffKeyword": "Vibration",
+       "activeRound": 0,
+       "stack": 2
+      },
+      {
+       "buffKeyword": "Burst",
+       "activeRound": 0,
+       "stack": 2
+      }
+     ]
+    },
+    "3": {
+     "attributeType": "SHAMROCK",
+     "atkType": "HIT",
+     "defaultValue": 180,
+     "coins": [
+      30,
+      30
+     ],
+     "onUse": [
+      {
+       "buffKeyword": "Agility",
+       "activeRound": 1,
+       "stack": 3
+      },
+      {
+       "buffKeyword": "AttackDmgUp",
+       "activeRound": 1,
+       "stack": 2
+      },
+      {
+       "buffKeyword": "Breath",
+       "activeRound": 0,
+       "stack": 3,
+       "turn": 2,
+       "target": "EveryAlly"
+      }
+     ],
+     "onHit": [
+      {
+       "buffKeyword": "Burst",
+       "activeRound": 0,
+       "stack": 3,
+       "turn": 2
+      }
+     ]
+    },
+    "defense": {
+     "attributeType": "SHAMROCK",
+     "atkType": "HIT",
+     "defaultValue": 100,
+     "coins": [
+      30
+     ],
+     "onUse": [
+      {
+       "buffKeyword": "Protection",
+       "activeRound": 0,
+       "stack": 3
+      }
+     ],
+     "onHit": [
+      {
+       "buffKeyword": "Burst",
+       "activeRound": 0,
+       "stack": 2
+      }
+     ]
+    }
+   },
+   "passives": {
+    "battle": [
+     1010201,
+     1050901,
+     1071403
+    ],
+    "support": [
+     1060321
+    ]
+   },
+   "texts": {
+    "3": {
+     "name": "The Greenest Hunt",
+     "note": "[WhenUse] Become the Greenest Hunt: Wild Hunt Heathcliff, green"
+    }
+   },
+   "aura": [
+    {
+     "from": "1079_Sancho_BerserkAppearance",
+     "textures": [
+      "Fx_T_Shape_Aura_02",
+      "Fx_T_Shape_Splash_01_2x2"
+     ],
+     "split": {
+      "Fx_T_Shape_Splash_01_2x2": [
+       2,
+       2
+      ]
+     },
+     "style": "mist",
+     "count": 6,
+     "size": 0.2,
+     "color": [
+      52,
+      88,
+      12
+     ],
+     "alpha": 0.9,
+     "soft": [
+      "Fx_T_Shape_Aura_02"
+     ]
+    }
+   ]
+  }
+ },
+ "identities": {
+  "vergilius-id": {
+   "identity": 10799,
+   "base": 10710,
+   "becomes": "Vergilius as an identity of his own (Heathcliff's slot), wearing what 10710 wears",
+   "tested": false,
+   "title": "Vergilius, an identity of his own - Heathcliff",
+   "card": "vergilius",
+   "name": "Vergilius",
+   "dupe_of": "vergilius"
+  },
+  "kali-id": {
+   "identity": 10499,
+   "base": 10410,
+   "becomes": "Kali as an identity of her own (Ryōshū's slot), wearing what 10410 wears",
+   "tested": false,
+   "title": "Kali, an identity of her own - Ryōshū",
+   "name": "Kali",
+   "dupe_of": "kali",
+   "game_title": "The Red Mist",
+   "own_body": true,
+   "own_skills": true
+  },
+  "dulcinea-id": {
+   "identity": 10999,
+   "base": 10917,
+   "source": "8381_Dulcinea_BossAppearance",
+   "unit": 8381,
+   "folder": 10911,
+   "becomes": "Dulcinea as an identity of her own (Rodion's slot): the boss's own body and whole moveset, on Rodion 10917's record (10911's bloodfiend script would drive a body it no longer has)",
+   "tested": false,
+   "title": "Dulcinea, the boss herself - an identity of her own - Rodion",
+   "name": "Dulcinea",
+   "cover": "Dolcinea",
+   "cover_face": [
+    440,
+    490
+   ]
+  },
+  "distorted-kim-id": {
+   "identity": 10599,
+   "base": 10508,
+   "source": "8153_KimSatGat_ErodeAppearance",
+   "unit": 8153,
+   "folder": 10508,
+   "becomes": "Distorted Kim Satgat as an identity of his own (Meursault's slot): the boss's own body and whole moveset",
+   "tested": false,
+   "title": "Distorted Kim Satgat, the boss himself - an identity of his own - Meursault",
+   "name": "Kim Satgat",
+   "cover": "Angry_KSG",
+   "game_title": "Distorted"
+  },
+  "vergilius-boss-id": {
+   "identity": 10795,
+   "of": 10710,
+   "becomes": "Vergilius as an identity of his own: his support unit's own body and whole kit",
+   "source": "400012_VergiliusAppearance",
+   "unit": 400012,
+   "folder": 10710,
+   "title": "Vergilius, the Red Gaze - the boss himself, an identity of his own - Heathcliff",
+   "tested": false,
+   "name": "Vergilius",
+   "cover": "Vergilius_Hurt",
+   "game_title": "The Red Gaze"
+  },
+  "vespa-id": {
+   "identity": 10233,
+   "of": 10201,
+   "becomes": "Vespa as an identity of her own: her Canto IX support unit's own body and whole kit",
+   "source": "400006_VespaAppearance",
+   "unit": 400009,
+   "folder": 10201,
+   "title": "Vespa - the support unit herself, an identity of her own - Faust",
+   "tested": false,
+   "name": "Vespa",
+   "cover": "Vespa",
+   "game_title": "Vespa"
+  },
+  "moses-id": {
+   "identity": 11133,
+   "of": 11101,
+   "becomes": "Moses as an identity of his own: his Canto IX support unit's own body and whole kit",
+   "source": "400010_MosesAppearance",
+   "unit": 400010,
+   "folder": 11101,
+   "title": "Moses - the support unit himself, an identity of his own - Outis",
+   "tested": false,
+   "name": "Moses",
+   "cover": "Moses_Smoke",
+   "game_title": "Moses"
+  },
+  "ezra-id": {
+   "identity": 10833,
+   "of": 10801,
+   "becomes": "Ezra as an identity of his own: his Canto IX support unit's own body and whole kit",
+   "source": "400011_EzraAppearance",
+   "unit": 400011,
+   "folder": 10801,
+   "title": "Ezra - the support unit himself, an identity of his own - Ishmael",
+   "tested": false,
+   "name": "Ezra",
+   "cover": "Ezra",
+   "game_title": "Ezra"
+  },
+  "greencliff-id": {
+   "identity": 10794,
+   "base": 10701,
+   "becomes": "Greencliff as an identity of his own (Heathcliff's slot): LCB Heathcliff with Greencliff's kit, glass-boned (Fatal to everything, defense -5) so he falls to half HP fast, and at half HP he turns into the green Wild Hunt; wears what 10701 wears (turn greencliff on for the green body)",
+   "tested": false,
+   "title": "Greencliff, an identity of his own - Heathcliff",
+   "name": "Greencliff",
+   "stats": {
+    "hp": 200,
+    "speed": [
+     6,
+     10
+    ],
+    "resist": {
+     "SLASH": 2.0,
+     "PENETRATE": 2.0,
+     "HIT": 2.0
+    },
+    "def": -5
+   },
+   "cover_art": "greencliff"
+  },
+  "baral-id": {
+   "identity": 10892,
+   "base": 10801,
+   "becomes": "Baral as an identity of his own (Ishmael's slot), with Baral's kit, wearing what 10801 wears",
+   "tested": false,
+   "title": "Baral, an identity of his own - Ishmael",
+   "name": "Baral",
+   "dupe_of": "baral",
+   "cover_art": "baral",
+   "game_title": "The Claw",
+   "own_body": true,
+   "own_skills": true
+  },
+  "binah-id": {
+   "identity": 10993,
+   "base": 10901,
+   "becomes": "Binah as an identity of her own (Rodion's slot), with Binah's kit and a body of her own",
+   "tested": false,
+   "title": "Binah, an identity of her own - Rodion",
+   "name": "Binah",
+   "dupe_of": "binah",
+   "cover_art": "binah",
+   "game_title": "Floor of\nPhilosophy",
+   "own_body": true,
+   "own_skills": true
+  },
+  "ayin-id": {
+   "identity": 11293,
+   "base": 11201,
+   "becomes": "Ayin as an identity of their own (Gregor's slot), with Ayin's kit, wearing what 11201 wears",
+   "tested": false,
+   "title": "Ayin, an identity of their own - Gregor",
+   "name": "Ayin",
+   "dupe_of": "ayin"
+  },
+  "malkuth-id": {
+   "identity": 10393,
+   "base": 10309,
+   "becomes": "Malkuth as an identity of their own (Don Quixote's slot), with Malkuth's kit, wearing what 10309 wears",
+   "tested": false,
+   "title": "Malkuth, an identity of their own - Don Quixote",
+   "name": "Malkuth",
+   "dupe_of": "malkuth",
+   "cover_art": "malkuth",
+   "game_title": "Floor of\nHistory",
+   "own_body": true,
+   "own_skills": true,
+   "moves": {
+    "1": {
+     "lor_dice": 9901202,
+     "attributeType": "CRIMSON",
+     "coins": [
+      0,
+      0
+     ],
+     "onHit": [
+      {
+       "buffKeyword": "AttackDmgDown",
+       "stack": 1,
+       "activeRound": 1,
+       "coins": [
+        1
+       ]
+      },
+      {
+       "buffKeyword": "Combustion",
+       "stack": 2,
+       "activeRound": 0,
+       "coins": [
+        1,
+        2
+       ],
+       "turn": 1
+      }
+     ]
+    },
+    "2": {
+     "lor_dice": 9901103,
+     "attributeType": "SCARLET",
+     "coins": [
+      0,
+      0,
+      0
+     ],
+     "onHit": [
+      {
+       "buffKeyword": "Combustion",
+       "stack": 1,
+       "activeRound": 0,
+       "turn": 1,
+       "coins": [
+        1
+       ]
+      },
+      {
+       "buffKeyword": "Laceration",
+       "stack": 3,
+       "activeRound": 0,
+       "coins": [
+        1,
+        2,
+        3
+       ],
+       "turn": 2
+      }
+     ]
+    },
+    "3": {
+     "lor_dice": 9901101,
+     "attributeType": "CRIMSON",
+     "coins": [
+      0,
+      0,
+      0,
+      0
+     ],
+     "onUse": [
+      {
+       "buffKeyword": "AttackDmgUp",
+       "stack": 2,
+       "activeRound": 0
+      }
+     ],
+     "onHit": [
+      {
+       "buffKeyword": "Combustion",
+       "stack": 5,
+       "activeRound": 0,
+       "coins": [
+        1,
+        2,
+        3,
+        4
+       ],
+       "turn": 3
+      }
+     ]
+    },
+    "defense": {
+     "lor_dice": 9901103,
+     "attributeType": "AMBER",
+     "coins": [
+      0
+     ],
+     "onUse": [
+      {
+       "buffKeyword": "Protection",
+       "stack": 2,
+       "activeRound": 0
+      }
+     ]
+    }
+   },
+   "texts": {
+    "1": {
+     "lor_card": 9901202
+    },
+    "2": {
+     "lor_card": 9901103
+    },
+    "3": {
+     "lor_card": 9901101
+    },
+    "defense": {
+     "lor_card": 9901103
+    }
+   }
+  },
+  "yesod-id": {
+   "identity": 10592,
+   "base": 10501,
+   "becomes": "Yesod as an identity of their own (Meursault's slot), with Yesod's kit, wearing what 10501 wears",
+   "tested": false,
+   "title": "Yesod, an identity of their own - Meursault",
+   "name": "Yesod",
+   "dupe_of": "yesod",
+   "cover_art": "yesod",
+   "game_title": "Floor of\nTechnological Sciences",
+   "own_body": true,
+   "own_skills": true,
+   "moves": {
+    "1": {
+     "lor_dice": 9902301,
+     "attributeType": "VIOLET",
+     "coins": [
+      0,
+      0
+     ],
+     "onHit": [
+      {
+       "buffKeyword": "Laceration",
+       "stack": 1,
+       "activeRound": 0,
+       "turn": 1,
+       "coins": [
+        1
+       ]
+      },
+      {
+       "buffKeyword": "Vibration",
+       "stack": 2,
+       "activeRound": 0,
+       "coins": [
+        1,
+        2
+       ],
+       "turn": 1
+      }
+     ]
+    },
+    "2": {
+     "lor_dice": 9902510,
+     "attributeType": "INDIGO",
+     "coins": [
+      0
+     ],
+     "onHit": [
+      {
+       "buffKeyword": "Charge",
+       "stack": 3,
+       "activeRound": 0,
+       "coins": [
+        1
+       ]
+      }
+     ]
+    },
+    "3": {
+     "lor_dice": 9902507,
+     "attributeType": "VIOLET",
+     "coins": [
+      0,
+      0,
+      0,
+      0
+     ],
+     "onUse": [
+      {
+       "buffKeyword": "AttackDmgUp",
+       "stack": 2,
+       "activeRound": 0
+      }
+     ],
+     "onHit": [
+      {
+       "buffKeyword": "Vibration",
+       "stack": 5,
+       "activeRound": 0,
+       "coins": [
+        1,
+        2,
+        3,
+        4
+       ],
+       "turn": 3
+      }
+     ]
+    },
+    "defense": {
+     "lor_dice": 9902202,
+     "attributeType": "INDIGO",
+     "coins": [
+      0
+     ],
+     "onUse": [
+      {
+       "buffKeyword": "Protection",
+       "stack": 2,
+       "activeRound": 0
+      }
+     ]
+    }
+   },
+   "texts": {
+    "1": {
+     "lor_card": 9902301
+    },
+    "2": {
+     "lor_card": 9902510
+    },
+    "3": {
+     "lor_card": 9902507
+    },
+    "defense": {
+     "lor_card": 9902202
+    }
+   }
+  },
+  "hod-id": {
+   "identity": 11093,
+   "base": 11002,
+   "becomes": "Hod as an identity of their own (Sinclair's slot), with Hod's kit, wearing what 11002 wears",
+   "tested": false,
+   "title": "Hod, an identity of their own - Sinclair",
+   "name": "Hod",
+   "dupe_of": "hod",
+   "cover_art": "hod",
+   "game_title": "Floor of\nLiterature",
+   "own_body": true,
+   "own_skills": true,
+   "moves": {
+    "1": {
+     "lor_dice": 9903512,
+     "attributeType": "AMBER",
+     "coins": [
+      0,
+      0
+     ],
+     "onHit": [
+      {
+       "buffKeyword": "Burst",
+       "stack": 2,
+       "activeRound": 0,
+       "coins": [
+        1,
+        2
+       ],
+       "turn": 1
+      }
+     ]
+    },
+    "2": {
+     "lor_dice": 9903105,
+     "attributeType": "SHAMROCK",
+     "coins": [
+      0,
+      0,
+      0
+     ],
+     "onHit": [
+      {
+       "buffKeyword": "Breath",
+       "stack": 3,
+       "activeRound": 0,
+       "coins": [
+        1,
+        2,
+        3
+       ],
+       "turn": 2
+      }
+     ]
+    },
+    "3": {
+     "lor_dice": 9903513,
+     "attributeType": "AMBER",
+     "coins": [
+      0
+     ],
+     "onUse": [
+      {
+       "buffKeyword": "AttackDmgUp",
+       "stack": 2,
+       "activeRound": 0
+      }
+     ],
+     "onHit": [
+      {
+       "buffKeyword": "AttackDmgDown",
+       "stack": 1,
+       "activeRound": 1,
+       "coins": [
+        1
+       ]
+      },
+      {
+       "buffKeyword": "AttackDmgDown",
+       "stack": 1,
+       "activeRound": 1,
+       "coins": [
+        1
+       ]
+      },
+      {
+       "buffKeyword": "Burst",
+       "stack": 5,
+       "activeRound": 0,
+       "coins": [
+        1
+       ],
+       "turn": 3
+      }
+     ]
+    },
+    "defense": {
+     "lor_dice": 9903101,
+     "attributeType": "SHAMROCK",
+     "coins": [
+      0
+     ],
+     "onUse": [
+      {
+       "buffKeyword": "Protection",
+       "stack": 2,
+       "activeRound": 0
+      }
+     ]
+    }
+   },
+   "texts": {
+    "1": {
+     "lor_card": 9903512
+    },
+    "2": {
+     "lor_card": 9903105
+    },
+    "3": {
+     "lor_card": 9903513
+    },
+    "defense": {
+     "lor_card": 9903101
+    }
+   }
+  },
+  "netzach-id": {
+   "identity": 10693,
+   "base": 10601,
+   "becomes": "Netzach as an identity of their own (Hong Lu's slot), with Netzach's kit, wearing what 10601 wears",
+   "tested": false,
+   "title": "Netzach, an identity of their own - Hong Lu",
+   "name": "Netzach",
+   "dupe_of": "netzach",
+   "cover_art": "netzach",
+   "game_title": "Floor of\nArt",
+   "own_body": true,
+   "own_skills": true,
+   "moves": {
+    "1": {
+     "lor_dice": 9904414,
+     "attributeType": "AZURE",
+     "coins": [
+      0
+     ],
+     "onHit": [
+      {
+       "buffKeyword": "Sinking",
+       "stack": 2,
+       "activeRound": 0,
+       "coins": [
+        1
+       ],
+       "turn": 1
+      }
+     ]
+    },
+    "2": {
+     "lor_dice": 9904411,
+     "attributeType": "AZURE",
+     "coins": [
+      0,
+      0
+     ],
+     "onHit": [
+      {
+       "buffKeyword": "Sinking",
+       "stack": 3,
+       "activeRound": 0,
+       "coins": [
+        1,
+        2
+       ],
+       "turn": 2
+      }
+     ]
+    },
+    "3": {
+     "lor_dice": 9904305,
+     "attributeType": "INDIGO",
+     "coins": [
+      0,
+      0
+     ],
+     "onUse": [
+      {
+       "buffKeyword": "AttackDmgUp",
+       "stack": 2,
+       "activeRound": 0
+      }
+     ],
+     "onHit": [
+      {
+       "buffKeyword": "Charge",
+       "stack": 5,
+       "activeRound": 0,
+       "coins": [
+        1,
+        2
+       ]
+      }
+     ]
+    },
+    "defense": {
+     "lor_dice": 9904103,
+     "attributeType": "AZURE",
+     "coins": [
+      0
+     ],
+     "onUse": [
+      {
+       "buffKeyword": "Protection",
+       "stack": 2,
+       "activeRound": 0
+      }
+     ]
+    }
+   },
+   "texts": {
+    "1": {
+     "lor_card": 9904414
+    },
+    "2": {
+     "lor_card": 9904411
+    },
+    "3": {
+     "lor_card": 9904305
+    },
+    "defense": {
+     "lor_card": 9904103
+    }
+   }
+  },
+  "tiphereth-id": {
+   "identity": 10193,
+   "base": 10101,
+   "becomes": "Tiphereth as an identity of their own (Yi Sang's slot), with Tiphereth's kit, wearing what 10101 wears",
+   "tested": false,
+   "title": "Tiphereth, an identity of their own - Yi Sang",
+   "name": "Tiphereth",
+   "dupe_of": "tiphereth",
+   "cover_art": "tiphereth",
+   "game_title": "Floor of\nNatural Sciences",
+   "own_body": true,
+   "own_skills": true,
+   "moves": {
+    "1": {
+     "lor_dice": 9905612,
+     "attributeType": "SCARLET",
+     "coins": [
+      0
+     ],
+     "onHit": [
+      {
+       "buffKeyword": "Laceration",
+       "stack": 2,
+       "activeRound": 0,
+       "coins": [
+        1
+       ],
+       "turn": 1
+      }
+     ]
+    },
+    "2": {
+     "lor_dice": 9905432,
+     "attributeType": "CRIMSON",
+     "coins": [
+      0,
+      0
+     ],
+     "onHit": [
+      {
+       "buffKeyword": "Combustion",
+       "stack": 3,
+       "activeRound": 0,
+       "coins": [
+        1,
+        2
+       ],
+       "turn": 2
+      }
+     ]
+    },
+    "3": {
+     "lor_dice": 9905615,
+     "attributeType": "SCARLET",
+     "coins": [
+      0,
+      0,
+      0
+     ],
+     "onUse": [
+      {
+       "buffKeyword": "AttackDmgUp",
+       "stack": 2,
+       "activeRound": 0
+      }
+     ],
+     "onHit": [
+      {
+       "buffKeyword": "Laceration",
+       "stack": 5,
+       "activeRound": 0,
+       "coins": [
+        1,
+        2,
+        3
+       ],
+       "turn": 3
+      }
+     ]
+    },
+    "defense": {
+     "lor_dice": 9905102,
+     "attributeType": "INDIGO",
+     "coins": [
+      0
+     ],
+     "onUse": [
+      {
+       "buffKeyword": "Protection",
+       "stack": 2,
+       "activeRound": 0
+      }
+     ]
+    }
+   },
+   "texts": {
+    "1": {
+     "lor_card": 9905612
+    },
+    "2": {
+     "lor_card": 9905432
+    },
+    "3": {
+     "lor_card": 9905615
+    },
+    "defense": {
+     "lor_card": 9905102
+    }
+   }
+  },
+  "chesed-id": {
+   "identity": 10293,
+   "base": 10201,
+   "becomes": "Chesed as an identity of their own (Faust's slot), with Chesed's kit, wearing what 10201 wears",
+   "tested": false,
+   "title": "Chesed, an identity of their own - Faust",
+   "name": "Chesed",
+   "dupe_of": "chesed",
+   "cover_art": "chesed",
+   "game_title": "Floor of\nSocial Sciences",
+   "own_body": true,
+   "own_skills": true,
+   "moves": {
+    "1": {
+     "lor_dice": 9907622,
+     "attributeType": "SHAMROCK",
+     "coins": [
+      0
+     ],
+     "onHit": [
+      {
+       "buffKeyword": "Breath",
+       "stack": 2,
+       "activeRound": 0,
+       "coins": [
+        1
+       ],
+       "turn": 1
+      }
+     ]
+    },
+    "2": {
+     "lor_dice": 9907516,
+     "attributeType": "SHAMROCK",
+     "coins": [
+      0,
+      0
+     ],
+     "onHit": [
+      {
+       "buffKeyword": "Breath",
+       "stack": 3,
+       "activeRound": 0,
+       "coins": [
+        1,
+        2
+       ],
+       "turn": 2
+      }
+     ]
+    },
+    "3": {
+     "lor_dice": 9907514,
+     "attributeType": "AZURE",
+     "coins": [
+      0,
+      0
+     ],
+     "onUse": [
+      {
+       "buffKeyword": "AttackDmgUp",
+       "stack": 2,
+       "activeRound": 0
+      }
+     ],
+     "onHit": [
+      {
+       "buffKeyword": "Sinking",
+       "stack": 5,
+       "activeRound": 0,
+       "coins": [
+        1,
+        2
+       ],
+       "turn": 3
+      }
+     ]
+    },
+    "defense": {
+     "lor_dice": 9907112,
+     "attributeType": "SHAMROCK",
+     "coins": [
+      0
+     ],
+     "onUse": [
+      {
+       "buffKeyword": "Protection",
+       "stack": 2,
+       "activeRound": 0
+      }
+     ]
+    }
+   },
+   "texts": {
+    "1": {
+     "lor_card": 9907622
+    },
+    "2": {
+     "lor_card": 9907516
+    },
+    "3": {
+     "lor_card": 9907514
+    },
+    "defense": {
+     "lor_card": 9907112
+    }
+   }
+  },
+  "hokma-id": {
+   "identity": 11193,
+   "base": 11110,
+   "becomes": "Hokma as an identity of their own (Outis's slot), with Hokma's kit, wearing what 11110 wears",
+   "tested": false,
+   "title": "Hokma, an identity of their own - Outis",
+   "name": "Hokma",
+   "dupe_of": "hokma",
+   "cover_art": "hokma",
+   "game_title": "Floor of\nReligion",
+   "own_body": true,
+   "own_skills": true,
+   "moves": {
+    "1": {
+     "lor_dice": 9909116,
+     "attributeType": "INDIGO",
+     "coins": [
+      0,
+      0
+     ],
+     "onHit": [
+      {
+       "buffKeyword": "Charge",
+       "stack": 2,
+       "activeRound": 0,
+       "coins": [
+        1,
+        2
+       ]
+      }
+     ]
+    },
+    "2": {
+     "lor_dice": 9909154,
+     "attributeType": "VIOLET",
+     "coins": [
+      0,
+      0
+     ],
+     "onHit": [
+      {
+       "buffKeyword": "Vibration",
+       "stack": 3,
+       "activeRound": 0,
+       "coins": [
+        1,
+        2
+       ],
+       "turn": 2
+      }
+     ]
+    },
+    "3": {
+     "lor_dice": 9909123,
+     "attributeType": "INDIGO",
+     "coins": [
+      0,
+      0,
+      0,
+      0
+     ],
+     "onUse": [
+      {
+       "buffKeyword": "AttackDmgUp",
+       "stack": 2,
+       "activeRound": 0
+      }
+     ],
+     "onHit": [
+      {
+       "buffKeyword": "Charge",
+       "stack": 5,
+       "activeRound": 0,
+       "coins": [
+        1,
+        2,
+        3,
+        4
+       ]
+      }
+     ]
+    },
+    "defense": {
+     "lor_dice": 9909121,
+     "attributeType": "VIOLET",
+     "coins": [
+      0
+     ],
+     "onUse": [
+      {
+       "buffKeyword": "Protection",
+       "stack": 2,
+       "activeRound": 0
+      }
+     ]
+    }
+   },
+   "texts": {
+    "1": {
+     "lor_card": 9909116
+    },
+    "2": {
+     "lor_card": 9909154
+    },
+    "3": {
+     "lor_card": 9909123
+    },
+    "defense": {
+     "lor_card": 9909121
+    }
+   }
+  },
+  "apocalypse-bird-id": {
+   "identity": 10793,
+   "base": 10704,
+   "becomes": "Apocalypse Bird as an identity of its own (Heathcliff's slot), with its moves, wearing what 10704 wears",
+   "tested": false,
+   "title": "Apocalypse Bird, an identity of its own - Heathcliff",
+   "name": "Apocalypse Bird",
+   "dupe_of": "apocalypse-bird",
+   "cover_art": "apocalypse-bird",
+   "game_title": "The Black Forest::\nThree Birds as One",
+   "own_body": true,
+   "own_skills": true
+  },
+  "roland-ruina": {
+   "identity": 10130,
+   "base": 10101,
+   "roster": true,
+   "tested": false,
+   "name": "Roland",
+   "game_title": "The Black\nSilence",
+   "title": "Roland (Ruina) - The Black Silence",
+   "becomes": "Roland of Library of Ruina as an identity of their own: own body, own skills, their Ruina pages as the kit",
+   "own_body": true,
+   "own_skills": true,
+   "lor": {
+    "bundle": "char/char_421.pres",
+    "prefab": "BlackSilence",
+    "map": {
+     "idle": [
+      "Default",
+      "Standing"
+     ],
+     "move": [
+      "Move"
+     ],
+     "gud": [
+      "Guard"
+     ],
+     "miss": [
+      "Evade"
+     ],
+     "dmg": [
+      "Damaged"
+     ],
+     "dead": [
+      "Damaged"
+     ],
+     "S1": [
+      "Mace_S9",
+      "Axe_S8"
+     ],
+     "S2": [
+      "Penetrate",
+      "LongSword_S4"
+     ],
+     "S3": [
+      "Hit",
+      "GreatSword_S10"
+     ]
+    },
+    "smear": [
+     "move",
+     "S1",
+     "S2",
+     "S3"
+    ],
+    "idle_time": 2.4,
+    "stands": 5.0
+   },
+   "moves": {
+    "1": {
+     "lor_dice": 702003,
+     "attributeType": "INDIGO",
+     "coins": [
+      0
+     ],
+     "onHit": [
+      {
+       "buffKeyword": "Charge",
+       "stack": 2,
+       "activeRound": 0,
+       "coins": [
+        1
+       ]
+      }
+     ]
+    },
+    "2": {
+     "lor_dice": 702001,
+     "attributeType": "INDIGO",
+     "coins": [
+      0,
+      0
+     ],
+     "onHit": [
+      {
+       "buffKeyword": "Charge",
+       "stack": 3,
+       "activeRound": 0,
+       "coins": [
+        1,
+        2
+       ]
+      }
+     ]
+    },
+    "3": {
+     "lor_dice": 702002,
+     "attributeType": "VIOLET",
+     "coins": [
+      0,
+      0,
+      0
+     ],
+     "onUse": [
+      {
+       "buffKeyword": "AttackDmgUp",
+       "stack": 2,
+       "activeRound": 0
+      }
+     ],
+     "onHit": [
+      {
+       "buffKeyword": "Vibration",
+       "stack": 5,
+       "activeRound": 0,
+       "coins": [
+        1,
+        2,
+        3
+       ],
+       "turn": 3
+      }
+     ]
+    },
+    "defense": {
+     "lor_dice": 702002,
+     "attributeType": "INDIGO",
+     "coins": [
+      0
+     ],
+     "onUse": [
+      {
+       "buffKeyword": "Protection",
+       "stack": 2,
+       "activeRound": 0
+      }
+     ]
+    }
+   },
+   "texts": {
+    "1": {
+     "lor_card": 702003
+    },
+    "2": {
+     "lor_card": 702001
+    },
+    "3": {
+     "lor_card": 702002
+    },
+    "defense": {
+     "lor_card": 702002
+    }
+   }
+  },
+  "argalia-ruina": {
+   "identity": 10630,
+   "base": 10601,
+   "roster": true,
+   "tested": false,
+   "name": "Argalia",
+   "game_title": "The Blue\nReverberation",
+   "title": "Argalia (Ruina) - The Blue Reverberation",
+   "becomes": "Argalia of Library of Ruina as an identity of their own: own body, own skills, their Ruina pages as the kit",
+   "own_body": true,
+   "own_skills": true,
+   "lor": {
+    "bundle": "char/char_412.pres",
+    "prefab": "Argalia2",
+    "map": {
+     "idle": [
+      "Default",
+      "Standing"
+     ],
+     "move": [
+      "Move"
+     ],
+     "gud": [
+      "Guard"
+     ],
+     "miss": [
+      "Evade"
+     ],
+     "dmg": [
+      "Damaged"
+     ],
+     "dead": [
+      "Damaged"
+     ],
+     "S1": [
+      "Slash"
+     ],
+     "S2": [
+      "Penetrate",
+      "Hit"
+     ],
+     "S3": [
+      "Slash",
+      "Penetrate",
+      "Hit",
+      "S1",
+      "S2"
+     ]
+    },
+    "smear": [
+     "move",
+     "S1",
+     "S2",
+     "S3"
+    ],
+    "idle_time": 2.4,
+    "stands": 5.0
+   },
+   "moves": {
+    "1": {
+     "lor_dice": 703001,
+     "attributeType": "AZURE",
+     "coins": [
+      0
+     ],
+     "onHit": [
+      {
+       "buffKeyword": "Vibration",
+       "stack": 3,
+       "activeRound": 0,
+       "turn": 1,
+       "coins": [
+        1
+       ]
+      },
+      {
+       "buffKeyword": "Sinking",
+       "stack": 2,
+       "activeRound": 0,
+       "coins": [
+        1
+       ],
+       "turn": 1
+      }
+     ]
+    },
+    "2": {
+     "lor_dice": 703002,
+     "attributeType": "AZURE",
+     "coins": [
+      0,
+      0
+     ],
+     "onHit": [
+      {
+       "buffKeyword": "Sinking",
+       "stack": 3,
+       "activeRound": 0,
+       "coins": [
+        1,
+        2
+       ],
+       "turn": 2
+      }
+     ]
+    },
+    "3": {
+     "lor_dice": 703021,
+     "attributeType": "INDIGO",
+     "coins": [
+      0,
+      0
+     ],
+     "onUse": [
+      {
+       "buffKeyword": "AttackDmgUp",
+       "stack": 2,
+       "activeRound": 0
+      }
+     ],
+     "onHit": [
+      {
+       "buffKeyword": "Charge",
+       "stack": 5,
+       "activeRound": 0,
+       "coins": [
+        1,
+        2
+       ]
+      }
+     ]
+    },
+    "defense": {
+     "lor_dice": 703002,
+     "attributeType": "AZURE",
+     "coins": [
+      0
+     ],
+     "onUse": [
+      {
+       "buffKeyword": "Protection",
+       "stack": 2,
+       "activeRound": 0
+      }
+     ]
+    }
+   },
+   "texts": {
+    "1": {
+     "lor_card": 703001
+    },
+    "2": {
+     "lor_card": 703002
+    },
+    "3": {
+     "lor_card": 703021
+    },
+    "defense": {
+     "lor_card": 703002
+    }
+   },
+   "evolves": {
+    "lor": {
+     "bundle": "char/char_677.pres",
+     "prefab": "TwistedArgalia",
+     "map": {
+      "idle": [
+       "Default",
+       "Standing"
+      ],
+      "move": [
+       "Move"
+      ],
+      "gud": [
+       "Guard"
+      ],
+      "miss": [
+       "Guard"
+      ],
+      "dmg": [
+       "Damaged"
+      ],
+      "dead": [
+       "Damaged"
+      ],
+      "S1": [
+       "Slash"
+      ],
+      "S2": [
+       "Penetrate",
+       "Hit"
+      ],
+      "S3": [
+       "Slash",
+       "Penetrate",
+       "Hit",
+       "S1",
+       "S2"
+      ]
+     },
+     "smear": [
+      "move",
+      "S1",
+      "S2",
+      "S3"
+     ],
+     "idle_time": 2.4,
+     "stands": 5.0
+    },
+    "hp": 50,
+    "word": "Distorted"
+   }
+  },
+  "iori-ruina": {
+   "identity": 10930,
+   "base": 10901,
+   "roster": true,
+   "tested": false,
+   "name": "Iori",
+   "game_title": "The Purple\nTear",
+   "title": "Iori (Ruina) - The Purple Tear",
+   "becomes": "Iori of Library of Ruina as an identity of their own: own body, own skills, their Ruina pages as the kit",
+   "own_body": true,
+   "own_skills": true,
+   "lor": {
+    "bundle": "char/char_603.pres",
+    "prefab": "ThePurpleTear",
+    "map": {
+     "idle": [
+      "Default",
+      "Standing"
+     ],
+     "move": [
+      "Move"
+     ],
+     "gud": [
+      "Guard"
+     ],
+     "miss": [
+      "Evade"
+     ],
+     "dmg": [
+      "Damaged"
+     ],
+     "dead": [
+      "Damaged"
+     ],
+     "S1": [
+      "Slash"
+     ],
+     "S2": [
+      "Penetrate",
+      "Hit"
+     ],
+     "S3": [
+      "Slash",
+      "Penetrate",
+      "Hit"
+     ]
+    },
+    "smear": [
+     "move",
+     "S1",
+     "S2",
+     "S3"
+    ],
+    "idle_time": 2.4,
+    "stands": 5.0
+   },
+   "moves": {
+    "1": {
+     "lor_dice": 609001,
+     "attributeType": "VIOLET",
+     "coins": [
+      0
+     ],
+     "onHit": [
+      {
+       "buffKeyword": "Vibration",
+       "stack": 2,
+       "activeRound": 0,
+       "coins": [
+        1
+       ],
+       "turn": 1
+      }
+     ]
+    },
+    "2": {
+     "lor_dice": 609008,
+     "attributeType": "VIOLET",
+     "coins": [
+      0,
+      0
+     ],
+     "onHit": [
+      {
+       "buffKeyword": "Vibration",
+       "stack": 3,
+       "activeRound": 0,
+       "coins": [
+        1,
+        2
+       ],
+       "turn": 2
+      }
+     ]
+    },
+    "3": {
+     "lor_dice": 609002,
+     "attributeType": "VIOLET",
+     "coins": [
+      0,
+      0,
+      0,
+      0
+     ],
+     "onUse": [
+      {
+       "buffKeyword": "AttackDmgUp",
+       "stack": 2,
+       "activeRound": 0
+      }
+     ],
+     "onHit": [
+      {
+       "buffKeyword": "Vibration",
+       "stack": 5,
+       "activeRound": 0,
+       "coins": [
+        1,
+        2,
+        3,
+        4
+       ],
+       "turn": 3
+      }
+     ]
+    },
+    "defense": {
+     "lor_dice": 609003,
+     "attributeType": "VIOLET",
+     "coins": [
+      0
+     ],
+     "onUse": [
+      {
+       "buffKeyword": "Protection",
+       "stack": 2,
+       "activeRound": 0
+      }
+     ]
+    }
+   },
+   "texts": {
+    "1": {
+     "lor_card": 609001
+    },
+    "2": {
+     "lor_card": 609008
+    },
+    "3": {
+     "lor_card": 609002
+    },
+    "defense": {
+     "lor_card": 609003
+    }
+   }
+  },
+  "vermilion-cross-ruina": {
+   "identity": 10730,
+   "base": 10701,
+   "roster": true,
+   "tested": false,
+   "name": "Vermilion Cross",
+   "game_title": "The Vermilion\nCross",
+   "title": "Vermilion Cross (Ruina) - The Vermilion Cross",
+   "becomes": "Vermilion Cross of Library of Ruina as an identity of their own: own body, own skills, their Ruina pages as the kit",
+   "own_body": true,
+   "own_skills": true,
+   "lor": {
+    "bundle": "char/char_545.pres",
+    "prefab": "OrangeCross",
+    "map": {
+     "idle": [
+      "Default"
+     ],
+     "move": [
+      "Move"
+     ],
+     "gud": [
+      "Guard"
+     ],
+     "miss": [
+      "Guard"
+     ],
+     "dmg": [
+      "Damaged"
+     ],
+     "dead": [
+      "Damaged"
+     ],
+     "S1": [
+      "Slash"
+     ],
+     "S2": [
+      "Hit"
+     ],
+     "S3": [
+      "Slash",
+      "Hit"
+     ]
+    },
+    "smear": [
+     "move",
+     "S1",
+     "S2",
+     "S3"
+    ],
+    "idle_time": 2.4,
+    "stands": 5.0
+   },
+   "moves": {
+    "1": {
+     "lor_dice": 703812,
+     "attributeType": "CRIMSON",
+     "coins": [
+      0
+     ],
+     "onHit": [
+      {
+       "buffKeyword": "Combustion",
+       "stack": 1,
+       "activeRound": 0,
+       "turn": 1,
+       "coins": [
+        1
+       ]
+      }
+     ]
+    },
+    "2": {
+     "lor_dice": 703811,
+     "attributeType": "SCARLET",
+     "coins": [
+      0,
+      0
+     ],
+     "onHit": [
+      {
+       "buffKeyword": "Combustion",
+       "stack": 2,
+       "activeRound": 0,
+       "turn": 1,
+       "coins": [
+        1
+       ]
+      },
+      {
+       "buffKeyword": "Combustion",
+       "stack": 1,
+       "activeRound": 0,
+       "turn": 1,
+       "coins": [
+        2
+       ]
+      },
+      {
+       "buffKeyword": "Laceration",
+       "stack": 3,
+       "activeRound": 0,
+       "coins": [
+        1,
+        2
+       ],
+       "turn": 2
+      }
+     ]
+    },
+    "3": {
+     "lor_dice": 703814,
+     "attributeType": "CRIMSON",
+     "coins": [
+      0,
+      0
+     ],
+     "onUse": [
+      {
+       "buffKeyword": "AttackDmgUp",
+       "stack": 2,
+       "activeRound": 0
+      }
+     ],
+     "onHit": [
+      {
+       "buffKeyword": "Combustion",
+       "stack": 5,
+       "activeRound": 0,
+       "coins": [
+        1,
+        2
+       ],
+       "turn": 3
+      }
+     ]
+    },
+    "defense": {
+     "lor_dice": 703811,
+     "attributeType": "SCARLET",
+     "coins": [
+      0
+     ],
+     "onUse": [
+      {
+       "buffKeyword": "Protection",
+       "stack": 2,
+       "activeRound": 0
+      }
+     ]
+    }
+   },
+   "texts": {
+    "1": {
+     "lor_card": 703812
+    },
+    "2": {
+     "lor_card": 703811
+    },
+    "3": {
+     "lor_card": 703814
+    },
+    "defense": {
+     "lor_card": 703811
+    }
+   }
+  },
+  "xiao-ruina": {
+   "identity": 10830,
+   "base": 10801,
+   "roster": true,
+   "tested": false,
+   "name": "Xiao",
+   "game_title": "Iron Lotus",
+   "title": "Xiao (Ruina) - Iron Lotus",
+   "becomes": "Xiao of Library of Ruina as an identity of their own: own body, own skills, their Ruina pages as the kit",
+   "own_body": true,
+   "own_skills": true,
+   "lor": {
+    "bundle": "char/char_583.pres",
+    "prefab": "Shyao",
+    "map": {
+     "idle": [
+      "Default"
+     ],
+     "move": [
+      "Move"
+     ],
+     "gud": [
+      "Guard"
+     ],
+     "miss": [
+      "Evade"
+     ],
+     "dmg": [
+      "Damaged"
+     ],
+     "dead": [
+      "Damaged"
+     ],
+     "S1": [
+      "Slash"
+     ],
+     "S2": [
+      "Panetrate",
+      "Hit"
+     ],
+     "S3": [
+      "Slash",
+      "Panetrate",
+      "Hit",
+      "S1",
+      "S2"
+     ]
+    },
+    "smear": [
+     "move",
+     "S1",
+     "S2",
+     "S3"
+    ],
+    "idle_time": 2.4,
+    "stands": 5.0
+   },
+   "moves": {
+    "1": {
+     "lor_dice": 601007,
+     "attributeType": "CRIMSON",
+     "coins": [
+      0
+     ],
+     "onHit": [
+      {
+       "buffKeyword": "Combustion",
+       "stack": 2,
+       "activeRound": 0,
+       "coins": [
+        1
+       ],
+       "turn": 1
+      }
+     ]
+    },
+    "2": {
+     "lor_dice": 606004,
+     "attributeType": "CRIMSON",
+     "coins": [
+      0
+     ],
+     "onHit": [
+      {
+       "buffKeyword": "Combustion",
+       "stack": 1,
+       "activeRound": 0,
+       "turn": 1,
+       "coins": [
+        1
+       ]
+      },
+      {
+       "buffKeyword": "Combustion",
+       "stack": 1,
+       "activeRound": 0,
+       "turn": 1,
+       "coins": [
+        1
+       ]
+      }
+     ]
+    },
+    "3": {
+     "lor_dice": 606001,
+     "attributeType": "SCARLET",
+     "coins": [
+      0
+     ],
+     "onUse": [
+      {
+       "buffKeyword": "AttackDmgUp",
+       "stack": 2,
+       "activeRound": 0
+      }
+     ],
+     "onHit": [
+      {
+       "buffKeyword": "Combustion",
+       "stack": 2,
+       "activeRound": 0,
+       "turn": 1,
+       "coins": [
+        1
+       ]
+      },
+      {
+       "buffKeyword": "Combustion",
+       "stack": 2,
+       "activeRound": 0,
+       "turn": 1,
+       "coins": [
+        1
+       ]
+      },
+      {
+       "buffKeyword": "Laceration",
+       "stack": 5,
+       "activeRound": 0,
+       "coins": [
+        1
+       ],
+       "turn": 3
+      }
+     ]
+    },
+    "defense": {
+     "lor_dice": 601001,
+     "attributeType": "CRIMSON",
+     "coins": [
+      0
+     ],
+     "onUse": [
+      {
+       "buffKeyword": "Protection",
+       "stack": 2,
+       "activeRound": 0
+      }
+     ]
+    }
+   },
+   "texts": {
+    "1": {
+     "lor_card": 601007
+    },
+    "2": {
+     "lor_card": 606004
+    },
+    "3": {
+     "lor_card": 606001
+    },
+    "defense": {
+     "lor_card": 601001
+    }
+   },
+   "evolves": {
+    "lor": {
+     "bundle": "char/char_618.pres",
+     "prefab": "XiaoEgo",
+     "map": {
+      "idle": [
+       "Default"
+      ],
+      "move": [
+       "Move"
+      ],
+      "gud": [
+       "Guard"
+      ],
+      "miss": [
+       "Evade"
+      ],
+      "dmg": [
+       "Damaged"
+      ],
+      "dead": [
+       "Damaged"
+      ],
+      "S1": [
+       "Slash"
+      ],
+      "S2": [
+       "Penetrate",
+       "Hit"
+      ],
+      "S3": [
+       "Slash",
+       "Penetrate",
+       "Hit",
+       "S1",
+       "S2"
+      ]
+     },
+     "smear": [
+      "move",
+      "S1",
+      "S2",
+      "S3"
+     ],
+     "idle_time": 2.4,
+     "stands": 5.0
+    },
+    "hp": 50,
+    "word": "Ego"
+   }
+  },
+  "philip-ruina": {
+   "identity": 11030,
+   "base": 11001,
+   "roster": true,
+   "tested": false,
+   "name": "Philip",
+   "game_title": "Dawn Office\nFixer",
+   "title": "Philip (Ruina) - Dawn Office Fixer",
+   "becomes": "Philip of Library of Ruina as an identity of their own: own body, own skills, their Ruina pages as the kit",
+   "own_body": true,
+   "own_skills": true,
+   "lor": {
+    "bundle": "char/char_425.pres",
+    "prefab": "Philip",
+    "map": {
+     "idle": [
+      "Default",
+      "Standing"
+     ],
+     "move": [
+      "Move"
+     ],
+     "gud": [
+      "Guard"
+     ],
+     "miss": [
+      "Evasion"
+     ],
+     "dmg": [
+      "Damaged"
+     ],
+     "dead": [
+      "Damaged"
+     ],
+     "S1": [
+      "Slash"
+     ],
+     "S2": [
+      "Penetrate",
+      "Hit"
+     ],
+     "S3": [
+      "Slash",
+      "Penetrate",
+      "Hit"
+     ]
+    },
+    "smear": [
+     "move",
+     "S1",
+     "S2",
+     "S3"
+    ],
+    "idle_time": 2.4,
+    "stands": 5.0
+   },
+   "moves": {
+    "1": {
+     "lor_dice": 403006,
+     "attributeType": "CRIMSON",
+     "coins": [
+      0
+     ],
+     "onHit": [
+      {
+       "buffKeyword": "Combustion",
+       "stack": 1,
+       "activeRound": 0,
+       "turn": 1,
+       "coins": [
+        1
+       ]
+      }
+     ]
+    },
+    "2": {
+     "lor_dice": 403007,
+     "attributeType": "CRIMSON",
+     "coins": [
+      0,
+      0,
+      0
+     ],
+     "onHit": [
+      {
+       "buffKeyword": "Combustion",
+       "stack": 1,
+       "activeRound": 0,
+       "turn": 1,
+       "coins": [
+        1
+       ]
+      },
+      {
+       "buffKeyword": "Combustion",
+       "stack": 1,
+       "activeRound": 0,
+       "turn": 1,
+       "coins": [
+        2
+       ]
+      }
+     ]
+    },
+    "3": {
+     "lor_dice": 403005,
+     "attributeType": "AMBER",
+     "coins": [
+      0,
+      0,
+      0
+     ],
+     "onUse": [
+      {
+       "buffKeyword": "AttackDmgUp",
+       "stack": 2,
+       "activeRound": 0
+      }
+     ],
+     "onHit": [
+      {
+       "buffKeyword": "Combustion",
+       "stack": 1,
+       "activeRound": 0,
+       "turn": 1,
+       "coins": [
+        1
+       ]
+      },
+      {
+       "buffKeyword": "Combustion",
+       "stack": 1,
+       "activeRound": 0,
+       "turn": 1,
+       "coins": [
+        2
+       ]
+      },
+      {
+       "buffKeyword": "Combustion",
+       "stack": 1,
+       "activeRound": 0,
+       "turn": 1,
+       "coins": [
+        3
+       ]
+      },
+      {
+       "buffKeyword": "Burst",
+       "stack": 5,
+       "activeRound": 0,
+       "coins": [
+        1,
+        2,
+        3
+       ],
+       "turn": 3
+      }
+     ]
+    },
+    "defense": {
+     "lor_dice": 403006,
+     "attributeType": "CRIMSON",
+     "coins": [
+      0
+     ],
+     "onUse": [
+      {
+       "buffKeyword": "Protection",
+       "stack": 2,
+       "activeRound": 0
+      }
+     ]
+    }
+   },
+   "texts": {
+    "1": {
+     "lor_card": 403006
+    },
+    "2": {
+     "lor_card": 403007
+    },
+    "3": {
+     "lor_card": 403005
+    },
+    "defense": {
+     "lor_card": 403006
+    }
+   },
+   "evolves": {
+    "lor": {
+     "bundle": "char/char_554.pres",
+     "prefab": "PhilipEgo",
+     "map": {
+      "idle": [
+       "Default",
+       "Standing"
+      ],
+      "move": [
+       "Move"
+      ],
+      "gud": [
+       "Guard"
+      ],
+      "miss": [
+       "Evade"
+      ],
+      "dmg": [
+       "Damaged"
+      ],
+      "dead": [
+       "Damaged"
+      ],
+      "S1": [
+       "Slash"
+      ],
+      "S2": [
+       "Penetrate",
+       "Hit"
+      ],
+      "S3": [
+       "Slash",
+       "Penetrate",
+       "Hit"
+      ]
+     },
+     "smear": [
+      "move",
+      "S1",
+      "S2",
+      "S3"
+     ],
+     "idle_time": 2.4,
+     "stands": 5.0
+    },
+    "hp": 50,
+    "word": "Ego"
+   }
+  },
+  "yuna-ruina": {
+   "identity": 10230,
+   "base": 10201,
+   "roster": true,
+   "tested": false,
+   "name": "Yuna",
+   "game_title": "Dawn Office\nFixer",
+   "title": "Yuna (Ruina) - Dawn Office Fixer",
+   "becomes": "Yuna of Library of Ruina as an identity of their own: own body, own skills, their Ruina pages as the kit",
+   "own_body": true,
+   "own_skills": true,
+   "lor": {
+    "bundle": "char/char_628.pres",
+    "prefab": "Yuna",
+    "map": {
+     "idle": [
+      "Default",
+      "Standing"
+     ],
+     "move": [
+      "Move"
+     ],
+     "gud": [
+      "Guard"
+     ],
+     "miss": [
+      "Evade"
+     ],
+     "dmg": [
+      "Damaged"
+     ],
+     "dead": [
+      "Damaged"
+     ],
+     "S1": [
+      "Slash"
+     ],
+     "S2": [
+      "Penetrate",
+      "Hit"
+     ],
+     "S3": [
+      "Slash",
+      "Penetrate",
+      "Hit"
+     ]
+    },
+    "smear": [
+     "move",
+     "S1",
+     "S2",
+     "S3"
+    ],
+    "idle_time": 2.4,
+    "stands": 5.0
+   },
+   "moves": {
+    "1": {
+     "lor_dice": 403006,
+     "attributeType": "AMBER",
+     "coins": [
+      0
+     ],
+     "onHit": [
+      {
+       "buffKeyword": "Combustion",
+       "stack": 1,
+       "activeRound": 0,
+       "turn": 1,
+       "coins": [
+        1
+       ]
+      },
+      {
+       "buffKeyword": "Burst",
+       "stack": 2,
+       "activeRound": 0,
+       "coins": [
+        1
+       ],
+       "turn": 1
+      }
+     ]
+    },
+    "2": {
+     "lor_dice": 403004,
+     "attributeType": "AMBER",
+     "coins": [
+      0,
+      0
+     ],
+     "onHit": [
+      {
+       "buffKeyword": "Burst",
+       "stack": 3,
+       "activeRound": 0,
+       "coins": [
+        1,
+        2
+       ],
+       "turn": 2
+      }
+     ]
+    },
+    "3": {
+     "lor_dice": 403003,
+     "attributeType": "SHAMROCK",
+     "coins": [
+      0,
+      0
+     ],
+     "onUse": [
+      {
+       "buffKeyword": "AttackDmgUp",
+       "stack": 2,
+       "activeRound": 0
+      }
+     ],
+     "onHit": [
+      {
+       "buffKeyword": "Combustion",
+       "stack": 2,
+       "activeRound": 0,
+       "turn": 1,
+       "coins": [
+        2
+       ]
+      },
+      {
+       "buffKeyword": "Breath",
+       "stack": 5,
+       "activeRound": 0,
+       "coins": [
+        1,
+        2
+       ],
+       "turn": 3
+      }
+     ]
+    },
+    "defense": {
+     "lor_dice": 403003,
+     "attributeType": "AMBER",
+     "coins": [
+      0
+     ],
+     "onUse": [
+      {
+       "buffKeyword": "Protection",
+       "stack": 2,
+       "activeRound": 0
+      }
+     ]
+    }
+   },
+   "texts": {
+    "1": {
+     "lor_card": 403006
+    },
+    "2": {
+     "lor_card": 403004
+    },
+    "3": {
+     "lor_card": 403003
+    },
+    "defense": {
+     "lor_card": 403003
+    }
+   }
+  },
+  "salvador-ruina": {
+   "identity": 11230,
+   "base": 11201,
+   "roster": true,
+   "tested": false,
+   "name": "Salvador",
+   "game_title": "Dawn Office\nRepresentative",
+   "title": "Salvador (Ruina) - Dawn Office Representative",
+   "becomes": "Salvador of Library of Ruina as an identity of their own: own body, own skills, their Ruina pages as the kit",
+   "own_body": true,
+   "own_skills": true,
+   "lor": {
+    "bundle": "char/char_576.pres",
+    "prefab": "Salvador",
+    "map": {
+     "idle": [
+      "Default",
+      "Standing"
+     ],
+     "move": [
+      "Move"
+     ],
+     "gud": [
+      "Guard"
+     ],
+     "miss": [
+      "Evade"
+     ],
+     "dmg": [
+      "Damaged"
+     ],
+     "dead": [
+      "Damaged"
+     ],
+     "S1": [
+      "Slash"
+     ],
+     "S2": [
+      "Penetrate",
+      "Hit"
+     ],
+     "S3": [
+      "Slash",
+      "Penetrate",
+      "Hit"
+     ]
+    },
+    "smear": [
+     "move",
+     "S1",
+     "S2",
+     "S3"
+    ],
+    "idle_time": 2.4,
+    "stands": 5.0
+   },
+   "moves": {
+    "1": {
+     "lor_dice": 403006,
+     "attributeType": "CRIMSON",
+     "coins": [
+      0
+     ],
+     "onHit": [
+      {
+       "buffKeyword": "Combustion",
+       "stack": 1,
+       "activeRound": 0,
+       "turn": 1,
+       "coins": [
+        1
+       ]
+      }
+     ]
+    },
+    "2": {
+     "lor_dice": 403005,
+     "attributeType": "SCARLET",
+     "coins": [
+      0
+     ],
+     "onHit": [
+      {
+       "buffKeyword": "Combustion",
+       "stack": 1,
+       "activeRound": 0,
+       "turn": 1,
+       "coins": [
+        1
+       ]
+      },
+      {
+       "buffKeyword": "Combustion",
+       "stack": 1,
+       "activeRound": 0,
+       "turn": 1,
+       "coins": [
+        1
+       ]
+      },
+      {
+       "buffKeyword": "Combustion",
+       "stack": 1,
+       "activeRound": 0,
+       "turn": 1,
+       "coins": [
+        1
+       ]
+      },
+      {
+       "buffKeyword": "Laceration",
+       "stack": 3,
+       "activeRound": 0,
+       "coins": [
+        1
+       ],
+       "turn": 2
+      }
+     ]
+    },
+    "3": {
+     "lor_dice": 403001,
+     "attributeType": "SCARLET",
+     "coins": [
+      0,
+      0
+     ],
+     "onUse": [
+      {
+       "buffKeyword": "Protection",
+       "stack": 2,
+       "activeRound": 1
+      },
+      {
+       "buffKeyword": "AttackDmgUp",
+       "stack": 2,
+       "activeRound": 0
+      }
+     ],
+     "onHit": [
+      {
+       "buffKeyword": "Combustion",
+       "stack": 3,
+       "activeRound": 0,
+       "turn": 1,
+       "coins": [
+        1
+       ]
+      },
+      {
+       "buffKeyword": "Laceration",
+       "stack": 5,
+       "activeRound": 0,
+       "coins": [
+        1,
+        2
+       ],
+       "turn": 3
+      }
+     ]
+    },
+    "defense": {
+     "lor_dice": 403001,
+     "attributeType": "CRIMSON",
+     "coins": [
+      0
+     ],
+     "onUse": [
+      {
+       "buffKeyword": "Protection",
+       "stack": 2,
+       "activeRound": 1
+      },
+      {
+       "buffKeyword": "Protection",
+       "stack": 2,
+       "activeRound": 0
+      }
+     ]
+    }
+   },
+   "texts": {
+    "1": {
+     "lor_card": 403006
+    },
+    "2": {
+     "lor_card": 403005
+    },
+    "3": {
+     "lor_card": 403001
+    },
+    "defense": {
+     "lor_card": 403001
+    }
+   }
+  },
+  "oscar-ruina": {
+   "identity": 11130,
+   "base": 11110,
+   "roster": true,
+   "tested": false,
+   "name": "Oscar",
+   "game_title": "Wedge Office\nRepresentative",
+   "title": "Oscar (Ruina) - Wedge Office Representative",
+   "becomes": "Oscar of Library of Ruina as an identity of their own: own body, own skills, their Ruina pages as the kit",
+   "own_body": true,
+   "own_skills": true,
+   "lor": {
+    "bundle": "char/char_546.pres",
+    "prefab": "Oscar",
+    "map": {
+     "idle": [
+      "Default",
+      "Standing"
+     ],
+     "move": [
+      "Move"
+     ],
+     "gud": [
+      "Guard"
+     ],
+     "miss": [
+      "Evade"
+     ],
+     "dmg": [
+      "Damaged"
+     ],
+     "dead": [
+      "Damaged"
+     ],
+     "S1": [
+      "Slash"
+     ],
+     "S2": [
+      "Penetrate",
+      "Hit"
+     ],
+     "S3": [
+      "Slash",
+      "Penetrate",
+      "Hit"
+     ]
+    },
+    "smear": [
+     "move",
+     "S1",
+     "S2",
+     "S3"
+    ],
+    "idle_time": 2.4,
+    "stands": 5.0
+   },
+   "moves": {
+    "1": {
+     "lor_dice": 408005,
+     "attributeType": "INDIGO",
+     "coins": [
+      0,
+      0
+     ],
+     "onHit": [
+      {
+       "buffKeyword": "Charge",
+       "stack": 2,
+       "activeRound": 0,
+       "coins": [
+        1,
+        2
+       ]
+      }
+     ]
+    },
+    "2": {
+     "lor_dice": 408002,
+     "attributeType": "INDIGO",
+     "coins": [
+      0,
+      0
+     ],
+     "onHit": [
+      {
+       "buffKeyword": "Charge",
+       "stack": 3,
+       "activeRound": 0,
+       "coins": [
+        1,
+        2
+       ]
+      }
+     ]
+    },
+    "3": {
+     "lor_dice": 408001,
+     "attributeType": "AZURE",
+     "coins": [
+      0,
+      0,
+      0,
+      0
+     ],
+     "onUse": [
+      {
+       "buffKeyword": "AttackDmgUp",
+       "stack": 2,
+       "activeRound": 0
+      }
+     ],
+     "onHit": [
+      {
+       "buffKeyword": "Sinking",
+       "stack": 5,
+       "activeRound": 0,
+       "coins": [
+        1,
+        2,
+        3,
+        4
+       ],
+       "turn": 3
+      }
+     ]
+    },
+    "defense": {
+     "lor_dice": 408001,
+     "attributeType": "INDIGO",
+     "coins": [
+      0
+     ],
+     "onUse": [
+      {
+       "buffKeyword": "Protection",
+       "stack": 2,
+       "activeRound": 0
+      }
+     ]
+    }
+   },
+   "texts": {
+    "1": {
+     "lor_card": 408005
+    },
+    "2": {
+     "lor_card": 408002
+    },
+    "3": {
+     "lor_card": 408001
+    },
+    "defense": {
+     "lor_card": 408001
+    }
+   }
+  },
+  "pamela-ruina": {
+   "identity": 10330,
+   "base": 10309,
+   "roster": true,
+   "tested": false,
+   "name": "Pamela",
+   "game_title": "Wedge Office\nFixer",
+   "title": "Pamela (Ruina) - Wedge Office Fixer",
+   "becomes": "Pamela of Library of Ruina as an identity of their own: own body, own skills, their Ruina pages as the kit",
+   "own_body": true,
+   "own_skills": true,
+   "lor": {
+    "bundle": "char/char_550.pres",
+    "prefab": "Pamela",
+    "map": {
+     "idle": [
+      "Default",
+      "Standing"
+     ],
+     "move": [
+      "Move"
+     ],
+     "gud": [
+      "Guard"
+     ],
+     "miss": [
+      "Evade"
+     ],
+     "dmg": [
+      "Damaged"
+     ],
+     "dead": [
+      "Damaged"
+     ],
+     "S1": [
+      "Slash"
+     ],
+     "S2": [
+      "Penetrate",
+      "Hit"
+     ],
+     "S3": [
+      "Slash",
+      "Penetrate",
+      "Hit"
+     ]
+    },
+    "smear": [
+     "move",
+     "S1",
+     "S2",
+     "S3"
+    ],
+    "idle_time": 2.4,
+    "stands": 5.0
+   },
+   "moves": {
+    "1": {
+     "lor_dice": 408005,
+     "attributeType": "INDIGO",
+     "coins": [
+      0,
+      0
+     ],
+     "onHit": [
+      {
+       "buffKeyword": "Charge",
+       "stack": 2,
+       "activeRound": 0,
+       "coins": [
+        1,
+        2
+       ]
+      }
+     ]
+    },
+    "2": {
+     "lor_dice": 408004,
+     "attributeType": "AZURE",
+     "coins": [
+      0,
+      0,
+      0
+     ],
+     "onHit": [
+      {
+       "buffKeyword": "Sinking",
+       "stack": 3,
+       "activeRound": 0,
+       "coins": [
+        1,
+        2,
+        3
+       ],
+       "turn": 2
+      }
+     ]
+    },
+    "3": {
+     "lor_dice": 408003,
+     "attributeType": "INDIGO",
+     "coins": [
+      0,
+      0,
+      0,
+      0
+     ],
+     "onUse": [
+      {
+       "buffKeyword": "AttackDmgUp",
+       "stack": 2,
+       "activeRound": 0
+      }
+     ],
+     "onHit": [
+      {
+       "buffKeyword": "Charge",
+       "stack": 5,
+       "activeRound": 0,
+       "coins": [
+        1,
+        2,
+        3,
+        4
+       ]
+      }
+     ]
+    },
+    "defense": {
+     "lor_dice": 408005,
+     "attributeType": "AZURE",
+     "coins": [
+      0
+     ],
+     "onUse": [
+      {
+       "buffKeyword": "Protection",
+       "stack": 2,
+       "activeRound": 0
+      }
+     ]
+    }
+   },
+   "texts": {
+    "1": {
+     "lor_card": 408005
+    },
+    "2": {
+     "lor_card": 408004
+    },
+    "3": {
+     "lor_card": 408003
+    },
+    "defense": {
+     "lor_card": 408005
+    }
+   }
+  },
+  "pameli-ruina": {
+   "identity": 10430,
+   "base": 10410,
+   "roster": true,
+   "tested": false,
+   "name": "Pameli",
+   "game_title": "Wedge Office\nFixer",
+   "title": "Pameli (Ruina) - Wedge Office Fixer",
+   "becomes": "Pameli of Library of Ruina as an identity of their own: own body, own skills, their Ruina pages as the kit",
+   "own_body": true,
+   "own_skills": true,
+   "lor": {
+    "bundle": "char/char_551.pres",
+    "prefab": "Pameli",
+    "map": {
+     "idle": [
+      "Default",
+      "Standing"
+     ],
+     "move": [
+      "Move"
+     ],
+     "gud": [
+      "Guard"
+     ],
+     "miss": [
+      "Evade"
+     ],
+     "dmg": [
+      "Damaged"
+     ],
+     "dead": [
+      "Damaged"
+     ],
+     "S1": [
+      "Slash"
+     ],
+     "S2": [
+      "Penetrate",
+      "Hit"
+     ],
+     "S3": [
+      "Slash",
+      "Penetrate",
+      "Hit"
+     ]
+    },
+    "smear": [
+     "move",
+     "S1",
+     "S2",
+     "S3"
+    ],
+    "idle_time": 2.4,
+    "stands": 5.0
+   },
+   "moves": {
+    "1": {
+     "lor_dice": 408005,
+     "attributeType": "AZURE",
+     "coins": [
+      0,
+      0
+     ],
+     "onHit": [
+      {
+       "buffKeyword": "Sinking",
+       "stack": 2,
+       "activeRound": 0,
+       "coins": [
+        1,
+        2
+       ],
+       "turn": 1
+      }
+     ]
+    },
+    "2": {
+     "lor_dice": 408004,
+     "attributeType": "INDIGO",
+     "coins": [
+      0,
+      0,
+      0
+     ],
+     "onHit": [
+      {
+       "buffKeyword": "Charge",
+       "stack": 3,
+       "activeRound": 0,
+       "coins": [
+        1,
+        2,
+        3
+       ]
+      }
+     ]
+    },
+    "3": {
+     "lor_dice": 408003,
+     "attributeType": "AZURE",
+     "coins": [
+      0,
+      0,
+      0
+     ],
+     "onUse": [
+      {
+       "buffKeyword": "AttackDmgUp",
+       "stack": 2,
+       "activeRound": 0
+      }
+     ],
+     "onHit": [
+      {
+       "buffKeyword": "Sinking",
+       "stack": 5,
+       "activeRound": 0,
+       "coins": [
+        1,
+        2,
+        3
+       ],
+       "turn": 3
+      }
+     ]
+    },
+    "defense": {
+     "lor_dice": 408005,
+     "attributeType": "INDIGO",
+     "coins": [
+      0,
+      0
+     ],
+     "onUse": [
+      {
+       "buffKeyword": "Protection",
+       "stack": 2,
+       "activeRound": 0
+      }
+     ]
+    }
+   },
+   "texts": {
+    "1": {
+     "lor_card": 408005
+    },
+    "2": {
+     "lor_card": 408004
+    },
+    "3": {
+     "lor_card": 408003
+    },
+    "defense": {
+     "lor_card": 408005
+    }
+   }
+  },
+  "philip-limbus": {
+   "identity": 11031,
+   "base": 11001,
+   "roster": true,
+   "tested": false,
+   "name": "Philip",
+   "game_title": "Dawn Office\nFixer",
+   "source": "1582_PhilipAppearance",
+   "unit": 1582,
+   "title": "Philip (Limbus) - Dawn Office Fixer",
+   "becomes": "Philip as Limbus Company draws them: the boss's own body and whole moveset, as an identity of their own",
+   "evolves": {
+    "appearance": "1587_Philip_AwakenAppearance",
+    "hp": 50
+   }
+  },
+  "yuna-limbus": {
+   "identity": 10231,
+   "base": 10201,
+   "roster": true,
+   "tested": false,
+   "name": "Yuna",
+   "game_title": "Dawn Office\nFixer",
+   "source": "1581_YunaAppearance",
+   "unit": 1581,
+   "title": "Yuna (Limbus) - Dawn Office Fixer",
+   "becomes": "Yuna as Limbus Company draws them: the boss's own body and whole moveset, as an identity of their own"
+  },
+  "salvador-limbus": {
+   "identity": 11231,
+   "base": 11201,
+   "roster": true,
+   "tested": false,
+   "name": "Salvador",
+   "game_title": "Dawn Office\nRepresentative",
+   "source": "1580_SalvadorAppearance",
+   "unit": 1580,
+   "title": "Salvador (Limbus) - Dawn Office Representative",
+   "becomes": "Salvador as Limbus Company draws them: the boss's own body and whole moveset, as an identity of their own"
+  },
+  "oscar-limbus": {
+   "identity": 11131,
+   "base": 11101,
+   "roster": true,
+   "tested": false,
+   "name": "Oscar",
+   "game_title": "Wedge Office\nRepresentative",
+   "source": "1583_OscarAppearance",
+   "unit": 1583,
+   "title": "Oscar (Limbus) - Wedge Office Representative",
+   "becomes": "Oscar as Limbus Company draws them: the boss's own body and whole moveset, as an identity of their own"
+  },
+  "pamela-limbus": {
+   "identity": 10331,
+   "base": 10301,
+   "roster": true,
+   "tested": false,
+   "name": "Pamela",
+   "game_title": "Wedge Office\nFixer",
+   "source": "1585_PamelaAppearance",
+   "unit": 1585,
+   "title": "Pamela (Limbus) - Wedge Office Fixer",
+   "becomes": "Pamela as Limbus Company draws them: the boss's own body and whole moveset, as an identity of their own"
+  },
+  "pameli-limbus": {
+   "identity": 10431,
+   "base": 10402,
+   "roster": true,
+   "tested": false,
+   "name": "Pameli",
+   "game_title": "Wedge Office\nFixer",
+   "source": "1584_PamelyAppearance",
+   "unit": 1584,
+   "title": "Pameli (Limbus) - Wedge Office Fixer",
+   "becomes": "Pameli as Limbus Company draws them: the boss's own body and whole moveset, as an identity of their own"
+  },
+  "jeanne-limbus": {
+   "identity": 11032,
+   "base": 11001,
+   "roster": true,
+   "tested": false,
+   "name": "Jeanne Sartre",
+   "game_title": "The Sartorial\nTailor",
+   "source": "1522_JeanneAppearance",
+   "unit": 1522,
+   "title": "Jeanne Sartre (Limbus) - The Sartorial Tailor",
+   "becomes": "Jeanne Sartre as Limbus Company draws them: the boss's own body and whole moveset, as an identity of their own"
+  },
+  "brand-manager-limbus": {
+   "identity": 11132,
+   "base": 11101,
+   "roster": true,
+   "tested": false,
+   "name": "Brand Manager",
+   "game_title": "Le Noir",
+   "source": "1506_5F_LeNoir_CaptainAppearance",
+   "unit": 1506,
+   "title": "Brand Manager (Limbus) - Le Noir",
+   "becomes": "Brand Manager as Limbus Company draws them: the boss's own body and whole moveset, as an identity of their own"
+  },
+  "gustave-limbus": {
+   "identity": 10831,
+   "base": 10801,
+   "roster": true,
+   "tested": false,
+   "name": "Gustave",
+   "game_title": "Le Noir Sales\nAssociate",
+   "source": "1465_LaNoirContemporaryAppearance",
+   "unit": 1465,
+   "title": "Gustave (Limbus) - Le Noir Sales Associate",
+   "becomes": "Gustave as Limbus Company draws them: the boss's own body and whole moveset, as an identity of their own"
+  },
+  "floor-manager-limbus": {
+   "identity": 10332,
+   "base": 10301,
+   "roster": true,
+   "tested": false,
+   "name": "Floor Manager",
+   "game_title": "Grand Magasin\n3F",
+   "source": "1481_3F_BossAppearance",
+   "unit": 1481,
+   "title": "Floor Manager (Limbus) - Grand Magasin 3F",
+   "becomes": "Floor Manager as Limbus Company draws them: the boss's own body and whole moveset, as an identity of their own"
+  },
+  "chaplain-limbus": {
+   "identity": 10530,
+   "base": 10501,
+   "roster": true,
+   "tested": false,
+   "name": "The Chaplain",
+   "game_title": "Grand Magasin",
+   "source": "1487_Warder_3pAppearance",
+   "unit": 1487,
+   "title": "The Chaplain (Limbus) - Grand Magasin",
+   "becomes": "The Chaplain as Limbus Company draws them: the boss's own body and whole moveset, as an identity of their own"
+  },
+  "warden-limbus": {
+   "identity": 10232,
+   "base": 10201,
+   "roster": true,
+   "tested": false,
+   "name": "The Warden",
+   "game_title": "Grand Magasin",
+   "source": "1485_WarderAppearance",
+   "unit": 1485,
+   "title": "The Warden (Limbus) - Grand Magasin",
+   "becomes": "The Warden as Limbus Company draws them: the boss's own body and whole moveset, as an identity of their own"
+  },
+  "annette-limbus": {
+   "identity": 10931,
+   "base": 10901,
+   "roster": true,
+   "tested": false,
+   "name": "Annette",
+   "game_title": "The\nAlterationist",
+   "source": "1495_3F_ScissorsAppearance",
+   "unit": 1495,
+   "title": "Annette (Limbus) - The Alterationist",
+   "becomes": "Annette as Limbus Company draws them: the boss's own body and whole moveset, as an identity of their own"
+  },
+  "needle-king-limbus": {
+   "identity": 10631,
+   "base": 10601,
+   "roster": true,
+   "tested": false,
+   "name": "King of Needleworks",
+   "game_title": "Grand Magasin\nB2",
+   "source": "1496_B2_Needle_KingAppearance",
+   "unit": 1496,
+   "title": "King of Needleworks (Limbus) - Grand Magasin B2",
+   "becomes": "King of Needleworks as Limbus Company draws them: the boss's own body and whole moveset, as an identity of their own"
+  },
+  "sous-chef-limbus": {
+   "identity": 10731,
+   "base": 10702,
+   "roster": true,
+   "tested": false,
+   "name": "Sous Chef",
+   "game_title": "Grand Magasin\nB1",
+   "source": "1474_B1SabsalPuppetAppearance",
+   "unit": 1474,
+   "title": "Sous Chef (Limbus) - Grand Magasin B1",
+   "becomes": "Sous Chef as Limbus Company draws them: the boss's own body and whole moveset, as an identity of their own"
+  },
+  "crimson-god-limbus": {
+   "identity": 10131,
+   "base": 10101,
+   "roster": true,
+   "tested": false,
+   "name": "The Crimson God",
+   "game_title": "Adulthood",
+   "source": "1517_Buffet_PerfectAppearance",
+   "unit": 1517,
+   "title": "The Crimson God (Limbus) - Adulthood",
+   "becomes": "The Crimson God as Limbus Company draws them: the boss's own body and whole moveset, as an identity of their own"
+  },
+  "overseer-limbus": {
+   "identity": 11232,
+   "base": 11201,
+   "roster": true,
+   "tested": false,
+   "name": "The Overseer",
+   "game_title": "Grand Magasin\nB3",
+   "source": "1488_B3_ControllerAppearance",
+   "unit": 1488,
+   "title": "The Overseer (Limbus) - Grand Magasin B3",
+   "becomes": "The Overseer as Limbus Company draws them: the boss's own body and whole moveset, as an identity of their own"
+  },
+  "jia-mu-limbus": {
+   "identity": 10632,
+   "base": 10601,
+   "roster": true,
+   "tested": false,
+   "name": "Jia Mu",
+   "game_title": "Hong Lu's\nGrandmother",
+   "source": "1154_GamoAppearance",
+   "unit": 1156,
+   "title": "Jia Mu (Limbus) - Hong Lu's Grandmother",
+   "becomes": "Jia Mu as Limbus Company draws them: the boss's own body and whole moveset, as an identity of their own",
+   "cover": "MadamJia"
+  },
+  "don-quixote-limbus": {
+   "identity": 10333,
+   "base": 10301,
+   "roster": true,
+   "tested": false,
+   "name": "Don Quixote",
+   "game_title": "De La Mancha",
+   "source": "8390_RealDon_1pAppearance",
+   "unit": 8390,
+   "title": "Don Quixote (Limbus) - De La Mancha",
+   "becomes": "Don Quixote as Limbus Company draws them: the boss's own body and whole moveset, as an identity of their own",
+   "evolves": {
+    "appearance": "8410_RealDon_2pAppearance",
+    "hp": 50
+   },
+   "cover": "Donquixote_real"
+  }
+ },
+ "kits": {
+  "roland": {
+   "identity": 10115,
+   "becomes": "Roland, the Black Silence (Library of Ruina): his pages on Index Father Yi Sang, at their own dice (Durandal, Ranga, Crystal Atelier, Furioso on all nine coins, Old Boys); 250 HP, Speed 6-10 - his body is the roland-yisang mod's",
+   "tested": false,
+   "moves": {
+    "1": {
+     "lor_dice": 702009,
+     "coins": [
+      0,
+      0
+     ],
+     "onUse": [
+      {
+       "buffKeyword": "AttackDmgUp",
+       "activeRound": 1,
+       "stack": 1
+      }
+     ]
+    },
+    "2": {
+     "lor_dice": 702006,
+     "coins": [
+      0,
+      0,
+      0
+     ],
+     "onHit": {
+      "buffKeyword": "Laceration",
+      "stack": 2,
+      "activeRound": 1
+     }
+    },
+    "3": {
+     "lor_dice": 702007,
+     "coins": [
+      0,
+      0,
+      0,
+      0
+     ],
+     "onUse": [
+      {
+       "buffKeyword": "Agility",
+       "activeRound": 1,
+       "stack": 3
+      }
+     ]
+    },
+    "4": {
+     "lor_dice": 702010,
+     "coins": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+     ],
+     "onUse": [
+      {
+       "buffKeyword": "AttackDmgUp",
+       "activeRound": 0,
+       "stack": 3
+      }
+     ],
+     "onHit": {
+      "buffKeyword": "Laceration",
+      "stack": 3,
+      "activeRound": 1,
+      "coins": [
+       9
+      ]
+     }
+    },
+    "defense": {
+     "lor_dice": 702004,
+     "coins": [
+      0
+     ],
+     "onUse": [
+      {
+       "buffKeyword": "Protection",
+       "activeRound": 0,
+       "stack": 3
+      }
+     ]
+    }
+   },
+   "texts": {
+    "1": {
+     "lor_card": 702009
+    },
+    "2": {
+     "lor_card": 702006
+    },
+    "3": {
+     "lor_card": 702007
+    },
+    "4": {
+     "lor_card": 702010
+    },
+    "defense": {
+     "lor_card": 702004
+    }
+   },
+   "stats": {
+    "hp": 250,
+    "speed": [
+     6,
+     10
+    ]
+   },
+   "title": "Roland's pages (Library of Ruina) - Index Father Yi Sang",
+   "name": "Roland",
+   "game_title": "The Black Silence"
+  },
+  "ayin": {
+   "identity": 11201,
+   "becomes": "Ayin: light, Cogito and the reset: Poise and Rupture; BROKEN on purpose: x1.6 HP, +3/+4 Speed, half damage taken, harder hits, double statuses",
+   "tested": false,
+   "stats": {
+    "hp": 384,
+    "speed": [
+     8,
+     13
+    ],
+    "resist": {
+     "SLASH": 0.5,
+     "PENETRATE": 0.5,
+     "HIT": 0.5
+    }
+   },
+   "moves": {
+    "1": {
+     "attributeType": "INDIGO",
+     "atkType": "HIT",
+     "defaultValue": 8,
+     "coins": [
+      6
+     ],
+     "onUse": [
+      {
+       "buffKeyword": "Breath",
+       "activeRound": 0,
+       "stack": 2
+      },
+      {
+       "buffKeyword": "AttackDmgUp",
+       "activeRound": 1,
+       "stack": 2
+      }
+     ],
+     "onHit": [
+      {
+       "buffKeyword": "Burst",
+       "activeRound": 0,
+       "stack": 4
+      }
+     ]
+    },
+    "2": {
+     "attributeType": "INDIGO",
+     "atkType": "PENETRATE",
+     "defaultValue": 9,
+     "coins": [
+      6
+     ],
+     "onUse": [
+      {
+       "buffKeyword": "Breath",
+       "activeRound": 0,
+       "stack": 3
+      },
+      {
+       "buffKeyword": "AttackDmgUp",
+       "activeRound": 1,
+       "stack": 2
+      }
+     ],
+     "onHit": [
+      {
+       "buffKeyword": "Vibration",
+       "activeRound": 0,
+       "stack": 4
+      },
+      {
+       "buffKeyword": "Burst",
+       "activeRound": 0,
+       "stack": 4
+      }
+     ]
+    },
+    "3": {
+     "attributeType": "INDIGO",
+     "atkType": "HIT",
+     "defaultValue": 11,
+     "coins": [
+      6,
+      6
+     ],
+     "onUse": [
+      {
+       "buffKeyword": "AttackDmgUp",
+       "activeRound": 1,
+       "stack": 2
+      },
+      {
+       "buffKeyword": "Breath",
+       "activeRound": 0,
+       "stack": 3,
+       "target": "EveryAlly"
+      },
+      {
+       "buffKeyword": "AttackDmgUp",
+       "activeRound": 1,
+       "stack": 3
+      }
+     ],
+     "onHit": [
+      {
+       "buffKeyword": "Burst",
+       "activeRound": 0,
+       "stack": 8
+      }
+     ]
+    },
+    "defense": {
+     "attributeType": "INDIGO",
+     "atkType": "SLASH",
+     "defaultValue": 9,
+     "coins": [
+      6
+     ],
+     "onUse": [
+      {
+       "buffKeyword": "Protection",
+       "activeRound": 0,
+       "stack": 6
+      },
+      {
+       "buffKeyword": "AttackDmgUp",
+       "activeRound": 1,
+       "stack": 2
+      }
+     ]
+    }
+   },
+   "texts": {
+    "1": {
+     "name": "Seed of Light"
+    },
+    "2": {
+     "name": "Cogito"
+    },
+    "3": {
+     "name": "Reset"
+    },
+    "defense": {
+     "name": "Founder's Resolve"
+    }
+   },
+   "title": "Ayin's kit - Gregor (11201)"
+  }
+ },
+ "fights": {
+  "twilight": {
+   "title": "Twilight - the Apocalypse Bird (EXP Luxcavation, the last stage's own tab, every day)",
+   "becomes": "EXP Luxcavation's last stage becomes the Black Forest: Big Bird, Small Bird and Long Bird, then the Apocalypse Bird - every bird with a kit of its own",
+   "tested": false,
+   "records": {
+    "battle-exp-dungeon": {
+     "18": {
+      "waveList": [
+       {
+        "battleMapInfo": {
+         "mapName": "SinclairForest_2"
+        },
+        "unitList": [
+         {
+          "unitID": 98801,
+          "unitCount": 1,
+          "unitLevel": 63
+         },
+         {
+          "unitID": 98802,
+          "unitCount": 1,
+          "unitLevel": 63
+         },
+         {
+          "unitID": 98803,
+          "unitCount": 1,
+          "unitLevel": 63
+         }
+        ],
+        "bgmList": [
+         "Battle_Cp10_Enemy_1"
+        ],
+        "enemyPositionID": 251,
+        "allyPositionID": 252
+       },
+       {
+        "battleMapInfo": {
+         "mapName": "SinclairForest_2"
+        },
+        "unitList": [
+         {
+          "unitID": 98804,
+          "unitCount": 1,
+          "unitLevel": 63
+         }
+        ],
+        "bgmList": [
+         "Battle_Cp10_Enemy_1"
+        ],
+        "enemyPositionID": 251,
+        "allyPositionID": 252
+       }
+      ],
+      "stageScriptList": [
+       "Refill"
+      ],
+      "participantInfo": {
+       "min": 1,
+       "max": 7
+      }
+     }
+    },
+    "enemy": {
+     "98801": {
+      "=clone": 70070,
+      "hp": {
+       "defaultStat": 300,
+       "incrementByLevel": 6
+      },
+      "+passives": [
+       817402
+      ]
+     },
+     "98802": {
+      "=clone": 90088,
+      "hp": {
+       "defaultStat": 260,
+       "incrementByLevel": 5
+      },
+      "+passives": [
+       817402
+      ]
+     },
+     "98803": {
+      "=clone": 71007,
+      "hp": {
+       "defaultStat": 260,
+       "incrementByLevel": 5
+      },
+      "+passives": [
+       817402
+      ]
+     },
+     "98804": {
+      "=clone": 91011,
+      "hp": {
+       "defaultStat": 1400,
+       "incrementByLevel": 25
+      },
+      "minSpeedList": [
+       5
+      ],
+      "maxSpeedList": [
+       8
+      ],
+      "startActionSlotNumList": [
+       3,
+       3,
+       3
+      ],
+      "maxActionSlotNum": 3
+     }
+    },
+    "exp-dungeon": {
+     "18": {
+      "daysofweek": [
+       "MON",
+       "TUE",
+       "WED",
+       "THU",
+       "FRI",
+       "SAT",
+       "SUN"
+      ],
+      "uiConfig.tabLabel": "TWI\nLIGHT"
+     }
+    }
+   },
+   "bodies": {
+    "91007_KCorpAppearance": {
+     "name": "Long Bird",
+     "lor": {
+      "bundle": "lobotomy/긴새",
+      "prefab": "JudgementBird",
+      "smear": [
+       "move"
+      ],
+      "idle_time": 2.4,
+      "map": {
+       "idle": [
+        "Default",
+        "Standing1",
+        "Standing2",
+        "Standing3",
+        "Standing4"
+       ],
+       "move": [
+        "Walk1",
+        "Walk2",
+        "Walk3",
+        "Walk4"
+       ],
+       "gud": [
+        "Seeing1"
+       ],
+       "miss": [
+        "Walk2"
+       ],
+       "dmg": [
+        "Seeing2"
+       ],
+       "dead": [
+        "Seeing3"
+       ],
+       "S1": [
+        "Judgement1",
+        "Judgement2",
+        "Judgement3"
+       ],
+       "S2": [
+        "Judgement3",
+        "Judgement4",
+        "Judgement5"
+       ],
+       "S3": [
+        "Judgement4",
+        "Judgement5",
+        "Judgement6"
+       ]
+      },
+      "boss": true,
+      "sins": {
+       "S1": "INDIGO",
+       "S2": "AZURE",
+       "S3": "INDIGO"
+      }
+     }
+    },
+    "91011_FishCreature_EliteAppearance": {
+     "name": "Apocalypse Bird",
+     "lor": {
+      "bundle": "char/char_115.pres",
+      "prefab": "Ego_ApocalypseBird",
+      "map": {
+       "idle": [
+        "Default"
+       ],
+       "move": [
+        "Move"
+       ],
+       "gud": [
+        "Guard"
+       ],
+       "miss": [
+        "Guard"
+       ],
+       "dmg": [
+        "Damaged"
+       ],
+       "dead": [
+        "Damaged"
+       ],
+       "S1": [
+        "Small_S2",
+        "Small_S3"
+       ],
+       "S2": [
+        "Slash",
+        "Long_S4"
+       ],
+       "S3": [
+        "Hit",
+        "Big_S1",
+        "S5"
+       ],
+       "S4": [
+        "Big_S1",
+        "S5"
+       ]
+      },
+      "smear": [
+       "move",
+       "S1",
+       "S2",
+       "S3"
+      ],
+      "idle_time": 2.4,
+      "boss": true,
+      "sins": {
+       "S1": "SCARLET",
+       "S2": "INDIGO",
+       "S3": "VIOLET",
+       "S4": "CRIMSON"
+      }
+     }
+    },
+    "90070_TCorpAppearance": {
+     "name": "Big Bird",
+     "lor": {
+      "bundle": "char/char_11.pres",
+      "prefab": "BigBird",
+      "smear": [
+       "move",
+       "S1",
+       "S3"
+      ],
+      "idle_time": 2.4,
+      "map": {
+       "idle": [
+        "Default"
+       ],
+       "move": [
+        "Move"
+       ],
+       "gud": [
+        "Guard"
+       ],
+       "miss": [
+        "Guard"
+       ],
+       "dmg": [
+        "Damaged"
+       ],
+       "dead": [
+        "Sleep_S2"
+       ],
+       "S1": [
+        "AtkReady_Z",
+        "SpecialAtk_S1"
+       ],
+       "S2": [
+        "Charm_F"
+       ],
+       "S3": [
+        "AtkReady_Z",
+        "SpecialAtk_S1"
+       ]
+      },
+      "boss": true,
+      "sins": {
+       "S1": "VIOLET",
+       "S2": "SCARLET",
+       "S3": "VIOLET"
+      }
+     }
+    },
+    "90088_Fishman_CruiseAppearance": {
+     "name": "Small Bird",
+     "lor": {
+      "bundle": "lobotomy/smallbird",
+      "prefab": "PunishingBird",
+      "smear": [
+       "move"
+      ],
+      "idle_time": 2.0,
+      "map": {
+       "idle": [
+        "Default",
+        "Standing1",
+        "Standing2"
+       ],
+       "move": [
+        "Fly1",
+        "Fly2",
+        "Fly3",
+        "Fly4",
+        "Fly5"
+       ],
+       "gud": [
+        "Guard"
+       ],
+       "miss": [
+        "Evade"
+       ],
+       "dmg": [
+        "Damaged"
+       ],
+       "dead": [
+        "Damaged"
+       ],
+       "S1": [
+        "Peck_ahead1",
+        "Peck_ahead2",
+        "Peck_ahead3"
+       ],
+       "S2": [
+        "Peck_up1",
+        "Peck_up2",
+        "Peck_up3"
+       ],
+       "S3": [
+        "Peck_down1",
+        "Peck_down2",
+        "Peck_down3",
+        "Peck_ahead3"
+       ]
+      },
+      "stands": 1.1,
+      "anchors": {
+       "center": 0.55,
+       "height": 2.4
+      },
+      "boss": true,
+      "sins": {
+       "S1": "SCARLET",
+       "S2": "CRIMSON",
+       "S3": "SCARLET"
+      }
+     }
+    }
+   },
+   "music": {
+    "request": "EnterExpDungeon",
+    "dungeon": 18,
+    "file": "twilight-1.ogg",
+    "second": {
+     "file": "twilight-2.ogg",
+     "at": 182000
+    }
+   },
+   "enemy_names": {
+    "98801": "Big Bird",
+    "98802": "Punishing Bird",
+    "98803": "Judgement Bird",
+    "98804": "Apocalypse Bird"
+   },
+   "story": [
+    {
+     "when": "start",
+     "picture": "forest"
+    },
+    {
+     "when": "half",
+     "unit": 98801,
+     "picture": "big"
+    },
+    {
+     "when": "half",
+     "unit": 98802,
+     "picture": "small"
+    },
+    {
+     "when": "half",
+     "unit": 98803,
+     "picture": "long"
+    },
+    {
+     "when": "one",
+     "unit": 98801,
+     "picture": "blinded"
+    },
+    {
+     "when": "one",
+     "unit": 98802,
+     "picture": "shut"
+    },
+    {
+     "when": "one",
+     "unit": 98803,
+     "picture": "lowered"
+    },
+    {
+     "when": "fuse",
+     "picture": "red"
+    },
+    {
+     "when": "fuse",
+     "picture": "monster"
+    }
+   ],
+   "kits": {
+    "98801": {
+     "moves": {
+      "1": {
+       "attributeType": "VIOLET",
+       "atkType": "HIT",
+       "defaultValue": 6,
+       "coins": [
+        9
+       ],
+       "onHit": [
+        {
+         "buffKeyword": "AttackDmgDown",
+         "stack": 2,
+         "activeRound": 0
+        }
+       ]
+      },
+      "2": {
+       "attributeType": "SCARLET",
+       "atkType": "PENETRATE",
+       "defaultValue": 7,
+       "coins": [
+        10
+       ],
+       "onHit": [
+        {
+         "buffKeyword": "Laceration",
+         "stack": 3,
+         "activeRound": 0,
+         "turn": 1
+        }
+       ]
+      },
+      "3": {
+       "attributeType": "VIOLET",
+       "atkType": "HIT",
+       "defaultValue": 8,
+       "coins": [
+        5,
+        5
+       ],
+       "onHit": [
+        {
+         "buffKeyword": "Vibration",
+         "stack": 2,
+         "activeRound": 0,
+         "turn": 2
+        }
+       ]
+      }
+     },
+     "texts": {
+      "1": {
+       "name": "Enchanting Lamp"
+      },
+      "2": {
+       "name": "Devour"
+      },
+      "3": {
+       "name": "A Thousand Eyes"
+      }
+     },
+     "pages": {
+      "1": "Bigbird_Lamp",
+      "2": "BigBird_Eyebird",
+      "3": "Bigbird_Eye"
+     }
+    },
+    "98802": {
+     "moves": {
+      "1": {
+       "attributeType": "SCARLET",
+       "atkType": "PENETRATE",
+       "defaultValue": 6,
+       "coins": [
+        4,
+        4
+       ],
+       "onHit": [
+        {
+         "buffKeyword": "Laceration",
+         "stack": 2,
+         "activeRound": 0,
+         "turn": 1
+        }
+       ]
+      },
+      "2": {
+       "attributeType": "CRIMSON",
+       "atkType": "PENETRATE",
+       "defaultValue": 9,
+       "coins": [
+        8
+       ],
+       "onHit": [
+        {
+         "buffKeyword": "Laceration",
+         "stack": 3,
+         "activeRound": 0,
+         "turn": 2
+        }
+       ]
+      },
+      "3": {
+       "attributeType": "SCARLET",
+       "atkType": "HIT",
+       "defaultValue": 10,
+       "coins": [
+        5,
+        5
+       ],
+       "onHit": [
+        {
+         "buffKeyword": "Laceration",
+         "stack": 3,
+         "activeRound": 0,
+         "turn": 1
+        }
+       ]
+      },
+      "4": {
+       "attributeType": "CRIMSON",
+       "atkType": "HIT",
+       "defaultValue": 12,
+       "coins": [
+        6,
+        6
+       ],
+       "onHit": [
+        {
+         "buffKeyword": "Laceration",
+         "stack": 4,
+         "activeRound": 0,
+         "turn": 2
+        }
+       ],
+       "onUse": [
+        {
+         "buffKeyword": "AttackDmgUp",
+         "stack": 2,
+         "activeRound": 0,
+         "target": "Self"
+        }
+       ]
+      }
+     },
+     "texts": {
+      "1": {
+       "name": "Peck"
+      },
+      "2": {
+       "name": "Punishment"
+      },
+      "3": {
+       "name": "Beak of Sin"
+      },
+      "4": {
+       "name": "The Bird's Wrath"
+      }
+     },
+     "pages": {
+      "1": "SmallBird_Beak",
+      "2": "SmallBird_Punishment",
+      "3": "Smallbird_SubAtk",
+      "4": "SmallBird_Punishment"
+     }
+    },
+    "98803": {
+     "moves": {
+      "1": {
+       "attributeType": "INDIGO",
+       "atkType": "SLASH",
+       "defaultValue": 5,
+       "coins": [
+        8
+       ],
+       "onHit": [
+        {
+         "buffKeyword": "Sinking",
+         "stack": 2,
+         "activeRound": 0,
+         "turn": 1
+        }
+       ]
+      },
+      "2": {
+       "attributeType": "INDIGO",
+       "atkType": "SLASH",
+       "defaultValue": 6,
+       "coins": [
+        9
+       ],
+       "onHit": [
+        {
+         "buffKeyword": "Sinking",
+         "stack": 2,
+         "activeRound": 0,
+         "turn": 1
+        }
+       ]
+      },
+      "3": {
+       "attributeType": "AZURE",
+       "atkType": "HIT",
+       "defaultValue": 7,
+       "coins": [
+        6
+       ],
+       "onHit": [
+        {
+         "buffKeyword": "Binding",
+         "stack": 1,
+         "activeRound": 0
+        }
+       ]
+      },
+      "4": {
+       "attributeType": "INDIGO",
+       "atkType": "HIT",
+       "defaultValue": 8,
+       "coins": [
+        9
+       ],
+       "onHit": [
+        {
+         "buffKeyword": "Sinking",
+         "stack": 3,
+         "activeRound": 0,
+         "turn": 2
+        }
+       ]
+      },
+      "5": {
+       "attributeType": "INDIGO",
+       "atkType": "HIT",
+       "defaultValue": 8,
+       "coins": [
+        8
+       ],
+       "onHit": [
+        {
+         "buffKeyword": "Sinking",
+         "stack": 3,
+         "activeRound": 0,
+         "turn": 2
+        }
+       ]
+      },
+      "6": {
+       "attributeType": "AZURE",
+       "atkType": "HIT",
+       "defaultValue": 18,
+       "coins": [
+        6
+       ],
+       "onHit": [
+        {
+         "buffKeyword": "Sinking",
+         "stack": 5,
+         "activeRound": 0,
+         "turn": 2
+        },
+        {
+         "buffKeyword": "Binding",
+         "stack": 2,
+         "activeRound": 0
+        }
+       ]
+      },
+      "8": {
+       "attributeType": "AZURE",
+       "atkType": "HIT",
+       "defaultValue": 8,
+       "coins": [
+        5
+       ],
+       "onHit": [
+        {
+         "buffKeyword": "Binding",
+         "stack": 1,
+         "activeRound": 0
+        }
+       ]
+      }
+     },
+     "texts": {
+      "1": {
+       "name": "Weigh"
+      },
+      "2": {
+       "name": "Weigh"
+      },
+      "3": {
+       "name": "The Scales Tip"
+      },
+      "4": {
+       "name": "Hanging"
+      },
+      "5": {
+       "name": "Hanging"
+      },
+      "6": {
+       "name": "Judgement"
+      },
+      "8": {
+       "name": "The Scales Tip"
+      }
+     },
+     "pages": {
+      "1": "LongBird_Scale",
+      "2": "LongBird_Scale",
+      "3": "LongBird_Sin",
+      "4": "LongBird_Sin",
+      "5": "LongBird_Sin",
+      "6": "LongBird_Judgement",
+      "8": "LongBird_Sin"
+     }
+    },
+    "98804": {
+     "moves": {
+      "1": {
+       "attributeType": "SCARLET",
+       "atkType": "PENETRATE",
+       "defaultValue": 7,
+       "coins": [
+        5,
+        5
+       ],
+       "onHit": [
+        {
+         "buffKeyword": "Laceration",
+         "stack": 3,
+         "activeRound": 0,
+         "turn": 1
+        }
+       ]
+      },
+      "2": {
+       "attributeType": "INDIGO",
+       "atkType": "PENETRATE",
+       "defaultValue": 12,
+       "coins": [
+        10
+       ],
+       "onHit": [
+        {
+         "buffKeyword": "Sinking",
+         "stack": 3,
+         "activeRound": 0,
+         "turn": 2
+        },
+        {
+         "buffKeyword": "Binding",
+         "stack": 2,
+         "activeRound": 0
+        }
+       ]
+      },
+      "3": {
+       "attributeType": "VIOLET",
+       "atkType": "SLASH",
+       "defaultValue": 6,
+       "coins": [
+        4,
+        4,
+        4,
+        4
+       ],
+       "onHit": [
+        {
+         "buffKeyword": "Vibration",
+         "stack": 2,
+         "activeRound": 0,
+         "turn": 1
+        }
+       ]
+      },
+      "4": {
+       "attributeType": "CRIMSON",
+       "atkType": "PENETRATE",
+       "defaultValue": 16,
+       "coins": [
+        8
+       ],
+       "onHit": [
+        {
+         "buffKeyword": "Combustion",
+         "stack": 4,
+         "activeRound": 0,
+         "turn": 3
+        }
+       ],
+       "onUse": [
+        {
+         "buffKeyword": "AttackDmgUp",
+         "stack": 3,
+         "activeRound": 0,
+         "target": "Self"
+        }
+       ]
+      }
+     },
+     "texts": {
+      "1": {
+       "name": "Small Beak"
+      },
+      "2": {
+       "name": "Long Arm"
+      },
+      "3": {
+       "name": "Big Eyes"
+      },
+      "4": {
+       "name": "The Apocalypse"
+      }
+     },
+     "pages": {
+      "1": "ApocalypseBird_SmallPeak",
+      "2": "ApocalypseBird_Atk",
+      "3": "ApocalypseBird_EGO_Laser",
+      "4": "ApocalypseBird_Apocalypse"
+     }
+    }
+   },
+   "intros": {
+    "98804": {
+     "bundle": "char/char_115.pres",
+     "prefab": "Ego_ApocalypseBird",
+     "pose": "Default",
+     "name": "Apocalypse Bird",
+     "line": "The forest falls silent. The beast has come.",
+     "sin": "CRIMSON"
+    }
+   }
+  },
+  "nothing-there": {
+   "title": "Nothing There (EXP Luxcavation, the first of the last three stages' tabs, every day)",
+   "becomes": "EXP Luxcavation's stage 16 becomes Nothing There, as Lobotomy Corporation draws it: its first form, then its last",
+   "tested": false,
+   "records": {
+    "battle-exp-dungeon": {
+     "16": {
+      "waveList": [
+       {
+        "battleMapInfo": {
+         "mapName": "Cp4_AdaptedLobotomy2",
+         "mapSize": 34
+        },
+        "unitList": [
+         {
+          "unitID": 98805,
+          "unitCount": 1,
+          "unitLevel": 63
+         }
+        ],
+        "bgmList": [
+         "Battle_Cp10_Enemy_1"
+        ],
+        "enemyPositionID": 251,
+        "allyPositionID": 252
+       },
+       {
+        "battleMapInfo": {
+         "mapName": "Cp4_AdaptedLobotomy2",
+         "mapSize": 34
+        },
+        "unitList": [
+         {
+          "unitID": 98806,
+          "unitCount": 1,
+          "unitLevel": 63
+         }
+        ],
+        "bgmList": [
+         "Battle_Cp10_Enemy_1"
+        ],
+        "enemyPositionID": 251,
+        "allyPositionID": 252
+       }
+      ],
+      "stageScriptList": [
+       "Refill"
+      ],
+      "participantInfo": {
+       "min": 1,
+       "max": 7
+      }
+     }
+    },
+    "enemy": {
+     "98805": {
+      "=clone": 90142,
+      "hp": {
+       "defaultStat": 320,
+       "incrementByLevel": 7
+      },
+      "minSpeedList": [
+       3
+      ],
+      "maxSpeedList": [
+       6
+      ],
+      "startActionSlotNumList": [
+       2,
+       2,
+       2
+      ]
+     },
+     "98806": {
+      "=clone": 90143,
+      "hp": {
+       "defaultStat": 900,
+       "incrementByLevel": 18
+      },
+      "minSpeedList": [
+       4
+      ],
+      "maxSpeedList": [
+       7
+      ],
+      "startActionSlotNumList": [
+       2,
+       3,
+       3
+      ],
+      "maxActionSlotNum": 3
+     }
+    },
+    "exp-dungeon": {
+     "16": {
+      "daysofweek": [
+       "MON",
+       "TUE",
+       "WED",
+       "THU",
+       "FRI",
+       "SAT",
+       "SUN"
+      ],
+      "uiConfig.tabLabel": "NOTHING\nTHERE"
+     }
+    }
+   },
+   "kits": {
+    "98805": {
+     "moves": {
+      "1": {
+       "attributeType": "SCARLET",
+       "atkType": "PENETRATE",
+       "defaultValue": 6,
+       "coins": [
+        4,
+        4
+       ],
+       "onHit": [
+        {
+         "buffKeyword": "Laceration",
+         "stack": 2,
+         "activeRound": 0,
+         "turn": 1
+        }
+       ]
+      },
+      "2": {
+       "attributeType": "VIOLET",
+       "atkType": "HIT",
+       "defaultValue": 7,
+       "coins": [
+        5,
+        5
+       ],
+       "onHit": [
+        {
+         "buffKeyword": "Vulnerable",
+         "stack": 1,
+         "activeRound": 0,
+         "coins": [
+          2
+         ]
+        }
+       ]
+      },
+      "3": {
+       "attributeType": "SCARLET",
+       "atkType": "HIT",
+       "defaultValue": 8,
+       "coins": [
+        5,
+        5,
+        5
+       ],
+       "onHit": [
+        {
+         "buffKeyword": "Laceration",
+         "stack": 3,
+         "activeRound": 0,
+         "turn": 1
+        }
+       ],
+       "onUse": [
+        {
+         "buffKeyword": "AttackDmgUp",
+         "stack": 2,
+         "activeRound": 0,
+         "target": "Self"
+        }
+       ]
+      }
+     },
+     "texts": {
+      "1": {
+       "name": "Hello?"
+      },
+      "2": {
+       "name": "Mimicry"
+      },
+      "3": {
+       "name": "Goodbye"
+      }
+     },
+     "says": {
+      "1": "Hello?",
+      "2": "Hello?",
+      "3": "I love you?"
+     }
+    },
+    "98806": {
+     "moves": {
+      "1": {
+       "attributeType": "SCARLET",
+       "atkType": "PENETRATE",
+       "defaultValue": 14,
+       "coins": [
+        12
+       ],
+       "onHit": [
+        {
+         "buffKeyword": "Laceration",
+         "stack": 4,
+         "activeRound": 0,
+         "turn": 2
+        }
+       ]
+      },
+      "2": {
+       "attributeType": "VIOLET",
+       "atkType": "SLASH",
+       "defaultValue": 10,
+       "coins": [
+        6,
+        6
+       ],
+       "onHit": [
+        {
+         "buffKeyword": "Vulnerable",
+         "stack": 2,
+         "activeRound": 0
+        }
+       ]
+      },
+      "3": {
+       "attributeType": "SCARLET",
+       "atkType": "SLASH",
+       "defaultValue": 10,
+       "coins": [
+        6,
+        6
+       ],
+       "onHit": [
+        {
+         "buffKeyword": "AttackDmgDown",
+         "stack": 2,
+         "activeRound": 0
+        }
+       ]
+      },
+      "4": {
+       "attributeType": "SCARLET",
+       "atkType": "SLASH",
+       "defaultValue": 8,
+       "coins": [
+        5,
+        5,
+        5,
+        5
+       ],
+       "onHit": [
+        {
+         "buffKeyword": "Laceration",
+         "stack": 2,
+         "activeRound": 0,
+         "turn": 1
+        }
+       ],
+       "onUse": [
+        {
+         "buffKeyword": "AttackDmgUp",
+         "stack": 3,
+         "activeRound": 0,
+         "target": "Self"
+        }
+       ]
+      }
+     },
+     "texts": {
+      "1": {
+       "name": "Goodbye"
+      },
+      "2": {
+       "name": "Hello"
+      },
+      "3": {
+       "name": "Mimicry"
+      },
+      "4": {
+       "name": "I Love You"
+      }
+     },
+     "says": {
+      "1": "Hello?",
+      "2": "Hello?",
+      "3": "I love you?",
+      "4": "I love you?"
+     }
+    }
+   },
+   "bodies": {
+    "90142_TCorp_StaffAppearance": {
+     "name": "Nothing There",
+     "lor": {
+      "bundle": "lobotomy/nothingthere1",
+      "prefab": "NothingThere1",
+      "smear": [
+       "move",
+       "S1",
+       "S2"
+      ],
+      "idle_time": 1.1,
+      "stands": 4.2,
+      "map": {
+       "idle": [
+        "Standing1",
+        "Standing2",
+        "Standing3",
+        "Standing4"
+       ],
+       "move": [
+        "Run1",
+        "Run2",
+        "Run3",
+        "Run4"
+       ],
+       "gud": [
+        "Default"
+       ],
+       "miss": [
+        "Run2"
+       ],
+       "dmg": [
+        "Dead1"
+       ],
+       "dead": [
+        "Dead1",
+        "Dead2",
+        "Dead3"
+       ],
+       "S1": [
+        "AtkA1",
+        "AtkA2",
+        "AtkA3"
+       ],
+       "S2": [
+        "AtkB1",
+        "AtkB2",
+        "AtkB3"
+       ],
+       "S3": [
+        "AtkA2",
+        "AtkB2",
+        "AtkB3"
+       ]
+      },
+      "boss": true,
+      "sins": {
+       "S1": "SCARLET",
+       "S2": "VIOLET",
+       "S3": "SCARLET"
+      }
+     }
+    },
+    "90143_TCorp_EliteAppearance": {
+     "name": "Nothing There",
+     "lor": {
+      "bundle": "lobotomy/nothingthere2",
+      "prefab": "NothingThere2",
+      "smear": [
+       "move",
+       "S1",
+       "S4"
+      ],
+      "idle_time": 2.0,
+      "stands": 7.5,
+      "map": {
+       "idle": [
+        "Standing1",
+        "Standing2",
+        "Standing3",
+        "Standing4"
+       ],
+       "move": [
+        "Move1",
+        "Move2",
+        "Move3",
+        "Move4"
+       ],
+       "gud": [
+        "Grab1"
+       ],
+       "miss": [
+        "Move2"
+       ],
+       "dmg": [
+        "Dead1"
+       ],
+       "dead": [
+        "Dead1",
+        "Dead2",
+        "Dead3"
+       ],
+       "S1": [
+        "Swing2",
+        "Swing3",
+        "Swing4"
+       ],
+       "S2": [
+        "Hook1",
+        "Hook2",
+        "Hook3",
+        "Hook4"
+       ],
+       "S3": [
+        "Grab1",
+        "Grab2",
+        "Grab3",
+        "Grab4"
+       ],
+       "S4": [
+        "Swing3",
+        "Swing4",
+        "Swing5",
+        "Swing6"
+       ]
+      },
+      "boss": true,
+      "sins": {
+       "S1": "SCARLET",
+       "S2": "VIOLET",
+       "S3": "SCARLET",
+       "S4": "SCARLET"
+      }
+     }
+    }
+   },
+   "enemy_names": {
+    "98805": "Nothing There",
+    "98806": "Nothing There"
+   }
+  },
+  "whitenight": {
+   "title": "WhiteNight (EXP Luxcavation, the second of the last three stages' tabs, every day)",
+   "becomes": "EXP Luxcavation's stage 17 becomes WhiteNight's descent, as Lobotomy Corporation draws it: its apostles, then WhiteNight among them",
+   "tested": false,
+   "records": {
+    "battle-exp-dungeon": {
+     "17": {
+      "waveList": [
+       {
+        "battleMapInfo": {
+         "mapName": "Walpu6_CentralCommandTeam",
+         "mapSize": 28
+        },
+        "unitList": [
+         {
+          "unitID": 98808,
+          "unitCount": 3,
+          "unitLevel": 63
+         }
+        ],
+        "bgmList": [
+         "Battle_Cp10_Enemy_1"
+        ],
+        "enemyPositionID": 251,
+        "allyPositionID": 252
+       },
+       {
+        "battleMapInfo": {
+         "mapName": "Walpu6_CentralCommandTeam",
+         "mapSize": 28
+        },
+        "unitList": [
+         {
+          "unitID": 98807,
+          "unitCount": 1,
+          "unitLevel": 63
+         },
+         {
+          "unitID": 98808,
+          "unitCount": 2,
+          "unitLevel": 63
+         }
+        ],
+        "bgmList": [
+         "Battle_Cp10_Enemy_1"
+        ],
+        "enemyPositionID": 251,
+        "allyPositionID": 252
+       }
+      ],
+      "stageScriptList": [
+       "Refill"
+      ],
+      "participantInfo": {
+       "min": 1,
+       "max": 7
+      }
+     }
+    },
+    "enemy": {
+     "98807": {
+      "=clone": 70209,
+      "hp": {
+       "defaultStat": 1200,
+       "incrementByLevel": 22
+      },
+      "minSpeedList": [
+       5
+      ],
+      "maxSpeedList": [
+       8
+      ],
+      "startActionSlotNumList": [
+       3,
+       3,
+       3
+      ],
+      "maxActionSlotNum": 3,
+      "passiveSet": {
+       "passiveIdList": []
+      }
+     },
+     "98808": {
+      "=clone": 70207,
+      "hp": {
+       "defaultStat": 180,
+       "incrementByLevel": 4
+      },
+      "minSpeedList": [
+       3
+      ],
+      "maxSpeedList": [
+       6
+      ],
+      "passiveSet": {
+       "passiveIdList": []
+      }
+     }
+    },
+    "exp-dungeon": {
+     "17": {
+      "daysofweek": [
+       "MON",
+       "TUE",
+       "WED",
+       "THU",
+       "FRI",
+       "SAT",
+       "SUN"
+      ],
+      "uiConfig.tabLabel": "WHITE\nNIGHT"
+     }
+    }
+   },
+   "kits": {
+    "98807": {
+     "moves": {
+      "1": {
+       "attributeType": "INDIGO",
+       "atkType": "PENETRATE",
+       "defaultValue": 15,
+       "coins": [
+        10
+       ],
+       "onHit": [
+        {
+         "buffKeyword": "Sinking",
+         "stack": 3,
+         "activeRound": 0,
+         "turn": 2
+        }
+       ]
+      },
+      "2": {
+       "attributeType": "AZURE",
+       "atkType": "PENETRATE",
+       "defaultValue": 10,
+       "coins": [
+        6,
+        6
+       ],
+       "onHit": [
+        {
+         "buffKeyword": "Sinking",
+         "stack": 2,
+         "activeRound": 0,
+         "turn": 1
+        },
+        {
+         "buffKeyword": "Binding",
+         "stack": 1,
+         "activeRound": 0,
+         "coins": [
+          2
+         ]
+        }
+       ]
+      },
+      "3": {
+       "attributeType": "VIOLET",
+       "atkType": "PENETRATE",
+       "defaultValue": 10,
+       "coins": [
+        5,
+        5,
+        5
+       ],
+       "onHit": [
+        {
+         "buffKeyword": "Vibration",
+         "stack": 3,
+         "activeRound": 0,
+         "turn": 2
+        }
+       ],
+       "onUse": [
+        {
+         "buffKeyword": "Protection",
+         "stack": 2,
+         "activeRound": 0,
+         "target": "EveryAlly"
+        }
+       ]
+      },
+      "4": {
+       "attributeType": "INDIGO",
+       "atkType": "PENETRATE",
+       "defaultValue": 12,
+       "coins": [
+        9,
+        9
+       ],
+       "onHit": [
+        {
+         "buffKeyword": "Sinking",
+         "stack": 3,
+         "activeRound": 0,
+         "turn": 2
+        }
+       ],
+       "onUse": [
+        {
+         "buffKeyword": "AttackDmgUp",
+         "stack": 3,
+         "activeRound": 0,
+         "target": "Self"
+        }
+       ]
+      }
+     },
+     "texts": {
+      "1": {
+       "name": "Revelation"
+      },
+      "2": {
+       "name": "Confession"
+      },
+      "3": {
+       "name": "Blessing"
+      },
+      "4": {
+       "name": "Paradise Lost"
+      }
+     },
+     "pages": {
+      "1": "WhiteNight_White",
+      "2": "WhiteNight_Confess",
+      "3": "WhiteNight_Bless",
+      "4": "WhiteNight_EGO"
+     }
+    },
+    "98808": {
+     "moves": {
+      "1": {
+       "attributeType": "INDIGO",
+       "atkType": "PENETRATE",
+       "defaultValue": 6,
+       "coins": [
+        4,
+        4
+       ],
+       "onHit": [
+        {
+         "buffKeyword": "Sinking",
+         "stack": 2,
+         "activeRound": 0,
+         "turn": 1
+        }
+       ]
+      },
+      "2": {
+       "attributeType": "AZURE",
+       "atkType": "HIT",
+       "defaultValue": 7,
+       "coins": [
+        4,
+        4
+       ],
+       "onHit": [
+        {
+         "buffKeyword": "Binding",
+         "stack": 1,
+         "activeRound": 0,
+         "coins": [
+          2
+         ]
+        }
+       ]
+      },
+      "3": {
+       "attributeType": "INDIGO",
+       "atkType": "PENETRATE",
+       "defaultValue": 8,
+       "coins": [
+        5,
+        5,
+        5
+       ],
+       "onHit": [
+        {
+         "buffKeyword": "Sinking",
+         "stack": 4,
+         "activeRound": 0,
+         "turn": 2
+        }
+       ]
+      }
+     },
+     "texts": {
+      "1": {
+       "name": "Apostle's Spear"
+      },
+      "2": {
+       "name": "Apostle's Staff"
+      },
+      "3": {
+       "name": "Thy Will Be Done"
+      }
+     },
+     "pages": {
+      "1": "WhiteNight_Sub_Spear",
+      "2": "WhiteNight_Sub_Wand",
+      "3": "WhiteNight_Apostle"
+     }
+    }
+   },
+   "bodies": {
+    "90209_WangFamily_Mob_EliteAppearance": {
+     "name": "WhiteNight",
+     "lor": {
+      "bundle": "lobotomy/whitenight",
+      "prefab": "WhiteNight",
+      "smear": [
+       "S1",
+       "S3"
+      ],
+      "idle_time": 3.0,
+      "stands": 8.5,
+      "map": {
+       "idle": [
+        "Standing1",
+        "Standing2",
+        "Standing3",
+        "Standing4"
+       ],
+       "move": [
+        "Default"
+       ],
+       "gud": [
+        "Judge1"
+       ],
+       "miss": [
+        "Judge1"
+       ],
+       "dmg": [
+        "Dead1"
+       ],
+       "dead": [
+        "Dead1",
+        "Dead2",
+        "Dead3"
+       ],
+       "S1": [
+        "Judge2",
+        "Judge3"
+       ],
+       "S2": [
+        "Judge3",
+        "Judge4"
+       ],
+       "S3": [
+        "Judge4",
+        "Judge5",
+        "Judge6"
+       ],
+       "S4": [
+        "Judge5",
+        "Judge6"
+       ]
+      },
+      "boss": true,
+      "sins": {
+       "S1": "INDIGO",
+       "S2": "AZURE",
+       "S3": "VIOLET",
+       "S4": "INDIGO"
+      }
+     }
+    },
+    "90207_Hcorp_Mob_CAppearance": {
+     "name": "Apostle",
+     "lor": {
+      "bundle": "lobotomy/apostle",
+      "prefab": "Apostle",
+      "smear": [
+       "move",
+       "S1",
+       "S3"
+      ],
+      "idle_time": 1.6,
+      "stands": 9.5,
+      "map": {
+       "idle": [
+        "Standing1",
+        "Standing2",
+        "Standing3"
+       ],
+       "move": [
+        "Move1",
+        "Move2",
+        "Move3"
+       ],
+       "gud": [
+        "Standing1"
+       ],
+       "miss": [
+        "Move1"
+       ],
+       "dmg": [
+        "Dead1"
+       ],
+       "dead": [
+        "Dead1",
+        "Dead2",
+        "Dead3"
+       ],
+       "S1": [
+        "Move2",
+        "Charge1",
+        "Charge2"
+       ],
+       "S2": [
+        "Range1",
+        "Range2",
+        "Range3"
+       ],
+       "S3": [
+        "Move3",
+        "Charge1",
+        "Charge2",
+        "Charge3"
+       ]
+      },
+      "sins": {
+       "S1": "INDIGO",
+       "S2": "AZURE",
+       "S3": "INDIGO"
+      }
+     }
+    }
+   },
+   "enemy_names": {
+    "98807": "WhiteNight",
+    "98808": "Apostle"
+   }
+  }
+ },
+ "rules": {
+  "all-sinners": {
+   "title": "All twelve sinners in a fight",
+   "becomes": "Every stage takes up to 12 sinners at once (the game's own April Fools 2025 stage does; Boss Raids keep theirs)",
+   "tested": false,
+   "records": {
+    "battle-story": {
+     "*": {
+      "participantInfo.max": 12
+     }
+    },
+    "battle-exp-dungeon": {
+     "*": {
+      "participantInfo.max": 12
+     }
+    },
+    "battle-thread-dungeon": {
+     "*": {
+      "participantInfo.max": 12
+     }
+    },
+    "battle-railway-dungeon": {
+     "*": {
+      "participantInfo.max": 12
+     }
+    },
+    "battle-dungeon": {
+     "*": {
+      "participantInfo.max": 12
+     }
+    },
+    "battle-mirrordungeon": {
+     "*": {
+      "participantInfo.max": 12
+     }
+    },
+    "battle-ab": {
+     "*": {
+      "participantInfo.max": 12
+     }
+    }
+   }
+  }
+ }
+}

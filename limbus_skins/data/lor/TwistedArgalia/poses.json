@@ -1,0 +1,77 @@
+{
+ "bundle": "char/char_677.pres",
+ "head": null,
+ "poses": {
+  "Damaged": {
+   "file": "Damaged.png",
+   "pivot": [
+    0.413265,
+    0.021277
+   ]
+  },
+  "Default": {
+   "file": "Default.png",
+   "pivot": [
+    0.262136,
+    0.110193
+   ]
+  },
+  "Guard": {
+   "file": "Guard.png",
+   "pivot": [
+    0.350704,
+    0.077713
+   ]
+  },
+  "Hit": {
+   "file": "Hit.png",
+   "pivot": [
+    0.58344,
+    0.201786
+   ]
+  },
+  "Move": {
+   "file": "Move.png",
+   "pivot": [
+    0.309035,
+    0.046075
+   ]
+  },
+  "Penetrate": {
+   "file": "Penetrate.png",
+   "pivot": [
+    0.682005,
+    0.168734
+   ]
+  },
+  "S1": {
+   "file": "S1.png",
+   "pivot": [
+    0.453258,
+    0.036045
+   ]
+  },
+  "S2": {
+   "file": "S2.png",
+   "pivot": [
+    0.588997,
+    -0.035363
+   ]
+  },
+  "Slash": {
+   "file": "Slash.png",
+   "pivot": [
+    0.589013,
+    0.261711
+   ]
+  },
+  "Standing": {
+   "file": "Standing.png",
+   "pivot": [
+    0.262136,
+    0.110193
+   ]
+  }
+ },
+ "prefab": "TwistedArgalia"
+}

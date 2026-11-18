@@ -1,0 +1,714 @@
+"""limbus-skins: dress Limbus Company identities as the characters they mirror.
+
+  limbus-skins                         what is on, and whether the game is ready
+  limbus-skins list [all|on|<sinner>|--json]  every skin you can turn on (--json: for an app)
+  limbus-skins on <skin|id|sinner|helpers|repaints|bosses|kits|identities|tested|all>...   turn skins on (saved)
+                                        one per identity, one copy of a character: the newest wins
+  limbus-skins off <skin|id|sinner|helpers|repaints|bosses|kits|identities|all>...         turn skins off
+  limbus-skins boss on|off <skin|all>   a repaint of a boss becomes it: the boss's own body
+                                        and skills (boss skins always are)
+  limbus-skins run -- <launch command>  the skins for a private session (through its client
+                                        patch - the game's own files are never changed), start
+                                        the game with your command, end the session when it exits
+                                        (a private-server package's play.sh or app: its
+                                        client patch also gets green coins, skill text
+                                        and body changes for the session)
+  limbus-skins apply --client <folder> / restore   the two halves of `run`, by hand: the skins go
+                                        in that client patch's modcache folder for the session
+                                        (the game's own files are never changed)
+  limbus-skins watch                    restore as soon as the game exits
+  limbus-skins build [<skin>...]        rebuild (apply does this when needed)
+  limbus-skins audit [<skin>...]        check what is built against the game's own files
+                                        (build does it as it goes: a skin with a finding
+                                        isn't swapped in)
+  limbus-skins preview <skin> [file.png]  see a repaint's frames before playing it
+  limbus-skins sheet [file.png]         every skin that is on: its idle before -> after
+  limbus-skins art <skin> <picture> [--invert]   your own head art (art <skin> --reset)
+  limbus-skins card <art> <id> <file>   draw an identity's card pictures into a bundle file
+                                        (a body mod's): the card art in <data>/art/cards/<art>
+  limbus-skins client [--off] <folder>...  set (or clear) those client patch settings
+                                        in a folder holding myosotis.ini, by hand
+  limbus-skins title [<picture>] [--logo] [--stretch] [--off]   the title screen's background
+                                        (or, with --logo, its logo) from your own picture;
+                                        --stretch pulls it to the screen's edges; --off: the game's
+  limbus-skins doctor                   check paths, Python packages and the cache
+  limbus-skins config --game DIR --cache DIR   set paths by hand
+
+Built only from your own installed game; no game art is downloaded or shipped.
+Private servers only: helper skins change skills, and any mod on official servers
+breaks the game's terms of service and can get an account banned.
+"""
+import argparse
+import json
+import os
+import re
+import shutil
+import subprocess
+import sys
+import unicodedata
+
+from . import __version__, paths
+
+NOTICE = """\
+limbus-skins is for private servers only. Helper skins change identities' skills, and
+any modded file on the official servers breaks the terms of service and can get your
+account banned. Run `limbus-skins apply --yes` (or `run --yes`) once to confirm you
+understand; it is remembered."""
+
+
+def _state():
+    cfg, data = paths.home_dirs()
+    try:
+        with open(os.path.join(cfg, "state.json"), encoding="utf-8") as f:
+            st = json.load(f)
+    except (OSError, ValueError):
+        st = {}
+    st.setdefault("on", [])
+    st.setdefault("boss", [])
+    return st, cfg, data
+
+
+def _save_state(st):
+    cfg, _ = paths.home_dirs()
+    os.makedirs(cfg, exist_ok=True)
+    kept = st.get("_kept") or []
+    doc = {k: v for k, v in st.items() if k != "_kept"}
+    doc["on"] = list(st.get("on", [])) + [k for k in kept if k not in st.get("on", [])]   # patchlc-only ones stay on
+    with open(os.path.join(cfg, "state.json") + ".tmp", "w", encoding="utf-8") as f:
+        json.dump(doc, f, indent=1)
+    os.replace(os.path.join(cfg, "state.json") + ".tmp", os.path.join(cfg, "state.json"))
+
+
+def _norm(s):
+    """'Ryōshū', 'ryoshu' and 'RYŌSHŪ' all become 'ryoshu'."""
+    plain = unicodedata.normalize("NFKD", s).encode("ascii", "ignore").decode()
+    return re.sub(r"[^a-z0-9]", "", plain.lower())
+
+
+SINNERS = {1: "Yi Sang", 2: "Faust", 3: "Don Quixote", 4: "Ryōshū", 5: "Meursault", 6: "Hong Lu",
+           7: "Heathcliff", 8: "Ishmael", 9: "Rodion", 10: "Sinclair", 11: "Outis", 12: "Gregor"}
+SINNER_IDS = {_norm(n): k for k, n in SINNERS.items()}
+SINNER_IDS.update({"don": 3, "heath": 7})
+
+
+GROUPS = {"repaints": "repaint", "helpers": "helper", "tints": "tint", "bosses": "boss", "identities": "identity",
+          "kits": "kit"}
+
+
+def select(words, skins):
+    keys = []
+    for w in words:
+        n = _norm(w)
+        hit = [k for k, s in skins.items() if
+               n in ("all",) or (n == "tested" and s.get("tested")) or _norm(k) == n
+               or (n in GROUPS and s["kind"] == GROUPS[n])
+               or str(s["identity"]) == w or (n in SINNER_IDS and s["identity"] // 100 % 100 == SINNER_IDS[n])]
+        if not hit:
+            raise SystemExit(f"limbus-skins: no skin, identity or sinner called '{w}' (see `limbus-skins list`)")
+        keys += [k for k in hit if k not in keys]
+    return keys
+
+
+def one_each(keys, skins):
+    """keys with one copy of each character (build.character): an identity with a body and
+    skills of its own when it is among them (it needs nothing of its character's skin), else the
+    character's own skin, else the newest (last) named."""
+    from .build import character
+    pick = {}
+    for k in keys:
+        c = character(skins, k)
+        whole = lambda x: bool(skins.get(x, {}).get("own_body") and skins[x].get("own_skills"))  # noqa: E731
+        if c not in pick or whole(k) or (not whole(pick[c]) and pick[c] != c):
+            pick[c] = k
+    keep = set(pick.values())
+    return [k for k in keys if k in keep]
+
+
+def dedupe(on, skins):
+    """(on with one copy of each character, the copies turned off): an older limbus-skins could
+    have both on. The character's own skin stays when it is on, else the newest."""
+    keep = one_each(on, skins)
+    return keep, [k for k in on if k not in keep]
+
+
+UNLOCK_HINT = {}
+
+
+PATCHLC_ONLY = "patchlc"      # a skin's "only": made and used on the machine patchlc runs on, never shipped
+
+
+def here_only(skins):
+    """The skins that are only for patchlc ("only": "patchlc", e.g. Kali - Library of Ruina's
+    Gebura) when this isn't patchlc (it sets LIMBUS_SKINS_PATCHLC=1)."""
+    if os.environ.get("LIMBUS_SKINS_PATCHLC") == "1":
+        return set()
+    return {k for k, s in skins.items() if s.get("only") == PATCHLC_ONLY}
+
+
+def unlocked(skins, st):
+    """(the skins that can be used, the locked ones). A skin with "unlock" stays out of sight
+    and is never swapped in until state["unlocked"] holds that word; a patchlc-only one, outside
+    patchlc. Locked ones are dropped from state["on"] in memory, so nothing locked is built or
+    applied - but a patchlc-only one that is on stays on in the saved state (_save_state)."""
+    have = set(st.get("unlocked", []))
+    hidden = here_only(skins)
+    locked = {k for k, s in skins.items() if s.get("unlock") and s["unlock"] not in have} | hidden
+    st["_kept"] = [k for k in st["on"] if k in hidden]
+    # names this version doesn't know (a skin renamed since, e.g. gebura -> kali) drop out too
+    st["on"] = [k for k in st["on"] if k in skins and k not in locked]
+    return {k: v for k, v in skins.items() if k not in locked}, locked
+
+
+def write_locks(data, skins):
+    """locks.json in the data folder: {unlock word: [title of each skin waiting for it]} - the
+    private server's Black Forest lists them as its gifts (Server/BlackForest.cs). Written only
+    when it changes."""
+    locks = {}
+    for k in sorted(skins, key=lambda k: (skins[k]["identity"], k)):
+        if skins[k].get("unlock"):
+            locks.setdefault(skins[k]["unlock"], []).append(skins[k].get("title") or k)
+    path = os.path.join(data, "locks.json")
+    text = json.dumps(locks, indent=1, ensure_ascii=False) + "\n"
+    try:
+        with open(path, encoding="utf-8") as f:
+            if f.read() == text:
+                return
+    except OSError:
+        pass
+    try:
+        os.makedirs(data, exist_ok=True)
+        with open(path + ".tmp", "w", encoding="utf-8") as f:
+            f.write(text)
+        os.replace(path + ".tmp", path)
+    except OSError:
+        pass                                        # only the mod menu's gift list goes without it
+
+
+def refuse_locked(words, locked, skins):
+    """Asking for a locked skin by name says where it is instead of 'no such skin'."""
+    for w in words:
+        hit = next((k for k in locked if _norm(k) == _norm(w)), None)
+        if hit:
+            why = ("is only for patchlc (this machine's private server)" if skins[hit].get("only") == PATCHLC_ONLY
+                   else UNLOCK_HINT.get(skins[hit].get("unlock"), "is locked"))
+            raise SystemExit(f"limbus-skins: {hit} {why}")
+
+
+def _table(skins, on, keys, boss=()):
+    width = max((len(k) for k in keys), default=10)
+    last = None
+    for k in sorted(keys, key=lambda k: (skins[k]["identity"], k)):
+        s = skins[k]
+        sid = s["identity"] // 100 % 100
+        if sid != last:
+            last = sid
+            print(f"\n{SINNERS.get(sid, '?').upper()}")
+        mark = "ON " if k in on else "   "
+        kind = f"{s['kind']:7}"
+        tested = "" if s.get("tested") else "  (not yet seen in a fight)"
+        fights = "  +boss form" if k in boss else ""
+        print(f"  {mark} {k:{width}}  {s['identity']}  {kind}  -> {s['becomes']}{fights}{tested}")
+
+
+def split_launch(args):
+    """(yes, launch command). Our own flags come before "--"; everything after it is the
+    launch command, passed on untouched (without "--", the words after our flags are)."""
+    if "--" in args:
+        cut = args.index("--")
+        return "--yes" in args[:cut], args[cut + 1:]
+    return "--yes" in args, [x for x in args if x != "--yes"]
+
+
+def _need_build(keys, skins, data_dir, cache, boss=()):
+    """Enabled skins with no build, or built for an older game version."""
+    from .build import FORMAT, boss_form, shares_static
+    root = os.path.join(data_dir, "built")
+    out = []
+    try:
+        with open(os.path.join(root, "helpers", "manifest.json"), encoding="utf-8") as f:
+            man = json.load(f)
+        helper_built, boss_built = set(man["skins"]), set(man.get("skills", []))
+    except (OSError, ValueError, KeyError):
+        helper_built, boss_built = set(), set()
+    want_helpers = {k for k in keys if shares_static(skins[k])}
+    from .build import skill_edits
+    want_boss = skill_edits(keys, skins, boss)
+    for k in keys:
+        # a skin with skill edits also needs the shared static-data file to be current
+        folders = ["helpers"] if shares_static(skins[k]) or boss_form(k, skins[k], boss) else [k]
+        if k in want_boss:
+            folders.append("helpers")
+        for folder in folders:
+            try:
+                with open(os.path.join(root, folder, "manifest.json"), encoding="utf-8") as f:
+                    m = json.load(f)
+                files = m["files"]
+            except (OSError, ValueError, KeyError):
+                out.append(k)
+                break
+            if m.get("format") != FORMAT:
+                out.append(k)                               # built by an older limbus-skins
+                break
+            if not all(os.path.isdir(os.path.join(cache, r)) for r in files):
+                out.append(k)                               # game updated: bundle replaced
+                break
+    # helpers and skill edits share one file, swapped in whenever any of them is on: rebuild it
+    # unless it holds exactly what is on now (a dropped helper or boss choice must leave it too)
+    if (want_helpers or want_boss) and (helper_built != want_helpers or boss_built != want_boss):
+        out += [k for k in want_boss | want_helpers if k not in out]
+    if any(shares_static(skins[k]) or k in want_boss for k in out):   # the static bundle rebuilds as one set
+        out += [k for k in want_helpers | want_boss if k not in out]
+    return out
+
+
+def _check_game_files(sess):
+    """No modded copy may stay in the game's own files (Session.heal_leftovers) - checked before a
+    build or a session, and after one; while the game runs it waits."""
+    from .mods import ModError
+    try:
+        sess.heal_leftovers(log=lambda line: print(line, file=sys.stderr))
+    except ModError as e:
+        print(f"warning: the game's own files weren't checked - {e}", file=sys.stderr)
+
+
+def _heal(data):
+    """Before anything else: the game's own files back, if an older limbus-skins left skins in
+    them (its session ended without putting them back) - else the official game plays with them."""
+    from .mods import ModError, Session
+    if not os.path.exists(os.path.join(data, "active.json")):
+        return
+    try:
+        _, c = paths.find()
+        Session(c, data).heal()
+    except ModError as e:
+        print(f"warning: an older limbus-skins left skins in the game's own files - {e}", file=sys.stderr)
+    except SystemExit as e:
+        print(f"warning: an older limbus-skins left skins in the game's own files, and the game wasn't found ({e})",
+              file=sys.stderr)
+
+
+def main(argv=None):
+    argv = list(sys.argv[1:] if argv is None else argv)
+    cmd, args = (argv[0], argv[1:]) if argv else ("status", [])
+
+    if cmd in ("-h", "--help", "help"):
+        print(__doc__)
+        return 0
+    if cmd in ("-V", "--version", "version"):
+        print(f"limbus-skins {__version__}")
+        return 0
+    if cmd == "config":
+        p = argparse.ArgumentParser(prog="limbus-skins config")
+        p.add_argument("--game"); p.add_argument("--cache")
+        o = p.parse_args(args)
+        paths.save_config(game=o.game, cache=o.cache)
+        g, c = paths.find()
+        print(f"game:  {g}\ncache: {c}")
+        return 0
+
+    from .build import boss_form, build, built_dirs, catalog, character, shares_static
+    from .mods import ModError, Session, game_running
+    st, _, data = _state()
+    _heal(data)
+    allskins = catalog()
+    write_locks(data, allskins)
+    skins, locked = unlocked(allskins, st)
+    st["on"], copies = dedupe(st["on"], allskins)
+    if copies:                                           # both copies on, from an older limbus-skins
+        _save_state(st)
+        print(f"limbus-skins: one copy of a character at a time now - off: {', '.join(copies)} "
+              "(`limbus-skins on <name>` picks that copy instead)", file=sys.stderr)
+
+    if cmd == "client":
+        from . import client
+        off = "--off" in args
+        folders = [a for a in args if a != "--off"]
+        if not folders:
+            raise SystemExit("usage: limbus-skins client [--off] <client patch folder>...")
+        for f in folders:
+            if not client.configure(f, data, on=not off):
+                raise SystemExit(f"{f}: no myosotis.ini there - not a client patch folder")
+            if not off and not client.wears_bosses(f) and any(
+                    boss_form(k, skins[k], set(st["boss"])) for k in client.applied(data) if k in skins):
+                print(f"warning: {f}'s client patch can't load a boss's body on a sinner - a boss skin "
+                      "swapped in will have no body (needs the Limbus Private Server's build 6)")
+        return 0
+    if cmd in ("status",):
+        print(f"limbus-skins {__version__} - {len(st['on'])} skin(s) on" + (": " + ", ".join(st["on"]) if st["on"] else ""))
+        try:
+            g, c = paths.find()
+            s = Session(c, data, game=g)
+            _check_game_files(s)
+            sess = s.current()
+            print("in a session right now: " + (", ".join(sess.get("mods") or []) if sess else "nothing")
+                  + " (the game's own files are never changed)")
+        except SystemExit as e:
+            print(e)
+        print("`limbus-skins help` for commands")
+        return 0
+    if cmd == "list":
+        keys = list(skins)
+        if "--json" in args:                    # for an app's skin picker: every skin, one object each
+            on, boss = set(st["on"]), set(st["boss"])
+            print(json.dumps([{"key": k, "sinner": SINNERS.get(skins[k]["identity"] // 100 % 100, "?"),
+                               "identity": skins[k]["identity"], "kind": skins[k]["kind"],
+                               "becomes": skins[k]["becomes"], "on": k in on,
+                               "tested": bool(skins[k].get("tested")), "boss": k in boss}
+                              for k in sorted(keys, key=lambda k: (skins[k]["identity"], k))], ensure_ascii=False, separators=(",", ":")))
+            return 0
+        if args and args[0] == "on":
+            keys = [k for k in keys if k in st["on"]]
+        elif args and args[0] != "all":
+            keys = select(args, skins)
+        _table(skins, set(st["on"]), keys, set(st["boss"]))
+        print(f"\n{len(st['on'])} on. `limbus-skins on <name>` to add one.")
+        return 0
+    if cmd in ("on", "off"):
+        if not args:
+            raise SystemExit(f"usage: limbus-skins {cmd} <skin|id|sinner|tested|all>...")
+        if cmd == "on":
+            refuse_locked(args, locked, allskins)
+        keys = select(args, skins)
+        copies = []
+        if cmd == "on":
+            # one skin per identity and one copy per character: the newest choice wins
+            for k in one_each(keys, allskins):
+                c = character(allskins, k)
+                copies += [x for x in st["on"] if x != k and character(allskins, x) == c and x not in copies]
+                st["on"] = [x for x in st["on"] if (not skins[k]["identity"] or skins[x]["identity"] != skins[k]["identity"])
+                            and character(allskins, x) != c] + [k]      # a fight (no identity) shares none
+            copies = [x for x in copies if x not in st["on"]]
+        else:
+            st["on"] = [x for x in st["on"] if x not in keys]
+        _save_state(st)
+        if copies:
+            print(f"off now, the same character as one turned on: {', '.join(copies)}")
+        print(f"{len(st['on'])} skin(s) on. They are swapped in the next time you `run` or `apply`.")
+        return 0
+    if cmd == "boss":
+        if len(args) < 2 or args[0] not in ("on", "off"):
+            raise SystemExit("usage: limbus-skins boss on|off <skin|sinner|all>...")
+        keys = [k for k in select(args[1:], skins) if skins[k]["kind"] == "repaint" and skins[k].get("source")]
+        if not keys:
+            raise SystemExit("boss forms are for repaints of a boss (e.g. ahab, kromer); boss skins (bosses) always are one")
+        if args[0] == "on":
+            st["boss"] = sorted(set(st["boss"]) | set(keys))
+            print("boss form on (the boss's own body and skills): " + ", ".join(keys))
+            print("these change skills and have not been seen in a fight yet - try them on a spare account")
+        else:
+            st["boss"] = [k for k in st["boss"] if k not in keys]
+            print("boss form off (back to the repaint): " + ", ".join(keys))
+        _save_state(st)
+        return 0
+    if cmd == "doctor":
+        return doctor(skins, st, data)
+    if cmd == "title":
+        from . import title
+        logo = "--logo" in args
+        pics = [a for a in args if not a.startswith("--")]
+        if "--intro" in args:
+            if "--off" in args:
+                for f in title.INTRO:
+                    title._remove(os.path.join(title.folder(data), f))
+                os.makedirs(title.folder(data), exist_ok=True)
+                open(os.path.join(title.folder(data), title.INTRO_OFF), "wb").close()
+                print("intro: the game's own opening again (the package's intro too)")
+            elif pics:
+                print(f"intro: {pics[0]} over the game's opening logo, from the next start ({title.save_intro(pics[0], data)})")
+            return 0
+        if "--off" in args:
+            title.clear(data, logo)
+            print(("logo" if logo else "background") + ": the game's own again, from the next start")
+        elif pics:
+            try:
+                out = title.save(pics[0], data, logo, stretch="--stretch" in args)
+            except OSError as e:
+                raise SystemExit(f"{pics[0]}: {e}")
+            print(f"{'logo' if logo else 'background'}: {pics[0]}, from the next start ({out})")
+        else:
+            have = title.files(data)
+            print("background: " + ("yours" if title.BACKGROUND in have else "the game's" if title.OFF in have
+                                    else "the package's (the game's own where it has none)"))
+            print("logo:       " + ("yours" if title.LOGO in have else "the game's"))
+        return 0
+    if cmd == "art":
+        from . import art
+        if not args:
+            raise SystemExit("usage: limbus-skins art <skin> <picture> [--invert] | art <skin> --reset")
+        key = select(args[:1], skins)[0]
+        if not skins[key].get("head"):
+            raise SystemExit(f"{key} has no head recipe - art is for head skins (e.g. butterfly-yisang)")
+        if "--reset" in args:
+            try:
+                os.remove(art.path_for(data, key))
+            except FileNotFoundError:
+                pass
+            print(f"{key} uses the in-game art again (rebuilt on the next apply)")
+        else:
+            pics = [a for a in args[1:] if not a.startswith("--")]
+            if not pics:
+                mine = art.path_for(data, key)
+                print(f"{key}: " + (f"your art, {mine}" if os.path.exists(mine) else "the in-game art"))
+                return 0
+            p, size = art.save(pics[0], data, key, "--invert" in args)
+            print(f"saved {size[0]}x{size[1]} art to {p}; rebuilt on the next apply")
+        shutil.rmtree(os.path.join(data, "built", key), ignore_errors=True)
+        return 0
+    if cmd == "card":
+        # for a body mod's own built file (mods.sh): its identity's card pictures from card art
+        from . import cards
+        from .game import unitypy
+        if len(args) != 3 or not args[1].isdigit():
+            raise SystemExit("usage: limbus-skins card <card art name> <identity id> <bundle file (rewritten)>")
+        name, ident, path = args[0], int(args[1]), args[2]
+        if not re.fullmatch(r"[a-z0-9][a-z0-9-]*", name):
+            raise SystemExit(f"limbus-skins: '{name}' isn't a card art name")
+        try:
+            art_ = cards.load_art(cards.art_dir(data, name))
+            env = unitypy().load(path)
+            n = cards.apply(env, ident, art_)
+            raw = env.file.save(packer="none")
+        except cards.CardError as e:
+            raise SystemExit(f"limbus-skins: {e}")
+        with open(path + ".tmp", "wb") as f:
+            f.write(raw)
+        os.replace(path + ".tmp", path)
+        print(f"{path}: {n} card pictures of {ident} from {name}")
+        return 0
+
+    g, c = paths.find()
+    sess = Session(c, data, game=g)
+    if cmd in ("build", "audit", "apply", "run", "restore", "watch"):
+        _check_game_files(sess)             # a build from a modded copy, or a session beside one, leaks
+
+    if cmd == "build":
+        refuse_locked(args, locked, allskins)
+        keys = select(args, skins) if args else st["on"]
+        if not keys:
+            raise SystemExit("nothing to build - turn some skins on first")
+        if sess.active():
+            raise SystemExit("a modded session is live - `limbus-skins restore` first (with the game closed)")
+        res = build(keys, g, c, data, boss=set(st["boss"]))
+        bad = [k for k, (ok, _) in res.items() if not ok]
+        print(f"built {len(res) - len(bad)} of {len(res)}" + (f"; failed: {', '.join(bad)}" if bad else ""))
+        return 1 if bad else 0
+    if cmd == "audit":
+        # what is built, checked again against the game's own files (build checks each as it goes)
+        keys = select(args, skins) if args else st["on"]
+        if sess.active():
+            raise SystemExit("a modded session is live - `limbus-skins restore` first (with the game closed)")
+        from .audit import built as audit_built
+        res = audit_built(keys, g, c, data, set(st["boss"]))
+        bad = {k: v for k, v in res.items() if v}
+        for k, found in sorted(bad.items()):
+            print(f"  {k}: " + "; ".join(found))
+        print(f"audited {len(res)} built file(s) of {len(keys)} skin(s): "
+              + (f"{len(bad)} with findings" if bad else "all sound"))
+        return 1 if bad else 0
+    if cmd == "preview":
+        if not args:
+            raise SystemExit("usage: limbus-skins preview <skin> [file.png]")
+        refuse_locked(args[:1], locked, allskins)
+        key = select(args[:1], skins)[0]
+        from .build import boss_form
+        if shares_static(skins[key]) or boss_form(key, skins[key], set(st["boss"])):
+            raise SystemExit("previews are for repaints and tints (helpers, boss forms and identities wear "
+                             "another body as the game draws it)")
+        own = lambda: [d for label, d in built_dirs(data, [key]) if label == key]  # noqa: E731 - not the shared helpers file
+        if not own():
+            if sess.active():
+                raise SystemExit("restore first (a modded session is live)")
+            build([key], g, c, data, static=False)      # the body only: the shared file keeps everyone's edits
+        from .repaint import preview
+        files = own()[0]
+        data_file = next(os.path.join(r, n) for r, _, ns in os.walk(files) for n in ns if n == "__data")
+        out = args[1] if len(args) > 1 else f"{key}.png"
+        from .game import identities
+        from .repaint import idle_gif
+        app = identities(g, c)[0].get(skins[key]["identity"], {}).get("appearance")
+        n = preview(data_file, out, appearance=app)
+        print(f"{n} frames -> {out}")
+        gif = os.path.splitext(out)[0] + "-idle.gif"
+        if app and idle_gif(data_file, app, gif):
+            print(f"standing idle, animated -> {gif}")
+        return 0
+    if cmd == "sheet":
+        from .game import identities
+        from .repaint import idle_image
+        from PIL import Image, ImageDraw
+        keys = [k for k in st["on"] if k in skins] or list(skins)
+        if not keys:
+            raise SystemExit("no skins")
+        if sess.active():
+            raise SystemExit("restore first (a modded session is live)")
+        stale = _need_build(keys, skins, data, c, set(st["boss"]))
+        if stale:
+            print(f"building {len(stale)} skin(s)...")
+            build(stale, g, c, data, boss=set(st["boss"]))
+        from .game import body_index
+        ids, helper_units = identities(g, c)
+        bodies, have = body_index(g, c, os.path.join(data, "bodies.json"))
+        cells = []
+        for k in sorted(keys, key=lambda k: (skins[k]["identity"], k)):
+            s = skins[k]
+            app = ids.get(s["identity"], {}).get("appearance")
+            before = idle_image(have[bodies[app]], app, 300) if app in bodies else None
+            after = None
+            if s["kind"] == "helper":
+                ha = helper_units.get(s["helper"], {}).get("appearance")
+                after = idle_image(have[bodies[ha]], ha, 300) if ha in bodies else None
+            elif boss_form(k, s, set(st["boss"])):         # the boss's own body, as the game draws it
+                ha = s.get("source")
+                after = idle_image(have[bodies[ha]], ha, 300) if ha in bodies else None
+            else:
+                b = built_dirs(data, [k])
+                f = next((os.path.join(r, n) for r, _, ns in os.walk(b[0][1]) for n in ns if n == "__data"), None) if b else None
+                after = idle_image(f, app, 300) if f else None
+            cells.append((k, s, before, after))
+            print(f"  {k}")
+        W, H, cols = 560, 350, 3
+        sheet = Image.new("RGB", (W * cols, H * ((len(cells) + cols - 1) // cols)), (24, 22, 26))
+        dr = ImageDraw.Draw(sheet)
+        for n, (k, s, b, a) in enumerate(cells):
+            x, y = (n % cols) * W, (n // cols) * H
+            dr.rectangle([x + 2, y + 2, x + W - 3, y + H - 3], outline=(70, 60, 80))
+            dr.text((x + 10, y + 8), f"{s['identity']} {k} ({s['kind']}) -> {s['becomes']}", fill=(235, 225, 210))
+            for i, im in enumerate((b, a)):
+                if im is None:
+                    dr.text((x + 20 + i * 270, y + 160), "no picture", fill=(200, 80, 80))
+                    continue
+                im = im.copy()
+                im.thumbnail((260, 300))
+                sheet.paste(im, (x + 10 + i * 270 + (260 - im.width) // 2, y + 30 + 300 - im.height), im)
+        out = args[0] if args else "limbus-skins-idles.png"
+        sheet.save(out)
+        print(f"{len(cells)} skins -> {out} (left: as the game ships it, right: with the skin)")
+        return 0
+    if cmd in ("apply", "run"):
+        given = []
+        if cmd == "apply":                      # apply --client <folder>...: the client patch folders
+            rest = []
+            it = iter(args)
+            for a in it:
+                if a == "--client":
+                    given.append(next(it, ""))
+                else:
+                    rest.append(a)
+            args = rest
+        yes, launch = split_launch(args)
+        if launch and cmd == "apply":
+            raise SystemExit(f"limbus-skins apply: unknown option {launch[0]}")
+        args = launch
+        if not st.get("understood"):
+            if not yes:
+                print(NOTICE)
+                return 2
+            st["understood"] = True
+            _save_state(st)
+        if not st["on"]:
+            raise SystemExit("no skins are on - `limbus-skins list`, then `limbus-skins on <name>`")
+        if game_running():
+            raise SystemExit("Limbus is running - close it first")
+        from . import client
+        clients = client.folders_beside(args[0]) if args else []
+        if cmd == "apply":
+            clients = [os.path.abspath(f) for f in given if f]
+            bad = [f for f in clients if not os.path.isfile(os.path.join(f, "myosotis.ini"))]
+            if bad:
+                raise SystemExit(f"{bad[0]}: no myosotis.ini there - not a client patch folder")
+        if not clients:
+            raise SystemExit("skins go in through the private server's client patch, never the game's own files: "
+                             + ("`limbus-skins apply --client <its folder>`" if cmd == "apply" else
+                                "launch its play.sh or app (`limbus-skins run -- <it>`)"))
+        old = [d for d in clients if not client.reads_modcache(d)]
+        if old:
+            raise SystemExit(f"{old[0]}'s client patch is older than limbus-skins {__version__}: it can't read skins "
+                             "from its own modcache folder, and limbus-skins no longer changes the game's files - "
+                             "update the Limbus Private Server package")
+        bosses = [k for k in st["on"] if boss_form(k, skins[k], set(st["boss"]))]
+        old = [d for d in clients if not client.wears_bosses(d)]
+        if bosses and old:                      # a boss's body on a sinner needs BossBodyPatch
+            raise SystemExit(f"{', '.join(bosses)} wear a boss's own body, which this package's client patch "
+                             f"can't load ({old[0]}): update the Limbus Private Server package (build 6 or "
+                             f"later), or `limbus-skins off {' '.join(bosses)}`")
+        sess.restore()
+        stale = _need_build(st["on"], skins, data, c, set(st["boss"]))
+        if stale:
+            print(f"building {len(stale)} skin(s) for this game version...")
+            build(stale, g, c, data, boss=set(st["boss"]))
+        try:
+            done = sess.apply(built_dirs(data, st["on"], set(st["boss"])), clients)
+        except ModError as e:
+            raise SystemExit(str(e))
+        print(f"skins for this session: {', '.join(done) if done else 'nothing'} (the game's own files are untouched)")
+        if cmd == "apply":
+            print("start the game now through the private server; `limbus-skins restore` (or `watch`) ends the session")
+            return 0
+        try:
+            for d in clients:                   # the package's client patch: green coins, skill text, bodies
+                client.configure(d, data)
+            if clients:
+                print(f"client patch set for this session: {', '.join(os.path.basename(d) for d in clients)}")
+            if not args:
+                print("no launch command given - waiting for you to start the game...")
+            else:
+                try:
+                    subprocess.Popen(args)
+                except OSError as e:
+                    sess.restore()
+                    raise SystemExit(f"could not start {args[0]}: {e}")
+            sess.watch()
+        finally:
+            for d in clients:
+                client.configure(d, data, on=False)
+        return 0
+    if cmd == "restore":
+        try:
+            sess.restore()
+        except ModError as e:
+            raise SystemExit(str(e))
+        print("the game's files are stock")
+        return 0
+    if cmd == "watch":
+        sess.watch()
+        return 0
+    raise SystemExit(f"limbus-skins: unknown command '{cmd}' - `limbus-skins help`")
+
+
+def doctor(skins, st, data):
+    ok = True
+    print(f"limbus-skins {__version__}, Python {sys.version.split()[0]} on {sys.platform}")
+    for mod in ("UnityPy", "PIL", "lz4"):
+        try:
+            __import__(mod)
+            print(f"  ok   {mod}")
+        except ImportError:
+            ok = False
+            print(f"  MISSING {mod} - pip install UnityPy==1.25.4 'Pillow>=13' 'brotli>=1.2.1' lz4")
+    try:
+        g, c = paths.find()
+        print(f"  ok   game:  {g}\n  ok   cache: {c}")
+        from .game import find_static
+        p, _ = find_static(c)
+        print(f"  ok   static data: {os.path.relpath(p, c)}")
+        from .game import catalogs, leftovers
+        rows = leftovers(c, catalogs(c, g))
+        if rows is None:
+            print("  ??   game files: the game's catalog couldn't be read - not checked")
+        elif rows:
+            ok = False
+            print(f"  LEAK {len(rows)} of the game's own file(s) aren't as it ships them: "
+                  + ", ".join(r for r, _, _ in rows[:5]) + " - `limbus-skins restore` (game closed) removes them")
+        else:
+            print("  ok   game files: every cached bundle is as the game ships it")
+    except SystemExit as e:
+        ok = False
+        print(f"  FAIL {e}")
+    from .mods import game_running
+    print(f"  game running: {'yes' if game_running() else 'no'}")
+    print(f"  skins on: {len(st['on'])} of {len(skins)}; data folder: {data}")
+    return 0 if ok else 1
+
+
+if __name__ == "__main__":
+    sys.exit(main())

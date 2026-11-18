@@ -1,0 +1,106 @@
+{
+ "bundle": "lobotomy/whitenight",
+ "head": null,
+ "poses": {
+  "Dead1": {
+   "file": "Dead1.png",
+   "pivot": [
+    0.481275,
+    0.0
+   ]
+  },
+  "Dead2": {
+   "file": "Dead2.png",
+   "pivot": [
+    0.439624,
+    0.0
+   ]
+  },
+  "Dead3": {
+   "file": "Dead3.png",
+   "pivot": [
+    0.4968,
+    0.0
+   ]
+  },
+  "Default": {
+   "file": "Default.png",
+   "pivot": [
+    0.485457,
+    0.0
+   ]
+  },
+  "Judge1": {
+   "file": "Judge1.png",
+   "pivot": [
+    0.482359,
+    0.0
+   ]
+  },
+  "Judge2": {
+   "file": "Judge2.png",
+   "pivot": [
+    0.446275,
+    0.0
+   ]
+  },
+  "Judge3": {
+   "file": "Judge3.png",
+   "pivot": [
+    0.441009,
+    0.0
+   ]
+  },
+  "Judge4": {
+   "file": "Judge4.png",
+   "pivot": [
+    0.465246,
+    0.0
+   ]
+  },
+  "Judge5": {
+   "file": "Judge5.png",
+   "pivot": [
+    0.501884,
+    0.0
+   ]
+  },
+  "Judge6": {
+   "file": "Judge6.png",
+   "pivot": [
+    0.49767,
+    0.0
+   ]
+  },
+  "Standing1": {
+   "file": "Standing1.png",
+   "pivot": [
+    0.485457,
+    0.0
+   ]
+  },
+  "Standing2": {
+   "file": "Standing2.png",
+   "pivot": [
+    0.47256,
+    0.0
+   ]
+  },
+  "Standing3": {
+   "file": "Standing3.png",
+   "pivot": [
+    0.499059,
+    0.0
+   ]
+  },
+  "Standing4": {
+   "file": "Standing4.png",
+   "pivot": [
+    0.503961,
+    0.0
+   ]
+  }
+ },
+ "prefab": "WhiteNight",
+ "source": "Lobotomy Corporation resources.assets: WhiteNight's skeleton (Spine 3.6), atlas and textures; mirrored to face left"
+}

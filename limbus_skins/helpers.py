@@ -1,0 +1,659 @@
+"""Helper-unit skins: an identity takes a story helper unit's body *and* its skills.
+
+Some story fights give you a helper (Arayashiki Ryōshū in 9-49, A Certain Sinclair,
+the Walpurgis Queen of Hatred...). Their bodies were made to be played, so giving an
+identity the helper's body together with the helper's own skills works in battle.
+(A body alone crashes: the identity's skills ask for motions the body lacks.)
+
+Boss forms go the same way with a boss: the identity wears the boss's own body (its
+appearance) and fights with the boss's whole moveset - each skill plays its own motion on the
+body made for it (boss_moveset).
+
+This changes skills, so it is a gameplay change: private servers only.
+"""
+import copy
+import json
+
+from .game import _text, lit, unitypy
+
+# Skills (helper or boss) that only work inside their own story fight: they end or stall the battle,
+# retreat, or kill the user. Outside it they hang the fight (A Certain Sinclair's S6 waits for
+# a "return from the living specimen" that never comes).
+STORY_SCRIPTS = ("Retreat", "EndPoint", "DieOnEndSkill", "DoNotEndGame", "EndBattleForcely",
+                 "GetImmortalOnlyOnUsingThisSkill")
+# ...and ones that lean on their unit's own battle script, which only a helper with "script" brings
+UNIT_SCRIPTS = ("CreateMang", "UseMpSelfIfCreateMang")
+
+
+def _scripts(rec):
+    out = set()
+    for d in rec.get("skillData", []):
+        for a in d.get("abilityScriptList") or []:
+            out.add(a.get("scriptName") or "")
+        for c in d.get("coinList") or []:
+            for a in c.get("abilityScriptList") or []:
+                out.add(a.get("scriptName") or "")
+    return out
+
+
+def story_only(rec, script=False):
+    """The first ability that ties skill record rec to its own story fight (or, unless
+    script, to its unit's own battle script); None when it works anywhere."""
+    banned = STORY_SCRIPTS + (() if script else UNIT_SCRIPTS)
+    return next((s for s in sorted(_scripts(rec)) if any(b in s for b in banned)), None)
+
+
+def _attacks(unit, skills):
+    """The unit's attack skills that work outside its own fight, lowest tier first."""
+    out = []
+    for a in lit(unit.get("attributeList")):
+        s = skills.get(a["skillId"])
+        if s and s.get("skillData") and s["skillData"][0].get("defType", "ATTACK") == "ATTACK" and not story_only(s):
+            out.append(s)
+    return sorted(out, key=lambda s: s.get("skillTier", 1))
+
+
+def _power(unit, skills):
+    """Enough attacks first (three fill an identity's skills), then the strongest per attack
+    (base power + coins): a boss can have a weak tutorial version under the same body."""
+    att = _attacks(unit, skills)
+    d = [s["skillData"][0] for s in att]
+    total = sum(x.get("defaultValue", 0) + sum(c.get("scale", 0) for c in x.get("coinList", [])) for x in d)
+    return min(len(att), 3), total / max(1, len(att))
+
+
+def pick_unit(records, skills, want=None):
+    """The boss record to borrow from: the one named `want`, else the strongest."""
+    if want is not None:
+        return next(r for r in records if r["id"] == want)
+    return max(records, key=lambda r: _power(r, skills))
+
+
+def _coin_cues(rec, n):
+    """For n coins of a skill played with rec's animation: each coin's place in it (actionIndex,
+    cutsceneStart), as rec's own coins have them at their last uptie. A coin past rec's own goes
+    on its last hit: an action number past the motion's hits is an error in the game."""
+    cues, own = [{} for _ in range(n)], 0
+    for d in rec["skillData"]:
+        cl = d.get("coinList") or []
+        own = max(own, len(cl))
+        for k, c in enumerate(cl[:n]):
+            cues[k].update({key: c[key] for key in COIN_CUES if key in c})
+    for k in range(own, n):
+        last = cues[own - 1].get("actionIndex", cues[own - 1].get("actionindex", own)) if own else 1
+        cues[k] = {"actionIndex": last}
+    return cues
+
+
+DEFENSES = ("GUARD", "COUNTER", "EVADE")
+
+
+def _motion(rec):
+    return rec["skillData"][0].get("skillMotion")
+
+
+DECK = {1: 3, 2: 2, 3: 1}    # copies of a skill in the deck by its tier, as an identity's S1-S3 are
+
+
+def boss_moveset(identity, unit, skills, motions):
+    """A boss form: the identity wears the boss's own body (kind "boss") and fights with the boss's
+    whole moveset - every attack it has, one per move, in the deck as an identity's own skills are
+    (tier 1 three times, tier 2 twice, tier 3 once) - and its defense: its defense skill, else a
+    guard, counter or evade it has, else the identity's own where the body can play it. Story-only
+    skills and ones whose motion the body lacks (motions: the names of the motions it has) are left
+    out. The boss's own skill ids, as a helper skin uses a helper's: their names, icons and text are
+    the game's own. Returns (attributeList, defenseSkillIDList). ValueError when the body can't
+    carry the identity: nothing to attack or defend with that it can play, hidden skills of the
+    identity's it can't play, or a battle script of the identity's own (it would drive a body the
+    identity no longer has)."""
+    if identity.get("unitScriptID"):
+        raise ValueError(f"identity {identity['id']} has its own battle script ({identity['unitScriptID']}), "
+                         "which would drive a body it no longer has - pick an identity without one")
+    hidden = [a["skillId"] for a in lit(identity.get("attributeList")) if not a.get("number", 1)]
+    if any(i in skills and _motion(skills[i]) not in motions for i in hidden):
+        raise ValueError(f"identity {identity['id']} has hidden skills its new body can't play")
+    listed = [a["skillId"] for a in lit(unit.get("attributeList"))]
+    playable = [skills[i] for i in listed if i in skills and skills[i].get("skillData")
+                and skills[i]["skillData"][0].get("defType", "ATTACK") == "ATTACK" and not story_only(skills[i])
+                and _motion(skills[i]) in motions]
+    attrs, moves = [], set()
+    for s in playable:
+        if _motion(s) not in moves:                 # a move it plays already: once is its moveset
+            moves.add(_motion(s))
+            attrs.append({"skillId": s["id"], "number": DECK.get(s.get("skillTier", 1), 1)})
+    tiers = {skills[a["skillId"]].get("skillTier", 1) for a in attrs}
+    for s in playable:                              # a boss that plays all its tiers with one move (Rien)
+        if s.get("skillTier", 1) not in tiers:      # still deals each tier: its first skill of that tier
+            tiers.add(s.get("skillTier", 1))
+            attrs.append({"skillId": s["id"], "number": DECK.get(s.get("skillTier", 1), 1)})
+    if not attrs:
+        raise ValueError(f"unit {unit['id']} has no attack its body can play")
+    theirs = [skills.get(i) for i in list(lit(unit.get("defenseSkillIDList"))) + listed]
+    guard = next((s for s in theirs if s and s.get("skillData") and s["skillData"][0].get("defType") in DEFENSES
+                  and not story_only(s) and _motion(s) in motions), None)
+    if guard is not None:
+        return attrs, [guard["id"]]
+    own = [g for g in lit(identity.get("defenseSkillIDList")) if g in skills and _motion(skills[g]) in motions]
+    if not own:
+        raise ValueError(f"unit {unit['id']} has no defense its body can play, nor does the identity")
+    return attrs, own
+
+
+def helper_kit(identity, helper, skills, script=False, motions=None):
+    """(attributeList, defenseSkillIDList, [(skill id, why) dropped]) for an identity taking
+    a helper's kit: the helper's skills minus the story-only ones (and those needing its
+    battle script, unless that comes along) and, given the helper body's motion names, those
+    it has no motion for (a helper's story script can lend it another body; the sinner's
+    can't). A helper without a defense skill leaves the identity its own, where the helper's
+    body has the motion (without motions: Default, or one its kept skills use). Raises
+    ValueError when nothing usable is left to attack or defend with."""
+    attrs, dropped = [], []
+    for a in lit(helper.get("attributeList")):
+        rec = skills.get(a["skillId"])
+        why = "not in the skill data" if rec is None else story_only(rec, script)
+        if not why and motions is not None and _motion(rec) not in motions:
+            why = f"its body has no {_motion(rec)} motion"
+        if why:
+            dropped.append((a["skillId"], why))
+        else:
+            attrs.append(a)
+    if not attrs:
+        raise ValueError(f"helper {helper['id']} has no skills that work outside its story fight")
+    can = motions if motions is not None else (
+        {"Default"} | {skills[a["skillId"]]["skillData"][0].get("skillMotion") for a in attrs})
+    guard = [g for g in lit(helper.get("defenseSkillIDList")) if g in skills and (motions is None or _motion(skills[g]) in can)]
+    if not guard:
+        guard = [g for g in lit(identity.get("defenseSkillIDList"))
+                 if g in skills and skills[g]["skillData"][0].get("skillMotion") in can]
+    if not guard:
+        raise ValueError(f"helper {helper['id']}: no defense its body can play, nor does the identity have one")
+    return attrs, guard, dropped
+
+
+def _record(sid, skills, base):
+    """A copy of skill sid to edit, on top of edits already made to it (base)."""
+    return copy.deepcopy((base or {}).get(sid) or skills[sid])
+
+
+def recolor_skills(identity, skills, sins, base=None):
+    """{skill id: new record}: the identity's skill n (1-based, as listed; "defense" for its
+    defense skills, "all" for every skill) takes sin sins[n] ("SHAMROCK" is green) at every
+    uptie that names one."""
+    mine = [a["skillId"] for a in lit(identity.get("attributeList"))]
+    guard = list(lit(identity.get("defenseSkillIDList")))
+    out = {}
+    for n, sin in sins.items():
+        ids = mine + guard if n == "all" else guard if n == "defense" else [mine[int(n) - 1]]
+        for sid in ids:
+            rec = _record(sid, skills, {**(base or {}), **out})
+            for d in rec["skillData"]:
+                if "attributeType" in d or d is rec["skillData"][0]:
+                    d["attributeType"] = sin
+            out[rec["id"]] = rec
+    return out
+
+
+def all_skill_ids(identity):
+    """Every skill id of the identity, attacks then defense ("green_coins": its coins draw green
+    whatever its sin)."""
+    return [a["skillId"] for a in lit(identity.get("attributeList"))] + list(lit(identity.get("defenseSkillIDList")))
+
+
+def green_ids(recoloured):
+    """The skill ids among recolor_skills' output that are now Gluttony: their coins draw green
+    too (myosotis's GreenCoinsPatch, told through the helpers manifest)."""
+    return sorted(i for i, rec in recoloured.items() if rec["skillData"][0].get("attributeType") == "SHAMROCK")
+
+
+SINS = ("CRIMSON", "SCARLET", "AMBER", "SHAMROCK", "AZURE", "INDIGO", "VIOLET")
+ATK = ("SLASH", "PENETRATE", "HIT")
+COIN_CUES = ("actionIndex", "actionindex", "cutsceneStart")    # a coin's place in its animation
+
+
+def _effects(v):
+    """A move's onUse/onHit: one effect, or a list of them."""
+    return [v] if isinstance(v, dict) else list(v or [])
+
+
+def _round(spec, on_use):
+    """0 = this turn, 1 = next turn; on use, next turn unless the effect says otherwise."""
+    return int(spec.get("activeRound", 1 if on_use else 0))
+
+
+def _buff(spec, script, target):
+    return {"scriptName": script,
+            "buffData": {"buffKeyword": spec["buffKeyword"], "target": spec.get("target", target), "buffOwner": "",
+                         "stack": int(spec.get("stack", 1)), "turn": int(spec.get("turn", 0)),
+                         "activeRound": _round(spec, script == "GiveBuffOnUse")}}
+
+
+def _on(effect, n):
+    """The coins (1-based) an onHit effect goes on: its own "coins", else all n."""
+    return effect.get("coins") or range(1, n + 1)
+
+
+def move_skills(identity, skills, moves, base=None):
+    """{skill id: new record}: skill n of the identity rewritten from plain data - sin,
+    attack type, base power, coins, and the game's own buff abilities on use and on hit:
+    {"attributeType", "atkType", "defaultValue", "coins": [scale...], "onUse": ..., "onHit": ...},
+    each of onUse/onHit one effect {"buffKeyword", "stack", "turn", "activeRound", "target"} or a
+    list of them. An onHit effect goes on every coin, or only on those in its "coins" (1-based).
+    n is "1", "2"... or "defense" (its first defense skill; a guard keeps its defType). Motions
+    and the uptie shell stay the identity's; every uptie plays the same skill. The coin count
+    stays the identity's own: each coin is a hit in its animation, and a different count stalls
+    it (ValueError)."""
+    mine = [a["skillId"] for a in lit(identity.get("attributeList"))]
+    guard = list(lit(identity.get("defenseSkillIDList")))
+    out = {}
+    for n, m in moves.items():
+        if n == "defense" and not guard:
+            raise ValueError("the identity has no defense skill to rewrite")
+        coins = m.get("coins") or []
+        if not 1 <= len(coins) <= 10 or not all(isinstance(c, int) and 0 <= c <= 30 for c in coins):
+            raise ValueError(f"skill {n}: coins must be 1 to 10 scales of 0-30")
+        if m.get("attributeType", "CRIMSON") not in SINS or m.get("atkType", "SLASH") not in ATK:
+            raise ValueError(f"skill {n}: unknown sin or attack type")
+        if not 0 <= int(m.get("defaultValue", 0)) <= 999:
+            raise ValueError(f"skill {n}: base power must be 0-999")
+        uses, hits = _effects(m.get("onUse")), _effects(m.get("onHit"))
+        if not all(isinstance(e, dict) and e.get("buffKeyword") for e in uses + hits):
+            raise ValueError(f"skill {n}: every effect needs a buffKeyword")
+        if not all(isinstance(k, int) and 1 <= k <= len(coins) for h in hits for k in _on(h, len(coins))):
+            raise ValueError(f"skill {n}: onHit coins must be among 1-{len(coins)}")
+        rec = _record(guard[0] if n == "defense" else mine[int(n) - 1], skills, base)
+        shell = rec["skillData"][0]
+        own = len(shell.get("coinList") or [])
+        if own and len(coins) != own:
+            raise ValueError(f"skill {n}: {len(coins)} coins, but its animation has {own} - keep {own}")
+        for k in ("attributeType", "atkType"):
+            if k in m:
+                shell[k] = m[k]
+        shell["defaultValue"] = int(m.get("defaultValue", shell.get("defaultValue", 3)))
+        shell["abilityScriptList"] = [_buff(u, "GiveBuffOnUse", "Self") for u in uses]
+        cues = _coin_cues(rec, len(coins))          # which hit of the animation each coin plays
+        shell["coinList"] = [dict(cues[k - 1], operatorType="ADD", scale=c,
+                                  abilityScriptList=[_buff(h, "GiveBuffOnSucceedAttack", "Target")
+                                                     for h in hits if k in _on(h, len(coins))])
+                             for k, c in enumerate(coins, 1)]
+        shell["gaksungLevel"] = 1
+        rec["skillData"] = [shell]
+        out[rec["id"]] = rec
+    return out
+
+
+def _line(when, effect, own):
+    """One effect in the game's own words: "[WhenUse] Gain 2 [Agility] next turn"."""
+    kw, stack, turn = effect["buffKeyword"], int(effect.get("stack", 1)), int(effect.get("turn", 0))
+    amount = (f"{stack} [{kw}] and +{turn} [{kw}] Count" if stack and turn else
+              f"+{turn} [{kw}] Count" if turn else f"{stack} [{kw}]")
+    later = " next turn" if _round(effect, when == "WhenUse") == 1 else ""
+    target = effect.get("target", own)
+    verb = "Gain" if target == "Self" else "Apply" if target == "EveryAlly" else "Inflict"
+    return f"[{when}] {verb} {amount}{' to all allies' if target == 'EveryAlly' else ''}{later}"
+
+
+def describe_move(m):
+    """(desc, [line per coin]): a move_skills move's effects in the game's own words, as its
+    text shows them - on use in the skill's description, on hit on each coin."""
+    n = len(m.get("coins") or [])
+    hits = _effects(m.get("onHit"))
+    return ("\n".join(_line("WhenUse", u, "Self") for u in _effects(m.get("onUse"))),
+            ["\n".join(_line("OnSucceedAttack", h, "Target") for h in hits if k in _on(h, n)) for k in range(1, n + 1)])
+
+
+def skill_texts(identity, skills, texts, moves=None):
+    """{skill id: {"name", "desc", "flavor", "coins": [line per coin]}}: what myosotis's
+    SkillTextPatch shows for skill n ("1", "2"... or "defense", as in move_skills) instead of the
+    game's own text. A moved skill's desc and coin lines describe its move (describe_move) unless
+    the skin's text gives them; a text's "note" goes before the move's own lines. desc, flavor and every coin line the skill has are always there
+    ("" blanks the old line, which would describe the old skill); a name not given keeps the old one."""
+    mine = [a["skillId"] for a in lit(identity.get("attributeList"))]
+    guard = list(lit(identity.get("defenseSkillIDList")))
+    moves = moves or {}
+    out = {}
+    for n in list(moves) + [n for n in texts if n not in moves]:
+        t = texts.get(n) or {}
+        if n == "defense" and not guard:
+            raise ValueError("the identity has no defense skill to name")
+        sid = guard[0] if n == "defense" else mine[int(n) - 1]
+        have = len(skills[sid]["skillData"][0].get("coinList") or [])
+        desc, lines = describe_move(moves[n]) if n in moves else ("", [])
+        if t.get("note"):                           # a line of the skin's own before the move's
+            desc = "\n".join(x for x in (t["note"], desc) if x)
+        lines = list(t["coins"]) if "coins" in t else lines
+        if len(lines) > have:
+            raise ValueError(f"skill {n}: {len(lines)} coin lines, but it has {have} coins")
+        out[sid] = {**({"name": t["name"]} if t.get("name") else {}),
+                    "desc": t.get("desc", desc), "flavor": t.get("flavor", ""), "coins": lines + [""] * (have - len(lines))}
+    return out
+
+
+def edit_stats(rec, stats):
+    """Set an identity record's HP ("hp": its base HP, the growth per level kept), Speed
+    ("speed": [min, max] at every uptie), resistances ("resist": {"SLASH"|"PENETRATE"|"HIT":
+    multiplier 0.25-2.0}, the others kept) and defense level offset ("def": -20..20), in place
+    and in the record's own encoding."""
+    def put(key, change):
+        old = rec.get(key)
+        new = change(lit(old) if isinstance(old, str) else old)
+        rec[key] = str(new) if isinstance(old, str) else new
+    if "hp" in stats:
+        if not 1 <= int(stats["hp"]) <= 9999:
+            raise ValueError("hp must be 1-9999")
+        put("hp", lambda hp: dict(hp or {}, defaultStat=int(stats["hp"])))
+    if "speed" in stats:
+        lo, hi = (int(v) for v in stats["speed"])
+        if not 1 <= lo <= hi <= 99:
+            raise ValueError("speed must be [min, max] with 1 <= min <= max <= 99")
+        put("minSpeedList", lambda old: [lo] * max(1, len(old or [])))
+        put("maxSpeedList", lambda old: [hi] * max(1, len(old or [])))
+    if "resist" in stats:
+        want = stats["resist"]
+        if not isinstance(want, dict) or not want or not set(want) <= {"SLASH", "PENETRATE", "HIT"}:
+            raise ValueError('resist must map SLASH, PENETRATE and/or HIT to a multiplier')
+        if not all(isinstance(v, (int, float)) and 0.25 <= v <= 2.0 for v in want.values()):
+            raise ValueError("resist multipliers must be 0.25-2.0")
+
+        def resist(old):
+            info = dict(old or {})
+            have = {r.get("type"): r for r in info.get("atkResistList") or []}
+            for t, v in want.items():
+                have[t] = dict(have.get(t, {}), type=t, value=v)
+            info["atkResistList"] = [have[t] for t in ("SLASH", "PENETRATE", "HIT") if t in have]
+            return info
+        put("resistInfo", resist)
+    if "def" in stats:
+        if not isinstance(stats["def"], int) or not -20 <= stats["def"] <= 20:
+            raise ValueError("def must be a whole number -20..20")
+        put("defCorrection", lambda old: stats["def"])
+
+
+# Identities of our own: a new id cloned from an existing identity, in every table the client
+# keys by identity (the record, its skin, passives, voice, card thumbnail, art offsets).
+IDENTITY_KEYS = {"personality": "id", "skin": "skinId", "personality-passive": "personalityID",
+                 "personality-voice": "personalityId", "personality-cg-thumbnail": "personalityId"}
+
+
+def skin_skills(attrs, guard, skills):
+    """An identity's skin record's skillDataList for these skills: the game deals a unit its
+    skills from its skin's list, not from the identity record's - a kit written only into the
+    identity record never reaches the fight (Vergilius dealt nothing but his counter)."""
+    out, seen = [], set()
+    for sid in [a["skillId"] for a in attrs] + list(guard):
+        if sid in seen or sid not in skills:
+            continue
+        seen.add(sid)
+        first = skills[sid]["skillData"][0]
+        out.append({"skillId": sid, "actionScript": first.get("actionScript", "") or "",
+                    "skillMotion": first.get("skillMotion") or "S1", "defType": first.get("defType") or "ATTACK"})
+    return out
+
+
+def own_skill_ids(base_rec, new, have):
+    """{the base identity's skill id: a new id for identity `new`'s own copy of it}, the way the
+    game numbers skills (<identity><nn>): the base's own nn where the skill is the base's,
+    counted on from 91 for one it borrows. ValueError when a new id is taken (have: every skill id)."""
+    base = base_rec["id"]
+    old = [a["skillId"] for a in lit(base_rec.get("attributeList"))] + list(lit(base_rec.get("defenseSkillIDList")))
+    out, spare = {}, 91
+    for sid in old:
+        if sid in out:
+            continue
+        if sid // 100 == base:
+            out[sid] = new * 100 + sid % 100
+        else:
+            out[sid] = new * 100 + spare
+            spare += 1
+    taken = sorted(n for n in out.values() if n in have)
+    if taken or len(set(out.values())) != len(out):
+        raise ValueError(f"identity {new}'s own skill ids are taken: {taken or 'they collide'}")
+    return out
+
+
+def own_skill(rec, new, own_text=False):
+    """Skill record `rec` as skill `new`, a copy: it shows the old skill's icon, and - unless it
+    has words of its own - the old skill's text (the game's own "iconID" and "textID")."""
+    out = dict(copy.deepcopy(rec), id=new)
+    first = out["skillData"][0]
+    first.setdefault("iconID", rec["id"])
+    if own_text:
+        out.pop("textID", None)
+    else:
+        out.setdefault("textID", rec["id"])
+    return out
+
+
+def with_own_skills(rec, ids):
+    """Identity record fields naming skills, moved to its own skill ids ({old: new})."""
+    return {"attributeList": [dict(a, skillId=ids.get(a["skillId"], a["skillId"])) for a in lit(rec.get("attributeList"))],
+            "defenseSkillIDList": [ids.get(i, i) for i in lit(rec.get("defenseSkillIDList"))]}
+
+
+def clone_record(kind, rec, base, new, folder=None, skill_ids=None):
+    """A copy of `rec` as identity `new`'s, if it is identity `base`'s in table `kind`; else None.
+    The card thumbnail points at an art folder the new id has none of its own of: `folder` (an
+    identity whose card it shows), else the base's."""
+    key = IDENTITY_KEYS.get(kind)
+    if key is not None:
+        if rec.get(key) != base:
+            return None
+        out = dict(copy.deepcopy(rec), **{key: new})
+        if kind == "skin" and skill_ids and out.get("skillDataList"):     # which motion each skill plays: its own skills'
+            moved = [dict(d, skillId=skill_ids.get(d.get("skillId"), d.get("skillId"))) for d in lit(out["skillDataList"])]
+            out["skillDataList"] = str(moved) if isinstance(out["skillDataList"], str) else moved
+        if kind == "personality-cg-thumbnail" and (folder or not out.get("folderName")):
+            out["folderName"] = str(folder or base)
+        return out
+    if kind.startswith("illust-pivots-") and str(rec.get("id", "")).startswith(f"{base}_"):
+        return dict(copy.deepcopy(rec), id=f"{new}_{rec['id'][len(str(base)) + 1:]}")
+    return None
+
+
+def add_clones(kind, records, clones, folders=None, skill_maps=None):
+    """records plus a clone of each base record for every {new id: base id} in `clones`
+    (folders: {new id: the identity whose card art it shows}, see clone_record)."""
+    out = list(records)
+    for new, base in sorted(clones.items()):
+        folder = (folders or {}).get(new)
+        if kind == "personality-cg-thumbnail" and folder:
+            base = folder                           # the card it shows: that identity's record, whole
+        out += [c for c in (clone_record(kind, r, base, new, folder, (skill_maps or {}).get(new)) for r in records)
+                if c is not None]
+    return out
+
+
+def ally_base(pers, of):
+    """The identity record an ally of identity `of` is a copy of: `of` itself when it has no
+    battle script and no hidden skills (either would drive a body it no longer has), else the
+    lowest such identity of the same sinner. ValueError when the sinner has none."""
+    def clean(r):
+        return not r.get("unitScriptID") and all(a.get("number", 1) for a in lit(r.get("attributeList")))
+    if of in pers and clean(pers[of]):
+        return of
+    same = sorted(i for i, r in pers.items() if i // 100 == of // 100 and clean(r))
+    if not same:
+        raise ValueError(f"no identity of {of}'s sinner without a battle script of its own to copy")
+    return same[0]
+
+
+def check_new_ids(have, clones):
+    """Refuse a new id the game already uses, or a base it doesn't have (ValueError)."""
+    for new, base in clones.items():
+        if new in have:
+            raise ValueError(f"identity {new} already exists in this game version")
+        if base not in have:
+            raise ValueError(f"identity {base} (to clone {new} from) isn't in this game version")
+
+
+def swap_passives(rec, battle, support):
+    """A copy of a personality-passive record with these passive ids at every uptie level
+    (passives are coded per id in the client: borrowed ones bring their own effect)."""
+    out = copy.deepcopy(rec)
+    for key, ids in (("battlePassiveList", battle), ("supporterPassiveList", support)):
+        out[key] = [dict(lv, passiveIDList=list(ids)) for lv in rec.get(key, [])]
+    return out
+
+
+CLONE = "=clone"     # in a record's edits: this id is new, a copy of that record with the edits on it
+EVERY = "*"          # in a table's edits: these fields on every record of it that has them
+
+
+def new_records(kind, records, edits):
+    """The records a table's edits add: {new id: {"=clone": base id, field: value...}} -> copies
+    of the base records under their new ids, edited. A table is kept in several files: a base
+    that isn't among these records is another file's to copy. ValueError for an id the table
+    already has."""
+    by_id = {r.get("id"): r for r in records if isinstance(r, dict)}
+    out = []
+    for new, fields in sorted((k, v) for k, v in edits.items() if k != EVERY):
+        if CLONE not in fields:
+            continue
+        base = fields[CLONE]
+        if new in by_id:
+            raise ValueError(f"{kind} {new} already exists in this game version")
+        if base not in by_id:
+            continue
+        rec = dict(copy.deepcopy(by_id[base]), id=new)
+        set_fields(rec, fields)
+        out.append(rec)
+    return out
+
+
+def set_fields(record, fields):
+    """record's fields set from fields, keeping each one's own encoding (some are stored as
+    Python-literal strings); "+passives": [ids] joins the unit's passiveSet.passiveIdList;
+    "a.b": value sets b inside the record's a, the rest of a as it is (ValueError when the record
+    has no such a to set it in)."""
+    for k, v in fields.items():
+        if k == CLONE:
+            continue
+        if "." in k:
+            head, tail = k.split(".", 1)
+            inner = lit(record.get(head)) if record.get(head) else None
+            if not isinstance(inner, dict) or "." in tail:
+                raise ValueError(f"{k}: the record has no {head} to set {tail} in")
+            inner = dict(inner, **{tail: v})
+            record[head] = str(inner) if isinstance(record.get(head), str) else inner
+            continue
+        if k == "+passives":
+            ps = lit(record.get("passiveSet")) if record.get("passiveSet") else {}
+            ps = dict(ps, passiveIdList=list(ps.get("passiveIdList", [])) + [i for i in v if i not in ps.get("passiveIdList", [])])
+            record["passiveSet"] = str(ps) if isinstance(record.get("passiveSet"), str) else ps
+            continue
+        record[k] = str(v) if isinstance(record.get(k), str) and not isinstance(v, str) else v
+
+
+def rewrite_static(static_path, swaps, skill_swaps=None, clones=None, passive_swaps=None, stat_edits=None,
+                   folders=None, record_edits=None, skill_maps=None):
+    """Rewrite identity records (and skill records) in the static-data bundle.
+    swaps = {identity id: helper record}; skill_swaps = {skill id: new record};
+    clones = {new identity id: base id}: cloned after the swaps, so a clone wears the base's, and
+    then a clone's own swaps, passives and stats go on it (a boss form of its own);
+    passive_swaps = {identity id: {"battle": [passive ids], "support": [passive ids]}};
+    stat_edits = {identity id: {"hp": base HP, "speed": [min, max]}} (edit_stats);
+    folders = {new identity id: identity whose card art it shows} (clone_record);
+    record_edits = {table: {record id: {field: value}}}: fields set on any table's records (a
+    fight's stage and enemies); "+passives" adds passive ids to a unit's passiveSet; "=clone":
+    base id makes the record a new one, a copy of that one (new_records); a new skill named in
+    skill_swaps is that record instead;
+    skill_maps = {new identity id: {base skill id: its own skill id}}: its skin record names its
+    own skills (clone_record).
+    Returns (bundle bytes, [identity ids changed], [skill ids changed])."""
+    UnityPy = unitypy()
+    env = UnityPy.load(static_path)
+    skill_swaps = skill_swaps or {}
+    clones = clones or {}
+    passive_swaps = passive_swaps or {}
+    stat_edits = stat_edits or {}
+    record_edits = record_edits or {}
+    done, done_skills = set(), set()
+    added = set()                                   # (table, new id): the records "=clone" made
+
+    def edit(kind, doc, i, x):
+        """Apply this record's edits in place; True when anything changed."""
+        every = record_edits.get(kind, {}).get(EVERY)
+        if every:                                   # a rule over the whole table: fields the record has
+            every = {k: v for k, v in every.items() if isinstance(lit(x.get(k.split(".")[0]) or None), dict) or "." not in k}
+            set_fields(x, every)
+        mine = record_edits.get(kind, {}).get(x.get("id", x.get(IDENTITY_KEYS.get(kind, "id"))))
+        if mine:                                    # its own fields first; its swaps and stats still go on
+            set_fields(x, mine)
+        return of_kind(kind, doc, i, x) or bool(mine) or bool(every)
+
+    def of_kind(kind, doc, i, x):
+        if kind == "personality":
+            h = swaps.get(x.get("id"))
+            hit = False
+            if x.get("id") in stat_edits:
+                edit_stats(x, stat_edits[x["id"]])
+                done.add(x["id"])
+                hit = True
+            if not h:
+                return hit
+            # a helper's skills come once each; a boss form's as dealt in its moveset (_numbers)
+            new = {"appearance": h["appearance"],
+                   "attributeList": [{"skillId": a["skillId"], "number": a.get("number", 1) if h.get("_numbers") else 1}
+                                     for a in lit(h.get("attributeList"))],
+                   "defenseSkillIDList": list(lit(h.get("defenseSkillIDList")))}
+            if h.get("_script") and h.get("unitScriptID"):
+                # the helper's own battle script too: the identity's would drive a body it no
+                # longer has (Wild Hunt's mount)
+                new["unitScriptID"] = h["unitScriptID"]
+            for k, v in new.items():
+                # keep the record's own encoding: some fields are stored as Python-literal strings
+                x[k] = str(v) if isinstance(x.get(k), str) and not isinstance(v, str) else v
+            done.add(x["id"])
+            return True
+        if kind == "skill":
+            if x.get("id") not in skill_swaps:
+                return False
+            doc["list"][i] = skill_swaps[x["id"]]
+            done_skills.add(x["id"])
+            return True
+        if kind == "personality-passive":
+            sw = passive_swaps.get(x.get("personalityID"))
+            if not sw:
+                return False
+            doc["list"][i] = swap_passives(x, sw.get("battle", []), sw.get("support", []))
+            return True
+        return False                                # a table here only for its clones
+
+    for path, obj in env.container.items():
+        if obj.type.name != "TextAsset":
+            continue
+        kind = path.split("/static-data/")[1].split("/")[0] if "/static-data/" in path else ""
+        is_pers = kind == "personality"
+        cloned = bool(clones) and (kind in IDENTITY_KEYS or kind.startswith("illust-pivots-"))
+        if not (is_pers or cloned or (skill_swaps and kind == "skill") or kind in record_edits
+                or (passive_swaps and kind == "personality-passive")):
+            continue
+        doc = _text(obj)
+        hit = False
+        for i, x in enumerate(doc.get("list", [])):
+            hit = edit(kind, doc, i, x) or hit
+        more = new_records(kind, doc.get("list", []), record_edits.get(kind, {}))
+        if more:
+            if kind == "skill":                     # a skill of our own, as built (its moves, its icon)
+                more = [skill_swaps.get(r["id"], r) for r in more]
+                done_skills.update(r["id"] for r in more if r["id"] in skill_swaps)
+            doc["list"] = list(doc.get("list", [])) + more
+            added.update((kind, r["id"]) for r in more)
+            hit = True
+        if cloned:
+            old = len(doc.get("list", []))
+            grown = add_clones(kind, doc.get("list", []), clones, folders, skill_maps)
+            if len(grown) != old:
+                doc["list"] = grown
+                hit = True
+                done.update(n for n in clones if is_pers and any(r.get("id") == n for r in grown))
+                for i in range(old, len(grown)):    # a clone's own edits, on top of the base's
+                    edit(kind, doc, i, grown[i])
+        if hit:
+            ta = obj.read()
+            ta.m_Script = json.dumps(doc, ensure_ascii=False, separators=(",", ":"))
+            ta.save()
+    for kind, recs in sorted(record_edits.items()):
+        for new, fields in sorted((k, v) for k, v in recs.items() if k != EVERY):
+            if CLONE in fields and (kind, new) not in added:
+                raise ValueError(f"{kind} {fields[CLONE]} (to copy {new} from) isn't in this game version")
+    return env.file.save(packer="none"), sorted(done), sorted(done_skills)
